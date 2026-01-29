@@ -9,6 +9,11 @@
 # NodeSource Repository (Node.js LTS)
 #-------------------------------------------------------------------------------
 
+- name: Remove existing NodeSource GPG key
+  ansible.builtin.file:
+    path: /tmp/nodesource.gpg.key
+    state: absent
+
 - name: Add NodeSource GPG key
   ansible.builtin.get_url:
     url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
@@ -21,7 +26,7 @@
 
 - name: Dearmor NodeSource GPG key
   ansible.builtin.shell: |
-    gpg --dearmor < /tmp/nodesource.gpg.key > /usr/share/keyrings/nodesource.gpg
+    gpg --dearmor --yes -o /usr/share/keyrings/nodesource.gpg /tmp/nodesource.gpg.key
   args:
     creates: /usr/share/keyrings/nodesource.gpg
 
@@ -30,6 +35,7 @@
     repo: "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_{{ nodejs_version }}.x nodistro main"
     filename: nodesource
     state: present
+    update_cache: yes
 
 #-------------------------------------------------------------------------------
 # GitHub CLI Repository
@@ -46,6 +52,7 @@
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
     filename: github-cli
     state: present
+    update_cache: yes
 
 #-------------------------------------------------------------------------------
 # Update apt cache after adding repositories

@@ -146,6 +146,12 @@
 # Performance: KDE Optimization for RDP
 #-------------------------------------------------------------------------------
 
+- name: Install KDE configuration tools
+  ansible.builtin.apt:
+    name: libkf5config-bin
+    state: present
+  when: kde_disable_compositor | default(true)
+
 - name: Disable KDE compositor for RDP performance
   ansible.builtin.command: "{{ item }}"
   loop:

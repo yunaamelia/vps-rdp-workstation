@@ -145,6 +145,35 @@ vm_vfs_cache_pressure: 50
 tcp_congestion_control: "bbr"
 io_scheduler: "mq-deadline"
 
+sysctl_performance:
+  vm.swappiness: "{{ vm_swappiness }}"
+  vm.vfs_cache_pressure: "{{ vm_vfs_cache_pressure }}"
+  net.ipv4.tcp_congestion_control: "{{ tcp_congestion_control }}"
+  net.core.default_qdisc: fq
+  net.ipv4.ip_forward: 1
+
+kde_theme:
+  catppuccin:
+    color_scheme: "CatppuccinMocha"
+    icon_theme: "Papirus-Dark"
+  breeze-dark:
+    color_scheme: "BreezeDark"
+    icon_theme: "breeze-dark"
+
+services_to_disable:
+  - cups
+  - cups-browsed
+  - bluetooth
+  - avahi-daemon
+  - whoopsie
+
+git_config:
+  user.name: "{{ vps_username }}"
+  user.email: "{{ vps_username }}@{{ vps_hostname }}"
+  init.defaultBranch: main
+  core.editor: nano
+  credential.helper: store
+
 # === Phase 8 Enhancements (Optional) ===
 install_database_tools: true
 install_cloud_tools: false

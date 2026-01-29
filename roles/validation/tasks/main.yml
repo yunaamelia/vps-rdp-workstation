@@ -1,0 +1,21 @@
+---
+# Validation role - Run validation tests
+
+- name: Run comprehensive validation
+  ansible.builtin.script: "{{ playbook_dir }}/../tests/comprehensive-validation.sh"
+  register: validation_result
+  failed_when: validation_result.rc != 0
+  changed_when: false
+
+- name: Create validation report
+  ansible.builtin.copy:
+    content: |
+      Validation Report
+      =================
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      Result: {{ 'PASSED' if validation_result.rc == 0 else 'FAILED' }}
+      
+      Output:
+      {{ validation_result.stdout | default('No output') }}
+    dest: "{{ vps_setup_log_dir }}/validation-report.txt"
+    mode: '0644'

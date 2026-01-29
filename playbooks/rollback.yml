@@ -1,0 +1,287 @@
+---
+#===============================================================================
+# Rollback Playbook
+#===============================================================================
+# Reverts changes made during deployment phases.
+# Use with caution - data may be lost.
+#
+# Usage:
+#   ansible-playbook playbooks/rollback.yml --tags phase4
+#   ansible-playbook playbooks/rollback.yml --tags all
+#===============================================================================
+
+- name: VPS RDP Workstation Rollback
+  hosts: localhost
+  become: true
+  gather_facts: true
+  
+  vars:
+    vps_username: "{{ lookup('env', 'VPS_USERNAME') | default('developer', true) }}"
+    vps_setup_log_dir: /var/log/vps-setup
+  
+  tasks:
+    #---------------------------------------------------------------------------
+    # Phase 8 Rollback: Enhancements
+    #---------------------------------------------------------------------------
+    
+    - name: "Rollback Phase 8: Remove enhancements"
+      tags:
+        - phase8
+        - enhancements
+      block:
+        - name: Remove additional utilities
+          ansible.builtin.apt:
+            name:
+              - tree
+              - ncdu
+              - iotop
+              - iftop
+              - nethogs
+              - tmux
+              - screen
+              - silversearcher-ag
+            state: absent
+          ignore_errors: yes
+        
+        - name: Remove custom MOTD
+          ansible.builtin.file:
+            path: /etc/motd
+            state: absent
+        
+        - name: Remove VS Code settings
+          ansible.builtin.file:
+            path: "/home/{{ vps_username }}/.config/Code/User/settings.json"
+            state: absent
+          ignore_errors: yes
+        
+        - name: Log Phase 8 rollback
+          ansible.builtin.debug:
+            msg: "✅ Phase 8 Rollback Complete"
+    
+    #---------------------------------------------------------------------------
+    # Phase 6 Rollback: Security & Optimization
+    #---------------------------------------------------------------------------
+    
+    - name: "Rollback Phase 6: Security & Optimization"
+      tags:
+        - phase6
+        - security
+      block:
+        - name: Disable and remove Fail2ban
+          ansible.builtin.apt:
+            name: fail2ban
+            state: absent
+          ignore_errors: yes
+        
+        - name: Disable UFW
+          community.general.ufw:
+            state: disabled
+          ignore_errors: yes
+        
+        - name: Remove sysctl tuning
+          ansible.builtin.file:
+            path: /etc/sysctl.d/99-vps-performance.conf
+            state: absent
+        
+        - name: Log Phase 6 rollback
+          ansible.builtin.debug:
+            msg: "✅ Phase 6 Rollback Complete"
+    
+    #---------------------------------------------------------------------------
+    # Phase 4 Rollback: RDP Packages
+    #---------------------------------------------------------------------------
+    
+    - name: "Rollback Phase 4: RDP Packages"
+      tags:
+        - phase4
+        - packages
+      block:
+        - name: Stop services
+          ansible.builtin.systemd:
+            name: "{{ item }}"
+            state: stopped
+          loop:
+            - xrdp
+            - sddm
+            - docker
+          ignore_errors: yes
+        
+        - name: Remove desktop and development packages
+          ansible.builtin.apt:
+            name:
+              - kde-plasma-desktop
+              - sddm
+              - xrdp
+              - xorgxrdp
+              - docker-ce
+              - docker-ce-cli
+              - containerd.io
+              - code
+              - firefox-esr
+              - zsh
+            state: absent
+            purge: yes
+          ignore_errors: yes
+        
+        - name: Remove Docker data
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - /etc/docker/daemon.json
+            - /var/lib/docker
+          ignore_errors: yes
+        
+        - name: Remove fonts
+          ansible.builtin.file:
+            path: /usr/share/fonts/truetype/jetbrains-mono-nerd
+            state: absent
+        
+        - name: Remove user xsession
+          ansible.builtin.file:
+            path: "/home/{{ vps_username }}/.xsession"
+            state: absent
+        
+        - name: Remove Oh My Zsh
+          ansible.builtin.file:
+            path: "/home/{{ vps_username }}/.oh-my-zsh"
+            state: absent
+        
+        - name: Remove Starship
+          ansible.builtin.file:
+            path: /usr/local/bin/starship
+            state: absent
+        
+        - name: Remove npm global packages
+          ansible.builtin.command: npm uninstall -g opencode-ai
+          ignore_errors: yes
+        
+        - name: Remove user from docker group
+          ansible.builtin.command: gpasswd -d {{ vps_username }} docker
+          ignore_errors: yes
+        
+        - name: Reset user shell to bash
+          ansible.builtin.user:
+            name: "{{ vps_username }}"
+            shell: /bin/bash
+        
+        - name: Rebuild font cache
+          ansible.builtin.command: fc-cache -fv
+          changed_when: false
+        
+        - name: Clean apt cache
+          ansible.builtin.apt:
+            autoremove: yes
+            autoclean: yes
+        
+        - name: Log Phase 4 rollback
+          ansible.builtin.debug:
+            msg: "✅ Phase 4 Rollback Complete"
+    
+    #---------------------------------------------------------------------------
+    # Phase 3 Rollback: Dependencies
+    #---------------------------------------------------------------------------
+    
+    - name: "Rollback Phase 3: Dependencies"
+      tags:
+        - phase3
+        - dependencies
+      block:
+        - name: Remove external repositories
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - /etc/apt/sources.list.d/nodesource.list
+            - /etc/apt/sources.list.d/docker.list
+            - /etc/apt/sources.list.d/vscode.list
+            - /etc/apt/sources.list.d/github-cli.list
+        
+        - name: Remove GPG keys
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - /usr/share/keyrings/nodesource.gpg
+            - /usr/share/keyrings/docker-archive-keyring.gpg
+            - /usr/share/keyrings/packages.microsoft.gpg
+            - /usr/share/keyrings/githubcli-archive-keyring.gpg
+        
+        - name: Remove development packages
+          ansible.builtin.apt:
+            name:
+              - nodejs
+              - gh
+            state: absent
+          ignore_errors: yes
+        
+        - name: Remove Lazygit
+          ansible.builtin.file:
+            path: /usr/local/bin/lazygit
+            state: absent
+        
+        - name: Remove Composer
+          ansible.builtin.file:
+            path: /usr/local/bin/composer
+            state: absent
+        
+        - name: Remove pipx packages for user
+          ansible.builtin.file:
+            path: "/home/{{ vps_username }}/.local/bin"
+            state: absent
+          ignore_errors: yes
+        
+        - name: Update apt cache
+          ansible.builtin.apt:
+            update_cache: yes
+        
+        - name: Log Phase 3 rollback
+          ansible.builtin.debug:
+            msg: "✅ Phase 3 Rollback Complete"
+    
+    #---------------------------------------------------------------------------
+    # Phase 2 Rollback: User Management
+    #---------------------------------------------------------------------------
+    
+    - name: "Rollback Phase 2: User Management"
+      tags:
+        - phase2
+        - user
+      block:
+        - name: Remove sudoers configuration
+          ansible.builtin.file:
+            path: "/etc/sudoers.d/{{ vps_username }}"
+            state: absent
+        
+        - name: Kill user processes
+          ansible.builtin.command: pkill -u {{ vps_username }}
+          ignore_errors: yes
+        
+        - name: Remove user account
+          ansible.builtin.user:
+            name: "{{ vps_username }}"
+            state: absent
+            remove: yes
+          ignore_errors: yes
+        
+        - name: Log Phase 2 rollback
+          ansible.builtin.debug:
+            msg: "✅ Phase 2 Rollback Complete - User {{ vps_username }} removed"
+    
+    #---------------------------------------------------------------------------
+    # Clean Logs (Optional)
+    #---------------------------------------------------------------------------
+    
+    - name: "Clean deployment logs"
+      tags:
+        - never
+        - clean-logs
+      block:
+        - name: Remove deployment logs
+          ansible.builtin.file:
+            path: "{{ vps_setup_log_dir }}"
+            state: absent
+        
+        - name: Log cleanup complete
+          ansible.builtin.debug:
+            msg: "✅ Deployment logs cleaned"

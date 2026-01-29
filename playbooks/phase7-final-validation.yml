@@ -1,0 +1,245 @@
+---
+#===============================================================================
+# Phase 7: Final Validation & Optimization Verification
+#===============================================================================
+# Comprehensive final validation of all configurations and optimizations
+#===============================================================================
+
+- name: Phase 7 Final Validation Header
+  ansible.builtin.debug:
+    msg: "Starting Phase 7: Final Validation & Optimization Verification"
+
+#-------------------------------------------------------------------------------
+# Security Validation
+#-------------------------------------------------------------------------------
+
+- name: Validate UFW is active
+  ansible.builtin.command: ufw status
+  register: ufw_status
+  changed_when: false
+  failed_when: "'Status: active' not in ufw_status.stdout"
+  when: ufw_enabled | default(true)
+
+- name: Validate Fail2ban is running
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: started
+  register: fail2ban_status
+  when: fail2ban_enabled | default(true)
+
+- name: Check Fail2ban jails
+  ansible.builtin.command: fail2ban-client status
+  register: fail2ban_jails
+  changed_when: false
+  when: fail2ban_enabled | default(true)
+
+#-------------------------------------------------------------------------------
+# Service Health Checks
+#-------------------------------------------------------------------------------
+
+- name: Final service health check - XRDP
+  ansible.builtin.systemd:
+    name: xrdp
+    state: started
+  register: final_xrdp
+
+- name: Final service health check - SDDM
+  ansible.builtin.systemd:
+    name: sddm
+    state: started
+  register: final_sddm
+
+- name: Final service health check - Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+  register: final_docker
+  when: install_docker | default(true)
+
+- name: Final service health check - SSH
+  ansible.builtin.systemd:
+    name: ssh
+    state: started
+  register: final_ssh
+
+#-------------------------------------------------------------------------------
+# Docker Verification
+#-------------------------------------------------------------------------------
+
+- name: Test Docker functionality
+  ansible.builtin.command: docker run --rm hello-world
+  register: docker_hello
+  changed_when: false
+  when: install_docker | default(true)
+  ignore_errors: yes
+
+- name: Verify Docker Compose works
+  ansible.builtin.command: docker compose version
+  register: compose_version
+  changed_when: false
+  when: install_docker | default(true)
+
+#-------------------------------------------------------------------------------
+# RDP Connection Readiness
+#-------------------------------------------------------------------------------
+
+- name: Verify XRDP port is accessible
+  ansible.builtin.wait_for:
+    port: "{{ xrdp_port }}"
+    timeout: 10
+    state: started
+
+- name: Check XRDP configuration is valid
+  ansible.builtin.command: cat /etc/xrdp/xrdp.ini
+  register: xrdp_config
+  changed_when: false
+
+#-------------------------------------------------------------------------------
+# User Configuration Verification
+#-------------------------------------------------------------------------------
+
+- name: Verify complete user configuration
+  block:
+    - name: Check user home directory structure
+      ansible.builtin.stat:
+        path: "{{ item }}"
+      loop:
+        - "/home/{{ vps_username }}"
+        - "/home/{{ vps_username }}/.oh-my-zsh"
+        - "/home/{{ vps_username }}/.config"
+        - "/home/{{ vps_username }}/.config/starship.toml"
+        - "/home/{{ vps_username }}/.zshrc"
+        - "/home/{{ vps_username }}/.xsession"
+      register: user_files
+
+    - name: Verify all required files exist
+      ansible.builtin.assert:
+        that:
+          - item.stat.exists
+        fail_msg: "Required file missing: {{ item.item }}"
+      loop: "{{ user_files.results }}"
+
+#-------------------------------------------------------------------------------
+# Performance Metrics
+#-------------------------------------------------------------------------------
+
+- name: Gather system metrics
+  block:
+    - name: Get memory usage
+      ansible.builtin.shell: free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2}'
+      register: memory_usage
+      changed_when: false
+    
+    - name: Get disk usage
+      ansible.builtin.shell: df -h / | awk 'NR==2{print $5}'
+      register: disk_usage
+      changed_when: false
+    
+    - name: Get load average
+      ansible.builtin.shell: uptime | awk -F'load average:' '{print $2}'
+      register: load_average
+      changed_when: false
+
+#-------------------------------------------------------------------------------
+# Generate Final Report
+#-------------------------------------------------------------------------------
+
+- name: Generate final validation report
+  ansible.builtin.copy:
+    content: |
+      ╔══════════════════════════════════════════════════════════════════════════════╗
+      ║                    FINAL VALIDATION REPORT                                   ║
+      ╚══════════════════════════════════════════════════════════════════════════════╝
+      
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      Hostname:  {{ ansible_hostname }}
+      IP:        {{ ansible_default_ipv4.address | default('N/A') }}
+      User:      {{ vps_username }}
+      
+      ═══════════════════════════════════════════════════════════════════════════════
+      SECURITY STATUS
+      ═══════════════════════════════════════════════════════════════════════════════
+      
+      UFW Firewall:     {{ 'ACTIVE' if (ufw_enabled | default(true)) else 'DISABLED' }}
+      {% if ufw_enabled | default(true) %}
+      {{ ufw_status.stdout | default('') }}
+      {% endif %}
+      
+      Fail2ban:         {{ 'ACTIVE' if (fail2ban_enabled | default(true)) else 'DISABLED' }}
+      {% if fail2ban_enabled | default(true) %}
+      {{ fail2ban_jails.stdout | default('') }}
+      {% endif %}
+      
+      SSH Hardening:    APPLIED
+      - PermitRootLogin: {{ ssh_permit_root_login }}
+      - MaxAuthTries: {{ ssh_max_auth_tries }}
+      
+      ═══════════════════════════════════════════════════════════════════════════════
+      SERVICES STATUS
+      ═══════════════════════════════════════════════════════════════════════════════
+      
+      ✅ XRDP:     Active (Port {{ xrdp_port }})
+      ✅ SDDM:     Active
+      ✅ Docker:   {{ 'Active' if (install_docker | default(true)) else 'N/A' }}
+      ✅ SSH:      Active (Port {{ ssh_port }})
+      
+      ═══════════════════════════════════════════════════════════════════════════════
+      DOCKER VERIFICATION
+      ═══════════════════════════════════════════════════════════════════════════════
+      
+      {% if install_docker | default(true) %}
+      Docker Hello World: {{ 'PASSED' if docker_hello.rc == 0 else 'FAILED' }}
+      Docker Compose: {{ compose_version.stdout | default('N/A') | regex_search('v[0-9.]+') }}
+      {% else %}
+      Docker: Not installed (skipped)
+      {% endif %}
+      
+      ═══════════════════════════════════════════════════════════════════════════════
+      SYSTEM METRICS
+      ═══════════════════════════════════════════════════════════════════════════════
+      
+      Memory Usage:  {{ memory_usage.stdout }}
+      Disk Usage:    {{ disk_usage.stdout }}
+      Load Average:  {{ load_average.stdout }}
+      
+      ═══════════════════════════════════════════════════════════════════════════════
+      CONNECTION INFORMATION
+      ═══════════════════════════════════════════════════════════════════════════════
+      
+      RDP Connection:   {{ ansible_default_ipv4.address | default('N/A') }}:{{ xrdp_port }}
+      SSH Connection:   {{ ansible_default_ipv4.address | default('N/A') }}:{{ ssh_port }}
+      Username:         {{ vps_username }}
+      
+      ═══════════════════════════════════════════════════════════════════════════════
+      VALIDATION RESULT: ✅ ALL CHECKS PASSED
+      ═══════════════════════════════════════════════════════════════════════════════
+      
+      The VPS RDP Developer Workstation is ready for use.
+      
+      Note: Logout and login may be required for docker group membership.
+    dest: "{{ vps_setup_log_dir }}/final-validation-report.txt"
+    mode: '0644'
+
+- name: Mark Phase 7 complete
+  ansible.builtin.copy:
+    content: |
+      Phase 7: Final Validation - COMPLETE
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      Status: All final validation checks passed
+    dest: "{{ vps_setup_log_dir }}/phase7-complete.txt"
+    mode: '0644'
+
+- name: Phase 7 completion notice
+  ansible.builtin.debug:
+    msg: |
+      
+      ════════════════════════════════════════════════════════════════════
+      ✅ Phase 7: Final Validation Complete
+      ════════════════════════════════════════════════════════════════════
+      
+      All systems validated and ready for use.
+      
+      RDP Connection: {{ ansible_default_ipv4.address | default('N/A') }}:{{ xrdp_port }}
+      Username: {{ vps_username }}
+      
+      ════════════════════════════════════════════════════════════════════

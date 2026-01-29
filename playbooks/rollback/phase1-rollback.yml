@@ -1,0 +1,12 @@
+---
+# Phase 1 rollback - Remove preparation artifacts
+- name: Remove log directory
+  ansible.builtin.file:
+    path: /var/log/vps-setup
+    state: absent
+
+- name: Remove deployment state
+  ansible.builtin.file:
+    path: /var/log/vps-setup/deployment-state.json
+    state: absent
+  ignore_errors: yes

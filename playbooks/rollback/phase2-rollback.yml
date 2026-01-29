@@ -1,0 +1,19 @@
+---
+# Phase 2 rollback - Remove user
+- name: Remove sudoers configuration
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ vps_username }}"
+    state: absent
+
+- name: Remove user account
+  ansible.builtin.user:
+    name: "{{ vps_username }}"
+    state: absent
+    remove: yes
+    force: yes
+  ignore_errors: yes
+
+- name: Remove user home directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}"
+    state: absent

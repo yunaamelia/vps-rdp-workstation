@@ -1,0 +1,220 @@
+---
+#===============================================================================
+# Phase 6: Configuration Optimization & Best Practices
+#===============================================================================
+# Applies security hardening, performance tuning, and configuration optimization
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Security: UFW Firewall
+#-------------------------------------------------------------------------------
+
+- name: Install UFW
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+  when: ufw_enabled | default(true)
+
+- name: Reset UFW to defaults
+  community.general.ufw:
+    state: reset
+  when: ufw_enabled | default(true)
+
+- name: Set UFW default policies
+  community.general.ufw:
+    direction: "{{ item.direction }}"
+    policy: "{{ item.policy }}"
+  loop:
+    - { direction: incoming, policy: deny }
+    - { direction: outgoing, policy: allow }
+  when: ufw_enabled | default(true)
+
+- name: Configure UFW allowed ports
+  community.general.ufw:
+    rule: allow
+    port: "{{ item.port }}"
+    proto: "{{ item.proto }}"
+    comment: "{{ item.comment }}"
+  loop: "{{ ufw_allowed_ports }}"
+  when: ufw_enabled | default(true)
+
+- name: Enable UFW
+  community.general.ufw:
+    state: enabled
+  when: ufw_enabled | default(true)
+
+#-------------------------------------------------------------------------------
+# Security: Fail2ban
+#-------------------------------------------------------------------------------
+
+- name: Install Fail2ban
+  ansible.builtin.apt:
+    name: fail2ban
+    state: present
+  when: fail2ban_enabled | default(true)
+
+- name: Configure Fail2ban jail.local
+  ansible.builtin.copy:
+    content: |
+      [DEFAULT]
+      bantime = {{ fail2ban_bantime }}
+      findtime = {{ fail2ban_findtime }}
+      maxretry = {{ fail2ban_maxretry }}
+      ignoreip = 127.0.0.1/8 ::1
+      banaction = iptables-multiport
+      
+      {% for jail_name, jail_config in fail2ban_jails.items() %}
+      [{{ jail_name }}]
+      enabled = {{ jail_config.enabled | string | lower }}
+      port = {{ jail_config.port }}
+      logpath = {{ jail_config.logpath }}
+      maxretry = {{ jail_config.maxretry }}
+      bantime = {{ jail_config.bantime }}
+      
+      {% endfor %}
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Fail2ban
+  when: fail2ban_enabled | default(true)
+
+- name: Enable and start Fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    enabled: yes
+    state: started
+  when: fail2ban_enabled | default(true)
+
+#-------------------------------------------------------------------------------
+# Security: SSH Hardening
+#-------------------------------------------------------------------------------
+
+- name: Harden SSH configuration
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    validate: 'sshd -t -f %s'
+  loop:
+    - { regexp: '^#?PermitRootLogin', line: "PermitRootLogin {{ ssh_permit_root_login | bool | ternary('yes', 'no') }}" }
+    - { regexp: '^#?PasswordAuthentication', line: "PasswordAuthentication {{ ssh_password_authentication | bool | ternary('yes', 'no') }}" }
+    - { regexp: '^#?PubkeyAuthentication', line: "PubkeyAuthentication {{ ssh_pubkey_authentication | bool | ternary('yes', 'no') }}" }
+    - { regexp: '^#?MaxAuthTries', line: "MaxAuthTries {{ ssh_max_auth_tries }}" }
+    - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
+    - { regexp: '^#?AllowTcpForwarding', line: 'AllowTcpForwarding no' }
+    - { regexp: '^#?ClientAliveInterval', line: 'ClientAliveInterval 300' }
+    - { regexp: '^#?ClientAliveCountMax', line: 'ClientAliveCountMax 2' }
+  notify: Restart SSH
+
+#-------------------------------------------------------------------------------
+# Security: Unattended Upgrades
+#-------------------------------------------------------------------------------
+
+- name: Install unattended-upgrades
+  ansible.builtin.apt:
+    name:
+      - unattended-upgrades
+      - apt-listchanges
+    state: present
+
+- name: Enable automatic security updates
+  ansible.builtin.copy:
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+      APT::Periodic::AutocleanInterval "7";
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    mode: '0644'
+
+#-------------------------------------------------------------------------------
+# Performance: System Tuning
+#-------------------------------------------------------------------------------
+
+- name: Apply sysctl performance tuning
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    state: present
+    reload: yes
+    sysctl_file: /etc/sysctl.d/99-vps-performance.conf
+  loop: "{{ sysctl_performance | dict2items }}"
+  ignore_errors: yes
+
+#-------------------------------------------------------------------------------
+# Performance: KDE Optimization for RDP
+#-------------------------------------------------------------------------------
+
+- name: Disable KDE compositor for RDP performance
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Compositing --key Enabled false"
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Compositing --key AnimationSpeed 0"
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key blurEnabled false"
+  become_user: "{{ vps_username }}"
+  ignore_errors: yes
+  when: kde_disable_compositor | default(true)
+
+- name: Configure KDE theme
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group General --key ColorScheme {{ kde_theme[vps_theme].color_scheme }}"
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group Icons --key Theme {{ kde_theme[vps_theme].icon_theme }}"
+  become_user: "{{ vps_username }}"
+  ignore_errors: yes
+
+#-------------------------------------------------------------------------------
+# Performance: Disable Unnecessary Services
+#-------------------------------------------------------------------------------
+
+- name: Disable unnecessary services
+  ansible.builtin.systemd:
+    name: "{{ item }}"
+    enabled: no
+    state: stopped
+  loop: "{{ services_to_disable }}"
+  ignore_errors: yes
+
+#-------------------------------------------------------------------------------
+# Configuration: Git
+#-------------------------------------------------------------------------------
+
+- name: Configure Git for user
+  community.general.git_config:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    scope: global
+  become_user: "{{ vps_username }}"
+  loop: "{{ git_config | dict2items }}"
+
+
+#-------------------------------------------------------------------------------
+# Mark Complete
+#-------------------------------------------------------------------------------
+
+- name: Mark Phase 6 complete
+  ansible.builtin.copy:
+    content: |
+      Phase 6: Configuration Optimization - COMPLETE
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      
+      Security:
+      - UFW Firewall: {{ 'Enabled' if (ufw_enabled | default(true)) else 'Skipped' }}
+      - Fail2ban: {{ 'Enabled' if (fail2ban_enabled | default(true)) else 'Skipped' }}
+      - SSH Hardening: Applied
+      - Unattended Upgrades: Enabled
+      
+      Performance:
+      - Sysctl tuning: Applied
+      - KDE compositor: Disabled for RDP
+      - Unnecessary services: Disabled
+      
+      Configuration:
+      - Git: Configured for {{ vps_username }}
+    dest: "{{ vps_setup_log_dir }}/phase6-complete.txt"
+    mode: '0644'
+
+- name: Phase 6 completion notice
+  ansible.builtin.debug:
+    msg: "✅ Phase 6: Configuration Optimization Complete"

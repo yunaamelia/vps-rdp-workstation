@@ -1,0 +1,41 @@
+# {{ ansible_managed }}
+# Konsole Developer Profile for VPS RDP Workstation
+# Generated: {{ ansible_date_time.iso8601 }}
+
+[Appearance]
+ColorScheme={{ 'Catppuccin-Mocha' if vps_theme == 'catppuccin' else 'Breeze' }}
+Font=JetBrainsMono Nerd Font,{{ vps_font_size | default(11) }},-1,5,50,0,0,0,0,0
+
+[Cursor Options]
+CursorShape=1
+UseCustomCursorColor=false
+
+[General]
+Command=/bin/zsh
+Name=Developer
+Parent=FALLBACK/
+TerminalCenter=false
+TerminalMargin=5
+
+[Interaction Options]
+AutoCopySelectedText=true
+CopyTextAsHTML=false
+MiddleClickPasteMode=0
+OpenLinksByDirectClickEnabled=true
+TrimLeadingSpacesInSelectedText=true
+TrimTrailingSpacesInSelectedText=true
+UnderlineFilesEnabled=true
+
+[Keyboard]
+KeyBindings=default
+
+[Scrolling]
+HistoryMode=1
+HistorySize=10000
+ScrollBarPosition=2
+
+[Terminal Features]
+BellMode=2
+BlinkingCursorEnabled=true
+FlowControlEnabled=false
+UrlHintsModifiers=0

@@ -1,0 +1,41 @@
+# {{ ansible_managed }}
+# Passwordless sudo configuration for {{ vps_username }}
+# Generated: {{ ansible_date_time.iso8601 }}
+#
+# This configuration grants passwordless sudo access for specific
+# commands only, following the principle of least privilege.
+#
+# SECURITY NOTE:
+# - Only approved administrative commands are allowed without password
+# - All sudo usage is logged to /var/log/sudo.log
+# - sudo timeout is set to require password after inactivity
+#
+
+# User alias for the workstation user
+User_Alias VPS_USER = {{ vps_username }}
+
+# Command aliases for each category
+{% for cmd_group in sudo_nopasswd_commands %}
+{% for name, cmds in cmd_group.items() %}
+Cmnd_Alias {{ name }} = {{ cmds }}
+{% endfor %}
+{% endfor %}
+
+# Grant passwordless sudo for defined command groups
+{% for cmd_group in sudo_nopasswd_commands %}
+{% for name, cmds in cmd_group.items() %}
+VPS_USER ALL=(ALL) NOPASSWD: {{ name }}
+{% endfor %}
+{% endfor %}
+
+# Environment preservation for common commands
+Defaults:{{ vps_username }} env_keep += "HOME PATH"
+
+# Log file for sudo commands
+Defaults:{{ vps_username }} logfile="/var/log/sudo.log"
+
+# Require password after 30 minutes of inactivity
+Defaults:{{ vps_username }} timestamp_timeout=30
+
+# Regular sudo access (with password) for all other commands
+{{ vps_username }} ALL=(ALL) ALL

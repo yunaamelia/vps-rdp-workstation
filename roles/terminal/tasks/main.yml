@@ -1,0 +1,54 @@
+---
+# Terminal role - Zsh and Starship configuration
+
+- name: Install Zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+
+- name: Install Oh My Zsh for user
+  become_user: "{{ vps_username }}"
+  ansible.builtin.shell: |
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  args:
+    creates: "/home/{{ vps_username }}/.oh-my-zsh"
+
+- name: Install zsh-autosuggestions
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+    dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    depth: 1
+  become_user: "{{ vps_username }}"
+
+- name: Install zsh-syntax-highlighting
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting
+    dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    depth: 1
+  become_user: "{{ vps_username }}"
+
+- name: Install Starship
+  ansible.builtin.shell: curl -sS https://starship.rs/install.sh | sh -s -- -y
+  args:
+    creates: /usr/local/bin/starship
+
+- name: Configure .zshrc
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "/home/{{ vps_username }}/.zshrc"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Configure Starship
+  ansible.builtin.template:
+    src: starship.toml.j2
+    dest: "/home/{{ vps_username }}/.config/starship.toml"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Set Zsh as default shell
+  ansible.builtin.user:
+    name: "{{ vps_username }}"
+    shell: /bin/zsh

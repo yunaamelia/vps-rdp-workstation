@@ -1,0 +1,84 @@
+; {{ ansible_managed }}
+; XRDP Configuration for VPS Developer Workstation
+; Generated: {{ ansible_date_time.iso8601 }}
+;
+; Optimized for:
+; - RDP performance over internet connections
+; - Security with TLS encryption
+; - KDE Plasma desktop compatibility
+
+[Globals]
+; Core settings
+ini_version=1
+fork=true
+port={{ xrdp_port }}
+
+; TCP settings for performance
+tcp_nodelay={{ 'true' if xrdp_tcp_nodelay else 'false' }}
+tcp_keepalive=true
+
+; Security settings
+security_layer={{ xrdp_security_layer }}
+crypt_level={{ xrdp_crypt_level }}
+ssl_protocols={{ xrdp_ssl_protocols }}
+certificate=/etc/xrdp/cert.pem
+key_file=/etc/xrdp/key.pem
+
+; Allow any client authentication
+allow_channels=true
+allow_multimon=true
+bitmap_cache=true
+bitmap_compression=true
+
+; Maximum color depth
+max_bpp={{ xrdp_max_bpp }}
+
+; Session settings
+new_cursors=true
+use_fastpath=both
+
+; Logging
+log_level=INFO
+log_path=/var/log/xrdp.log
+
+; Session management
+autorun=
+hidelogwindow=true
+
+; Channels
+channel.rdpdr=true
+channel.rdpsnd=true
+channel.cliprdr=true
+channel.drdynvc=true
+
+[Logging]
+LogFile=/var/log/xrdp.log
+LogLevel=INFO
+EnableSyslog=false
+SyslogLevel=INFO
+
+[Channels]
+rdpdr=true
+rdpsnd=true
+drdynvc=true
+cliprdr=true
+rail=true
+xrdpvr=true
+tcutils=true
+
+[Xorg]
+name=Xorg
+lib=libxup.so
+username=ask
+password=ask
+ip=127.0.0.1
+port=-1
+code=20
+
+[Xvnc]
+name=Xvnc
+lib=libvnc.so
+username=ask
+password=ask
+ip=127.0.0.1
+port=-1

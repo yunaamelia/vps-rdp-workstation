@@ -1,0 +1,245 @@
+---
+#===============================================================================
+# Phase 5: Installation Validation
+#===============================================================================
+# Validates all installed components are working correctly
+#===============================================================================
+
+- name: Phase 5 Validation Header
+  ansible.builtin.debug:
+    msg: "Starting Phase 5: Installation Validation"
+
+#-------------------------------------------------------------------------------
+# Service Validation
+#-------------------------------------------------------------------------------
+
+- name: Validate XRDP service
+  ansible.builtin.systemd:
+    name: xrdp
+    state: started
+  register: xrdp_status
+
+- name: Validate SDDM service
+  ansible.builtin.systemd:
+    name: sddm
+    state: started
+  register: sddm_status
+
+- name: Validate Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: started
+  register: docker_status
+  when: install_docker | default(true)
+
+- name: Validate SSH service
+  ansible.builtin.systemd:
+    name: ssh
+    state: started
+  register: ssh_status
+
+#-------------------------------------------------------------------------------
+# Port Validation
+#-------------------------------------------------------------------------------
+
+- name: Check XRDP port is listening
+  ansible.builtin.wait_for:
+    port: "{{ xrdp_port }}"
+    timeout: 10
+    state: started
+  register: xrdp_port_check
+
+- name: Check SSH port is listening
+  ansible.builtin.wait_for:
+    port: "{{ ssh_port }}"
+    timeout: 10
+    state: started
+  register: ssh_port_check
+
+#-------------------------------------------------------------------------------
+# Command Validation
+#-------------------------------------------------------------------------------
+
+- name: Validate Node.js installation
+  ansible.builtin.command: node --version
+  register: node_check
+  changed_when: false
+  failed_when: node_check.rc != 0
+
+- name: Validate npm installation
+  ansible.builtin.command: npm --version
+  register: npm_check
+  changed_when: false
+  failed_when: npm_check.rc != 0
+
+- name: Validate Python installation
+  ansible.builtin.command: python3 --version
+  register: python_check
+  changed_when: false
+  failed_when: python_check.rc != 0
+
+- name: Validate PHP installation
+  ansible.builtin.command: php --version
+  register: php_check
+  changed_when: false
+  failed_when: php_check.rc != 0
+
+- name: Validate Docker installation
+  ansible.builtin.command: docker --version
+  register: docker_check
+  changed_when: false
+  failed_when: docker_check.rc != 0
+  when: install_docker | default(true)
+
+- name: Validate Docker Compose
+  ansible.builtin.command: docker compose version
+  register: compose_check
+  changed_when: false
+  failed_when: compose_check.rc != 0
+  when: install_docker | default(true)
+
+- name: Validate VS Code installation
+  ansible.builtin.command: code --version
+  register: vscode_check
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: false
+  failed_when: vscode_check.rc != 0
+
+- name: Validate Zsh installation
+  ansible.builtin.command: zsh --version
+  register: zsh_check
+  changed_when: false
+  failed_when: zsh_check.rc != 0
+
+- name: Validate Starship installation
+  ansible.builtin.command: starship --version
+  register: starship_check
+  changed_when: false
+  failed_when: starship_check.rc != 0
+
+- name: Validate Lazygit installation
+  ansible.builtin.command: lazygit --version
+  register: lazygit_check
+  changed_when: false
+  failed_when: lazygit_check.rc != 0
+
+- name: Validate GitHub CLI installation
+  ansible.builtin.command: gh --version
+  register: gh_check
+  changed_when: false
+  failed_when: gh_check.rc != 0
+
+#-------------------------------------------------------------------------------
+# Configuration Validation
+#-------------------------------------------------------------------------------
+
+- name: Verify user exists
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ vps_username }}"
+  register: user_exists
+
+- name: Verify user is in docker group
+  ansible.builtin.command: id -nG {{ vps_username }}
+  register: user_groups
+  changed_when: false
+  failed_when: "'docker' not in user_groups.stdout"
+  when: install_docker | default(true)
+
+- name: Verify user shell is Zsh
+  ansible.builtin.command: getent passwd {{ vps_username }}
+  register: user_shell
+  changed_when: false
+  failed_when: "'/bin/zsh' not in user_shell.stdout"
+
+- name: Verify Oh My Zsh is installed
+  ansible.builtin.stat:
+    path: "/home/{{ vps_username }}/.oh-my-zsh"
+  register: omz_installed
+  failed_when: not omz_installed.stat.exists
+
+- name: Verify Starship config exists
+  ansible.builtin.stat:
+    path: "/home/{{ vps_username }}/.config/starship.toml"
+  register: starship_config
+  failed_when: not starship_config.stat.exists
+
+- name: Verify xsession file exists
+  ansible.builtin.stat:
+    path: "/home/{{ vps_username }}/.xsession"
+  register: xsession_file
+  failed_when: not xsession_file.stat.exists
+
+#-------------------------------------------------------------------------------
+# Font Validation
+#-------------------------------------------------------------------------------
+
+- name: Verify JetBrains Mono Nerd Font is installed
+  ansible.builtin.shell: fc-list | grep -i "JetBrainsMono"
+  become_user: "{{ vps_username }}"
+  register: font_check
+  changed_when: false
+  failed_when: font_check.rc != 0
+
+#-------------------------------------------------------------------------------
+# Generate Validation Report
+#-------------------------------------------------------------------------------
+
+- name: Generate validation report
+  ansible.builtin.copy:
+    content: |
+      Phase 5: Installation Validation Report
+      ========================================
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      
+      Services:
+      ✅ XRDP: Active
+      ✅ SDDM: Active
+      ✅ Docker: {{ 'Active' if (install_docker | default(true)) else 'Skipped' }}
+      ✅ SSH: Active
+      
+      Ports:
+      ✅ XRDP ({{ xrdp_port }}): Listening
+      ✅ SSH ({{ ssh_port }}): Listening
+      
+      Development Tools:
+      ✅ Node.js: {{ node_check.stdout }}
+      ✅ npm: {{ npm_check.stdout }}
+      ✅ Python: {{ python_check.stdout }}
+      ✅ PHP: {{ php_check.stdout | regex_search('PHP [0-9.]+') }}
+      ✅ Docker: {{ docker_check.stdout | default('N/A') }}
+      ✅ Docker Compose: {{ compose_check.stdout | default('N/A') | regex_search('v[0-9.]+') }}
+      ✅ VS Code: {{ vscode_check.stdout_lines[0] | default('N/A') }}
+      ✅ Zsh: {{ zsh_check.stdout }}
+      ✅ Starship: {{ starship_check.stdout }}
+      ✅ Lazygit: {{ lazygit_check.stdout }}
+      ✅ GitHub CLI: {{ gh_check.stdout_lines[0] | default('N/A') }}
+      
+      User Configuration:
+      ✅ User '{{ vps_username }}' exists
+      ✅ User in docker group: {{ 'Yes' if (install_docker | default(true)) else 'N/A' }}
+      ✅ Shell: /bin/zsh
+      ✅ Oh My Zsh: Installed
+      ✅ Starship config: Present
+      ✅ xsession file: Present
+      
+      Fonts:
+      ✅ JetBrains Mono Nerd Font: Installed
+      
+      VALIDATION STATUS: ✅ ALL CHECKS PASSED
+    dest: "{{ vps_setup_log_dir }}/phase5-validation-report.txt"
+    mode: '0644'
+
+- name: Mark Phase 5 complete
+  ansible.builtin.copy:
+    content: |
+      Phase 5: Installation Validation - COMPLETE
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      Status: All validation checks passed
+    dest: "{{ vps_setup_log_dir }}/phase5-complete.txt"
+    mode: '0644'
+
+- name: Phase 5 completion notice
+  ansible.builtin.debug:
+    msg: "✅ Phase 5: Installation Validation Complete - All checks passed"

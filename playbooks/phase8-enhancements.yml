@@ -1,0 +1,127 @@
+---
+# Phase 8 - Optional Enhancements & Extensions
+- name: Phase 8 - Enhancements & Extensions
+  hosts: all
+  become: yes
+  
+  vars:
+    install_database_tools: true
+    install_productivity_tools: true
+    install_monitoring_tools: true
+    install_cloud_tools: false
+  
+  tasks:
+    # Database Management Tools
+    - name: Install database clients
+      ansible.builtin.apt:
+        name:
+          - mysql-client
+          - postgresql-client
+          - redis-tools
+          - sqlite3
+        state: present
+      when: install_database_tools | bool
+    
+    # Productivity Tools
+    - name: Install tmux plugin manager
+      ansible.builtin.git:
+        repo: https://github.com/tmux-plugins/tpm
+        dest: "/home/{{ vps_username }}/.tmux/plugins/tpm"
+        version: master
+      become_user: "{{ vps_username }}"
+      when: install_productivity_tools | bool
+    
+    - name: Configure tmux
+      ansible.builtin.copy:
+        content: |
+          # Tmux configuration
+          set -g default-terminal "screen-256color"
+          set -g mouse on
+          set -g history-limit 50000
+          set -g base-index 1
+          setw -g pane-base-index 1
+          
+          # Better splits
+          bind | split-window -h
+          bind - split-window -v
+          
+          # Easy reload
+          bind r source-file ~/.tmux.conf \; display "Reloaded!"
+          
+          # Plugin manager
+          set -g @plugin 'tmux-plugins/tpm'
+          set -g @plugin 'tmux-plugins/tmux-sensible'
+          set -g @plugin 'tmux-plugins/tmux-resurrect'
+          
+          # Initialize TPM
+          run '~/.tmux/plugins/tpm/tpm'
+        dest: "/home/{{ vps_username }}/.tmux.conf"
+        owner: "{{ vps_username }}"
+        group: "{{ vps_username }}"
+        mode: '0644'
+      when: install_productivity_tools | bool
+    
+    - name: Install dev shortcuts
+      ansible.builtin.copy:
+        src: files/scripts/dev-shortcuts.sh
+        dest: "/home/{{ vps_username }}/.dev-shortcuts.sh"
+        owner: "{{ vps_username }}"
+        group: "{{ vps_username }}"
+        mode: '0644'
+      when: install_productivity_tools | bool
+    
+    - name: Add dev shortcuts to .zshrc
+      ansible.builtin.lineinfile:
+        path: "/home/{{ vps_username }}/.zshrc"
+        line: '[ -f ~/.dev-shortcuts.sh ] && source ~/.dev-shortcuts.sh'
+        state: present
+      when: install_productivity_tools | bool
+    
+    # Monitoring Tools
+    - name: Install monitoring utilities
+      ansible.builtin.apt:
+        name:
+          - ncdu
+          - iotop
+          - nload
+          - iftop
+          - nethogs
+        state: present
+      when: install_monitoring_tools | bool
+    
+    # Additional terminal tools
+    - name: Install additional terminal tools
+      ansible.builtin.apt:
+        name:
+          - mc
+          - ranger
+          - ncurses-hexedit
+        state: present
+      when: install_productivity_tools | bool
+    
+    # Cloud CLI tools (optional)
+    - name: Install DigitalOcean CLI
+      ansible.builtin.shell: |
+        cd /tmp
+        wget -q https://github.com/digitalocean/doctl/releases/latest/download/doctl-1.104.0-linux-amd64.tar.gz
+        tar xf doctl-*-linux-amd64.tar.gz
+        mv doctl /usr/local/bin/
+        rm -f doctl-*-linux-amd64.tar.gz
+      args:
+        creates: /usr/local/bin/doctl
+      when: install_cloud_tools | bool
+    
+    - name: Log Phase 8 completion
+      ansible.builtin.copy:
+        content: |
+          Phase 8 Enhancements Installed
+          ==============================
+          Date: {{ ansible_date_time.iso8601 }}
+          
+          Features:
+          - Database tools: {{ install_database_tools }}
+          - Productivity tools: {{ install_productivity_tools }}
+          - Monitoring tools: {{ install_monitoring_tools }}
+          - Cloud tools: {{ install_cloud_tools }}
+        dest: "{{ vps_setup_log_dir }}/phase8-enhancements.txt"
+        mode: '0644'

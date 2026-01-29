@@ -1,0 +1,49 @@
+---
+# KDE Plasma theme and visual configuration
+
+- name: Install Papirus icon theme
+  ansible.builtin.apt:
+    name: papirus-icon-theme
+    state: present
+  become: yes
+
+- name: Create local share directories for user
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/konsole"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Configure KDE dark theme
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - kwriteconfig5 --file kdeglobals --group General --key ColorScheme BreezeDark
+    - kwriteconfig5 --file kdeglobals --group Icons --key Theme Papirus-Dark
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  ignore_errors: yes
+
+- name: Disable KDE compositor for RDP performance
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - kwriteconfig5 --file kwinrc --group Compositing --key Enabled false
+    - kwriteconfig5 --file kwinrc --group Compositing --key AnimationSpeed 0
+    - kwriteconfig5 --file kwinrc --group Plugins --key blurEnabled false
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  ignore_errors: yes
+
+- name: Configure Konsole profile
+  ansible.builtin.copy:
+    src: files/configs/konsole-profile.profile
+    dest: "/home/{{ vps_username }}/.local/share/konsole/Developer.profile"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Set Konsole as default terminal
+  ansible.builtin.command: kwriteconfig5 --file kdeglobals --group General --key TerminalApplication konsole
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  ignore_errors: yes

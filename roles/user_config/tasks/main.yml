@@ -1,0 +1,57 @@
+---
+# User config role - User creation and sudo configuration
+- name: Create primary workstation user
+  ansible.builtin.user:
+    name: "{{ vps_username }}"
+    password: "{{ vps_password_hash }}"
+    shell: /bin/bash
+    groups: sudo,users
+    append: yes
+    create_home: yes
+    state: present
+  register: user_created
+
+- name: Set home directory permissions
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+    state: directory
+
+- name: Create sudoers configuration
+  ansible.builtin.template:
+    src: sudoers.d/nopasswd-user.j2
+    dest: "/etc/sudoers.d/{{ vps_username }}"
+    owner: root
+    group: root
+    mode: '0440'
+    validate: 'visudo -cf %s'
+
+- name: Create .ssh directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.ssh"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0700'
+    state: directory
+
+- name: Document user permissions
+  ansible.builtin.copy:
+    content: |
+      User: {{ vps_username }}
+      Created: {{ ansible_date_time.iso8601 }}
+      Shell: {{ user_created.shell | default('/bin/bash') }}
+      Sudo Configuration: /etc/sudoers.d/{{ vps_username }}
+      
+      Passwordless Sudo Commands:
+      - Package Management: apt, apt-get, dpkg
+      - System Control: systemctl, reboot, shutdown
+      - Docker Commands: docker, docker-compose
+      - Network Tools: ip, iptables, ufw
+      
+      Sudo session timeout: 30 minutes
+    dest: "{{ vps_setup_log_dir }}/user-permissions-{{ vps_username }}.txt"
+    owner: root
+    group: root
+    mode: '0600'

@@ -1,0 +1,68 @@
+---
+# Desktop role - KDE Plasma and XRDP installation
+
+- name: Install KDE Plasma desktop
+  ansible.builtin.apt:
+    name:
+      - kde-plasma-desktop
+      - sddm
+      - konsole
+      - dolphin
+      - kate
+      - ark
+      - plasma-nm
+      - plasma-pa
+    state: present
+    install_recommends: no
+  register: kde_install
+
+- name: Install XRDP
+  ansible.builtin.apt:
+    name:
+      - xrdp
+      - xorgxrdp
+    state: present
+
+- name: Install Firefox ESR
+  ansible.builtin.apt:
+    name: firefox-esr
+    state: present
+
+- name: Enable SDDM
+  ansible.builtin.systemd:
+    name: sddm
+    enabled: yes
+
+- name: Create .xsession for user
+  ansible.builtin.copy:
+    content: |
+      #!/bin/bash
+      export XDG_SESSION_DESKTOP=KDE
+      export XDG_CURRENT_DESKTOP=KDE
+      export DESKTOP_SESSION=plasma
+      exec startplasma-x11
+    dest: "/home/{{ vps_username }}/.xsession"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Add xrdp user to ssl-cert group
+  ansible.builtin.user:
+    name: xrdp
+    groups: ssl-cert
+    append: yes
+
+- name: Configure XRDP
+  ansible.builtin.template:
+    src: xrdp.ini.j2
+    dest: /etc/xrdp/xrdp.ini
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart xrdp
+
+- name: Enable XRDP service
+  ansible.builtin.systemd:
+    name: xrdp
+    enabled: yes
+    state: started

@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+# Fail2ban jail configuration
+
+[DEFAULT]
+bantime = 3600
+findtime = 600
+maxretry = 5
+destemail = root@localhost
+sendername = Fail2Ban
+action = %(action_mwl)s
+
+[sshd]
+enabled = true
+port = ssh
+logpath = /var/log/auth.log
+maxretry = 3
+bantime = 7200
+
+[xrdp]
+enabled = true
+port = 3389
+logpath = /var/log/xrdp.log
+maxretry = 5
+bantime = 3600

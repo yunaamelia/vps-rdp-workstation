@@ -1,0 +1,6 @@
+---
+# Phase 5 rollback - Remove installation validation artifacts
+- name: Remove phase 5 validation log
+  ansible.builtin.file:
+    path: /var/log/vps-setup/phase5-validation.log
+    state: absent

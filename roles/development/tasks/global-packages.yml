@@ -1,0 +1,58 @@
+---
+# Global packages installation (npm and pipx)
+
+# Configure npm global directory
+- name: Create npm global directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.npm-global"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Configure npm to use global directory
+  ansible.builtin.command: npm config set prefix "/home/{{ vps_username }}/.npm-global"
+  become_user: "{{ vps_username }}"
+  changed_when: true
+
+# Install npm global packages
+- name: Install npm global packages
+  community.general.npm:
+    name: "{{ item }}"
+    global: yes
+    state: present
+  loop:
+    - yarn
+    - pnpm
+    - typescript
+    - ts-node
+    - prettier
+    - eslint
+    - nodemon
+    - pm2
+    - http-server
+  become_user: "{{ vps_username }}"
+  ignore_errors: yes
+
+# Install pipx packages
+- name: Ensure pipx local bin exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/bin"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Install pipx packages
+  ansible.builtin.command: "pipx install {{ item }}"
+  loop:
+    - black
+    - pylint
+    - pytest
+    - ipython
+    - poetry
+    - httpie
+  become_user: "{{ vps_username }}"
+  register: pipx_result
+  changed_when: "'installed package' in pipx_result.stdout"
+  failed_when: false

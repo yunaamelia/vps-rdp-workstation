@@ -1,0 +1,57 @@
+---
+# Git configuration for development
+
+- name: Configure Git global settings
+  community.general.git_config:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop:
+    - { name: 'user.name', value: '{{ vps_username }}' }
+    - { name: 'user.email', value: '{{ vps_username }}@{{ ansible_hostname }}' }
+    - { name: 'core.editor', value: 'code --wait' }
+    - { name: 'init.defaultBranch', value: 'main' }
+    - { name: 'pull.rebase', value: 'false' }
+    - { name: 'color.ui', value: 'auto' }
+    - { name: 'core.autocrlf', value: 'input' }
+  become_user: "{{ vps_username }}"
+
+- name: Create global .gitignore
+  ansible.builtin.copy:
+    content: |
+      # OS generated files
+      .DS_Store
+      .DS_Store?
+      ._*
+      Thumbs.db
+      
+      # IDE files
+      .vscode/
+      .idea/
+      *.swp
+      *.swo
+      *~
+      
+      # Dependencies
+      node_modules/
+      vendor/
+      __pycache__/
+      *.pyc
+      .env
+      .env.local
+      
+      # Build outputs
+      dist/
+      build/
+      *.log
+    dest: "/home/{{ vps_username }}/.gitignore_global"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Configure global .gitignore
+  community.general.git_config:
+    name: core.excludesfile
+    value: "/home/{{ vps_username }}/.gitignore_global"
+    scope: global
+  become_user: "{{ vps_username }}"

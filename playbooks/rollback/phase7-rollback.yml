@@ -1,0 +1,16 @@
+---
+# Phase 7 rollback - Remove validation artifacts
+- name: Remove deployment completion marker
+  ansible.builtin.file:
+    path: /var/log/vps-setup/DEPLOYMENT_COMPLETE
+    state: absent
+
+- name: Remove validation reports
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /var/log/vps-setup/phase7-final-validation-report.txt
+    - /var/log/vps-setup/phase6-validation-report.txt
+    - /var/log/vps-setup/phase5-validation-report.txt
+  ignore_errors: yes

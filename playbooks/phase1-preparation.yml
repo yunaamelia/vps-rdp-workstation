@@ -1,0 +1,121 @@
+---
+#===============================================================================
+# Phase 1: System Preparation & Checkpoint Creation
+#===============================================================================
+# Creates system checkpoint, initializes logging, and validates prerequisites
+#===============================================================================
+
+- name: Create log directory
+  ansible.builtin.file:
+    path: "{{ vps_setup_log_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Record initial system state
+  block:
+    - name: Record initial packages
+      ansible.builtin.shell: dpkg -l > {{ vps_setup_log_dir }}/initial-packages.txt
+      args:
+        creates: "{{ vps_setup_log_dir }}/initial-packages.txt"
+    
+    - name: Record system information
+      ansible.builtin.copy:
+        content: |
+          Deployment Date: {{ ansible_date_time.iso8601 }}
+          Hostname: {{ ansible_hostname }}
+          FQDN: {{ ansible_fqdn }}
+          OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+          Kernel: {{ ansible_kernel }}
+          Architecture: {{ ansible_architecture }}
+          CPU Cores: {{ ansible_processor_vcpus }}
+          Memory: {{ ansible_memtotal_mb }} MB
+          IPv4: {{ ansible_default_ipv4.address | default('N/A') }}
+        dest: "{{ vps_setup_log_dir }}/initial-system-info.txt"
+        mode: '0644'
+
+- name: Initialize deployment state
+  ansible.builtin.copy:
+    content: |
+      {
+        "deployment_id": "{{ ansible_date_time.epoch }}",
+        "start_time": "{{ ansible_date_time.iso8601 }}",
+        "current_phase": "1",
+        "completed_phases": [],
+        "target_user": "{{ vps_username }}",
+        "target_hostname": "{{ vps_hostname }}"
+      }
+    dest: "{{ vps_setup_log_dir }}/deployment-state.json"
+    mode: '0644'
+
+- name: System preparation
+  block:
+    - name: Set hostname
+      ansible.builtin.hostname:
+        name: "{{ vps_hostname }}"
+      register: hostname_changed
+    
+    - name: Update /etc/hosts with hostname
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1 {{ vps_hostname }}"
+        state: present
+    
+    - name: Set timezone
+      community.general.timezone:
+        name: "{{ vps_timezone }}"
+      register: timezone_changed
+    
+    - name: Generate locales
+      community.general.locale_gen:
+        name: "{{ vps_locale }}"
+        state: present
+    
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+    
+    - name: Upgrade all packages
+      ansible.builtin.apt:
+        upgrade: safe
+      register: upgrade_result
+    
+    - name: Install essential packages
+      ansible.builtin.apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - gnupg
+          - curl
+          - wget
+          - git
+          - vim
+          - htop
+          - unzip
+          - jq
+          - lsb-release
+          - python3-pip
+          - python3-venv
+          - python3-apt
+        state: present
+
+  rescue:
+    - name: Phase 1 failed
+      ansible.builtin.fail:
+        msg: "Phase 1 System Preparation failed. Check logs at {{ vps_setup_log_dir }}"
+
+- name: Mark Phase 1 complete
+  ansible.builtin.copy:
+    content: |
+      Phase 1: System Preparation - COMPLETE
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      Hostname: {{ vps_hostname }}
+      Timezone: {{ vps_timezone }}
+      Packages upgraded: {{ upgrade_result.changed | default(false) }}
+    dest: "{{ vps_setup_log_dir }}/phase1-complete.txt"
+    mode: '0644'
+
+- name: Phase 1 completion notice
+  ansible.builtin.debug:
+    msg: "✅ Phase 1: System Preparation Complete"

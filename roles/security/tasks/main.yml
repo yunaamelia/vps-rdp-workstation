@@ -1,0 +1,89 @@
+---
+# Security role - Firewall and fail2ban configuration
+
+- name: Install security packages
+  ansible.builtin.apt:
+    name:
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+      - apt-listchanges
+    state: present
+
+- name: Configure UFW defaults
+  community.general.ufw:
+    state: enabled
+    policy: deny
+    direction: incoming
+
+- name: Allow SSH through UFW
+  community.general.ufw:
+    rule: allow
+    port: "22"
+    proto: tcp
+    comment: "SSH access"
+
+- name: Allow RDP through UFW
+  community.general.ufw:
+    rule: allow
+    port: "3389"
+    proto: tcp
+    comment: "RDP access"
+
+- name: Create fail2ban jail configuration
+  ansible.builtin.copy:
+    content: |
+      [DEFAULT]
+      bantime = 3600
+      maxretry = 5
+      findtime = 600
+
+      [sshd]
+      enabled = true
+      port = ssh
+      filter = sshd
+      logpath = /var/log/auth.log
+      maxretry = 5
+
+      [xrdp]
+      enabled = true
+      port = 3389
+      filter = xrdp
+      logpath = /var/log/xrdp-sesman.log
+      maxretry = 5
+      bantime = 3600
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart fail2ban
+
+- name: Create XRDP fail2ban filter
+  ansible.builtin.copy:
+    content: |
+      [Definition]
+      failregex = .*\[WARN\].*Connection received from <HOST>.*
+                  .*\[INFO\].*Login failed for user.*from <HOST>.*
+      ignoreregex =
+    dest: /etc/fail2ban/filter.d/xrdp.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: restart fail2ban
+
+- name: Enable fail2ban service
+  ansible.builtin.systemd:
+    name: fail2ban
+    enabled: yes
+    state: started
+
+- name: Configure unattended-upgrades
+  ansible.builtin.copy:
+    content: |
+      APT::Periodic::Update-Package-Lists "1";
+      APT::Periodic::Unattended-Upgrade "1";
+      APT::Periodic::AutocleanInterval "7";
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    owner: root
+    group: root
+    mode: '0644'

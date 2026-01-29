@@ -1,0 +1,57 @@
+---
+# Phase 6 rollback - Revert optimizations
+- name: Restore original XRDP configuration
+  ansible.builtin.copy:
+    src: /etc/xrdp/xrdp.ini.backup
+    dest: /etc/xrdp/xrdp.ini
+    remote_src: yes
+  ignore_errors: yes
+
+- name: Restart XRDP after restore
+  ansible.builtin.systemd:
+    name: xrdp
+    state: restarted
+  ignore_errors: yes
+
+- name: Remove custom sysctl settings
+  ansible.builtin.file:
+    path: /etc/sysctl.d/99-vps-rdp-performance.conf
+    state: absent
+
+- name: Reload sysctl
+  ansible.builtin.command: sysctl --system
+  ignore_errors: yes
+
+- name: Stop fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: stopped
+    enabled: no
+  ignore_errors: yes
+
+- name: Remove fail2ban configuration
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/fail2ban/jail.local
+    - /etc/fail2ban/filter.d/xrdp.conf
+
+- name: Remove Zsh plugins
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    - "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+  ignore_errors: yes
+
+- name: Remove Starship config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/starship.toml"
+    state: absent
+
+- name: Remove VS Code settings
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/Code/User/settings.json"
+    state: absent

@@ -1,0 +1,82 @@
+---
+# Security hardening configuration
+
+- name: Configure UFW default policies
+  community.general.ufw:
+    direction: "{{ item.direction }}"
+    policy: "{{ item.policy }}"
+  loop:
+    - { direction: 'incoming', policy: 'deny' }
+    - { direction: 'outgoing', policy: 'allow' }
+  become: yes
+
+- name: Allow SSH through UFW
+  community.general.ufw:
+    rule: allow
+    port: '22'
+    proto: tcp
+    comment: 'SSH Access'
+  become: yes
+
+- name: Allow RDP through UFW
+  community.general.ufw:
+    rule: allow
+    port: '3389'
+    proto: tcp
+    comment: 'RDP Access'
+  become: yes
+
+- name: Enable UFW firewall
+  community.general.ufw:
+    state: enabled
+  become: yes
+
+- name: Create fail2ban jail configuration
+  ansible.builtin.template:
+    src: fail2ban-jail.local.j2
+    dest: /etc/fail2ban/jail.local
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+  notify: restart fail2ban
+
+- name: Create XRDP fail2ban filter
+  ansible.builtin.copy:
+    content: |
+      [Definition]
+      failregex = ^\[\d+\]: \[ERROR\] security_check_username: authentication failed for user <HOST>
+                  ^\[\d+\]: \[ERROR\] Connection closed from <HOST>
+                  .*\[WARN\].*Connection received from <HOST>.*
+      ignoreregex =
+    dest: /etc/fail2ban/filter.d/xrdp.conf
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+
+- name: Configure unattended-upgrades settings
+  ansible.builtin.template:
+    src: 50unattended-upgrades.j2
+    dest: /etc/apt/apt.conf.d/50unattended-upgrades
+    owner: root
+    group: root
+    mode: '0644'
+  become: yes
+
+- name: Harden SSH configuration
+  ansible.builtin.lineinfile:
+    path: /etc/ssh/sshd_config
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+  loop:
+    - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin no' }
+    - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication yes' }
+    - { regexp: '^#?PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
+    - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
+    - { regexp: '^#?MaxAuthTries', line: 'MaxAuthTries 3' }
+    - { regexp: '^#?ClientAliveInterval', line: 'ClientAliveInterval 300' }
+    - { regexp: '^#?ClientAliveCountMax', line: 'ClientAliveCountMax 2' }
+  become: yes
+  notify: restart sshd

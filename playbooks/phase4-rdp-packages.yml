@@ -1,0 +1,519 @@
+---
+#===============================================================================
+# Phase 4: RDP Workstation Package Installation
+#===============================================================================
+# Installs KDE Plasma desktop, XRDP, Docker, VS Code, and terminal tools
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Docker Repository
+#-------------------------------------------------------------------------------
+
+- name: Add Docker GPG key
+  ansible.builtin.shell: |
+    curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/docker-archive-keyring.gpg
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    filename: docker
+    state: present
+  when: install_docker | default(true)
+
+#-------------------------------------------------------------------------------
+# VS Code Repository
+#-------------------------------------------------------------------------------
+
+- name: Add Microsoft GPG key
+  ansible.builtin.shell: |
+    curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/packages.microsoft.gpg
+  args:
+    creates: /usr/share/keyrings/packages.microsoft.gpg
+
+- name: Remove existing VS Code repository
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/vscode.list
+    state: absent
+
+- name: Add VS Code repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main"
+    filename: vscode
+    state: present
+
+#-------------------------------------------------------------------------------
+# Update apt cache
+#-------------------------------------------------------------------------------
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+#-------------------------------------------------------------------------------
+# KDE Plasma Desktop
+#-------------------------------------------------------------------------------
+
+- name: Install KDE Plasma Desktop (minimal)
+  ansible.builtin.apt:
+    name:
+      - kde-plasma-desktop
+      - sddm
+      - konsole
+      - dolphin
+      - kate
+      - ark
+      - plasma-systemmonitor
+      - plasma-nm
+      - plasma-pa
+      - kscreen
+      - powerdevil
+      - breeze-gtk-theme
+      - papirus-icon-theme
+    state: present
+    install_recommends: no
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+#-------------------------------------------------------------------------------
+# Konsole Terminal Configuration
+#-------------------------------------------------------------------------------
+
+- name: Create Konsole config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/konsole"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Deploy Konsole Developer profile
+  ansible.builtin.template:
+    src: ../templates/konsole/Developer.profile.j2
+    dest: "/home/{{ vps_username }}/.local/share/konsole/Developer.profile"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Create user config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Set Konsole default profile
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      DefaultProfile=Developer.profile
+    dest: "/home/{{ vps_username }}/.config/konsolerc"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+    force: no
+
+#-------------------------------------------------------------------------------
+# XRDP (Remote Desktop)
+#-------------------------------------------------------------------------------
+
+- name: Install XRDP and dependencies
+  ansible.builtin.apt:
+    name:
+      - xrdp
+      - xorgxrdp
+    state: present
+
+- name: Add xrdp user to ssl-cert group
+  ansible.builtin.user:
+    name: xrdp
+    groups: ssl-cert
+    append: yes
+
+- name: Configure XRDP
+  ansible.builtin.template:
+    src: ../templates/xrdp.ini.j2
+    dest: /etc/xrdp/xrdp.ini
+    owner: root
+    group: root
+    mode: '0644'
+    backup: yes
+  register: xrdp_config
+
+- name: Restart XRDP if config changed
+  ansible.builtin.systemd:
+    name: xrdp
+    state: restarted
+  when: xrdp_config.changed
+
+- name: Create user xsession file
+  ansible.builtin.copy:
+    content: |
+      #!/bin/bash
+      export XDG_SESSION_TYPE=x11
+      export XDG_CURRENT_DESKTOP=KDE
+      export KDE_SESSION_VERSION=5
+      exec startplasma-x11
+    dest: "/home/{{ vps_username }}/.xsession"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Enable and start SDDM
+  ansible.builtin.systemd:
+    name: sddm
+    enabled: yes
+    state: started
+
+- name: Enable and start XRDP
+  ansible.builtin.systemd:
+    name: xrdp
+    enabled: yes
+    state: started
+
+#-------------------------------------------------------------------------------
+# Docker Engine
+#-------------------------------------------------------------------------------
+
+- name: Install Docker
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: present
+  when: install_docker | default(true)
+
+- name: Configure Docker daemon
+  ansible.builtin.template:
+    src: ../templates/docker-daemon.json.j2
+    dest: /etc/docker/daemon.json
+    owner: root
+    group: root
+    mode: '0644'
+  register: docker_config
+  when: install_docker | default(true)
+
+- name: Restart Docker if config changed
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted
+  when: (install_docker | default(true)) and docker_config.changed | default(false)
+
+- name: Add user to docker group
+  ansible.builtin.user:
+    name: "{{ vps_username }}"
+    groups: docker
+    append: yes
+  when: install_docker | default(true)
+
+- name: Enable and start Docker
+  ansible.builtin.systemd:
+    name: docker
+    enabled: yes
+    state: started
+  when: install_docker | default(true)
+
+#-------------------------------------------------------------------------------
+# VS Code
+#-------------------------------------------------------------------------------
+
+- name: Install VS Code
+  ansible.builtin.apt:
+    name: code
+    state: present
+
+- name: Install VS Code extensions for user
+  ansible.builtin.shell: |
+    code --install-extension {{ item }} --force
+  become_user: "{{ vps_username }}"
+  loop: "{{ vscode_extensions }}"
+  ignore_errors: yes
+  environment:
+    HOME: "/home/{{ vps_username }}"
+
+#-------------------------------------------------------------------------------
+# Browser
+#-------------------------------------------------------------------------------
+
+- name: Install Firefox ESR
+  ansible.builtin.apt:
+    name: firefox-esr
+    state: present
+  when: install_browser | default(true)
+
+- name: Create Firefox configuration directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0700'
+  loop:
+    - "/home/{{ vps_username }}/.mozilla"
+    - "/home/{{ vps_username }}/.mozilla/firefox"
+    - "/home/{{ vps_username }}/.mozilla/firefox/{{ vps_username }}-default"
+  when: install_browser | default(true)
+
+- name: Create Firefox profiles.ini
+  ansible.builtin.copy:
+    content: |
+      [Profile0]
+      Name=default
+      IsRelative=1
+      Path={{ vps_username }}-default
+      Default=1
+
+      [General]
+      StartWithLastProfile=1
+      Version=2
+    dest: "/home/{{ vps_username }}/.mozilla/firefox/profiles.ini"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: install_browser | default(true)
+
+- name: Set Firefox profile path variable
+  ansible.builtin.set_fact:
+    firefox_profile_path:
+      stdout: "/home/{{ vps_username }}/.mozilla/firefox/{{ vps_username }}-default"
+  when: install_browser | default(true)
+
+
+- name: Deploy Firefox user.js privacy configuration
+  ansible.builtin.template:
+    src: ../templates/firefox/user.js.j2
+    dest: "{{ firefox_profile_path.stdout }}/user.js"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: 
+    - install_browser | default(true)
+    - firefox_profile_path.stdout | length > 0
+
+- name: Set Firefox as default browser
+  ansible.builtin.command: xdg-settings set default-web-browser firefox-esr.desktop
+  become_user: "{{ vps_username }}"
+  environment:
+    HOME: "/home/{{ vps_username }}"
+    XDG_RUNTIME_DIR: "/run/user/{{ vps_username_uid | default(1000) }}"
+  when: install_browser | default(true)
+  changed_when: false
+  ignore_errors: yes
+
+#-------------------------------------------------------------------------------
+# Fonts
+#-------------------------------------------------------------------------------
+
+- name: Create fonts directory
+  ansible.builtin.file:
+    path: "{{ nerd_font_install_path }}"
+    state: directory
+    mode: '0755'
+
+- name: Download JetBrains Mono Nerd Font
+  ansible.builtin.get_url:
+    url: "{{ nerd_font_url }}"
+    dest: /tmp/JetBrainsMono.zip
+    mode: '0644'
+  retries: 3
+  delay: 10
+
+- name: Extract Nerd Font
+  ansible.builtin.unarchive:
+    src: /tmp/JetBrainsMono.zip
+    dest: "{{ nerd_font_install_path }}"
+    remote_src: yes
+
+- name: Rebuild font cache
+  ansible.builtin.command:
+    cmd: fc-cache -fv
+  become_user: "{{ vps_username }}"
+  changed_when: false
+
+#-------------------------------------------------------------------------------
+# Terminal: Zsh + Oh My Zsh + Starship
+#-------------------------------------------------------------------------------
+
+- name: Install Zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+
+- name: Set Zsh as default shell for user
+  ansible.builtin.user:
+    name: "{{ vps_username }}"
+    shell: /bin/zsh
+
+- name: Install Oh My Zsh
+  ansible.builtin.shell: |
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  args:
+    creates: "/home/{{ vps_username }}/.oh-my-zsh"
+  become_user: "{{ vps_username }}"
+  environment:
+    HOME: "/home/{{ vps_username }}"
+    SHELL: /bin/zsh
+
+- name: Install Zsh custom plugins
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
+    depth: 1
+  become_user: "{{ vps_username }}"
+  loop: "{{ zsh_custom_plugins }}"
+
+- name: Install Starship prompt
+  ansible.builtin.shell: |
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+  args:
+    creates: /usr/local/bin/starship
+
+- name: Configure Zsh
+  ansible.builtin.template:
+    src: ../templates/zshrc.j2
+    dest: "/home/{{ vps_username }}/.zshrc"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Configure Starship
+  ansible.builtin.template:
+    src: ../templates/starship.toml.j2
+    dest: "/home/{{ vps_username }}/.config/starship.toml"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+#-------------------------------------------------------------------------------
+# OpenCode AI (Optional)
+#-------------------------------------------------------------------------------
+
+- name: Install OpenCode AI
+  community.general.npm:
+    name: opencode-ai
+    global: yes
+    state: present
+  when: install_opencode | default(true)
+  ignore_errors: yes
+
+#-------------------------------------------------------------------------------
+# Google Antigravity IDE (Optional)
+#-------------------------------------------------------------------------------
+
+- name: Validate glibc version for Antigravity
+  ansible.builtin.shell: |
+    ldd --version 2>&1 | head -n1 | grep -oP '\d+\.\d+'
+  register: glibc_version
+  changed_when: false
+  when: install_antigravity | default(true)
+
+- name: Check glibc compatibility for Antigravity
+  ansible.builtin.assert:
+    that:
+      - glibc_version.stdout is version('2.28', '>=')
+    fail_msg: "Antigravity requires glibc >= 2.28. Found: {{ glibc_version.stdout }}"
+    success_msg: "glibc {{ glibc_version.stdout }} is compatible with Antigravity"
+  when: install_antigravity | default(true)
+
+- name: Create Antigravity keyring directory
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: '0755'
+  when: install_antigravity | default(true)
+
+- name: Add Antigravity repository GPG key
+  ansible.builtin.shell: |
+    curl -fsSL https://us-central1-apt.pkg.dev/doc/repo-signing-key.gpg | \
+      gpg --dearmor --yes -o /etc/apt/keyrings/antigravity-repo-key.gpg
+  args:
+    creates: /etc/apt/keyrings/antigravity-repo-key.gpg
+  when: install_antigravity | default(true)
+
+- name: Add Antigravity repository
+  ansible.builtin.copy:
+    content: |
+      deb [signed-by=/etc/apt/keyrings/antigravity-repo-key.gpg] https://us-central1-apt.pkg.dev/projects/antigravity-auto-updater-dev/ antigravity-debian main
+    dest: /etc/apt/sources.list.d/antigravity.list
+    mode: '0644'
+  when: install_antigravity | default(true)
+  register: antigravity_repo
+
+- name: Update apt cache for Antigravity
+  ansible.builtin.apt:
+    update_cache: yes
+  when: 
+    - install_antigravity | default(true)
+    - antigravity_repo.changed | default(false)
+
+- name: Install Google Antigravity
+  ansible.builtin.apt:
+    name: antigravity
+    state: present
+  when: install_antigravity | default(true)
+  register: antigravity_install
+  ignore_errors: yes
+
+- name: Create Antigravity workspace directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/antigravity-workspace"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  when: 
+    - install_antigravity | default(true)
+    - antigravity_install is succeeded
+
+- name: Verify Antigravity desktop entry exists
+  ansible.builtin.stat:
+    path: /usr/share/applications/antigravity.desktop
+  register: antigravity_desktop
+  when: install_antigravity | default(true)
+
+- name: Log Antigravity installation status
+  ansible.builtin.debug:
+    msg: >-
+      Antigravity installation: {{ 'SUCCESS' if antigravity_install is succeeded else 'SKIPPED/FAILED' }}
+      Desktop entry: {{ 'EXISTS' if antigravity_desktop.stat.exists | default(false) else 'NOT FOUND' }}
+  when: install_antigravity | default(true)
+
+#-------------------------------------------------------------------------------
+# Handlers
+#-------------------------------------------------------------------------------
+
+# Handlers handled inline now
+
+#-------------------------------------------------------------------------------
+# Mark Complete
+#-------------------------------------------------------------------------------
+
+- name: Mark Phase 4 complete
+  ansible.builtin.copy:
+    content: |
+      Phase 4: RDP Workstation Packages - COMPLETE
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      
+      Installed:
+      - KDE Plasma Desktop
+      - Konsole with Developer profile
+      - XRDP on port {{ xrdp_port }}
+      - Docker: {{ install_docker | default(true) }}
+      - VS Code with {{ vscode_extensions | length }} extensions
+      - Firefox ESR: {{ install_browser | default(true) }}
+      - OpenCode AI: {{ install_opencode | default(true) }}
+      - Google Antigravity: {{ install_antigravity | default(true) }}
+      - Zsh + Oh My Zsh + Starship
+      - JetBrains Mono Nerd Font
+    dest: "{{ vps_setup_log_dir }}/phase4-complete.txt"
+    mode: '0644'
+
+
+- name: Phase 4 completion notice
+  ansible.builtin.debug:
+    msg: "✅ Phase 4: RDP Workstation Packages Complete"

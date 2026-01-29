@@ -1,0 +1,41 @@
+---
+# Checkpoint role - System state management
+- name: Create log directory
+  ansible.builtin.file:
+    path: "{{ vps_setup_log_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Record initial system state
+  ansible.builtin.copy:
+    content: |
+      Deployment Date: {{ ansible_date_time.iso8601 }}
+      Hostname: {{ ansible_hostname }}
+      OS: {{ ansible_distribution }} {{ ansible_distribution_version }}
+      Kernel: {{ ansible_kernel }}
+      Architecture: {{ ansible_architecture }}
+      CPU Cores: {{ ansible_processor_vcpus }}
+      Memory: {{ ansible_memtotal_mb }} MB
+      IPv4: {{ ansible_default_ipv4.address | default('N/A') }}
+    dest: "{{ vps_setup_log_dir }}/initial-system-info.txt"
+    mode: '0644'
+
+- name: Record initial packages
+  ansible.builtin.shell: dpkg -l > {{ vps_setup_log_dir }}/initial-packages.txt
+  args:
+    creates: "{{ vps_setup_log_dir }}/initial-packages.txt"
+
+- name: Initialize deployment state
+  ansible.builtin.copy:
+    content: |
+      {
+        "deployment_id": "{{ ansible_date_time.epoch }}",
+        "start_time": "{{ ansible_date_time.iso8601 }}",
+        "current_phase": "1",
+        "completed_phases": [],
+        "target_user": "{{ vps_username }}",
+        "target_hostname": "{{ vps_hostname }}",
+        "checkpoint_created": true
+      }
+    dest: "{{ vps_setup_log_dir }}/deployment-state.json"
+    mode: '0644'

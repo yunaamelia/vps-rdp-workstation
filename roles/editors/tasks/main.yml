@@ -1,0 +1,53 @@
+---
+# Editors role - VS Code and tools
+
+- name: Add Microsoft GPG key
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    dest: /usr/share/keyrings/packages.microsoft.asc
+    mode: '0644'
+
+- name: Add VS Code repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/packages.microsoft.asc] https://packages.microsoft.com/repos/code stable main"
+    state: present
+    filename: vscode
+
+- name: Install VS Code
+  ansible.builtin.apt:
+    name: code
+    state: present
+    update_cache: yes
+
+- name: Create VS Code config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/Code/User"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Install VS Code extensions
+  become_user: "{{ vps_username }}"
+  ansible.builtin.command: "code --install-extension {{ item }}"
+  loop:
+    - dbaeumer.vscode-eslint
+    - esbenp.prettier-vscode
+    - ms-python.python
+    - ms-python.vscode-pylance
+    - bmewburn.vscode-intelephense-client
+    - eamodio.gitlens
+    - rangav.vscode-thunder-client
+    - PKief.material-icon-theme
+    - Equinusocio.vsc-material-theme
+    - ms-azuretools.vscode-docker
+    - bradlc.vscode-tailwindcss
+  register: extension_result
+  changed_when: "'is already installed' not in extension_result.stdout"
+  failed_when: false
+
+- name: Install OpenCode AI
+  community.general.npm:
+    name: opencode-ai
+    global: yes
+    state: present

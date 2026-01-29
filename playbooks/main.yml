@@ -1,0 +1,180 @@
+---
+#===============================================================================
+# VPS RDP Developer Workstation - Main Orchestration Playbook
+#===============================================================================
+# This playbook orchestrates all deployment phases in order.
+# Each phase has validation checkpoints and rollback capability.
+#
+# Usage:
+#   ansible-playbook -i inventory/hosts.yml playbooks/main.yml
+#
+# With extra vars:
+#   ansible-playbook playbooks/main.yml -e "vps_username=myuser"
+#===============================================================================
+
+- name: "Phase 1: System Preparation & Checkpoint Creation"
+  hosts: localhost
+  become: true
+  gather_facts: true
+  tags:
+    - phase1
+    - preparation
+  
+  tasks:
+    - name: Include Phase 1 playbook
+      ansible.builtin.include_tasks: phase1-preparation.yml
+
+- name: "Phase 2: User Management & Access Configuration"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase2
+    - user
+  
+  tasks:
+    - name: Include Phase 2 playbook
+      ansible.builtin.include_tasks: phase2-user-management.yml
+
+- name: "Phase 3: Environment Validation & Dependency Installation"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase3
+    - dependencies
+  
+  tasks:
+    - name: Include Phase 3 playbook
+      ansible.builtin.include_tasks: phase3-dependencies.yml
+
+- name: "Phase 4: RDP Workstation Package Installation"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase4
+    - packages
+  
+  tasks:
+    - name: Include Phase 4 playbook
+      ansible.builtin.include_tasks: phase4-rdp-packages.yml
+
+- name: "Phase 5: Installation Validation"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase5
+    - validation
+  
+  tasks:
+    - name: Include Phase 5 playbook
+      ansible.builtin.include_tasks: phase5-validation.yml
+
+- name: "Phase 6: Configuration Optimization & Best Practices"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase6
+    - optimization
+  
+  tasks:
+    - name: Include Phase 6 playbook
+      ansible.builtin.include_tasks: phase6-optimization.yml
+
+  handlers:
+    - name: Restart SSH
+      ansible.builtin.systemd:
+        name: ssh
+        state: restarted
+
+    - name: Restart Fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: restarted
+
+- name: "Phase 7: Final Validation & Optimization Verification"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase7
+    - final
+  
+  tasks:
+    - name: Include Phase 7 playbook
+      ansible.builtin.include_tasks: phase7-final-validation.yml
+
+- name: "Phase 8: Enhancement & Extension (Optional)"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase8
+    - enhancements
+    - optional
+  
+  tasks:
+    - name: Include Phase 8 playbook
+      ansible.builtin.include_tasks: phase8-enhancements.yml
+      when: install_enhancements | default(false)
+
+- name: "Deployment Complete - Generate Summary"
+  hosts: localhost
+  become: true
+  gather_facts: true
+  tags:
+    - always
+  
+  tasks:
+    - name: Get IP address
+      ansible.builtin.set_fact:
+        vps_ip: "{{ ansible_default_ipv4.address | default(ansible_all_ipv4_addresses[0]) }}"
+
+    - name: Generate deployment summary
+      ansible.builtin.copy:
+        content: |
+          ╔══════════════════════════════════════════════════════════════════╗
+          ║              VPS RDP Workstation - Deployment Complete           ║
+          ╠══════════════════════════════════════════════════════════════════╣
+          ║                                                                  ║
+          ║  RDP Connection: {{ vps_ip }}:{{ xrdp_port }}
+          ║  Username:       {{ vps_username }}
+          ║                                                                  ║
+          ║  Deployed:       {{ ansible_date_time.iso8601 }}
+          ║  Hostname:       {{ vps_hostname }}
+          ║                                                                  ║
+          ╚══════════════════════════════════════════════════════════════════╝
+          
+          Installed Components:
+          - KDE Plasma Desktop with {{ vps_theme }} theme
+          - XRDP Remote Desktop on port {{ xrdp_port }}
+          - Node.js {{ nodejs_version }}.x LTS
+          - Python 3.12+
+          - PHP 8.x
+          - Docker with Compose V2
+          - VS Code with extensions
+          - Zsh + Oh My Zsh + Starship
+          - JetBrains Mono Nerd Font
+          - UFW Firewall + Fail2ban
+          
+          Logs: {{ vps_setup_log_dir }}/
+        dest: "{{ vps_setup_log_dir }}/deployment-summary.txt"
+        mode: '0644'
+
+    - name: Display completion message
+      ansible.builtin.debug:
+        msg: |
+          
+          ════════════════════════════════════════════════════════════════════
+                         DEPLOYMENT COMPLETE!
+          ════════════════════════════════════════════════════════════════════
+          
+          RDP Connection: {{ vps_ip }}:{{ xrdp_port }}
+          Username: {{ vps_username }}
+          
+          ⚠️  Important: Logout and login required for docker group membership
+          
+          ════════════════════════════════════════════════════════════════════

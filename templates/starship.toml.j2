@@ -1,0 +1,132 @@
+# {{ ansible_managed }}
+# Starship prompt configuration for VPS Developer Workstation
+# Generated: {{ ansible_date_time.iso8601 }}
+# Preset: {{ starship_preset }}
+
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+
+# Inserts a blank line between shell prompts
+add_newline = true
+
+# Overall format
+format = """
+$username\
+$hostname\
+$directory\
+$git_branch\
+$git_status\
+$nodejs\
+$python\
+$php\
+$docker_context\
+$line_break\
+$character"""
+
+# Prompt character
+[character]
+success_symbol = "[❯](bold green)"
+error_symbol = "[❯](bold red)"
+vimcmd_symbol = "[❮](bold green)"
+
+# Directory
+[directory]
+truncation_length = 5
+truncate_to_repo = true
+format = "[$path]($style)[$read_only]($read_only_style) "
+style = "bold cyan"
+read_only = " 🔒"
+read_only_style = "red"
+home_symbol = "~"
+
+# Git branch
+[git_branch]
+format = "on [$symbol$branch(:$remote_branch)]($style) "
+symbol = " "
+style = "bold purple"
+
+# Git status
+[git_status]
+format = '([\[$all_status$ahead_behind\]]($style) )'
+style = "bold yellow"
+conflicted = "⚔️"
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?${count}"
+stashed = "📦"
+modified = "!${count}"
+staged = "+${count}"
+renamed = "»${count}"
+deleted = "✘${count}"
+
+# Username
+[username]
+format = "[$user]($style) "
+style_user = "bold dimmed green"
+style_root = "bold red"
+show_always = false
+disabled = false
+
+# Hostname
+[hostname]
+format = "at [$hostname]($style) in "
+style = "bold dimmed yellow"
+ssh_only = true
+disabled = false
+
+# Node.js
+[nodejs]
+format = "via [$symbol($version )]($style)"
+symbol = " "
+style = "bold green"
+detect_files = ["package.json", ".nvmrc"]
+detect_extensions = ["js", "mjs", "cjs", "ts", "mts", "cts"]
+
+# Python
+[python]
+format = "via [$symbol$pyenv_prefix($version )(\\($virtualenv\\) )]($style)"
+symbol = " "
+style = "bold yellow"
+detect_extensions = ["py"]
+detect_files = ["requirements.txt", "pyproject.toml", "setup.py", "Pipfile"]
+
+# PHP
+[php]
+format = "via [$symbol($version )]($style)"
+symbol = " "
+style = "bold 147"
+detect_extensions = ["php"]
+detect_files = ["composer.json"]
+
+# Docker
+[docker_context]
+format = "via [$symbol$context]($style) "
+symbol = "🐳 "
+style = "blue bold"
+only_with_files = true
+detect_files = ["docker-compose.yml", "docker-compose.yaml", "Dockerfile"]
+
+# Package version (disabled by default - can be slow)
+[package]
+disabled = true
+
+# AWS (disabled - not typically needed)
+[aws]
+disabled = true
+
+# Azure (disabled - not typically needed)
+[azure]
+disabled = true
+
+# GCloud (disabled - not typically needed)
+[gcloud]
+disabled = true
+
+# Kubernetes (disabled - can be slow)
+[kubernetes]
+disabled = true
+
+# Time (disabled - use system clock)
+[time]
+disabled = true

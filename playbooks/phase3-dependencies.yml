@@ -1,0 +1,226 @@
+---
+#===============================================================================
+# Phase 3: Environment Validation & Dependency Installation
+#===============================================================================
+# Adds external repositories and installs core development dependencies
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# NodeSource Repository (Node.js LTS)
+#-------------------------------------------------------------------------------
+
+- name: Add NodeSource GPG key
+  ansible.builtin.get_url:
+    url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+    dest: /tmp/nodesource.gpg.key
+    mode: '0644'
+  register: nodesource_key_download
+  retries: 3
+  delay: 10
+  until: nodesource_key_download is succeeded
+
+- name: Dearmor NodeSource GPG key
+  ansible.builtin.shell: |
+    gpg --dearmor < /tmp/nodesource.gpg.key > /usr/share/keyrings/nodesource.gpg
+  args:
+    creates: /usr/share/keyrings/nodesource.gpg
+
+- name: Add NodeSource repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_{{ nodejs_version }}.x nodistro main"
+    filename: nodesource
+    state: present
+
+#-------------------------------------------------------------------------------
+# GitHub CLI Repository
+#-------------------------------------------------------------------------------
+
+- name: Add GitHub CLI GPG key
+  ansible.builtin.shell: |
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+  args:
+    creates: /usr/share/keyrings/githubcli-archive-keyring.gpg
+
+- name: Add GitHub CLI repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
+    filename: github-cli
+    state: present
+
+#-------------------------------------------------------------------------------
+# Update apt cache after adding repositories
+#-------------------------------------------------------------------------------
+
+- name: Update apt cache
+  ansible.builtin.apt:
+    update_cache: yes
+
+#-------------------------------------------------------------------------------
+# Install Development Languages & Tools
+#-------------------------------------------------------------------------------
+
+- name: Install Node.js
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+  register: nodejs_installed
+
+- name: Install Python development packages
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-dev
+      - python3-setuptools
+      - python3-wheel
+      - pipx
+    state: present
+
+- name: Install PHP
+  ansible.builtin.apt:
+    name:
+      - php
+      - php-cli
+      - php-common
+      - php-json
+      - php-mysql
+      - php-pgsql
+      - php-xml
+      - php-mbstring
+      - php-curl
+      - php-zip
+    state: present
+
+- name: Install GitHub CLI
+  ansible.builtin.apt:
+    name: gh
+    state: present
+
+#-------------------------------------------------------------------------------
+# Composer Installation
+#-------------------------------------------------------------------------------
+
+- name: Download Composer installer
+  ansible.builtin.get_url:
+    url: https://getcomposer.org/installer
+    dest: /tmp/composer-setup.php
+    mode: '0755'
+
+- name: Install Composer
+  ansible.builtin.shell: |
+    php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  args:
+    creates: /usr/local/bin/composer
+
+#-------------------------------------------------------------------------------
+# Lazygit Installation
+#-------------------------------------------------------------------------------
+
+- name: Get latest Lazygit release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+    return_content: yes
+  register: lazygit_release
+  retries: 3
+  delay: 5
+  until: lazygit_release.status == 200
+
+- name: Download Lazygit
+  ansible.builtin.get_url:
+    url: "https://github.com/jesseduffield/lazygit/releases/download/{{ lazygit_release.json.tag_name }}/lazygit_{{ lazygit_release.json.tag_name | regex_replace('^v', '') }}_Linux_x86_64.tar.gz"
+    dest: /tmp/lazygit.tar.gz
+    mode: '0644'
+
+- name: Extract Lazygit
+  ansible.builtin.unarchive:
+    src: /tmp/lazygit.tar.gz
+    dest: /tmp/
+    remote_src: yes
+
+- name: Install Lazygit binary
+  ansible.builtin.copy:
+    src: /tmp/lazygit
+    dest: /usr/local/bin/lazygit
+    mode: '0755'
+    remote_src: yes
+
+#-------------------------------------------------------------------------------
+# NPM Global Packages
+#-------------------------------------------------------------------------------
+
+- name: Install npm global packages
+  community.general.npm:
+    name: "{{ item }}"
+    global: yes
+    state: present
+  loop: "{{ npm_global_packages }}"
+  ignore_errors: yes
+
+#-------------------------------------------------------------------------------
+# Python Pipx Packages
+#-------------------------------------------------------------------------------
+
+- name: Ensure pipx PATH for user
+  ansible.builtin.lineinfile:
+    path: "/home/{{ vps_username }}/.profile"
+    line: 'export PATH="$HOME/.local/bin:$PATH"'
+    state: present
+    create: yes
+  become_user: "{{ vps_username }}"
+
+- name: Install pipx packages for user
+  ansible.builtin.shell: |
+    pipx install {{ item }}
+  args:
+    creates: "/home/{{ vps_username }}/.local/bin/{{ item | regex_replace('\\[.*\\]', '') }}"
+  become_user: "{{ vps_username }}"
+  loop: "{{ pipx_packages | default([]) }}"
+  ignore_errors: yes
+  environment:
+    PATH: "/home/{{ vps_username }}/.local/bin:{{ ansible_env.PATH }}"
+
+#-------------------------------------------------------------------------------
+# Verification
+#-------------------------------------------------------------------------------
+
+- name: Verify installations
+  block:
+    - name: Check Node.js version
+      ansible.builtin.command: node --version
+      register: node_version
+      changed_when: false
+    
+    - name: Check Python version
+      ansible.builtin.command: python3 --version
+      register: python_version
+      changed_when: false
+    
+    - name: Check PHP version
+      ansible.builtin.command: php --version
+      register: php_version
+      changed_when: false
+    
+    - name: Check Composer version
+      ansible.builtin.command: composer --version
+      register: composer_version
+      changed_when: false
+
+- name: Mark Phase 3 complete
+  ansible.builtin.copy:
+    content: |
+      Phase 3: Dependencies - COMPLETE
+      Timestamp: {{ ansible_date_time.iso8601 }}
+      
+      Installed Versions:
+      - Node.js: {{ node_version.stdout }}
+      - Python: {{ python_version.stdout }}
+      - PHP: {{ php_version.stdout | regex_search('PHP [0-9.]+') }}
+      - Composer: {{ composer_version.stdout | regex_search('[0-9.]+') }}
+      - Lazygit: {{ lazygit_release.json.tag_name }}
+    dest: "{{ vps_setup_log_dir }}/phase3-complete.txt"
+    mode: '0644'
+
+- name: Phase 3 completion notice
+  ansible.builtin.debug:
+    msg: "✅ Phase 3: Dependencies Complete - Node.js {{ node_version.stdout }}, Python {{ python_version.stdout }}"

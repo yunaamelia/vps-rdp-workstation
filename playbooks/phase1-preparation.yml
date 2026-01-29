@@ -71,6 +71,15 @@
         name: "{{ vps_locale }}"
         state: present
     
+    - name: Remove upstream conflicting repository configurations
+      ansible.builtin.file:
+        path: "/etc/apt/sources.list.d/{{ item }}"
+        state: absent
+      loop:
+        - vscode.list
+        - microsoft-prod.list
+        - microsoft.list
+
     - name: Update apt cache
       ansible.builtin.apt:
         update_cache: yes

@@ -160,6 +160,7 @@
     - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key blurEnabled false"
   become_user: "{{ vps_username }}"
   ignore_errors: yes
+  changed_when: false
   when: kde_disable_compositor | default(true)
 
 - name: Configure KDE theme
@@ -169,6 +170,7 @@
     - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group Icons --key Theme {{ kde_theme[vps_theme].icon_theme }}"
   become_user: "{{ vps_username }}"
   ignore_errors: yes
+  changed_when: false
 
 #-------------------------------------------------------------------------------
 # Performance: Disable Unnecessary Services

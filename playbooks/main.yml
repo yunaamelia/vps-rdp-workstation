@@ -84,16 +84,12 @@
     - name: Include Phase 6 playbook
       ansible.builtin.include_tasks: phase6-optimization.yml
 
-  handlers:
-    - name: Restart SSH
-      ansible.builtin.systemd:
-        name: ssh
-        state: restarted
+  tags:
+    - always
 
-    - name: Restart Fail2ban
-      ansible.builtin.systemd:
-        name: fail2ban
-        state: restarted
+  tasks:
+    - name: Import shared handlers
+      ansible.builtin.import_tasks: handlers/main.yml
 
 - name: "Phase 7: Final Validation & Optimization Verification"
   hosts: localhost

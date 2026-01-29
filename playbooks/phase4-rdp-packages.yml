@@ -234,6 +234,8 @@
 - name: Install VS Code extensions for user
   ansible.builtin.shell: |
     code --install-extension {{ item }} --force
+  register: vscode_ext_install
+  changed_when: "'already installed' not in vscode_ext_install.stdout"
   become_user: "{{ vps_username }}"
   loop: "{{ vscode_extensions }}"
   ignore_errors: yes

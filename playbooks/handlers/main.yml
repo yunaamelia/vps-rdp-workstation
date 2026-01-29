@@ -1,0 +1,22 @@
+---
+# Shared Handlers for all playbooks
+
+- name: Restart SSH
+  ansible.builtin.systemd:
+    name: ssh
+    state: restarted
+
+- name: Restart Fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: restarted
+
+- name: Restart XRDP
+  ansible.builtin.systemd:
+    name: xrdp
+    state: restarted
+
+- name: Restart Docker
+  ansible.builtin.systemd:
+    name: docker
+    state: restarted

@@ -260,10 +260,29 @@ install_ansible() {
 
     # Pre-generate locale to avoid Ansible hang
     log_info "Pre-generating locale en_US.UTF-8..."
-    if command -v locale-gen &>/dev/null; then
-        locale-gen en_US.UTF-8
-        update-locale LANG=en_US.UTF-8
+    
+    # Ensure locales package is installed
+    if ! dpkg -s locales >/dev/null 2>&1; then
+        apt-get install -y locales
     fi
+
+    # Uncomment/Add en_US.UTF-8 in /etc/locale.gen
+    if [ -f /etc/locale.gen ]; then
+        sed -i 's/^# *en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen
+        if ! grep -q "^en_US.UTF-8 UTF-8" /etc/locale.gen; then
+            echo "en_US.UTF-8 UTF-8" >> /etc/locale.gen
+        fi
+    fi
+
+    # Generate
+    if command -v locale-gen &>/dev/null; then
+        locale-gen en_US.UTF-8 || locale-gen
+        update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 || true
+    fi
+
+    # Export for current session
+    export LANG=en_US.UTF-8
+    export LC_ALL=en_US.UTF-8
 }
 
 #===============================================================================

@@ -21,12 +21,24 @@
 #===============================================================================
 
 set -euo pipefail
+export DEBIAN_FRONTEND=noninteractive
 
-# Script directory
+# Configure apt to be non-interactive
+if command -v debconf-set-selections &>/dev/null; then
+    echo "libraries/restart-without-asking boolean true" | debconf-set-selections 2>/dev/null || true
+fi
+
+# Script directory and logs
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_DIR="/var/log/vps-setup"
 LOG_FILE="$LOG_DIR/deployment.log"
 STATE_FILE="$LOG_DIR/deployment-state.json"
+
+# Ensure log dir exists
+mkdir -p "$LOG_DIR"
+
+# Redirect all output to log file and console
+exec > >(tee -a "$LOG_FILE") 2>&1
 
 # Colors for output
 RED='\033[0;31m'
@@ -158,26 +170,38 @@ prompt_configuration() {
     
     # Username
     if [ -z "${VPS_USERNAME:-}" ]; then
-        read -p "Enter username for workstation user: " VPS_USERNAME
-        if [ -z "$VPS_USERNAME" ]; then
-            log_error "Username cannot be empty"
-            exit 1
+        if [ "${NON_INTERACTIVE:-false}" = "true" ]; then
+            VPS_USERNAME="admin"
+            log_warn "Non-interactive mode: Defaulting username to 'admin'"
+        else
+            read -p "Enter username for workstation user: " VPS_USERNAME
+            if [ -z "$VPS_USERNAME" ]; then
+                log_error "Username cannot be empty"
+                exit 1
+            fi
         fi
     fi
     
     # Password
     if [ -z "${VPS_PASSWORD:-}" ]; then
-        read -sp "Enter password for $VPS_USERNAME: " VPS_PASSWORD
-        echo ""
-        if [ -z "$VPS_PASSWORD" ]; then
-            log_error "Password cannot be empty"
-            exit 1
-        fi
-        read -sp "Confirm password: " VPS_PASSWORD_CONFIRM
-        echo ""
-        if [ "$VPS_PASSWORD" != "$VPS_PASSWORD_CONFIRM" ]; then
-            log_error "Passwords do not match"
-            exit 1
+        if [ "${NON_INTERACTIVE:-false}" = "true" ]; then
+            # Generate random password if not provided
+            VPS_PASSWORD=$(openssl rand -base64 12)
+            log_warn "Non-interactive mode: Generated random password for user '$VPS_USERNAME'"
+            log_warn "Password: $VPS_PASSWORD"
+        else
+            read -sp "Enter password for $VPS_USERNAME: " VPS_PASSWORD
+            echo ""
+            if [ -z "$VPS_PASSWORD" ]; then
+                log_error "Password cannot be empty"
+                exit 1
+            fi
+            read -sp "Confirm password: " VPS_PASSWORD_CONFIRM
+            echo ""
+            if [ "$VPS_PASSWORD" != "$VPS_PASSWORD_CONFIRM" ]; then
+                log_error "Passwords do not match"
+                exit 1
+            fi
         fi
     fi
     
@@ -221,9 +245,10 @@ hash_password() {
 #===============================================================================
 
 install_ansible() {
-    if command -v ansible-playbook &>/dev/null; then
+    if which ansible-playbook &>/dev/null; then
         local version=$(ansible --version | head -n1)
         log_success "Ansible already installed: $version"
+        mkdir -p /var/log/vps-setup/retry /var/log/vps-setup/facts_cache
         return 0
     fi
     
@@ -231,6 +256,14 @@ install_ansible() {
     apt-get update
     apt-get install -y ansible python3-apt
     log_success "Ansible installed: $(ansible --version | head -n1)"
+    mkdir -p /var/log/vps-setup/retry /var/log/vps-setup/facts_cache
+
+    # Pre-generate locale to avoid Ansible hang
+    log_info "Pre-generating locale en_US.UTF-8..."
+    if command -v locale-gen &>/dev/null; then
+        locale-gen en_US.UTF-8
+        update-locale LANG=en_US.UTF-8
+    fi
 }
 
 #===============================================================================
@@ -296,7 +329,7 @@ run_ansible_deployment() {
         -e "vps_theme=$VPS_THEME" \
         -e "vps_locale=$VPS_LOCALE" \
         --become \
-        -v
+        -v 2>&1 | tee -a "$LOG_FILE"
 }
 
 #===============================================================================

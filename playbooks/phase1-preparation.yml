@@ -72,13 +72,12 @@
         state: present
     
     - name: Remove upstream conflicting repository configurations
-      ansible.builtin.file:
-        path: "/etc/apt/sources.list.d/{{ item }}"
-        state: absent
+      ansible.builtin.shell: rm -f /etc/apt/sources.list.d/{{ item }}
       loop:
         - vscode.list
         - microsoft-prod.list
         - microsoft.list
+      ignore_errors: yes
 
     - name: Update apt cache
       ansible.builtin.apt:

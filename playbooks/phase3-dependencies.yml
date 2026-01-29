@@ -19,6 +19,7 @@
     url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
     dest: /tmp/nodesource.gpg.key
     mode: '0644'
+    timeout: 30
   register: nodesource_key_download
   retries: 3
   delay: 10
@@ -41,9 +42,20 @@
 # GitHub CLI Repository
 #-------------------------------------------------------------------------------
 
-- name: Add GitHub CLI GPG key
+- name: Download GitHub CLI GPG key
+  ansible.builtin.get_url:
+    url: https://cli.github.com/packages/githubcli-archive-keyring.gpg
+    dest: /tmp/githubcli.gpg.key
+    mode: '0644'
+    timeout: 30
+  register: github_key_download
+  retries: 3
+  delay: 10
+  until: github_key_download is succeeded
+
+- name: Dearmor GitHub CLI GPG key
   ansible.builtin.shell: |
-    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | gpg --dearmor -o /usr/share/keyrings/githubcli-archive-keyring.gpg
+    gpg --dearmor < /tmp/githubcli.gpg.key > /usr/share/keyrings/githubcli-archive-keyring.gpg
   args:
     creates: /usr/share/keyrings/githubcli-archive-keyring.gpg
 

@@ -84,12 +84,8 @@
     - name: Include Phase 6 playbook
       ansible.builtin.include_tasks: phase6-optimization.yml
 
-  tags:
-    - always
-
-  tasks:
-    - name: Import shared handlers
-      ansible.builtin.import_tasks: handlers/main.yml
+  handlers:
+    - ansible.builtin.import_tasks: handlers/main.yml
 
 - name: "Phase 7: Final Validation & Optimization Verification"
   hosts: localhost

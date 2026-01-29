@@ -32,10 +32,14 @@
   args:
     creates: /usr/share/keyrings/packages.microsoft.gpg
 
-- name: Remove existing VS Code repository
+- name: Remove conflicting repository configurations
   ansible.builtin.file:
-    path: /etc/apt/sources.list.d/vscode.list
+    path: "/etc/apt/sources.list.d/{{ item }}"
     state: absent
+  loop:
+    - vscode.list
+    - microsoft-prod.list
+    - microsoft.list
 
 - name: Add VS Code repository
   ansible.builtin.apt_repository:

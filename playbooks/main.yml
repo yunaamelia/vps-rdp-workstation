@@ -108,26 +108,38 @@
     - name: Import handlers
       ansible.builtin.import_tasks: handlers/main.yml
 
-- name: "Phase 8: Final Validation & Optimization Verification"
+- name: "Phase 8: Enhancements & Extensions"
   hosts: localhost
   become: true
   gather_facts: false
   tags:
     - phase8
-    - final
+    - enhancements
 
   tasks:
     - name: Include Phase 8 playbook
-      ansible.builtin.include_tasks: phase8-final-validation.yml
+      ansible.builtin.include_tasks: phase8-enhancements.yml
 
-- name: "Phase 9: Enhancement & Extension (Optional)"
+- name: "Phase 9: Final Validation & Optimization Verification"
   hosts: localhost
   become: true
   gather_facts: false
   tags:
     - phase9
-    - enhancements
-    - optional
+    - final
+
+
+  tasks:
+    - name: Include Phase 8 playbook
+      ansible.builtin.include_tasks: phase8-final-validation.yml
+
+- name: "Phase 10: Additional Extensions (Optional)"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase10
+    - optional_extensions
 
   tasks:
     - name: Include Phase 9 playbook

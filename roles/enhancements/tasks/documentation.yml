@@ -188,6 +188,6 @@
 - name: Log documentation deployment
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Enhancement Documentation deployed"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Enhancement Documentation deployed"
     create: yes
     mode: '0644'

@@ -11,20 +11,27 @@
 
 - name: Check if Atuin is installed
   ansible.builtin.command: which atuin
-  register: atuin_check
+  register: enhancements_atuin_check
   changed_when: false
   failed_when: false
 
-- name: Install Atuin via install script
-  ansible.builtin.shell: |
-    curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | bash -s -- --yes
+- name: Download Atuin installer
+  ansible.builtin.get_url:
+    url: https://setup.atuin.sh
+    dest: /tmp/install-atuin.sh
+    mode: '0755'
+  when: enhancements_atuin_check.rc != 0
+
+- name: Run Atuin installer
+  ansible.builtin.command: /tmp/install-atuin.sh --yes
   become: yes
   become_user: "{{ vps_username }}"
   environment:
     HOME: "/home/{{ vps_username }}"
-  when: atuin_check.rc != 0
-  args:
-    creates: "/home/{{ vps_username }}/.atuin/bin/atuin"
+  when: enhancements_atuin_check.rc != 0
+  register: atuin_install
+  changed_when: atuin_install.rc == 0
+
 
 #-------------------------------------------------------------------------------
 # Configure Atuin
@@ -39,40 +46,8 @@
     mode: '0755'
 
 - name: Configure Atuin
-  ansible.builtin.copy:
-    content: |
-      ## Atuin Configuration
-      ## https://docs.atuin.sh/configuration/config/
-      
-      # Disable sync for privacy (can enable later)
-      sync_address = ""
-      auto_sync = false
-      
-      # Search settings
-      search_mode = "fuzzy"
-      filter_mode = "global"
-      filter_mode_shell_up_key_binding = "session"
-      
-      # Style
-      style = "auto"
-      inline_height = 8
-      show_preview = true
-      show_help = true
-      
-      # History settings
-      max_history_length = {{ atuin_max_history }}
-      enter_accept = true
-      
-      # Filter sensitive commands
-      secrets_filter = true
-      history_filter = [
-        "^password",
-        "^token",
-        "^secret",
-        "^api.key",
-        "^AWS_",
-        "^GITHUB_TOKEN",
-      ]
+  ansible.builtin.template:
+    src: "atuin-config.toml.j2"
     dest: "/home/{{ vps_username }}/.config/atuin/config.toml"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
@@ -102,6 +77,6 @@
 - name: Log Atuin installation
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Atuin Shell History installed"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Atuin Shell History installed"
     create: yes
     mode: '0644'

@@ -11,12 +11,12 @@
 
 - name: Check if pet is installed
   ansible.builtin.command: which pet
-  register: pet_check
+  register: enhancements_pet_check
   changed_when: false
   failed_when: false
 
 - name: Download pet
-  when: pet_check.rc != 0
+  when: enhancements_pet_check.rc != 0
   block:
     - name: Download pet binary
       ansible.builtin.get_url:
@@ -50,19 +50,8 @@
     mode: '0755'
 
 - name: Configure pet
-  ansible.builtin.copy:
-    content: |
-      [General]
-      snippetfile = "/home/{{ vps_username }}/.config/pet/snippet.toml"
-      editor = "code"
-      column = 40
-      selectcmd = "fzf --ansi --layout=reverse --border"
-      backend = "pet"
-      sortby = "recency"
-      
-      [Gist]
-      # Disabled for privacy
-      auto_sync = false
+  ansible.builtin.template:
+    src: "pet-config.toml.j2"
     dest: "/home/{{ vps_username }}/.config/pet/config.toml"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
@@ -173,6 +162,6 @@
 - name: Log pet installation
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Pet Snippet Manager installed"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Pet Snippet Manager installed"
     create: yes
     mode: '0644'

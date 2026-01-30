@@ -1,0 +1,90 @@
+#===============================================================================
+# VPS Workstation Enhancements - Zsh Additions
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Modern CLI Tool Aliases
+#-------------------------------------------------------------------------------
+{% if enable_modern_cli | default(true) %}
+# Modern replacement for ls
+if command -v eza &> /dev/null; then
+  alias ls='eza --icons --git'
+  alias ll='eza -la --icons --git'
+  alias tree='eza --tree --icons'
+fi
+
+# Modern replacement for cat
+if command -v bat &> /dev/null; then
+  alias cat='bat --style=plain'
+  export BAT_THEME="{{ bat_theme | default('Catppuccin-mocha') }}"
+fi
+
+# Modern replacement for find
+if command -v fd &> /dev/null; then
+  # We don't alias find by default to avoid breaking scripts
+  # alias find='fd'
+  export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+fi
+
+# Modern replacement for grep
+if command -v rg &> /dev/null; then
+  # alias grep='rg'
+  alias rgrep='rg'
+fi
+
+# Modern replacement for du
+if command -v dust &> /dev/null; then
+  alias du='dust'
+fi
+
+# Modern replacement for ps
+if command -v procs &> /dev/null; then
+  alias ps='procs'
+fi
+{% endif %}
+
+#-------------------------------------------------------------------------------
+# Git Enhancements
+#-------------------------------------------------------------------------------
+{% if enable_git_tools | default(true) %}
+if command -v lazygit &> /dev/null; then
+  alias lg='lazygit'
+fi
+{% endif %}
+
+#-------------------------------------------------------------------------------
+# File Manager
+#-------------------------------------------------------------------------------
+{% if enable_file_manager | default(true) %}
+if command -v yazi &> /dev/null; then
+  alias y='yazi'
+  
+  # Function to change directory when quitting yazi
+  function ya() {
+    local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
+    yazi "$@" --cwd-file="$tmp"
+    if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+      cd -- "$cwd"
+    fi
+    rm -f -- "$tmp"
+  }
+fi
+{% endif %}
+
+#-------------------------------------------------------------------------------
+# Keybindings
+#-------------------------------------------------------------------------------
+# Autosuggestions: accept with Right Arrow or Ctrl+Space
+bindkey '^ ' autosuggest-accept
+bindkey '^[[C' autosuggest-accept
+
+# History search
+bindkey '^R' history-incremental-search-backward
+
+#-------------------------------------------------------------------------------
+# Welcome Message
+#-------------------------------------------------------------------------------
+if [[ -o interactive ]]; then
+  echo -e "\n\033[1;34m🚀 VPS Enhancements Loaded\033[0m"
+  echo -e "Try: \033[1;32mlg\033[0m (lazygit), \033[1;32mya\033[0m (yazi), \033[1;32mCtrl+T\033[0m (files), \033[1;32mCtrl+R\033[0m (history)"
+fi

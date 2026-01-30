@@ -1,0 +1,32 @@
+## Atuin Configuration
+## https://docs.atuin.sh/configuration/config/
+
+# Disable sync for privacy (can enable later)
+sync_address = ""
+auto_sync = false
+
+# Search settings
+search_mode = "fuzzy"
+filter_mode = "global"
+filter_mode_shell_up_key_binding = "session"
+
+# Style
+style = "auto"
+inline_height = 8
+show_preview = true
+show_help = true
+
+# History settings
+max_history_length = {{ atuin_max_history | default(10000) }}
+enter_accept = true
+
+# Filter sensitive commands
+secrets_filter = true
+history_filter = [
+  "^password",
+  "^token",
+  "^secret",
+  "^api.key",
+  "^AWS_",
+  "^GITHUB_TOKEN",
+]

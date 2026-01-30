@@ -17,7 +17,7 @@
       - ripgrep      # modern grep
       - fzf          # fuzzy finder (also used in Phase 9.4)
     state: present
-  register: apt_cli_tools
+  register: enhancements_apt_cli_tools
 
 #-------------------------------------------------------------------------------
 # Install eza (modern ls) - not in Debian repos yet
@@ -25,7 +25,7 @@
 
 - name: Check if eza is installed
   ansible.builtin.command: which eza
-  register: eza_check
+  register: enhancements_eza_check
   changed_when: false
   failed_when: false
 
@@ -36,12 +36,12 @@
   environment:
     HOME: "/home/{{ vps_username }}"
     PATH: "/home/{{ vps_username }}/.cargo/bin:{{ ansible_env.PATH }}"
-  when: eza_check.rc != 0
-  register: eza_install
+  when: enhancements_eza_check.rc != 0
+  register: enhancements_eza_install
   failed_when: false
 
 - name: Download eza binary as fallback
-  when: eza_check.rc != 0 and (eza_install.rc | default(1)) != 0
+  when: enhancements_eza_check.rc != 0 and (enhancements_eza_install.rc | default(1)) != 0
   block:
     - name: Download eza binary
       ansible.builtin.get_url:
@@ -62,12 +62,12 @@
 
 - name: Check if dust is installed
   ansible.builtin.command: which dust
-  register: dust_check
+  register: enhancements_dust_check
   changed_when: false
   failed_when: false
 
 - name: Download dust binary
-  when: dust_check.rc != 0
+  when: enhancements_dust_check.rc != 0
   block:
     - name: Download dust
       ansible.builtin.get_url:
@@ -94,12 +94,12 @@
 
 - name: Check if procs is installed
   ansible.builtin.command: which procs
-  register: procs_check
+  register: enhancements_procs_check
   changed_when: false
   failed_when: false
 
 - name: Download procs binary
-  when: procs_check.rc != 0
+  when: enhancements_procs_check.rc != 0
   block:
     - name: Download procs
       ansible.builtin.get_url:
@@ -128,14 +128,14 @@
     src: /usr/bin/fdfind
     dest: /usr/local/bin/fd
     state: link
-  when: apt_cli_tools is succeeded
+  when: enhancements_apt_cli_tools is succeeded
 
 - name: Create batcat symlink (Debian packages as batcat)
   ansible.builtin.file:
     src: /usr/bin/batcat
     dest: /usr/local/bin/bat
     state: link
-  when: apt_cli_tools is succeeded
+  when: enhancements_apt_cli_tools is succeeded
 
 #-------------------------------------------------------------------------------
 # Configure bat
@@ -148,6 +148,30 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0755'
+
+- name: Create bat themes directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/bat/themes"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Download Catppuccin Mocha theme for bat
+  ansible.builtin.get_url:
+    url: "https://raw.githubusercontent.com/catppuccin/bat/main/themes/Catppuccin%20Mocha.tmTheme"
+    dest: "/home/{{ vps_username }}/.config/bat/themes/Catppuccin Mocha.tmTheme"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  register: enhancements_bat_theme_download
+
+- name: Rebuild bat cache
+  ansible.builtin.command: bat cache --build
+  become: yes
+  become_user: "{{ vps_username }}"
+  when: enhancements_bat_theme_download.changed
 
 - name: Configure bat
   ansible.builtin.copy:
@@ -180,6 +204,6 @@
 - name: Log modern CLI tools installation
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Modern CLI Tools installed"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Modern CLI Tools installed"
     create: yes
     mode: '0644'

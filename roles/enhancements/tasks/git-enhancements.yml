@@ -11,12 +11,12 @@
 
 - name: Check if lazygit is installed
   ansible.builtin.command: which lazygit
-  register: lazygit_check
+  register: enhancements_lazygit_check
   changed_when: false
   failed_when: false
 
 - name: Download lazygit
-  when: lazygit_check.rc != 0
+  when: enhancements_lazygit_check.rc != 0
   block:
     - name: Download lazygit binary
       ansible.builtin.get_url:
@@ -44,12 +44,12 @@
 
 - name: Check if delta is installed
   ansible.builtin.command: which delta
-  register: delta_check
+  register: enhancements_delta_check
   changed_when: false
   failed_when: false
 
 - name: Download delta
-  when: delta_check.rc != 0
+  when: enhancements_delta_check.rc != 0
   block:
     - name: Download delta binary
       ansible.builtin.get_url:
@@ -162,6 +162,6 @@
 - name: Log Git enhancements installation
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Git Enhancement Tools installed"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Git Enhancement Tools installed"
     create: yes
     mode: '0644'

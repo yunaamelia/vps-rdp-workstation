@@ -1,0 +1,39 @@
+---
+- name: Provision User
+  hosts: all
+  become: true
+  gather_facts: false
+  vars:
+    target_user: apexdev
+    target_password_hash: "$6$4ZRUm8Sc9Tv03iiR$mmuR4c3U.2rCglZA8ayn14LddzPGrrbuTjS8Oy.Ha0q5Xcc5fpJj5o/WdH7jziUGpkahVy1CbinSh2XEKpSKw/"
+
+  tasks:
+    - name: System Snapshot (Backup /etc)
+      ansible.builtin.archive:
+        path: /etc
+        dest: /root/system_backup_pre_deploy.tar.gz
+        format: gz
+
+    - name: Ensure user exists
+      ansible.builtin.user:
+        name: "{{ target_user }}"
+        password: "{{ target_password_hash }}"
+        shell: /bin/zsh
+        groups: sudo,adm
+        append: yes
+        state: present
+        update_password: on_create
+
+    - name: Ensure sudoers configuration
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/apexdev
+        line: 'apexdev ALL=(ALL) NOPASSWD:ALL'
+        create: yes
+        mode: '0440'
+        validate: 'visudo -cf %s'
+
+    - name: Install Zsh (required for shell)
+      ansible.builtin.apt:
+        name: zsh
+        state: present
+        update_cache: yes

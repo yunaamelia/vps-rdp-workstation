@@ -89,6 +89,6 @@
 - name: Log Zsh plugins installation
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Zsh Plugins installed"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Zsh Plugins installed"
     create: yes
     mode: '0644'

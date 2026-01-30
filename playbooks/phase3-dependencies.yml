@@ -203,6 +203,15 @@
 # Python Pipx Packages
 #-------------------------------------------------------------------------------
 
+- name: Create Ansible remote_tmp directory to strict permissions
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.ansible/tmp"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0700'
+  when: not ansible_check_mode
+
 - name: Ensure pipx PATH for user
   ansible.builtin.lineinfile:
     path: "/home/{{ vps_username }}/.profile"

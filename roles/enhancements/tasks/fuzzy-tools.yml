@@ -91,6 +91,6 @@
 - name: Log FZF installation
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - FZF Fuzzy Finding configured"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - FZF Fuzzy Finding configured"
     create: yes
     mode: '0644'

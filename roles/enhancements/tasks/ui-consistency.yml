@@ -18,7 +18,7 @@
 - name: Note if Nerd Font is missing
   ansible.builtin.debug:
     msg: "JetBrains Mono Nerd Font not found - icons may not display correctly"
-  when: nerd_font_check.matched == 0
+  when: enhancements_nerd_font_check.matched == 0
 
 #-------------------------------------------------------------------------------
 # Configure Shell Aliases (Modern CLI)
@@ -194,6 +194,6 @@
 - name: Log UI consistency configuration
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - UI/UX Consistency configured"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - UI/UX Consistency configured"
     create: yes
     mode: '0644'

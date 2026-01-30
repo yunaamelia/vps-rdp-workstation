@@ -11,12 +11,12 @@
 
 - name: Check if yazi is installed
   ansible.builtin.command: which yazi
-  register: yazi_check
+  register: enhancements_yazi_check
   changed_when: false
   failed_when: false
 
 - name: Download yazi
-  when: yazi_check.rc != 0
+  when: enhancements_yazi_check.rc != 0
   block:
     - name: Download yazi binary
       ansible.builtin.get_url:
@@ -50,33 +50,8 @@
     mode: '0755'
 
 - name: Configure yazi
-  ansible.builtin.copy:
-    content: |
-      [manager]
-      show_hidden = true
-      sort_by = "natural"
-      sort_sensitive = false
-      sort_reverse = false
-      sort_dir_first = true
-      linemode = "size"
-      show_symlink = true
-      
-      [preview]
-      tab_size = 2
-      max_width = 600
-      max_height = 900
-      cache_dir = ""
-      
-      [opener]
-      edit = [
-        { run = 'code "$@"', block = true, for = "unix" },
-        { run = 'vim "$@"', block = true },
-      ]
-      
-      [tasks]
-      micro_workers = 5
-      macro_workers = 10
-      bizarre_retry = 5
+  ansible.builtin.template:
+    src: "yazi-config.toml.j2"
     dest: "/home/{{ vps_username }}/.config/yazi/yazi.toml"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
@@ -109,6 +84,6 @@
 - name: Log yazi installation
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Yazi File Manager installed"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Yazi File Manager installed"
     create: yes
     mode: '0644'

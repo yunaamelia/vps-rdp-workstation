@@ -1,0 +1,59 @@
+---
+# playbooks/phase8-enhancements.yml
+# Phase 8: VPS Workstation Enhancements
+# Installs AI coding tools, modern CLI utilities, and terminal improvements
+# NOTE: This is a task file, included by main.yml
+
+- name: Verify previous phases completed
+  ansible.builtin.stat:
+    path: "{{ vps_setup_log_dir }}/phase7-complete.txt"
+  register: phase7_check
+  failed_when: not phase7_check.stat.exists and not ansible_check_mode
+  ignore_errors: "{{ ansible_check_mode }}"
+
+- name: Create enhancements directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: root
+    group: root
+  loop:
+    - "/var/log/vps-setup/enhancements"
+    - "/var/backups/vps-workstation/enhancements"
+    - "/var/cache/vps-workstation/binaries"
+
+- name: Include enhancements role tasks
+  ansible.builtin.include_role:
+    name: enhancements
+  vars:
+    enable_codeium: true
+    enable_zsh_plugins: true
+
+- name: Run validation script
+  ansible.builtin.command: "{{ enhancement_scripts_dir | default('/root/vps-rdp-workstation/scripts') }}/validation/validate-enhancements.sh"
+  register: validation_result
+  changed_when: false
+  ignore_errors: true
+  when: not ansible_check_mode
+
+- name: Log Phase 8 completion
+  ansible.builtin.copy:
+    content: |
+      Phase 8 Enhancements Completed
+      ==============================
+      Date: {{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }}
+      
+      Features Enabled:
+      - Codeium: {{ enable_codeium | default(true) }}
+      - Zsh Plugins: {{ enable_zsh_plugins | default(true) }}
+      - Modern CLI: {{ enable_modern_cli | default(true) }}
+      - Git Tools: {{ enable_git_tools | default(true) }}
+      
+      Validation Status: {{ 'Success' if validation_result.rc | default(0) == 0 else 'Failed' }}
+    dest: "{{ vps_setup_log_dir }}/phase8-enhancements.txt"
+    mode: '0644'
+
+- name: Phase 8 completion notice
+  ansible.builtin.debug:
+    msg: "✅ Phase 8: Enhancements Complete"

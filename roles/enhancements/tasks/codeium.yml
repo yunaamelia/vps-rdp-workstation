@@ -12,7 +12,7 @@
 - name: Check if VS Code is installed
   ansible.builtin.stat:
     path: /usr/bin/code
-  register: vscode_installed
+  register: enhancements_vscode_installed
 
 #-------------------------------------------------------------------------------
 # Install Codeium Extension
@@ -24,9 +24,9 @@
   become_user: "{{ vps_username }}"
   environment:
     HOME: "/home/{{ vps_username }}"
-  when: vscode_installed.stat.exists
-  register: codeium_install
-  changed_when: "'already installed' not in codeium_install.stdout | default('')"
+  when: enhancements_vscode_installed.stat.exists
+  register: enhancements_codeium_install
+  changed_when: "'already installed' not in enhancements_codeium_install.stdout | default('')"
   failed_when: false
 
 #-------------------------------------------------------------------------------
@@ -39,15 +39,15 @@
   become_user: "{{ vps_username }}"
   environment:
     HOME: "/home/{{ vps_username }}"
-  register: vscode_extensions
+  register: enhancements_vscode_extensions
   changed_when: false
   failed_when: false
-  when: vscode_installed.stat.exists
+  when: enhancements_vscode_installed.stat.exists
 
 - name: Set Codeium verification status
   ansible.builtin.set_fact:
-    codeium_verified: "{{ 'Codeium.codeium' in (vscode_extensions.stdout | default('')) }}"
-  when: vscode_installed.stat.exists
+    enhancements_codeium_verified: "{{ 'Codeium.codeium' in (enhancements_vscode_extensions.stdout | default('')) }}"
+  when: enhancements_vscode_installed.stat.exists
 
 #-------------------------------------------------------------------------------
 # Log Result
@@ -56,15 +56,15 @@
 - name: Log Codeium installation success
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Codeium AI Code Completion installed"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Codeium AI Code Completion installed"
     create: yes
     mode: '0644'
-  when: codeium_verified | default(false)
+  when: enhancements_codeium_verified | default(false)
 
 - name: Log Codeium installation skip
   ansible.builtin.lineinfile:
     path: "{{ enhancement_log_dir }}/install.log"
-    line: "{{ ansible_date_time.iso8601 }} - Codeium skipped (VS Code not found or install failed)"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Codeium skipped (VS Code not found or install failed)"
     create: yes
     mode: '0644'
-  when: not (codeium_verified | default(false))
+  when: not (enhancements_codeium_verified | default(false))

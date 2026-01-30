@@ -4,9 +4,9 @@
 # This file contains all customizable parameters for the deployment
 
 # === System Configuration ===
-vps_username: "developer"           # Primary workstation user (REQUIRED)
+vps_username: "apexdev"           # Primary workstation user (REQUIRED)
 vps_password_hash: "$6$test$QoG/jLk8dlVZC4Ig4XQXv5F9KlM3qR6UPbWTvKnH3RmZ1KjHqYB2kLVpF8Jh1Qd5vN0wM."  # TEST HASH - Replace via setup.sh
-vps_timezone: "UTC"                 # System timezone
+vps_timezone: "GMT+8"                 # System timezone
 vps_hostname: "dev-workstation"     # System hostname
 vps_locale: "en_US.UTF-8"           # System locale
 vps_keyboard: "us"                  # Keyboard layout
@@ -174,7 +174,7 @@ git_config:
   core.editor: nano
   credential.helper: store
 
-# === Phase 8 Enhancements (Optional) ===
+# === Phase 10 Additional Extensions (Optional) ===
 install_database_tools: true
 install_cloud_tools: false
 install_productivity_tools: true

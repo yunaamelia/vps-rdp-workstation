@@ -9,4 +9,4 @@
   ansible.builtin.file:
     path: /var/log/vps-setup/deployment-state.json
     state: absent
-  ignore_errors: yes
+  ignore_errors: true

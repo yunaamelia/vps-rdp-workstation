@@ -1,0 +1,167 @@
+---
+#===============================================================================
+# Phase 9.6: Git Enhancement Tools
+#===============================================================================
+# Installs lazygit and delta for enhanced Git workflows
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Install lazygit
+#-------------------------------------------------------------------------------
+
+- name: Check if lazygit is installed
+  ansible.builtin.command: which lazygit
+  register: lazygit_check
+  changed_when: false
+  failed_when: false
+
+- name: Download lazygit
+  when: lazygit_check.rc != 0
+  block:
+    - name: Download lazygit binary
+      ansible.builtin.get_url:
+        url: "https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz"
+        dest: "{{ enhancement_cache_dir }}/lazygit.tar.gz"
+        mode: '0644'
+
+    - name: Extract lazygit
+      ansible.builtin.unarchive:
+        src: "{{ enhancement_cache_dir }}/lazygit.tar.gz"
+        dest: /usr/local/bin
+        remote_src: yes
+        creates: /usr/local/bin/lazygit
+        extra_opts:
+          - lazygit
+
+    - name: Set lazygit executable
+      ansible.builtin.file:
+        path: /usr/local/bin/lazygit
+        mode: '0755'
+
+#-------------------------------------------------------------------------------
+# Install delta (diff viewer)
+#-------------------------------------------------------------------------------
+
+- name: Check if delta is installed
+  ansible.builtin.command: which delta
+  register: delta_check
+  changed_when: false
+  failed_when: false
+
+- name: Download delta
+  when: delta_check.rc != 0
+  block:
+    - name: Download delta binary
+      ansible.builtin.get_url:
+        url: "https://github.com/dandavison/delta/releases/download/{{ delta_version }}/delta-{{ delta_version }}-x86_64-unknown-linux-gnu.tar.gz"
+        dest: "{{ enhancement_cache_dir }}/delta.tar.gz"
+        mode: '0644'
+
+    - name: Extract delta
+      ansible.builtin.unarchive:
+        src: "{{ enhancement_cache_dir }}/delta.tar.gz"
+        dest: "{{ enhancement_cache_dir }}"
+        remote_src: yes
+
+    - name: Install delta
+      ansible.builtin.copy:
+        src: "{{ enhancement_cache_dir }}/delta-{{ delta_version }}-x86_64-unknown-linux-gnu/delta"
+        dest: /usr/local/bin/delta
+        remote_src: yes
+        mode: '0755'
+
+#-------------------------------------------------------------------------------
+# Configure lazygit
+#-------------------------------------------------------------------------------
+
+- name: Configure lazygit with Catppuccin theme
+  ansible.builtin.copy:
+    content: |
+      gui:
+        theme:
+          activeBorderColor:
+            - "#89b4fa"
+            - bold
+          inactiveBorderColor:
+            - "#6c7086"
+          optionsTextColor:
+            - "#89b4fa"
+          selectedLineBgColor:
+            - "#313244"
+          selectedRangeBgColor:
+            - "#313244"
+          cherryPickedCommitBgColor:
+            - "#45475a"
+          cherryPickedCommitFgColor:
+            - "#89b4fa"
+          unstagedChangesColor:
+            - "#f38ba8"
+          defaultFgColor:
+            - "#cdd6f4"
+          searchingActiveBorderColor:
+            - "#f9e2af"
+        showRandomTip: false
+        showCommandLog: false
+      git:
+        paging:
+          colorArg: always
+          useConfig: false
+          pager: delta --dark --paging=never
+      keybinding:
+        universal:
+          quit: q
+          quit-alt1: <c-c>
+    dest: "/home/{{ vps_username }}/.config/lazygit/config.yml"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+#-------------------------------------------------------------------------------
+# Configure delta as Git pager
+#-------------------------------------------------------------------------------
+
+- name: Configure delta as Git pager
+  community.general.git_config:
+    name: "{{ item.name }}"
+    value: "{{ item.value }}"
+    scope: global
+  loop:
+    - { name: 'core.pager', value: 'delta' }
+    - { name: 'interactive.diffFilter', value: 'delta --color-only' }
+    - { name: 'delta.navigate', value: 'true' }
+    - { name: 'delta.light', value: 'false' }
+    - { name: 'delta.line-numbers', value: 'true' }
+    - { name: 'delta.syntax-theme', value: 'Catppuccin-mocha' }
+    - { name: 'delta.side-by-side', value: 'false' }
+    - { name: 'merge.conflictstyle', value: 'diff3' }
+    - { name: 'diff.colorMoved', value: 'default' }
+  become: yes
+  become_user: "{{ vps_username }}"
+
+#-------------------------------------------------------------------------------
+# Create Desktop Launcher
+#-------------------------------------------------------------------------------
+
+- name: Create lazygit desktop launcher
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Lazygit
+      Comment=Simple terminal UI for git commands
+      Icon=git
+      Exec=konsole -e lazygit
+      Terminal=false
+      Categories=Development;VersionControl;
+      Keywords=git;version control;vcs;
+    dest: "/home/{{ vps_username }}/.local/share/applications/lazygit.desktop"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Log Git enhancements installation
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ ansible_date_time.iso8601 }} - Git Enhancement Tools installed"
+    create: yes
+    mode: '0644'

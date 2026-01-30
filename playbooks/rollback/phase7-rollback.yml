@@ -1,16 +1,28 @@
 ---
-# Phase 7 rollback - Remove validation artifacts
-- name: Remove deployment completion marker
+# Phase 7 rollback - Remove optimization configuration
+- name: Stop and disable Fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: stopped
+    enabled: false
+  ignore_errors: true
+
+- name: Reset UFW
+  community.general.ufw:
+    state: reset
+  ignore_errors: true
+
+- name: Remove Fail2ban configuration
   ansible.builtin.file:
-    path: /var/log/vps-setup/DEPLOYMENT_COMPLETE
+    path: /etc/fail2ban/jail.local
     state: absent
 
-- name: Remove validation reports
+- name: Remove sysctl performance tuning
   ansible.builtin.file:
-    path: "{{ item }}"
+    path: /etc/sysctl.d/99-vps-performance.conf
     state: absent
-  loop:
-    - /var/log/vps-setup/phase7-final-validation-report.txt
-    - /var/log/vps-setup/phase6-validation-report.txt
-    - /var/log/vps-setup/phase5-validation-report.txt
-  ignore_errors: yes
+
+- name: Remove phase 7 log
+  ansible.builtin.file:
+    path: "{{ vps_setup_log_dir }}/phase7-complete.txt"
+    state: absent

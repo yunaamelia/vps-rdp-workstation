@@ -1,0 +1,156 @@
+---
+#===============================================================================
+# Phase 4: Desktop Environment & RDP
+#===============================================================================
+# Installs KDE Plasma desktop, SDDM, and XRDP for remote access
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# KDE Plasma Desktop (Minimal - Optimized for RDP)
+#-------------------------------------------------------------------------------
+# Based on https://zihad.com.bd/posts/debian-minimal-kde-plasma-post-install/
+
+- name: Install KDE Plasma Desktop (minimal for RDP)
+  ansible.builtin.apt:
+    name:
+      # Core Desktop
+      - kde-plasma-desktop
+      - sddm
+      - sddm-theme-breeze
+      - kwin-addons
+      # Essential Apps
+      - konsole
+      - dolphin
+      - kate
+      - ark
+      # System Integration
+      - plasma-nm
+      - plasma-pa
+      - kscreen
+      # GTK Integration
+      - breeze-gtk-theme
+      # Icons
+      - papirus-icon-theme
+    state: present
+    install_recommends: false
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+#-------------------------------------------------------------------------------
+# Konsole Terminal Configuration
+#-------------------------------------------------------------------------------
+
+- name: Create Konsole config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/konsole"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Deploy Konsole Developer profile
+  ansible.builtin.template:
+    src: ../templates/konsole/Developer.profile.j2
+    dest: "/home/{{ vps_username }}/.local/share/konsole/Developer.profile"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Create user config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Set Konsole default profile
+  ansible.builtin.copy:
+    content: |
+      [Desktop Entry]
+      DefaultProfile=Developer.profile
+    dest: "/home/{{ vps_username }}/.config/konsolerc"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+    force: false
+
+#-------------------------------------------------------------------------------
+# XRDP (Remote Desktop)
+#-------------------------------------------------------------------------------
+
+- name: Install XRDP and dependencies
+  ansible.builtin.apt:
+    name:
+      - xrdp
+      - xorgxrdp
+    state: present
+
+- name: Add xrdp user to ssl-cert group
+  ansible.builtin.user:
+    name: xrdp
+    groups: ssl-cert
+    append: true
+
+- name: Configure XRDP
+  ansible.builtin.template:
+    src: ../templates/xrdp.ini.j2
+    dest: /etc/xrdp/xrdp.ini
+    owner: root
+    group: root
+    mode: '0644'
+    backup: true
+  register: xrdp_config
+
+- name: Restart XRDP if config changed
+  ansible.builtin.systemd:
+    name: xrdp
+    state: restarted
+  when: xrdp_config.changed
+
+- name: Create user xsession file
+  ansible.builtin.copy:
+    content: |
+      #!/bin/bash
+      export XDG_SESSION_TYPE=x11
+      export XDG_CURRENT_DESKTOP=KDE
+      export KDE_SESSION_VERSION=5
+      exec startplasma-x11
+    dest: "/home/{{ vps_username }}/.xsession"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Enable and start SDDM
+  ansible.builtin.systemd:
+    name: sddm
+    enabled: true
+    state: started
+
+- name: Enable and start XRDP
+  ansible.builtin.systemd:
+    name: xrdp
+    enabled: true
+    state: started
+
+#-------------------------------------------------------------------------------
+# Mark Complete
+#-------------------------------------------------------------------------------
+
+- name: Mark Phase 4 complete
+  ansible.builtin.copy:
+    content: |
+      Phase 4: Desktop Environment - COMPLETE
+      Timestamp: {{ ansible_date_time.iso8601 }}
+
+      Installed:
+      - KDE Plasma Desktop
+      - Konsole with Developer profile
+      - SDDM Display Manager
+      - XRDP on port {{ xrdp_port }}
+    dest: "{{ vps_setup_log_dir }}/phase4-complete.txt"
+    mode: '0644'
+
+- name: Phase 4 completion notice
+  ansible.builtin.debug:
+    msg: "✅ Phase 4: Desktop Environment Complete - KDE Plasma + XRDP ready"

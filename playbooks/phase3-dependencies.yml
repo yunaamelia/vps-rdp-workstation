@@ -36,7 +36,7 @@
     repo: "deb [signed-by=/usr/share/keyrings/nodesource.gpg] https://deb.nodesource.com/node_{{ nodejs_version }}.x nodistro main"
     filename: nodesource
     state: present
-    update_cache: yes
+    update_cache: true
 
 #-------------------------------------------------------------------------------
 # GitHub CLI Repository
@@ -64,7 +64,7 @@
     repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main"
     filename: github-cli
     state: present
-    update_cache: yes
+    update_cache: true
 
 #-------------------------------------------------------------------------------
 # Update apt cache after adding repositories
@@ -72,7 +72,7 @@
 
 - name: Update apt cache
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
 
 #-------------------------------------------------------------------------------
 # Install Development Languages & Tools
@@ -141,33 +141,50 @@
 # Lazygit Installation
 #-------------------------------------------------------------------------------
 
+- name: Check if Lazygit is installed
+  ansible.builtin.command: which lazygit
+  register: lazygit_check
+  changed_when: false
+  failed_when: false
+
 - name: Get latest Lazygit release
   ansible.builtin.uri:
     url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
-    return_content: yes
+    return_content: true
   register: lazygit_release
   retries: 3
   delay: 5
   until: lazygit_release.status == 200
+  when:
+    - lazygit_check.rc != 0
+    - not ansible_check_mode
+
+- name: Set Lazygit version
+  ansible.builtin.set_fact:
+    lazygit_version: "{{ lazygit_release.json.tag_name | default('v0.44.1') | regex_replace('^v', '') }}"
+  when: lazygit_check.rc != 0
 
 - name: Download Lazygit
   ansible.builtin.get_url:
-    url: "https://github.com/jesseduffield/lazygit/releases/download/{{ lazygit_release.json.tag_name }}/lazygit_{{ lazygit_release.json.tag_name | regex_replace('^v', '') }}_Linux_x86_64.tar.gz"
+    url: "https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz"
     dest: /tmp/lazygit.tar.gz
     mode: '0644'
+  when: lazygit_check.rc != 0
 
 - name: Extract Lazygit
   ansible.builtin.unarchive:
     src: /tmp/lazygit.tar.gz
     dest: /tmp/
-    remote_src: yes
+    remote_src: true
+  when: lazygit_check.rc != 0
 
 - name: Install Lazygit binary
   ansible.builtin.copy:
     src: /tmp/lazygit
     dest: /usr/local/bin/lazygit
     mode: '0755'
-    remote_src: yes
+    remote_src: true
+  when: lazygit_check.rc != 0
 
 #-------------------------------------------------------------------------------
 # NPM Global Packages
@@ -176,10 +193,11 @@
 - name: Install npm global packages
   community.general.npm:
     name: "{{ item }}"
-    global: yes
+    global: true
     state: present
   loop: "{{ npm_global_packages }}"
-  ignore_errors: yes
+  ignore_errors: true
+  when: not ansible_check_mode
 
 #-------------------------------------------------------------------------------
 # Python Pipx Packages
@@ -190,41 +208,46 @@
     path: "/home/{{ vps_username }}/.profile"
     line: 'export PATH="$HOME/.local/bin:$PATH"'
     state: present
-    create: yes
+    create: true
+  become: true
   become_user: "{{ vps_username }}"
+  when: not ansible_check_mode
 
 - name: Install pipx packages for user
   ansible.builtin.shell: |
     pipx install {{ item }}
   args:
     creates: "/home/{{ vps_username }}/.local/bin/{{ item | regex_replace('\\[.*\\]', '') }}"
+  become: true
   become_user: "{{ vps_username }}"
   loop: "{{ pipx_packages | default([]) }}"
-  ignore_errors: yes
+  ignore_errors: true
   environment:
     PATH: "/home/{{ vps_username }}/.local/bin:{{ ansible_env.PATH }}"
+  when: not ansible_check_mode
 
 #-------------------------------------------------------------------------------
 # Verification
 #-------------------------------------------------------------------------------
 
 - name: Verify installations
+  when: not ansible_check_mode
   block:
     - name: Check Node.js version
       ansible.builtin.command: node --version
       register: node_version
       changed_when: false
-    
+
     - name: Check Python version
       ansible.builtin.command: python3 --version
       register: python_version
       changed_when: false
-    
+
     - name: Check PHP version
       ansible.builtin.command: php --version
       register: php_version
       changed_when: false
-    
+
     - name: Check Composer version
       ansible.builtin.command: composer --version
       register: composer_version
@@ -235,16 +258,17 @@
     content: |
       Phase 3: Dependencies - COMPLETE
       Timestamp: {{ ansible_date_time.iso8601 }}
-      
+
       Installed Versions:
-      - Node.js: {{ node_version.stdout }}
-      - Python: {{ python_version.stdout }}
-      - PHP: {{ php_version.stdout | regex_search('PHP [0-9.]+') }}
-      - Composer: {{ composer_version.stdout | regex_search('[0-9.]+') }}
-      - Lazygit: {{ lazygit_release.json.tag_name }}
+      - Node.js: {{ node_version.stdout | default('N/A') }}
+      - Python: {{ python_version.stdout | default('N/A') }}
+      - PHP: {{ (php_version.stdout | default('PHP N/A')) | regex_search('PHP [0-9.]+') | default('N/A') }}
+      - Composer: {{ (composer_version.stdout | default('0.0.0')) | regex_search('[0-9.]+') | default('N/A') }}
+      - Lazygit: {{ lazygit_version | default('N/A') }}
     dest: "{{ vps_setup_log_dir }}/phase3-complete.txt"
     mode: '0644'
+  when: not ansible_check_mode
 
 - name: Phase 3 completion notice
   ansible.builtin.debug:
-    msg: "✅ Phase 3: Dependencies Complete - Node.js {{ node_version.stdout }}, Python {{ python_version.stdout }}"
+    msg: "✅ Phase 3: Dependencies Complete"

@@ -1,35 +1,9 @@
 ---
-# Phase 8 rollback - Remove optional enhancements
-- name: Remove development shortcuts
+# Phase 8 rollback - Remove final validation artifacts
+- name: Remove phase 8 validation logs
   ansible.builtin.file:
     path: "{{ item }}"
     state: absent
   loop:
-    - /usr/local/share/dev-shortcuts.sh
-    - /usr/local/bin/setup-github-ssh
-    - /usr/local/bin/daily-dev-start
-    - /usr/local/bin/auto-backup
-    - "/home/{{ vps_username }}/.vscode-templates"
-    - "/home/{{ vps_username }}/.tmux.conf"
-    - "/home/{{ vps_username }}/.dev-shortcuts.sh"
-  ignore_errors: yes
-
-- name: Remove monitoring tools
-  ansible.builtin.apt:
-    name:
-      - glances
-      - ncdu
-      - iotop
-      - nload
-      - iftop
-      - nethogs
-    state: absent
-    purge: yes
-  ignore_errors: yes
-
-- name: Remove backup cron job
-  ansible.builtin.cron:
-    name: "Weekly VPS backup"
-    state: absent
-    user: "{{ vps_username }}"
-  ignore_errors: yes
+    - "{{ vps_setup_log_dir }}/final-validation-report.txt"
+    - "{{ vps_setup_log_dir }}/phase8-complete.txt"

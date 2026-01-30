@@ -10,6 +10,7 @@
     that:
       - vps_password_hash | length > 0
     fail_msg: "Password hash must be provided. Use setup.sh or set VPS_PASSWORD_HASH."
+  when: not ansible_check_mode
 
 - name: Create workstation user
   ansible.builtin.user:
@@ -18,8 +19,8 @@
     shell: /bin/bash
     groups:
       - sudo
-    append: yes
-    create_home: yes
+    append: true
+    create_home: true
     state: present
   register: user_created
 
@@ -29,6 +30,8 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0750'
+    state: directory
+  when: not ansible_check_mode or user_created is changed
 
 - name: Configure passwordless sudo for specific commands
   ansible.builtin.template:
@@ -64,14 +67,14 @@
       Created: {{ ansible_date_time.iso8601 }}
       Groups: sudo
       Home: /home/{{ vps_username }}
-      
+
       Passwordless sudo commands:
       {% for cmd_group in sudo_nopasswd_commands %}
       {% for name, cmds in cmd_group.items() %}
       - {{ name }}: {{ cmds }}
       {% endfor %}
       {% endfor %}
-      
+
       Sudo log: /var/log/sudo.log
     dest: "{{ vps_setup_log_dir }}/user-permissions-{{ vps_username }}.txt"
     mode: '0644'

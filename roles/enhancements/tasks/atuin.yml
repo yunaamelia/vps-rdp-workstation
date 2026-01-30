@@ -1,0 +1,107 @@
+---
+#===============================================================================
+# Phase 9.5: Enhanced Shell History (Atuin)
+#===============================================================================
+# Installs Atuin for magical shell history with full-text search
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Install Atuin
+#-------------------------------------------------------------------------------
+
+- name: Check if Atuin is installed
+  ansible.builtin.command: which atuin
+  register: atuin_check
+  changed_when: false
+  failed_when: false
+
+- name: Install Atuin via install script
+  ansible.builtin.shell: |
+    curl --proto '=https' --tlsv1.2 -sSf https://setup.atuin.sh | bash -s -- --yes
+  become: yes
+  become_user: "{{ vps_username }}"
+  environment:
+    HOME: "/home/{{ vps_username }}"
+  when: atuin_check.rc != 0
+  args:
+    creates: "/home/{{ vps_username }}/.atuin/bin/atuin"
+
+#-------------------------------------------------------------------------------
+# Configure Atuin
+#-------------------------------------------------------------------------------
+
+- name: Create Atuin config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/atuin"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Configure Atuin
+  ansible.builtin.copy:
+    content: |
+      ## Atuin Configuration
+      ## https://docs.atuin.sh/configuration/config/
+      
+      # Disable sync for privacy (can enable later)
+      sync_address = ""
+      auto_sync = false
+      
+      # Search settings
+      search_mode = "fuzzy"
+      filter_mode = "global"
+      filter_mode_shell_up_key_binding = "session"
+      
+      # Style
+      style = "auto"
+      inline_height = 8
+      show_preview = true
+      show_help = true
+      
+      # History settings
+      max_history_length = {{ atuin_max_history }}
+      enter_accept = true
+      
+      # Filter sensitive commands
+      secrets_filter = true
+      history_filter = [
+        "^password",
+        "^token",
+        "^secret",
+        "^api.key",
+        "^AWS_",
+        "^GITHUB_TOKEN",
+      ]
+    dest: "/home/{{ vps_username }}/.config/atuin/config.toml"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+#-------------------------------------------------------------------------------
+# Initialize Atuin
+#-------------------------------------------------------------------------------
+
+- name: Add Atuin initialization to enhancements file
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc.enhancements"
+    marker: "# {mark} ATUIN CONFIGURATION"
+    block: |
+      # Atuin - Enhanced Shell History
+      if [[ -f ~/.atuin/bin/env ]]; then
+        source ~/.atuin/bin/env
+      fi
+      if command -v atuin &> /dev/null; then
+        eval "$(atuin init zsh --disable-up-arrow)"
+      fi
+    create: yes
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Log Atuin installation
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ ansible_date_time.iso8601 }} - Atuin Shell History installed"
+    create: yes
+    mode: '0644'

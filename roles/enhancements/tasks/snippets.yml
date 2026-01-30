@@ -1,0 +1,178 @@
+---
+#===============================================================================
+# Phase 9.9: Command Snippet Manager (pet)
+#===============================================================================
+# Installs pet for managing and executing command snippets
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Install pet
+#-------------------------------------------------------------------------------
+
+- name: Check if pet is installed
+  ansible.builtin.command: which pet
+  register: pet_check
+  changed_when: false
+  failed_when: false
+
+- name: Download pet
+  when: pet_check.rc != 0
+  block:
+    - name: Download pet binary
+      ansible.builtin.get_url:
+        url: "https://github.com/knqyf263/pet/releases/download/v{{ pet_version }}/pet_{{ pet_version }}_linux_amd64.tar.gz"
+        dest: "{{ enhancement_cache_dir }}/pet.tar.gz"
+        mode: '0644'
+
+    - name: Extract pet
+      ansible.builtin.unarchive:
+        src: "{{ enhancement_cache_dir }}/pet.tar.gz"
+        dest: "{{ enhancement_cache_dir }}"
+        remote_src: yes
+
+    - name: Install pet
+      ansible.builtin.copy:
+        src: "{{ enhancement_cache_dir }}/pet"
+        dest: /usr/local/bin/pet
+        remote_src: yes
+        mode: '0755'
+
+#-------------------------------------------------------------------------------
+# Configure pet
+#-------------------------------------------------------------------------------
+
+- name: Create pet config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/pet"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+
+- name: Configure pet
+  ansible.builtin.copy:
+    content: |
+      [General]
+      snippetfile = "/home/{{ vps_username }}/.config/pet/snippet.toml"
+      editor = "code"
+      column = 40
+      selectcmd = "fzf --ansi --layout=reverse --border"
+      backend = "pet"
+      sortby = "recency"
+      
+      [Gist]
+      # Disabled for privacy
+      auto_sync = false
+    dest: "/home/{{ vps_username }}/.config/pet/config.toml"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+#-------------------------------------------------------------------------------
+# Pre-load common snippets
+#-------------------------------------------------------------------------------
+
+- name: Create snippet file with common commands
+  ansible.builtin.copy:
+    content: |
+      [[snippets]]
+      description = "Docker - Remove all stopped containers"
+      command = "docker rm $(docker ps -a -q -f status=exited)"
+      tag = ["docker", "cleanup"]
+      
+      [[snippets]]
+      description = "Docker - Remove all unused images"
+      command = "docker image prune -a -f"
+      tag = ["docker", "cleanup"]
+      
+      [[snippets]]
+      description = "Docker - Show container logs"
+      command = "docker logs -f --tail=100 <container_name>"
+      tag = ["docker", "logs"]
+      
+      [[snippets]]
+      description = "Docker - Execute bash in container"
+      command = "docker exec -it <container_name> bash"
+      tag = ["docker", "exec"]
+      
+      [[snippets]]
+      description = "Git - Undo last commit (keep changes)"
+      command = "git reset --soft HEAD~1"
+      tag = ["git", "undo"]
+      
+      [[snippets]]
+      description = "Git - Stash with message"
+      command = "git stash push -m '<message>'"
+      tag = ["git", "stash"]
+      
+      [[snippets]]
+      description = "Git - Interactive rebase last N commits"
+      command = "git rebase -i HEAD~<n>"
+      tag = ["git", "rebase"]
+      
+      [[snippets]]
+      description = "System - Find large files (>100MB)"
+      command = "find / -type f -size +100M 2>/dev/null | head -20"
+      tag = ["system", "disk"]
+      
+      [[snippets]]
+      description = "System - Show disk usage by directory"
+      command = "dust -d 1"
+      tag = ["system", "disk"]
+      
+      [[snippets]]
+      description = "System - Monitor process in real-time"
+      command = "watch -n 1 'procs <process_name>'"
+      tag = ["system", "monitor"]
+      
+      [[snippets]]
+      description = "NPM - Clear cache and reinstall"
+      command = "rm -rf node_modules package-lock.json && npm install"
+      tag = ["npm", "fix"]
+      
+      [[snippets]]
+      description = "SSH - Generate ED25519 key"
+      command = "ssh-keygen -t ed25519 -C '<email>'"
+      tag = ["ssh", "security"]
+    dest: "/home/{{ vps_username }}/.config/pet/snippet.toml"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+    force: no  # Don't overwrite if exists
+
+#-------------------------------------------------------------------------------
+# Add pet shell integration
+#-------------------------------------------------------------------------------
+
+- name: Add pet shell function to enhancements file
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc.enhancements"
+    marker: "# {mark} PET SNIPPET MANAGER"
+    block: |
+      # Pet snippet manager integration
+      if command -v pet &> /dev/null; then
+        function pet-select() {
+          BUFFER=$(pet search --query "$LBUFFER")
+          CURSOR=$#BUFFER
+          zle redisplay
+        }
+        zle -N pet-select
+        bindkey '^x^p' pet-select  # Ctrl+X Ctrl+P
+        
+        # Quick new snippet from last command
+        function pet-prev() {
+          PREV=$(fc -lrn | head -n 1)
+          sh -c "pet new $(printf %q "$PREV")"
+        }
+      fi
+    create: yes
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Log pet installation
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ ansible_date_time.iso8601 }} - Pet Snippet Manager installed"
+    create: yes
+    mode: '0644'

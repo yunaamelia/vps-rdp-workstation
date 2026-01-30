@@ -1,6 +1,6 @@
 ---
 #===============================================================================
-# Phase 6: Configuration Optimization & Best Practices
+# Phase 7: Configuration Optimization & Best Practices
 #===============================================================================
 # Applies security hardening, performance tuning, and configuration optimization
 #===============================================================================
@@ -18,7 +18,9 @@
 - name: Reset UFW to defaults
   community.general.ufw:
     state: reset
-  when: ufw_enabled | default(true)
+  when:
+    - ufw_enabled | default(true)
+    - not ansible_check_mode
 
 - name: Set UFW default policies
   community.general.ufw:
@@ -27,7 +29,9 @@
   loop:
     - { direction: incoming, policy: deny }
     - { direction: outgoing, policy: allow }
-  when: ufw_enabled | default(true)
+  when:
+    - ufw_enabled | default(true)
+    - not ansible_check_mode
 
 - name: Configure UFW allowed ports
   community.general.ufw:
@@ -36,12 +40,16 @@
     proto: "{{ item.proto }}"
     comment: "{{ item.comment }}"
   loop: "{{ ufw_allowed_ports }}"
-  when: ufw_enabled | default(true)
+  when:
+    - ufw_enabled | default(true)
+    - not ansible_check_mode
 
 - name: Enable UFW
   community.general.ufw:
     state: enabled
-  when: ufw_enabled | default(true)
+  when:
+    - ufw_enabled | default(true)
+    - not ansible_check_mode
 
 #-------------------------------------------------------------------------------
 # Security: Fail2ban
@@ -51,7 +59,9 @@
   ansible.builtin.apt:
     name: fail2ban
     state: present
-  when: fail2ban_enabled | default(true)
+  when:
+    - fail2ban_enabled | default(true)
+    - not ansible_check_mode
 
 - name: Configure Fail2ban jail.local
   ansible.builtin.copy:
@@ -62,7 +72,7 @@
       maxretry = {{ fail2ban_maxretry }}
       ignoreip = 127.0.0.1/8 ::1
       banaction = iptables-multiport
-      
+
       {% for jail_name, jail_config in fail2ban_jails.items() %}
       [{{ jail_name }}]
       enabled = {{ jail_config.enabled | string | lower }}
@@ -70,21 +80,25 @@
       logpath = {{ jail_config.logpath }}
       maxretry = {{ jail_config.maxretry }}
       bantime = {{ jail_config.bantime }}
-      
+
       {% endfor %}
     dest: /etc/fail2ban/jail.local
     owner: root
     group: root
     mode: '0644'
   notify: Restart Fail2ban
-  when: fail2ban_enabled | default(true)
+  when:
+    - fail2ban_enabled | default(true)
+    - not ansible_check_mode
 
 - name: Enable and start Fail2ban
   ansible.builtin.systemd:
     name: fail2ban
-    enabled: yes
+    enabled: true
     state: started
-  when: fail2ban_enabled | default(true)
+  when:
+    - fail2ban_enabled | default(true)
+    - not ansible_check_mode
 
 #-------------------------------------------------------------------------------
 # Security: SSH Hardening
@@ -137,14 +151,16 @@
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     state: present
-    reload: yes
+    reload: true
     sysctl_file: /etc/sysctl.d/99-vps-performance.conf
   loop: "{{ sysctl_performance | dict2items }}"
-  ignore_errors: yes
+  ignore_errors: true
 
 #-------------------------------------------------------------------------------
-# Performance: KDE Optimization for RDP
+# Performance: KDE Plasma Optimization for RDP
 #-------------------------------------------------------------------------------
+# Based on https://zihad.com.bd/posts/debian-minimal-kde-plasma-post-install/
+# and KDE Developer Documentation via Context7
 
 - name: Install KDE configuration tools
   ansible.builtin.apt:
@@ -152,25 +168,72 @@
     state: present
   when: kde_disable_compositor | default(true)
 
+- name: Create kwinrc config file if not exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/kwinrc"
+    state: touch
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+    modification_time: preserve
+    access_time: preserve
+
 - name: Disable KDE compositor for RDP performance
   ansible.builtin.command: "{{ item }}"
   loop:
+    # Disable compositor completely
     - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Compositing --key Enabled false"
+    # Set animation speed to instant (0 = fastest)
     - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Compositing --key AnimationSpeed 0"
+    # Disable blur effect (heavy on GPU)
     - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key blurEnabled false"
+    # Disable contrast effect
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key contrastEnabled false"
+    # Disable slide effect
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key slideEnabled false"
+    # Disable fade effect
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key fadeEnabled false"
+    # Disable translucency effect
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key translucencyEnabled false"
+    # Disable desktop effects animations
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key kwin4_effect_fadeEnabled false"
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key kwin4_effect_morphingpopupsEnabled false"
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key kwin4_effect_squashEnabled false"
+  become: true
   become_user: "{{ vps_username }}"
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: false
-  when: kde_disable_compositor | default(true)
+  when:
+    - kde_disable_compositor | default(true)
+    - not ansible_check_mode
 
-- name: Configure KDE theme
+- name: Configure KDE global settings for performance
   ansible.builtin.command: "{{ item }}"
   loop:
-    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group General --key ColorScheme {{ kde_theme[vps_theme].color_scheme }}"
-    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group Icons --key Theme {{ kde_theme[vps_theme].icon_theme }}"
+    # Set low graphics animations globally
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group KDE --key AnimationDurationFactor 0"
+    # Disable smooth scrolling in lists
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group KDE --key SmoothScroll false"
+  become: true
   become_user: "{{ vps_username }}"
-  ignore_errors: yes
+  ignore_errors: true
   changed_when: false
+  when:
+    - kde_disable_compositor | default(true)
+    - not ansible_check_mode
+
+- name: Configure KDE theme (Breeze Dark + Papirus)
+  ansible.builtin.command: "{{ item }}"
+  loop:
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group General --key ColorScheme {{ kde_theme[vps_theme].color_scheme | default('BreezeDark') }}"  # noqa: yaml[line-length]
+    - "kwriteconfig5 --file /home/{{ vps_username }}/.config/kdeglobals --group Icons --key Theme {{ kde_theme[vps_theme].icon_theme | default('Papirus-Dark') }}"  # noqa: yaml[line-length]
+  become: true
+  become_user: "{{ vps_username }}"
+  ignore_errors: true
+  changed_when: false
+  when:
+    - kde_disable_compositor | default(true)
+    - not ansible_check_mode
 
 #-------------------------------------------------------------------------------
 # Performance: Disable Unnecessary Services
@@ -179,10 +242,11 @@
 - name: Disable unnecessary services
   ansible.builtin.systemd:
     name: "{{ item }}"
-    enabled: no
+    enabled: false
     state: stopped
   loop: "{{ services_to_disable }}"
-  ignore_errors: yes
+  ignore_errors: true
+  when: not ansible_check_mode
 
 #-------------------------------------------------------------------------------
 # Configuration: Git
@@ -193,36 +257,38 @@
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     scope: global
+  become: true
   become_user: "{{ vps_username }}"
   loop: "{{ git_config | dict2items }}"
+  when: not ansible_check_mode
 
 
 #-------------------------------------------------------------------------------
 # Mark Complete
 #-------------------------------------------------------------------------------
 
-- name: Mark Phase 6 complete
+- name: Mark Phase 7 complete
   ansible.builtin.copy:
     content: |
-      Phase 6: Configuration Optimization - COMPLETE
+      Phase 7: Configuration Optimization - COMPLETE
       Timestamp: {{ ansible_date_time.iso8601 }}
-      
+
       Security:
       - UFW Firewall: {{ 'Enabled' if (ufw_enabled | default(true)) else 'Skipped' }}
       - Fail2ban: {{ 'Enabled' if (fail2ban_enabled | default(true)) else 'Skipped' }}
       - SSH Hardening: Applied
       - Unattended Upgrades: Enabled
-      
+
       Performance:
       - Sysctl tuning: Applied
       - KDE compositor: Disabled for RDP
       - Unnecessary services: Disabled
-      
+
       Configuration:
       - Git: Configured for {{ vps_username }}
-    dest: "{{ vps_setup_log_dir }}/phase6-complete.txt"
+    dest: "{{ vps_setup_log_dir }}/phase7-complete.txt"
     mode: '0644'
 
-- name: Phase 6 completion notice
+- name: Phase 7 completion notice
   ansible.builtin.debug:
-    msg: "✅ Phase 6: Configuration Optimization Complete"
+    msg: "✅ Phase 7: Configuration Optimization Complete"

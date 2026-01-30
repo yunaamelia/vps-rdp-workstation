@@ -1,0 +1,124 @@
+---
+#===============================================================================
+# Phase 9.8: Tmux Enhancement Suite
+#===============================================================================
+# Installs TPM and plugins for session persistence and enhanced workflow
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Install Tmux Plugin Manager (TPM)
+#-------------------------------------------------------------------------------
+
+- name: Check if TPM is installed
+  ansible.builtin.stat:
+    path: "/home/{{ vps_username }}/.tmux/plugins/tpm"
+  register: tpm_dir
+
+- name: Clone TPM
+  ansible.builtin.git:
+    repo: https://github.com/tmux-plugins/tpm.git
+    dest: "/home/{{ vps_username }}/.tmux/plugins/tpm"
+    version: master
+    depth: 1
+  become: yes
+  become_user: "{{ vps_username }}"
+  when: not tpm_dir.stat.exists
+
+#-------------------------------------------------------------------------------
+# Configure Tmux with Plugins
+#-------------------------------------------------------------------------------
+
+- name: Backup existing tmux.conf
+  ansible.builtin.copy:
+    src: "/home/{{ vps_username }}/.tmux.conf"
+    dest: "{{ enhancement_backup_dir }}/tmux.conf.{{ ansible_date_time.epoch }}"
+    remote_src: yes
+    mode: '0644'
+  when: ansible_facts['file_exists'] | default(false)
+  failed_when: false
+
+- name: Configure tmux with enhancements
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.tmux.conf"
+    marker: "# {mark} VPS WORKSTATION ENHANCEMENTS"
+    block: |
+      # === Tmux Plugin Manager ===
+      set -g @plugin 'tmux-plugins/tpm'
+      
+      # Session Persistence
+      set -g @plugin 'tmux-plugins/tmux-resurrect'
+      set -g @plugin 'tmux-plugins/tmux-continuum'
+      
+      # Clipboard Integration (RDP compatible)
+      set -g @plugin 'tmux-plugins/tmux-yank'
+      
+      # FZF Integration
+      set -g @plugin 'sainnhe/tmux-fzf'
+      
+      # Catppuccin Theme
+      set -g @plugin 'catppuccin/tmux'
+      
+      # === Plugin Configuration ===
+      
+      # Resurrect
+      set -g @resurrect-save 'C-s'
+      set -g @resurrect-restore 'C-r'
+      set -g @resurrect-capture-pane-contents 'on'
+      set -g @resurrect-strategy-vim 'session'
+      set -g @resurrect-strategy-nvim 'session'
+      
+      # Continuum (auto-save)
+      set -g @continuum-restore 'on'
+      set -g @continuum-save-interval '{{ tmux_save_interval }}'
+      
+      # Yank (clipboard)
+      set -g @yank_selection 'clipboard'
+      set -g @yank_selection_mouse 'clipboard'
+      set -g @yank_action 'copy-pipe'
+      
+      # FZF
+      set -g @tmux-fzf-launch-key 'F'
+      TMUX_FZF_OPTIONS="-p -w 80% -h 70% -m"
+      
+      # === Catppuccin Theme Configuration ===
+      set -g @catppuccin_flavour 'mocha'
+      set -g @catppuccin_window_left_separator ""
+      set -g @catppuccin_window_right_separator " "
+      set -g @catppuccin_window_middle_separator " █"
+      set -g @catppuccin_window_number_position "right"
+      set -g @catppuccin_window_default_fill "number"
+      set -g @catppuccin_window_default_text "#W"
+      set -g @catppuccin_window_current_fill "number"
+      set -g @catppuccin_window_current_text "#W"
+      set -g @catppuccin_status_modules_right "directory user host session"
+      set -g @catppuccin_status_left_separator  " "
+      set -g @catppuccin_status_right_separator ""
+      set -g @catppuccin_status_fill "icon"
+      set -g @catppuccin_status_connect_separator "no"
+      set -g @catppuccin_directory_text "#{pane_current_path}"
+      
+      # === General Settings ===
+      set -g mouse on
+      set -g base-index 1
+      setw -g pane-base-index 1
+      set -g renumber-windows on
+      set -g history-limit 50000
+      set -g display-time 4000
+      set -g status-interval 5
+      set -g default-terminal "screen-256color"
+      set -ga terminal-overrides ",*256col*:Tc"
+      
+      # Initialize TPM (keep this at the very bottom)
+      run '~/.tmux/plugins/tpm/tpm'
+    create: yes
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  notify: install tmux plugins
+
+- name: Log Tmux enhancements installation
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ ansible_date_time.iso8601 }} - Tmux Enhancement Suite installed"
+    create: yes
+    mode: '0644'

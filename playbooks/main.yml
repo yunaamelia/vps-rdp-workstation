@@ -19,7 +19,7 @@
   tags:
     - phase1
     - preparation
-  
+
   tasks:
     - name: Include Phase 1 playbook
       ansible.builtin.include_tasks: phase1-preparation.yml
@@ -31,7 +31,7 @@
   tags:
     - phase2
     - user
-  
+
   tasks:
     - name: Include Phase 2 playbook
       ansible.builtin.include_tasks: phase2-user-management.yml
@@ -43,74 +43,95 @@
   tags:
     - phase3
     - dependencies
-  
+
   tasks:
     - name: Include Phase 3 playbook
       ansible.builtin.include_tasks: phase3-dependencies.yml
 
-- name: "Phase 4: RDP Workstation Package Installation"
+- name: "Phase 4: Desktop Environment & RDP"
   hosts: localhost
   become: true
   gather_facts: false
   tags:
     - phase4
-    - packages
-  
+    - desktop
+    - rdp
+
   tasks:
     - name: Include Phase 4 playbook
-      ansible.builtin.include_tasks: phase4-rdp-packages.yml
+      ansible.builtin.include_tasks: phase4-desktop-environment.yml
 
-- name: "Phase 5: Installation Validation"
+- name: "Phase 5: Development Tools Installation"
   hosts: localhost
   become: true
   gather_facts: false
   tags:
     - phase5
-    - validation
-  
+    - devtools
+    - packages
+
   tasks:
     - name: Include Phase 5 playbook
-      ansible.builtin.include_tasks: phase5-validation.yml
+      ansible.builtin.include_tasks: phase5-development-tools.yml
 
-- name: "Phase 6: Configuration Optimization & Best Practices"
+- name: "Phase 6: Installation Validation"
   hosts: localhost
   become: true
   gather_facts: false
   tags:
     - phase6
-    - optimization
-  
+    - validation
+
   tasks:
     - name: Include Phase 6 playbook
-      ansible.builtin.include_tasks: phase6-optimization.yml
+      ansible.builtin.include_tasks: phase6-validation.yml
+      when: not ansible_check_mode
 
-  handlers:
-    - ansible.builtin.import_tasks: handlers/main.yml
+    - name: Phase 6 skipped notice (check mode)
+      ansible.builtin.debug:
+        msg: "⏩ Phase 6: Validation skipped in check mode"
+      when: ansible_check_mode
 
-- name: "Phase 7: Final Validation & Optimization Verification"
+- name: "Phase 7: Configuration Optimization & Best Practices"
   hosts: localhost
   become: true
   gather_facts: false
   tags:
     - phase7
-    - final
-  
+    - optimization
+
   tasks:
     - name: Include Phase 7 playbook
-      ansible.builtin.include_tasks: phase7-final-validation.yml
+      ansible.builtin.include_tasks: phase7-optimization.yml
 
-- name: "Phase 8: Enhancement & Extension (Optional)"
+  handlers:
+    - name: Import handlers
+      ansible.builtin.import_tasks: handlers/main.yml
+
+- name: "Phase 8: Final Validation & Optimization Verification"
   hosts: localhost
   become: true
   gather_facts: false
   tags:
     - phase8
-    - enhancements
-    - optional
-  
+    - final
+
   tasks:
     - name: Include Phase 8 playbook
-      ansible.builtin.include_tasks: phase8-enhancements.yml
+      ansible.builtin.include_tasks: phase8-final-validation.yml
+
+- name: "Phase 9: Enhancement & Extension (Optional)"
+  hosts: localhost
+  become: true
+  gather_facts: false
+  tags:
+    - phase9
+    - enhancements
+    - optional
+
+  tasks:
+    - name: Include Phase 9 playbook
+      ansible.builtin.include_tasks: phase9-enhancements.yml
       when: install_enhancements | default(false)
 
 - name: "Deployment Complete - Generate Summary"
@@ -119,7 +140,7 @@
   gather_facts: true
   tags:
     - always
-  
+
   tasks:
     - name: Get IP address
       ansible.builtin.set_fact:
@@ -139,7 +160,7 @@
           ║  Hostname:       {{ vps_hostname }}
           ║                                                                  ║
           ╚══════════════════════════════════════════════════════════════════╝
-          
+
           Installed Components:
           - KDE Plasma Desktop with {{ vps_theme }} theme
           - XRDP Remote Desktop on port {{ xrdp_port }}
@@ -151,7 +172,7 @@
           - Zsh + Oh My Zsh + Starship
           - JetBrains Mono Nerd Font
           - UFW Firewall + Fail2ban
-          
+
           Logs: {{ vps_setup_log_dir }}/
         dest: "{{ vps_setup_log_dir }}/deployment-summary.txt"
         mode: '0644'
@@ -159,14 +180,14 @@
     - name: Display completion message
       ansible.builtin.debug:
         msg: |
-          
+
           ════════════════════════════════════════════════════════════════════
-                         DEPLOYMENT COMPLETE!
+                           DEPLOYMENT COMPLETE!
           ════════════════════════════════════════════════════════════════════
-          
+
           RDP Connection: {{ vps_ip }}:{{ xrdp_port }}
           Username: {{ vps_username }}
-          
+
           ⚠️  Important: Logout and login required for docker group membership
-          
+
           ════════════════════════════════════════════════════════════════════

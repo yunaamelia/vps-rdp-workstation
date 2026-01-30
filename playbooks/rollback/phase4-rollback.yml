@@ -1,59 +1,47 @@
 ---
-# Phase 4 rollback - Remove RDP packages
+# Phase 4 rollback - Remove Desktop Environment
 - name: Stop desktop services
   ansible.builtin.systemd:
     name: "{{ item }}"
     state: stopped
-    enabled: no
+    enabled: false
   loop:
     - xrdp
     - sddm
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Remove XRDP and desktop packages
   ansible.builtin.apt:
     name:
       - xrdp
+      - xorgxrdp
       - sddm
       - kde-plasma-desktop
-      - plasma-desktop
       - konsole
       - dolphin
-      - firefox-esr
+      - kate
+      - ark
+      - plasma-systemmonitor
+      - plasma-nm
+      - plasma-pa
+      - kscreen
+      - powerdevil
+      - breeze-gtk-theme
+      - papirus-icon-theme
     state: absent
-    purge: yes
-  ignore_errors: yes
+    purge: true
+  ignore_errors: true
 
-- name: Remove Docker
-  ansible.builtin.apt:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-    state: absent
-    purge: yes
-  ignore_errors: yes
-
-- name: Remove VS Code
-  ansible.builtin.apt:
-    name: code
-    state: absent
-    purge: yes
-  ignore_errors: yes
-
-- name: Remove user .xsession
+- name: Remove user desktop configuration
   ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.xsession"
+    path: "{{ item }}"
     state: absent
+  loop:
+    - "/home/{{ vps_username }}/.xsession"
+    - "/home/{{ vps_username }}/.local/share/konsole"
+    - "/home/{{ vps_username }}/.config/konsolerc"
 
-- name: Remove Docker configuration
+- name: Remove phase 4 log
   ansible.builtin.file:
-    path: /etc/docker
-    state: absent
-
-- name: Remove fonts
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/fonts"
+    path: "{{ vps_setup_log_dir }}/phase4-complete.txt"
     state: absent

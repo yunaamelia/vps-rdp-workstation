@@ -1,13 +1,13 @@
 ---
 #===============================================================================
-# Phase 5: Installation Validation
+# Phase 6: Installation Validation
 #===============================================================================
 # Validates all installed components are working correctly
 #===============================================================================
 
-- name: Phase 5 Validation Header
+- name: Phase 6 Validation Header
   ansible.builtin.debug:
-    msg: "Starting Phase 5: Installation Validation"
+    msg: "Starting Phase 6: Installation Validation"
 
 #-------------------------------------------------------------------------------
 # Service Validation
@@ -177,6 +177,7 @@
 
 - name: Verify JetBrains Mono Nerd Font is installed
   ansible.builtin.shell: fc-list | grep -i "JetBrainsMono"
+  become: true
   become_user: "{{ vps_username }}"
   register: font_check
   changed_when: false
@@ -189,20 +190,20 @@
 - name: Generate validation report
   ansible.builtin.copy:
     content: |
-      Phase 5: Installation Validation Report
+      Phase 6: Installation Validation Report
       ========================================
       Timestamp: {{ ansible_date_time.iso8601 }}
-      
+
       Services:
       ✅ XRDP: Active
       ✅ SDDM: Active
       ✅ Docker: {{ 'Active' if (install_docker | default(true)) else 'Skipped' }}
       ✅ SSH: Active
-      
+
       Ports:
       ✅ XRDP ({{ xrdp_port }}): Listening
       ✅ SSH ({{ ssh_port }}): Listening
-      
+
       Development Tools:
       ✅ Node.js: {{ node_check.stdout }}
       ✅ npm: {{ npm_check.stdout }}
@@ -215,7 +216,7 @@
       ✅ Starship: {{ starship_check.stdout }}
       ✅ Lazygit: {{ lazygit_check.stdout }}
       ✅ GitHub CLI: {{ gh_check.stdout_lines[0] | default('N/A') }}
-      
+
       User Configuration:
       ✅ User '{{ vps_username }}' exists
       ✅ User in docker group: {{ 'Yes' if (install_docker | default(true)) else 'N/A' }}
@@ -223,23 +224,23 @@
       ✅ Oh My Zsh: Installed
       ✅ Starship config: Present
       ✅ xsession file: Present
-      
+
       Fonts:
       ✅ JetBrains Mono Nerd Font: Installed
-      
+
       VALIDATION STATUS: ✅ ALL CHECKS PASSED
-    dest: "{{ vps_setup_log_dir }}/phase5-validation-report.txt"
+    dest: "{{ vps_setup_log_dir }}/phase6-validation-report.txt"
     mode: '0644'
 
-- name: Mark Phase 5 complete
+- name: Mark Phase 6 complete
   ansible.builtin.copy:
     content: |
-      Phase 5: Installation Validation - COMPLETE
+      Phase 6: Installation Validation - COMPLETE
       Timestamp: {{ ansible_date_time.iso8601 }}
       Status: All validation checks passed
-    dest: "{{ vps_setup_log_dir }}/phase5-complete.txt"
+    dest: "{{ vps_setup_log_dir }}/phase6-complete.txt"
     mode: '0644'
 
-- name: Phase 5 completion notice
+- name: Phase 6 completion notice
   ansible.builtin.debug:
-    msg: "✅ Phase 5: Installation Validation Complete - All checks passed"
+    msg: "✅ Phase 6: Installation Validation Complete - All checks passed"

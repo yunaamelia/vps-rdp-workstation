@@ -94,7 +94,7 @@ function gnew() {
 function sysinfo() {
     echo "=== System Information ==="
     echo "Hostname: $(hostname)"
-    echo "OS: $(lsb_release -d 2>/dev/null | cut -f2 || cat /etc/os-release | grep PRETTY_NAME | cut -d'"' -f2)"
+    echo "OS: $(lsb_release -d 2>/dev/null | cut -f2 || grep PRETTY_NAME /etc/os-release | cut -d'"' -f2)"
     echo "Kernel: $(uname -r)"
     echo "Uptime: $(uptime -p)"
     echo ""

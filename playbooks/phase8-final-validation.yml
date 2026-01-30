@@ -1,13 +1,13 @@
 ---
 #===============================================================================
-# Phase 7: Final Validation & Optimization Verification
+# Phase 8: Final Validation & Optimization Verification
 #===============================================================================
 # Comprehensive final validation of all configurations and optimizations
 #===============================================================================
 
-- name: Phase 7 Final Validation Header
+- name: Phase 8 Final Validation Header
   ansible.builtin.debug:
-    msg: "Starting Phase 7: Final Validation & Optimization Verification"
+    msg: "Starting Phase 8: Final Validation & Optimization Verification"
 
 #-------------------------------------------------------------------------------
 # Security Validation
@@ -71,7 +71,7 @@
   register: docker_hello
   changed_when: false
   when: install_docker | default(true)
-  ignore_errors: yes
+  ignore_errors: true
 
 - name: Verify Docker Compose works
   ansible.builtin.command: docker compose version
@@ -129,12 +129,12 @@
       ansible.builtin.shell: free -m | awk 'NR==2{printf "%.1f%%", $3*100/$2}'
       register: memory_usage
       changed_when: false
-    
+
     - name: Get disk usage
       ansible.builtin.shell: df -h / | awk 'NR==2{print $5}'
       register: disk_usage
       changed_when: false
-    
+
     - name: Get load average
       ansible.builtin.shell: uptime | awk -F'load average:' '{print $2}'
       register: load_average
@@ -150,96 +150,96 @@
       ╔══════════════════════════════════════════════════════════════════════════════╗
       ║                    FINAL VALIDATION REPORT                                   ║
       ╚══════════════════════════════════════════════════════════════════════════════╝
-      
+
       Timestamp: {{ ansible_date_time.iso8601 }}
       Hostname:  {{ ansible_hostname }}
       IP:        {{ ansible_default_ipv4.address | default('N/A') }}
       User:      {{ vps_username }}
-      
+
       ═══════════════════════════════════════════════════════════════════════════════
       SECURITY STATUS
       ═══════════════════════════════════════════════════════════════════════════════
-      
+
       UFW Firewall:     {{ 'ACTIVE' if (ufw_enabled | default(true)) else 'DISABLED' }}
       {% if ufw_enabled | default(true) %}
       {{ ufw_status.stdout | default('') }}
       {% endif %}
-      
+
       Fail2ban:         {{ 'ACTIVE' if (fail2ban_enabled | default(true)) else 'DISABLED' }}
       {% if fail2ban_enabled | default(true) %}
       {{ fail2ban_jails.stdout | default('') }}
       {% endif %}
-      
+
       SSH Hardening:    APPLIED
       - PermitRootLogin: {{ ssh_permit_root_login }}
       - MaxAuthTries: {{ ssh_max_auth_tries }}
-      
+
       ═══════════════════════════════════════════════════════════════════════════════
       SERVICES STATUS
       ═══════════════════════════════════════════════════════════════════════════════
-      
+
       ✅ XRDP:     Active (Port {{ xrdp_port }})
       ✅ SDDM:     Active
       ✅ Docker:   {{ 'Active' if (install_docker | default(true)) else 'N/A' }}
       ✅ SSH:      Active (Port {{ ssh_port }})
-      
+
       ═══════════════════════════════════════════════════════════════════════════════
       DOCKER VERIFICATION
       ═══════════════════════════════════════════════════════════════════════════════
-      
+
       {% if install_docker | default(true) %}
       Docker Hello World: {{ 'PASSED' if docker_hello.rc == 0 else 'FAILED' }}
       Docker Compose: {{ compose_version.stdout | default('N/A') | regex_search('v[0-9.]+') }}
       {% else %}
       Docker: Not installed (skipped)
       {% endif %}
-      
+
       ═══════════════════════════════════════════════════════════════════════════════
       SYSTEM METRICS
       ═══════════════════════════════════════════════════════════════════════════════
-      
+
       Memory Usage:  {{ memory_usage.stdout }}
       Disk Usage:    {{ disk_usage.stdout }}
       Load Average:  {{ load_average.stdout }}
-      
+
       ═══════════════════════════════════════════════════════════════════════════════
       CONNECTION INFORMATION
       ═══════════════════════════════════════════════════════════════════════════════
-      
+
       RDP Connection:   {{ ansible_default_ipv4.address | default('N/A') }}:{{ xrdp_port }}
       SSH Connection:   {{ ansible_default_ipv4.address | default('N/A') }}:{{ ssh_port }}
       Username:         {{ vps_username }}
-      
+
       ═══════════════════════════════════════════════════════════════════════════════
       VALIDATION RESULT: ✅ ALL CHECKS PASSED
       ═══════════════════════════════════════════════════════════════════════════════
-      
+
       The VPS RDP Developer Workstation is ready for use.
-      
+
       Note: Logout and login may be required for docker group membership.
     dest: "{{ vps_setup_log_dir }}/final-validation-report.txt"
     mode: '0644'
 
-- name: Mark Phase 7 complete
+- name: Mark Phase 8 complete
   ansible.builtin.copy:
     content: |
-      Phase 7: Final Validation - COMPLETE
+      Phase 8: Final Validation - COMPLETE
       Timestamp: {{ ansible_date_time.iso8601 }}
       Status: All final validation checks passed
-    dest: "{{ vps_setup_log_dir }}/phase7-complete.txt"
+    dest: "{{ vps_setup_log_dir }}/phase8-complete.txt"
     mode: '0644'
 
-- name: Phase 7 completion notice
+- name: Phase 8 completion notice
   ansible.builtin.debug:
     msg: |
-      
+
       ════════════════════════════════════════════════════════════════════
-      ✅ Phase 7: Final Validation Complete
+      ✅ Phase 8: Final Validation Complete
       ════════════════════════════════════════════════════════════════════
-      
+
       All systems validated and ready for use.
-      
+
       RDP Connection: {{ ansible_default_ipv4.address | default('N/A') }}:{{ xrdp_port }}
       Username: {{ vps_username }}
-      
+
       ════════════════════════════════════════════════════════════════════

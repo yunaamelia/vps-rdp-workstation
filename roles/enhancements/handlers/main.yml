@@ -1,0 +1,18 @@
+---
+# Enhancement Role Handlers
+
+- name: Reload Zsh configuration
+  ansible.builtin.shell: |
+    su - {{ vps_username }} -c 'source ~/.zshrc'
+  changed_when: false
+  listen: reload zsh
+
+- name: Install TPM plugins
+  ansible.builtin.shell: |
+    ~/.tmux/plugins/tpm/bin/install_plugins
+  become: yes
+  become_user: "{{ vps_username }}"
+  environment:
+    HOME: "/home/{{ vps_username }}"
+  changed_when: false
+  listen: install tmux plugins

@@ -17,7 +17,7 @@
       ansible.builtin.shell: dpkg -l > {{ vps_setup_log_dir }}/initial-packages.txt
       args:
         creates: "{{ vps_setup_log_dir }}/initial-packages.txt"
-    
+
     - name: Record system information
       ansible.builtin.copy:
         content: |
@@ -53,42 +53,44 @@
       ansible.builtin.hostname:
         name: "{{ vps_hostname }}"
       register: hostname_changed
-    
+
     - name: Update /etc/hosts with hostname
       ansible.builtin.lineinfile:
         path: /etc/hosts
         regexp: '^127\.0\.1\.1'
         line: "127.0.1.1 {{ vps_hostname }}"
         state: present
-    
+
     - name: Set timezone
       community.general.timezone:
         name: "{{ vps_timezone }}"
       register: timezone_changed
-    
+
     - name: Generate locales
       community.general.locale_gen:
         name: "{{ vps_locale }}"
         state: present
-    
+
     - name: Remove upstream conflicting repository configurations
-      ansible.builtin.shell: rm -f /etc/apt/sources.list.d/{{ item }}
+      ansible.builtin.file:
+        path: "/etc/apt/sources.list.d/{{ item }}"
+        state: absent
       loop:
         - vscode.list
         - microsoft-prod.list
         - microsoft.list
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Update apt cache
       ansible.builtin.apt:
-        update_cache: yes
+        update_cache: true
         cache_valid_time: 3600
-    
+
     - name: Upgrade all packages
       ansible.builtin.apt:
         upgrade: safe
       register: upgrade_result
-    
+
     - name: Install essential packages
       ansible.builtin.apt:
         name:

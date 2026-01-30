@@ -1,0 +1,7 @@
+---
+# Phase 9 rollback - Remove enhancement artifacts
+- name: Remove phase 9 enhancements log
+  ansible.builtin.file:
+    path: "{{ vps_setup_log_dir }}/phase9-enhancements.txt"
+    state: absent
+

@@ -9,9 +9,9 @@
   ansible.builtin.user:
     name: "{{ vps_username }}"
     state: absent
-    remove: yes
-    force: yes
-  ignore_errors: yes
+    remove: true
+    force: true
+  ignore_errors: true
 
 - name: Remove user home directory
   ansible.builtin.file:

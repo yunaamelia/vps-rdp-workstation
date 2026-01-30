@@ -1,0 +1,17 @@
+ignore: |
+  .agent/
+  .github/
+
+rules:
+  line-length:
+    max: 160
+    level: warning
+  truthy: disable
+  comments: disable
+  braces: disable
+  brackets: disable
+  empty-lines:
+    max: 2
+    max-start: 1
+    max-end: 1
+  trailing-spaces: disable

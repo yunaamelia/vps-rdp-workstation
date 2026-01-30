@@ -1,6 +1,67 @@
 ---
-# Phase 5 rollback - Remove installation validation artifacts
-- name: Remove phase 5 validation log
+# Phase 5 rollback - Remove Development Tools
+- name: Stop Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: stopped
+    enabled: false
+  ignore_errors: true
+
+- name: Remove Docker
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: absent
+    purge: true
+  ignore_errors: true
+
+- name: Remove VS Code
+  ansible.builtin.apt:
+    name: code
+    state: absent
+    purge: true
+  ignore_errors: true
+
+- name: Remove Firefox ESR
+  ansible.builtin.apt:
+    name: firefox-esr
+    state: absent
+    purge: true
+  ignore_errors: true
+
+- name: Remove Zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: absent
+    purge: true
+  ignore_errors: true
+
+- name: Remove user development configuration
   ansible.builtin.file:
-    path: /var/log/vps-setup/phase5-validation.log
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/home/{{ vps_username }}/.oh-my-zsh"
+    - "/home/{{ vps_username }}/.zshrc"
+    - "/home/{{ vps_username }}/.config/starship.toml"
+    - "/home/{{ vps_username }}/.mozilla"
+    - "/home/{{ vps_username }}/.local/share/fonts"
+
+- name: Remove Docker configuration
+  ansible.builtin.file:
+    path: /etc/docker
+    state: absent
+
+- name: Remove Starship
+  ansible.builtin.file:
+    path: /usr/local/bin/starship
+    state: absent
+
+- name: Remove phase 5 log
+  ansible.builtin.file:
+    path: "{{ vps_setup_log_dir }}/phase5-complete.txt"
     state: absent

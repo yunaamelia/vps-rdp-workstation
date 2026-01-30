@@ -1,0 +1,94 @@
+---
+#===============================================================================
+# Phase 9.3: Intelligent Zsh Enhancements
+#===============================================================================
+# Installs Zsh plugins for autosuggestions, syntax highlighting, and directory jumping
+#===============================================================================
+
+#-------------------------------------------------------------------------------
+# Install zsh-autosuggestions
+#-------------------------------------------------------------------------------
+
+- name: Clone zsh-autosuggestions
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-autosuggestions.git
+    dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions"
+    version: master
+    depth: 1
+  become: yes
+  become_user: "{{ vps_username }}"
+
+#-------------------------------------------------------------------------------
+# Install zsh-syntax-highlighting
+#-------------------------------------------------------------------------------
+
+- name: Clone zsh-syntax-highlighting
+  ansible.builtin.git:
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting.git
+    dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting"
+    version: master
+    depth: 1
+  become: yes
+  become_user: "{{ vps_username }}"
+
+#-------------------------------------------------------------------------------
+# Install zsh-z (frecency-based directory jumping)
+#-------------------------------------------------------------------------------
+
+- name: Clone zsh-z
+  ansible.builtin.git:
+    repo: https://github.com/agkozak/zsh-z.git
+    dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-z"
+    version: master
+    depth: 1
+  become: yes
+  become_user: "{{ vps_username }}"
+
+#-------------------------------------------------------------------------------
+# Configure Zsh Plugins
+#-------------------------------------------------------------------------------
+
+- name: Add Zsh plugin configuration to enhancements file
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc.enhancements"
+    marker: "# {mark} ZSH PLUGINS CONFIGURATION"
+    block: |
+      # Zsh Autosuggestions
+      if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions ]]; then
+        source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+        ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+        ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE="fg=#6c7086"
+        ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+        bindkey '^\t' autosuggest-accept  # Ctrl+Tab to accept
+      fi
+      
+      # Zsh-z (frecency directory jumping)
+      if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-z ]]; then
+        source ~/.oh-my-zsh/custom/plugins/zsh-z/zsh-z.plugin.zsh
+        ZSHZ_CASE=smart
+        ZSHZ_ECHO=1
+      fi
+      
+      # Zsh Syntax Highlighting (MUST be last)
+      if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting ]]; then
+        source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+        ZSH_HIGHLIGHT_STYLES[command]='fg=#a6e3a1'
+        ZSH_HIGHLIGHT_STYLES[alias]='fg=#a6e3a1'
+        ZSH_HIGHLIGHT_STYLES[builtin]='fg=#a6e3a1'
+        ZSH_HIGHLIGHT_STYLES[function]='fg=#89b4fa'
+        ZSH_HIGHLIGHT_STYLES[command-not-found]='fg=#f38ba8'
+        ZSH_HIGHLIGHT_STYLES[path]='fg=#cdd6f4,underline'
+        ZSH_HIGHLIGHT_STYLES[single-quoted-argument]='fg=#f9e2af'
+        ZSH_HIGHLIGHT_STYLES[double-quoted-argument]='fg=#f9e2af'
+      fi
+    create: yes
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+
+- name: Log Zsh plugins installation
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ ansible_date_time.iso8601 }} - Zsh Plugins installed"
+    create: yes
+    mode: '0644'

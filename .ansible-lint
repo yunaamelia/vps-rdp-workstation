@@ -1,0 +1,12 @@
+---
+profile: basic
+# Exclude galaxy roles or external dependencies
+exclude_paths:
+  - .github/
+  - roles/external/
+  - inventory/
+
+# Rule skips can be added here if needed
+skip_list:
+  - '204'  # Lines should be no longer than 160 chars
+  - '403'  # Package installs should not use latest

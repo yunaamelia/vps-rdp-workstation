@@ -1,0 +1,77 @@
+---
+# Enhancement Role Default Variables
+# Configure which enhancements to install
+
+#===============================================================================
+# Feature Toggles
+#===============================================================================
+
+# Modern CLI Tools (eza, bat, fd, ripgrep, dust, procs)
+enable_modern_cli: true
+
+# Zsh Plugins (autosuggestions, syntax-highlighting, zsh-z)
+enable_zsh_plugins: true
+
+# Fuzzy Finding Tools (fzf)
+enable_fuzzy_tools: true
+
+# Enhanced Shell History (Atuin)
+enable_atuin: true
+
+# Git Enhancement Tools (lazygit, delta)
+enable_git_enhancements: true
+
+# Terminal File Manager (yazi)
+enable_file_manager: true
+
+# Tmux Plugin Suite (resurrect, continuum, yank, fzf)
+enable_tmux_plugins: true
+
+# Command Snippet Manager (pet)
+enable_snippet_manager: true
+
+# AI Code Completion (Codeium VS Code extension)
+enable_codeium: true
+
+#===============================================================================
+# Theme Configuration
+#===============================================================================
+
+enhancement_theme: catppuccin-mocha
+bat_theme: Catppuccin-mocha
+
+# FZF Catppuccin colors
+fzf_colors: "bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+
+#===============================================================================
+# Performance Tuning
+#===============================================================================
+
+# Max file size (lines) for FZF preview
+fzf_preview_max_size: 500
+
+# Atuin history limit
+atuin_max_history: 100000
+
+# Tmux auto-save interval (minutes)
+tmux_save_interval: 15
+
+#===============================================================================
+# Paths
+#===============================================================================
+
+enhancement_backup_dir: /var/backups/vps-workstation/enhancements
+enhancement_log_dir: /var/log/vps-setup/enhancements
+enhancement_cache_dir: /var/cache/vps-workstation/binaries
+enhancement_docs_dir: "/home/{{ vps_username }}/.local/share/vps-workstation"
+
+#===============================================================================
+# Tool Versions (for binary downloads)
+#===============================================================================
+
+lazygit_version: "0.44.1"
+delta_version: "0.18.2"
+yazi_version: "0.4.2"
+pet_version: "0.8.4"
+dust_version: "1.1.1"
+procs_version: "0.14.8"

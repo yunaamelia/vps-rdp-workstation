@@ -1,210 +1,166 @@
 # VPS RDP Developer Workstation
 
-Transform a fresh **Debian 13 (Trixie)** VPS into a fully-configured RDP developer workstation with a single command.
+![Ansible](https://img.shields.io/badge/Ansible-2.14+-EE0000?style=flat&logo=ansible)
+![Debian](https://img.shields.io/badge/Debian-13%20Trixie-A81D33?style=flat&logo=debian)
+![License](https://img.shields.io/badge/License-MIT-blue)
 
-## 🚀 Quick Start
+Automated deployment of a complete remote developer workstation with KDE Plasma desktop, XRDP access, Docker, VS Code, and terminal enhancements. Connect via RDP from anywhere.
+
+## Technology Stack
+
+| Technology | Version | Purpose |
+|------------|---------|---------|
+| **Ansible** | 2.14+ | Infrastructure automation |
+| **Debian** | 13 (Trixie) | Target operating system |
+| **KDE Plasma** | Latest | Desktop environment |
+| **XRDP** | Latest | Remote desktop server |
+| **Docker** | CE Latest | Container runtime |
+| **Node.js** | 20.x LTS | JavaScript runtime |
+| **Python** | 3.x | System scripting |
+
+## Quick Start
+
+**Prerequisites:** Debian 13 (Trixie), 4GB+ RAM, 40GB+ disk, root access
 
 ```bash
-# Clone or download to your VPS
-cd /opt
-git clone https://github.com/your-repo/vps-rdp-workstation.git
+# 1. Clone the repository
+git clone https://github.com/your-org/vps-rdp-workstation.git
 cd vps-rdp-workstation
 
-# Make executable
-chmod +x setup.sh
+# 2. Run pre-flight checks
+./scripts/pre-flight-checks.sh
 
-# Run (interactive mode)
+# 3. Run setup (will prompt for username)
 sudo ./setup.sh
-
-# Run (non-interactive mode)
-export VPS_USERNAME="developer"
-export VPS_PASSWORD="your-secure-password"
-sudo -E ./setup.sh --non-interactive
 ```
 
-## ✨ What Gets Installed
+**Connect via RDP:** Use any RDP client to connect to port `3389`.
 
-### Desktop Environment
-- **KDE Plasma** (minimal installation) with dark theme
-- **XRDP** for Windows Remote Desktop connections
-- **SDDM** display manager
-
-### Development Tools
-- **VS Code** with essential extensions
-- **Node.js LTS** (v20.x) with npm, yarn, pnpm
-- **Python 3.12+** with pipx and common tools
-- **PHP 8.x** with Composer
-- **Docker** with Compose V2
-- **GitHub CLI**, **Lazygit**
-
-### Terminal Experience
-- **Zsh** with Oh My Zsh
-- **Starship** prompt (Catppuccin theme)
-- **JetBrains Mono Nerd Font**
-
-### Security
-- **UFW** firewall (deny by default)
-- **Fail2ban** with SSH and XRDP protection
-- **SSH hardening** (no root, limited retries)
-- **Unattended security updates**
-
-## 📋 Requirements
-
-| Resource | Minimum | Recommended |
-|----------|---------|-------------|
-| OS | Debian 13 (Trixie) | Debian 13 (Trixie) |
-| CPU | 2 cores | 4+ cores |
-| RAM | 4 GB | 8 GB |
-| Storage | 40 GB | 60+ GB |
-| Architecture | x86_64 | x86_64 |
-
-## 🔧 Configuration
-
-Edit `inventory/group_vars/all.yml` before running to customize:
-
-```yaml
-# User settings
-vps_username: developer
-vps_hostname: vps-workstation
-vps_timezone: UTC
-
-# Desktop theme
-vps_theme: dark  # or 'light'
-
-# Security
-ssh_port: 22
-xrdp_port: 3389
-
-# What to install
-install_docker: true
-install_browser: true
-install_opencode: true
-```
-
-## 🔐 Environment Variables
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `VPS_USERNAME` | Yes (non-interactive) | - | Workstation user |
-| `VPS_PASSWORD` | Yes (non-interactive) | - | User password |
-| `VPS_TIMEZONE` | No | UTC | System timezone |
-| `VPS_HOSTNAME` | No | vps-workstation | System hostname |
-| `VPS_THEME` | No | dark | KDE theme |
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 vps-rdp-workstation/
 ├── setup.sh                 # Main entry point
 ├── ansible.cfg              # Ansible configuration
-├── inventory/
-│   ├── hosts.yml            # Target hosts
+├── inventory/               # Host and variable definitions
 │   └── group_vars/all.yml   # Configuration variables
-├── playbooks/
-│   ├── main.yml             # Orchestration
-│   ├── phase1-preparation.yml
-│   ├── phase2-user-management.yml
-│   ├── phase3-dependencies.yml
-│   ├── phase4-rdp-packages.yml
-│   ├── phase5-validation.yml
-│   ├── phase6-optimization.yml
-│   ├── phase7-final-validation.yml
-│   └── phase8-enhancements.yml
-├── templates/               # Configuration templates
-├── scripts/                 # Utility scripts
-└── tests/                   # Validation tests
+├── playbooks/               # Deployment orchestration
+│   ├── main.yml             # 10-phase deployment
+│   ├── rollback.yml         # Rollback procedures
+│   └── tasks/               # Phase implementations
+├── roles/                   # Reusable Ansible roles (12)
+├── templates/               # Jinja2 configuration templates
+├── tests/                   # Validation scripts
+└── docs/                    # Project documentation
 ```
 
-## 🔄 Deployment Phases
+<details>
+<summary>View detailed documentation</summary>
 
-| Phase | Description | Time |
-|-------|-------------|------|
-| 1 | System preparation, checkpoint | 5-10 min |
-| 2 | User management, sudo config | 2-3 min |
-| 3 | Development dependencies | 10-15 min |
-| 4 | Desktop, XRDP, Docker, tools | 15-20 min |
-| 5 | Installation validation | 2-3 min |
-| 6 | Security, optimization | 5-10 min |
-| 7 | Final validation | 2-3 min |
-| 8 | Optional enhancements | 2-5 min |
+- [Folder Structure Blueprint](docs/Project_Folders_Structure_Blueprint.md)
+- [Technology Stack Blueprint](docs/Technology_Stack_Blueprint.md)
+- [Workflow Documentation](docs/PROJECT-WORKFLOW-DOCUMENTATION.md)
+- [Code Exemplars](docs/EXEMPLARS.md)
 
-**Total: 45-60 minutes**
+</details>
 
-## 🖥️ Connecting via RDP
+## What Gets Installed
 
-After deployment, connect using Windows Remote Desktop:
+### Desktop Environment
+- KDE Plasma (minimal) with Breeze Dark/Catppuccin themes
+- XRDP optimized for performance
+- JetBrains Mono Nerd Font
 
-1. Open `mstsc.exe` (Remote Desktop Connection)
-2. Enter: `<your-vps-ip>:3389`
-3. Login with your configured username and password
-4. Enjoy your KDE Plasma desktop!
+### Development Tools
+- Docker CE with docker-compose
+- VS Code with extensions (ESLint, Prettier, Python, GitLens)
+- Node.js 20.x + npm/pnpm/yarn
+- Python 3 + pipx tools
+- PHP + Composer
+- Git + Lazygit + GitHub CLI
 
-## 🛠️ Troubleshooting
+### Terminal Enhancements
+- Zsh + Oh My Zsh
+- Starship prompt
+- Modern CLI tools (bat, exa, fd, ripgrep)
+- Fuzzy finding (fzf, atuin)
 
-### RDP Connection Refused
+### Security
+- UFW firewall (SSH + RDP only)
+- Fail2ban with SSH jail
+- SSH hardening
+- Unattended security updates
+
+## Deployment Phases
+
+| Phase | Name | Description |
+|-------|------|-------------|
+| 1 | Preparation | System logging, initial state |
+| 2 | User Management | Create user, sudo configuration |
+| 3 | Dependencies | Node.js, Python, PHP, Lazygit |
+| 4 | Desktop | KDE Plasma, XRDP |
+| 5 | Development Tools | Docker, VS Code, editors |
+| 6 | Validation | Service verification |
+| 7 | Optimization | Security hardening, performance |
+| 8-9 | Enhancements | Terminal tools, plugins |
+| 10 | Final | Cleanup, documentation |
+
+## Configuration
+
+Edit `inventory/group_vars/all.yml` to customize:
+
+```yaml
+# User
+vps_username: "apexdev"
+vps_timezone: "GMT+8"
+
+# Theme
+vps_theme: "catppuccin"  # or "breeze-dark"
+
+# Features
+install_docker: true
+install_vscode: true
+install_antigravity: true
+```
+
+## Testing
+
 ```bash
-# Check XRDP status
-sudo systemctl status xrdp
+# Run comprehensive validation
+./tests/comprehensive-validation.sh
 
-# Restart XRDP
-sudo systemctl restart xrdp
-
-# Check firewall
-sudo ufw status
+# Run phase-specific tests
+./tests/phase5-tests.sh
 ```
 
-### Docker Permission Denied
-```bash
-# Logout and login again for group changes
-# Or run:
-newgrp docker
-```
-
-### Black Screen on RDP
-```bash
-# Check xsession file
-cat ~/.xsession
-
-# Restart display manager
-sudo systemctl restart sddm
-```
-
-## 📝 Logs
-
-All deployment logs are stored in `/var/log/vps-setup/`:
-
-- `deployment.log` - Full deployment log
-- `phase*-complete.txt` - Phase completion markers
-- `deployment-summary.txt` - Final summary
-- `final-validation-report.txt` - Validation results
-
-## 🔙 Rollback
-
-To rollback to a previous state:
+## Rollback
 
 ```bash
 # Rollback specific phase
-ansible-playbook playbooks/rollback.yml --tags phase4
+ansible-playbook playbooks/rollback.yml --tags phase5
 
-# Full system rollback (requires snapshot)
-./scripts/rollback-full.sh <snapshot-id>
+# Full rollback
+ansible-playbook playbooks/rollback.yml
 ```
 
-## 📄 License
+## Development Workflow
 
-MIT License
+1. **Setup**: Clone repo, configure `inventory/group_vars/all.yml`
+2. **Deploy**: Run `./setup.sh` or `ansible-playbook playbooks/main.yml`
+3. **Test**: Run phase tests after each modification
+4. **Commit**: Follow conventional commits
 
-## 🤝 Contributing
+## Contributing
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
+1. Follow patterns in [Code Exemplars](docs/EXEMPLARS.md)
+2. Add tests for new features
+3. Update documentation
+4. Run pre-commit hooks before pushing
 
-## 🙏 Acknowledgments
+## License
 
-- [Ansible](https://www.ansible.com/)
-- [KDE Plasma](https://kde.org/plasma-desktop/)
-- [XRDP](https://github.com/neutrinolabs/xrdp)
-- [Oh My Zsh](https://ohmyz.sh/)
-- [Starship](https://starship.rs/)
+MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+**Documentation:** See `docs/` folder for detailed architecture and workflow documentation.

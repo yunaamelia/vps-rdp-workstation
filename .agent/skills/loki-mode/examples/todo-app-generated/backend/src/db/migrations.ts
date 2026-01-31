@@ -28,4 +28,3 @@ export function initializeDatabase(): void {
     throw error;
   }
 }
-

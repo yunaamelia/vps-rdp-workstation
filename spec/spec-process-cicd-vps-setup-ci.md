@@ -10,7 +10,7 @@ tags: [process, cicd, github-actions, automation, ansible, vps-setup]
 ## Workflow Overview
 
 **Purpose**: Validate the integrity, syntax, and idempotency of the VPS setup Ansible playbooks and shell scripts to ensure reliable deployments.
-**Trigger Events**: 
+**Trigger Events**:
 - Push events to the `main` branch
 - Pull Request events targeting the `main` branch
 - Manual dispatch (workflow_dispatch)
@@ -23,7 +23,7 @@ graph TD
     A[Trigger Event] --> B[Job: Lint]
     B --> C[Job: Test (Dry Run)]
     C --> D[End]
-    
+
     style A fill:#e1f5fe
     style D fill:#e8f5e8
 ```
@@ -67,13 +67,13 @@ graph TD
 # GITHUB_TOKEN: secret (automatic)
 
 # Repository Triggers
-paths: 
+paths:
   - '**.yml'
   - '**.yaml'
   - '**.sh'
   - 'playbooks/**'
   - 'inventory/**'
-branches: 
+branches:
   - 'main'
 ```
 

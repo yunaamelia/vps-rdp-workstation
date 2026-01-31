@@ -218,4 +218,3 @@ Use these biases when scoring:
 * **pricing-strategy** – Monetize demand
 * **programmatic-seo** – Scale SEO ideas
 * **ab-test-setup** – Test ideas rigorously
-

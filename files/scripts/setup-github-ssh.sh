@@ -14,18 +14,18 @@ if [ -f ~/.ssh/id_ed25519 ]; then
 else
     echo "Enter your GitHub email address:"
     read -r email
-    
+
     if [ -z "$email" ]; then
         echo "Email is required. Aborting."
         exit 1
     fi
-    
+
     mkdir -p ~/.ssh
     ssh-keygen -t ed25519 -C "$email" -f ~/.ssh/id_ed25519 -N ""
-    
+
     eval "$(ssh-agent -s)"
     ssh-add ~/.ssh/id_ed25519
-    
+
     echo ""
     echo "✅ SSH key generated successfully!"
     echo ""

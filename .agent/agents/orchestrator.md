@@ -202,7 +202,7 @@ Finally, use the test-engineer to identify missing test coverage.
 
 ### Agent Chaining with Context
 ```
-Use the frontend-specialist to analyze React components, 
+Use the frontend-specialist to analyze React components,
 then have the test-engineer generate tests for the identified components.
 ```
 

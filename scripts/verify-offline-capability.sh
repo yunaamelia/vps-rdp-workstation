@@ -153,8 +153,8 @@ To deploy in an air-gapped or limited-internet environment:
    │   └── VPS_OFFLINE=true ./setup.sh
    └── Skip repository additions and use local cache
 
-📌 NOTE: This deployment system is primarily designed for 
-   internet-connected environments. Offline support requires 
+📌 NOTE: This deployment system is primarily designed for
+   internet-connected environments. Offline support requires
    significant manual preparation.
 
 EOF

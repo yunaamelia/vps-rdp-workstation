@@ -519,7 +519,7 @@ Every touchable element needs ripple:
 Touch down → Ripple expands from touch point
 Touch up → Ripple completes and fades
 
-Color: 
+Color:
 ├── On light: Black at ~12% opacity
 ├── On dark: White at ~12% opacity
 ├── On colored: Appropriate contrast

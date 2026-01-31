@@ -4,7 +4,7 @@
   ansible.builtin.file:
     path: "{{ vps_setup_log_dir }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Record initial system state
   ansible.builtin.copy:
@@ -18,7 +18,7 @@
       Memory: {{ ansible_memtotal_mb }} MB
       IPv4: {{ ansible_default_ipv4.address | default('N/A') }}
     dest: "{{ vps_setup_log_dir }}/initial-system-info.txt"
-    mode: '0644'
+    mode: "0644"
 
 - name: Record initial packages
   ansible.builtin.shell: dpkg -l > {{ vps_setup_log_dir }}/initial-packages.txt
@@ -38,4 +38,4 @@
         "checkpoint_created": true
       }
     dest: "{{ vps_setup_log_dir }}/deployment-state.json"
-    mode: '0644'
+    mode: "0644"

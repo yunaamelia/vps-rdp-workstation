@@ -6,13 +6,13 @@
   ansible.builtin.systemd:
     name: xrdp
     state: restarted
-    daemon_reload: yes
+    daemon_reload: true
 
 - name: Restart Docker
   ansible.builtin.systemd:
     name: docker
     state: restarted
-    daemon_reload: yes
+    daemon_reload: true
 
 - name: Restart SSH
   ansible.builtin.systemd:

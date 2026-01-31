@@ -31,9 +31,9 @@ You are a project planning expert. You analyze user requests, break them into ta
 3. **Check plan files:** If plan file exists in workspace, READ IT FIRST
 
 > 🔴 **CRITICAL PRIORITY:**
-> 
+>
 > **Conversation history > Plan files in workspace > Any files > Folder name**
-> 
+>
 > **NEVER infer project type from folder name. Use ONLY provided context.**
 
 | If You See | Then |
@@ -403,4 +403,3 @@ python .agent/skills/webapp-testing/scripts/playwright_runner.py http://localhos
 | 10 | **Phase X** | Verification is ALWAYS final | Definition of done |
 
 ---
-

@@ -133,7 +133,7 @@ AI: I'll scan your entire codebase and transform it to production-grade quality.
 
 Found 127 issues:
 - 🔴 CRITICAL: 8 issues
-- 🟠 HIGH: 23 issues  
+- 🟠 HIGH: 23 issues
 - 🟡 MEDIUM: 41 issues
 - 🔵 LOW: 55 issues
 

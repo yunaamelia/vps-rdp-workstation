@@ -74,14 +74,14 @@ class StealthUtils:
                 element = page.wait_for_selector(selector, timeout=2000)
             except:
                 pass
-        
+
         if not element:
             print(f"⚠️ Element not found for typing: {selector}")
             return
 
         # Click to focus
         element.click()
-        
+
         # Type
         for char in text:
             element.type(char, delay=random.uniform(25, 75))

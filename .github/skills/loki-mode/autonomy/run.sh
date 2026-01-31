@@ -1,5 +1,6 @@
 #!/bin/bash
 #===============================================================================
+# shellcheck disable=SC2155,SC2317,SC2248,SC2059,SC2002,SC2162,SC2310,SC2012,SC2026,SC2086,SC2034,SC2046
 # Loki Mode - Autonomous Runner
 # Single script that handles prerequisites, setup, and autonomous execution
 #

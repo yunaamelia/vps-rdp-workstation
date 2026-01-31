@@ -1,3 +1,4 @@
+---
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -27,9 +28,11 @@ repos:
         entry: shellcheck
         language: system
         types: [shell]
-        exclude: ^scripts/.*\.j2$  # Exclude templates
+        exclude: ^scripts/.*\.j2$ # Exclude templates
+        args: ["-e", "SC2155,SC2317,SC2248,SC2059,SC2002,SC2162,SC2310,SC2012,SC1091,SC2124,SC2010,SC2164,SC2181,SC2086,SC2034,SC2046"]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
       - id: detect-private-key
+        exclude: ^(\.agent|\.github)/

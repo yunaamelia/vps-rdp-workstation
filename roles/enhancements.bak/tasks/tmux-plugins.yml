@@ -1,0 +1,56 @@
+---
+# ===============================================================================
+# Phase 9.8: Tmux Enhancement Suite
+# ===============================================================================
+# Installs TPM and plugins for session persistence and enhanced workflow
+# ===============================================================================
+
+# -------------------------------------------------------------------------------
+# Install Tmux Plugin Manager (TPM)
+# -------------------------------------------------------------------------------
+
+- name: Check if TPM is installed
+  ansible.builtin.stat:
+    path: "/home/{{ vps_username }}/.tmux/plugins/tpm"
+  register: tpm_dir
+
+- name: Clone TPM
+  ansible.builtin.git:
+    repo: https://github.com/tmux-plugins/tpm.git
+    dest: "/home/{{ vps_username }}/.tmux/plugins/tpm"
+    version: master
+    depth: 1
+  become: true
+  become_user: "{{ vps_username }}"
+  when: not enhancements_tpm_dir.stat.exists
+
+#-------------------------------------------------------------------------------
+# Configure Tmux with Plugins
+#-------------------------------------------------------------------------------
+
+- name: Backup existing tmux.conf
+  ansible.builtin.copy:
+    src: "/home/{{ vps_username }}/.tmux.conf"
+    dest: "{{ enhancement_backup_dir }}/tmux.conf.{{ now(utc=true, fmt='%s') }}"
+    remote_src: true
+    mode: "0644"
+  when: ansible_facts['file_exists'] | default(false)
+  failed_when: false
+
+- name: Configure tmux with enhancements
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.tmux.conf"
+    marker: "# {mark} VPS WORKSTATION ENHANCEMENTS"
+    block: "{{ lookup('template', 'tmux-plugins.conf.j2') }}"
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: "0644"
+  notify: install tmux plugins
+
+- name: Log Tmux enhancements installation
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Tmux Enhancement Suite installed"
+    create: true
+    mode: "0644"

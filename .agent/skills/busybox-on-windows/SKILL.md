@@ -8,7 +8,7 @@ BusyBox is a single binary that implements many common Unix tools.
 
 Use this skill only on Windows. If you are on UNIX, then stop here.
 
-Run the following steps only if you cannot find a `busybox.exe` file in the same directory as this document is. 
+Run the following steps only if you cannot find a `busybox.exe` file in the same directory as this document is.
 These are PowerShell commands, if you have a classic `cmd.exe` terminal, then you must use `powershell -Command "..."` to run them.
 1. Print the type of CPU: `Get-CimInstance -ClassName Win32_Processor | Select-Object Name, NumberOfCores, MaxClockSpeed`
 2. Print the OS versions: `Get-ItemProperty "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion" | Select-Object ProductName, DisplayVersion, CurrentBuild`

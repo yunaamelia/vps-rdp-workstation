@@ -13,8 +13,8 @@ This section contains **12 rules** focused on re-render optimization.
 
 ## Rule 5.1: Calculate Derived State During Rendering
 
-**Impact:** MEDIUM  
-**Tags:** rerender, derived-state, useEffect, state  
+**Impact:** MEDIUM
+**Tags:** rerender, derived-state, useEffect, state
 
 ## Calculate Derived State During Rendering
 
@@ -54,8 +54,8 @@ References: [You Might Not Need an Effect](https://react.dev/learn/you-might-not
 
 ## Rule 5.2: Defer State Reads to Usage Point
 
-**Impact:** MEDIUM  
-**Tags:** rerender, searchParams, localStorage, optimization  
+**Impact:** MEDIUM
+**Tags:** rerender, searchParams, localStorage, optimization
 
 ## Defer State Reads to Usage Point
 
@@ -94,8 +94,8 @@ function ShareButton({ chatId }: { chatId: string }) {
 
 ## Rule 5.3: Do not wrap a simple expression with a primitive result type in useMemo
 
-**Impact:** LOW-MEDIUM  
-**Tags:** rerender, useMemo, optimization  
+**Impact:** LOW-MEDIUM
+**Tags:** rerender, useMemo, optimization
 
 ## Do not wrap a simple expression with a primitive result type in useMemo
 
@@ -130,8 +130,8 @@ function Header({ user, notifications }: Props) {
 
 ## Rule 5.4: Extract Default Non-primitive Parameter Value from Memoized Component to Constant
 
-**Impact:** MEDIUM  
-**Tags:** rerender, memo, optimization  
+**Impact:** MEDIUM
+**Tags:** rerender, memo, optimization
 
 ## Extract Default Non-primitive Parameter Value from Memoized Component to Constant
 
@@ -167,8 +167,8 @@ const UserAvatar = memo(function UserAvatar({ onClick = NOOP }: { onClick?: () =
 
 ## Rule 5.5: Extract to Memoized Components
 
-**Impact:** MEDIUM  
-**Tags:** rerender, memo, useMemo, optimization  
+**Impact:** MEDIUM
+**Tags:** rerender, memo, useMemo, optimization
 
 ## Extract to Memoized Components
 
@@ -212,8 +212,8 @@ function Profile({ user, loading }: Props) {
 
 ## Rule 5.6: Narrow Effect Dependencies
 
-**Impact:** LOW  
-**Tags:** rerender, useEffect, dependencies, optimization  
+**Impact:** LOW
+**Tags:** rerender, useEffect, dependencies, optimization
 
 ## Narrow Effect Dependencies
 
@@ -258,8 +258,8 @@ useEffect(() => {
 
 ## Rule 5.7: Put Interaction Logic in Event Handlers
 
-**Impact:** MEDIUM  
-**Tags:** rerender, useEffect, events, side-effects, dependencies  
+**Impact:** MEDIUM
+**Tags:** rerender, useEffect, events, side-effects, dependencies
 
 ## Put Interaction Logic in Event Handlers
 
@@ -304,8 +304,8 @@ Reference: [Should this code move to an event handler?](https://react.dev/learn/
 
 ## Rule 5.8: Subscribe to Derived State
 
-**Impact:** MEDIUM  
-**Tags:** rerender, derived-state, media-query, optimization  
+**Impact:** MEDIUM
+**Tags:** rerender, derived-state, media-query, optimization
 
 ## Subscribe to Derived State
 
@@ -334,8 +334,8 @@ function Sidebar() {
 
 ## Rule 5.9: Use Functional setState Updates
 
-**Impact:** MEDIUM  
-**Tags:** react, hooks, useState, useCallback, callbacks, closures  
+**Impact:** MEDIUM
+**Tags:** react, hooks, useState, useCallback, callbacks, closures
 
 ## Use Functional setState Updates
 
@@ -346,17 +346,17 @@ When updating state based on the current state value, use the functional update 
 ```tsx
 function TodoList() {
   const [items, setItems] = useState(initialItems)
-  
+
   // Callback must depend on items, recreated on every items change
   const addItems = useCallback((newItems: Item[]) => {
     setItems([...items, ...newItems])
   }, [items])  // ❌ items dependency causes recreations
-  
+
   // Risk of stale closure if dependency is forgotten
   const removeItem = useCallback((id: string) => {
     setItems(items.filter(item => item.id !== id))
   }, [])  // ❌ Missing items dependency - will use stale items!
-  
+
   return <ItemsEditor items={items} onAdd={addItems} onRemove={removeItem} />
 }
 ```
@@ -368,17 +368,17 @@ The first callback is recreated every time `items` changes, which can cause chil
 ```tsx
 function TodoList() {
   const [items, setItems] = useState(initialItems)
-  
+
   // Stable callback, never recreated
   const addItems = useCallback((newItems: Item[]) => {
     setItems(curr => [...curr, ...newItems])
   }, [])  // ✅ No dependencies needed
-  
+
   // Always uses latest state, no stale closure risk
   const removeItem = useCallback((id: string) => {
     setItems(curr => curr.filter(item => item.id !== id))
   }, [])  // ✅ Safe and stable
-  
+
   return <ItemsEditor items={items} onAdd={addItems} onRemove={removeItem} />
 }
 ```
@@ -409,8 +409,8 @@ function TodoList() {
 
 ## Rule 5.10: Use Lazy State Initialization
 
-**Impact:** MEDIUM  
-**Tags:** react, hooks, useState, performance, initialization  
+**Impact:** MEDIUM
+**Tags:** react, hooks, useState, performance, initialization
 
 ## Use Lazy State Initialization
 
@@ -423,7 +423,7 @@ function FilteredList({ items }: { items: Item[] }) {
   // buildSearchIndex() runs on EVERY render, even after initialization
   const [searchIndex, setSearchIndex] = useState(buildSearchIndex(items))
   const [query, setQuery] = useState('')
-  
+
   // When query changes, buildSearchIndex runs again unnecessarily
   return <SearchResults index={searchIndex} query={query} />
 }
@@ -433,7 +433,7 @@ function UserProfile() {
   const [settings, setSettings] = useState(
     JSON.parse(localStorage.getItem('settings') || '{}')
   )
-  
+
   return <SettingsForm settings={settings} onChange={setSettings} />
 }
 ```
@@ -445,7 +445,7 @@ function FilteredList({ items }: { items: Item[] }) {
   // buildSearchIndex() runs ONLY on initial render
   const [searchIndex, setSearchIndex] = useState(() => buildSearchIndex(items))
   const [query, setQuery] = useState('')
-  
+
   return <SearchResults index={searchIndex} query={query} />
 }
 
@@ -455,7 +455,7 @@ function UserProfile() {
     const stored = localStorage.getItem('settings')
     return stored ? JSON.parse(stored) : {}
   })
-  
+
   return <SettingsForm settings={settings} onChange={setSettings} />
 }
 ```
@@ -468,8 +468,8 @@ For simple primitives (`useState(0)`), direct references (`useState(props.value)
 
 ## Rule 5.11: Use Transitions for Non-Urgent Updates
 
-**Impact:** MEDIUM  
-**Tags:** rerender, transitions, startTransition, performance  
+**Impact:** MEDIUM
+**Tags:** rerender, transitions, startTransition, performance
 
 ## Use Transitions for Non-Urgent Updates
 
@@ -509,8 +509,8 @@ function ScrollTracker() {
 
 ## Rule 5.12: Use useRef for Transient Values
 
-**Impact:** MEDIUM  
-**Tags:** rerender, useref, state, performance  
+**Impact:** MEDIUM
+**Tags:** rerender, useref, state, performance
 
 ## Use useRef for Transient Values
 
@@ -578,4 +578,3 @@ function Tracker() {
   )
 }
 ```
-

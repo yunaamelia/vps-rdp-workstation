@@ -32,15 +32,15 @@ list_checkpoints() {
 restore_checkpoint() {
     local checkpoint_name="$1"
     local backup_file="$CHECKPOINT_DIR/${checkpoint_name}.tar.gz"
-    
+
     if [ ! -f "$backup_file" ]; then
         log_error "Checkpoint not found: $backup_file"
         return 1
     fi
-    
+
     log_warn "⚠️  WARNING: This will restore system to checkpoint: $checkpoint_name"
     log_warn "This operation will overwrite current configuration!"
-    
+
     if [ "${FORCE:-false}" != "true" ]; then
         read -p "Are you sure you want to continue? [y/N] " -n 1 -r
         echo
@@ -49,14 +49,14 @@ restore_checkpoint() {
             return 0
         fi
     fi
-    
+
     log_info "Restoring from checkpoint: $checkpoint_name"
-    
+
     # Extract backup
     log_task "Extracting backup files..."
     cd /
     tar -xzf "$backup_file" --overwrite 2>/dev/null || true
-    
+
     # Restore package state
     local packages_file="$CHECKPOINT_DIR/${checkpoint_name}-packages.txt"
     if [ -f "$packages_file" ]; then
@@ -64,16 +64,16 @@ restore_checkpoint() {
         dpkg --set-selections < "$packages_file"
         apt-get dselect-upgrade -y 2>/dev/null || true
     fi
-    
+
     log_success "Checkpoint restored: $checkpoint_name"
     log_warn "A system reboot is recommended"
 }
 
 rollback_phase() {
     local phase="$1"
-    
+
     log_info "Rolling back Phase $phase..."
-    
+
     case "$phase" in
         2)
             # Rollback user management
@@ -104,16 +104,16 @@ rollback_phase() {
             log_warn "No specific rollback defined for phase $phase"
             ;;
     esac
-    
+
     # Update state
     fail_phase "$phase" "Rolled back by user"
-    
+
     log_success "Phase $phase rolled back"
 }
 
 test_rollback() {
     log_info "Testing rollback mechanism..."
-    
+
     # Check if checkpoints exist
     if [ -d "$CHECKPOINT_DIR" ] && ls "$CHECKPOINT_DIR"/*.tar.gz &>/dev/null; then
         log_success "Rollback mechanism functional - checkpoints available"
@@ -127,7 +127,7 @@ test_rollback() {
 # Main
 main() {
     local action="${1:-help}"
-    
+
     case "$action" in
         list)
             list_checkpoints

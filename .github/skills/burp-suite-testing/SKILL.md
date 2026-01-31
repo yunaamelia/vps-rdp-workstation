@@ -167,7 +167,7 @@ Original Request:
 GET /product?productId=1 HTTP/1.1
 
 Test 1: productId=2    → Valid product response
-Test 2: productId=999  → Not Found response  
+Test 2: productId=999  → Not Found response
 Test 3: productId='    → Error/exception response
 Test 4: productId=1 OR 1=1 → SQL injection test
 ```

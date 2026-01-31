@@ -1,38 +1,38 @@
 ---
-#===============================================================================
+# ===============================================================================
 # Phase 9.12: Documentation
-#===============================================================================
+# ===============================================================================
 # Deploys enhancement documentation files
-#===============================================================================
+# ===============================================================================
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Create Documentation Files
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 - name: Create SHORTCUTS.md
   ansible.builtin.copy:
     content: |
       # ⌨️ Keyboard Shortcuts Cheat Sheet
-      
+
       ## FZF Fuzzy Finding
       | Shortcut | Action |
       |----------|--------|
       | `Ctrl+T` | Fuzzy file search |
       | `Ctrl+R` | Fuzzy history search (Atuin) |
       | `Alt+C` | Fuzzy directory navigation |
-      
+
       ## Zsh Autosuggestions
       | Shortcut | Action |
       |----------|--------|
       | `→` (Right Arrow) | Accept suggestion |
       | `Ctrl+Tab` | Accept suggestion |
       | `End` | Accept to end of line |
-      
+
       ## Pet Snippets
       | Shortcut | Action |
       |----------|--------|
       | `Ctrl+X Ctrl+P` | Search and insert snippet |
-      
+
       ## Tmux (prefix = Ctrl+B)
       | Shortcut | Action |
       |----------|--------|
@@ -41,7 +41,7 @@
       | `prefix + F` | FZF command palette |
       | `prefix + [` | Enter copy mode |
       | `prefix + ]` | Paste |
-      
+
       ## Lazygit
       | Key | Action |
       |-----|--------|
@@ -51,7 +51,7 @@
       | `p` | Pull |
       | `j/k` | Navigate |
       | `q` | Quit |
-      
+
       ## Yazi File Manager
       | Key | Action |
       |-----|--------|
@@ -63,22 +63,22 @@
       | `d` | Cut |
       | `p` | Paste |
       | `q` | Quit |
-    dest: "{{ enhancement_docs_dir }}/SHORTCUTS.md"
+    dest: "{{ enhancements_docs_dir }}/SHORTCUTS.md"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 - name: Create ENHANCEMENTS.md
   ansible.builtin.copy:
     content: |
       # 🚀 VPS Workstation Enhancements
-      
+
       ## Overview
-      
+
       Your terminal has been enhanced with modern tools for productivity.
-      
+
       ## Features
-      
+
       ### 🔧 Modern CLI Tools
       - **eza** - Better `ls` with icons and git status
       - **bat** - Better `cat` with syntax highlighting
@@ -86,108 +86,108 @@
       - **ripgrep** - Better `grep`, optimized for code
       - **dust** - Better `du`, visual disk usage
       - **procs** - Better `ps`, colored and filterable
-      
+
       ### 🧠 Intelligent Shell
       - **zsh-autosuggestions** - Fish-like suggestions
       - **zsh-syntax-highlighting** - Real-time command validation
       - **zsh-z** - Smart directory jumping
-      
+
       ### 🔍 Fuzzy Finding
       - **fzf** - Find files, history, directories instantly
       - **Atuin** - Magical shell history with context
-      
+
       ### 🌿 Git Enhancement
       - **lazygit** - Beautiful terminal UI for Git
       - **delta** - Enhanced diff viewing
-      
+
       ### 📁 File Management
       - **yazi** - GPU-accelerated file manager
-      
+
       ### 💾 Session Persistence
       - **tmux-resurrect** - Save/restore tmux sessions
       - **tmux-continuum** - Auto-save every 15 minutes
-      
+
       ### 📝 Command Snippets
       - **pet** - Manage and execute command snippets
-      
+
       ### 🤖 AI Code Completion
       - **Codeium** - AI-powered code suggestions in VS Code
-      
+
       ## Quick Commands
-      
+
       ```bash
       shortcuts         # View keyboard shortcuts
       enhancement-stats # Check installation status
       terminal-guide    # Usage examples
       ```
-    dest: "{{ enhancement_docs_dir }}/ENHANCEMENTS.md"
+    dest: "{{ enhancements_docs_dir }}/ENHANCEMENTS.md"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 - name: Create TERMINAL_GUIDE.md
   ansible.builtin.copy:
     content: |
       # 📖 Terminal Usage Guide
-      
+
       ## Daily Workflows
-      
+
       ### Finding Files
       ```bash
       # Fuzzy search (Ctrl+T)
       # Type partial filename, select, done!
-      
+
       # Search code
       rg "TODO"                    # Find all TODOs
       rg "function.*auth" -t js    # Find functions in JS files
       ```
-      
+
       ### Directory Navigation
       ```bash
       z project    # Jump to frecent directory matching "project"
       y            # Open yazi file manager
       tree         # Visual directory tree
       ```
-      
+
       ### Git Workflow
       ```bash
       lazygit      # Open Git UI
       # Space to stage, c to commit, P to push
       ```
-      
+
       ### Command History
       ```bash
       # Press Ctrl+R
       # Type partial command, see context, select
       ```
-      
+
       ### Disk Usage
       ```bash
       dust         # Visual disk usage
       dust -d 1    # Just top level
       ```
-      
+
       ### Snippets
       ```bash
       # Press Ctrl+X Ctrl+P
       # Search your saved commands
       pet new      # Add new snippet
       ```
-      
-      ### Tmux Sessions  
+
+      ### Tmux Sessions
       ```bash
       tmux                    # Start new session
       tmux attach -t mywork   # Attach to session
       # Sessions auto-save every 15 min
       ```
-    dest: "{{ enhancement_docs_dir }}/TERMINAL_GUIDE.md"
+    dest: "{{ enhancements_docs_dir }}/TERMINAL_GUIDE.md"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 - name: Log documentation deployment
   ansible.builtin.lineinfile:
-    path: "{{ enhancement_log_dir }}/install.log"
+    path: "{{ enhancements_log_dir }}/install.log"
     line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Enhancement Documentation deployed"
-    create: yes
-    mode: '0644'
+    create: true
+    mode: "0644"

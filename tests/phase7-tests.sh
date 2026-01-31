@@ -83,7 +83,7 @@ echo "  Load: $(uptime | awk -F'load average:' '{print $2}')"
 # Summary
 echo ""
 echo "══════════════════════════════════════════════════════════════"
-if [ $FAILED -eq 0 ]; then
+if [ "$FAILED" -eq 0 ]; then
     echo "✅ FINAL VALIDATION: ALL CRITICAL TESTS PASSED"
     echo ""
     echo "🎉 VPS RDP Workstation is ready!"

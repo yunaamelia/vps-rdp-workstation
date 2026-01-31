@@ -13,8 +13,8 @@ This section contains **4 rules** focused on client-side data fetching.
 
 ## Rule 4.1: Deduplicate Global Event Listeners
 
-**Impact:** LOW  
-**Tags:** client, swr, event-listeners, subscription  
+**Impact:** LOW
+**Tags:** client, swr, event-listeners, subscription
 
 ## Deduplicate Global Event Listeners
 
@@ -78,7 +78,7 @@ function useKeyboardShortcut(key: string, callback: () => void) {
 
 function Profile() {
   // Multiple shortcuts will share the same listener
-  useKeyboardShortcut('p', () => { /* ... */ }) 
+  useKeyboardShortcut('p', () => { /* ... */ })
   useKeyboardShortcut('k', () => { /* ... */ })
   // ...
 }
@@ -88,8 +88,8 @@ function Profile() {
 
 ## Rule 4.2: Use Passive Event Listeners for Scrolling Performance
 
-**Impact:** MEDIUM  
-**Tags:** client, event-listeners, scrolling, performance, touch, wheel  
+**Impact:** MEDIUM
+**Tags:** client, event-listeners, scrolling, performance, touch, wheel
 
 ## Use Passive Event Listeners for Scrolling Performance
 
@@ -101,10 +101,10 @@ Add `{ passive: true }` to touch and wheel event listeners to enable immediate s
 useEffect(() => {
   const handleTouch = (e: TouchEvent) => console.log(e.touches[0].clientX)
   const handleWheel = (e: WheelEvent) => console.log(e.deltaY)
-  
+
   document.addEventListener('touchstart', handleTouch)
   document.addEventListener('wheel', handleWheel)
-  
+
   return () => {
     document.removeEventListener('touchstart', handleTouch)
     document.removeEventListener('wheel', handleWheel)
@@ -118,10 +118,10 @@ useEffect(() => {
 useEffect(() => {
   const handleTouch = (e: TouchEvent) => console.log(e.touches[0].clientX)
   const handleWheel = (e: WheelEvent) => console.log(e.deltaY)
-  
+
   document.addEventListener('touchstart', handleTouch, { passive: true })
   document.addEventListener('wheel', handleWheel, { passive: true })
-  
+
   return () => {
     document.removeEventListener('touchstart', handleTouch)
     document.removeEventListener('wheel', handleWheel)
@@ -137,8 +137,8 @@ useEffect(() => {
 
 ## Rule 4.3: Use SWR for Automatic Deduplication
 
-**Impact:** MEDIUM-HIGH  
-**Tags:** client, swr, deduplication, data-fetching  
+**Impact:** MEDIUM-HIGH
+**Tags:** client, swr, deduplication, data-fetching
 
 ## Use SWR for Automatic Deduplication
 
@@ -194,8 +194,8 @@ Reference: [https://swr.vercel.app](https://swr.vercel.app)
 
 ## Rule 4.4: Version and Minimize localStorage Data
 
-**Impact:** MEDIUM  
-**Tags:** client, localStorage, storage, versioning, data-minimization  
+**Impact:** MEDIUM
+**Tags:** client, localStorage, storage, versioning, data-minimization
 
 ## Version and Minimize localStorage Data
 
@@ -261,4 +261,3 @@ function cachePrefs(user: FullUser) {
 **Always wrap in try-catch:** `getItem()` and `setItem()` throw in incognito/private browsing (Safari, Firefox), when quota exceeded, or when disabled.
 
 **Benefits:** Schema evolution via versioning, reduced storage size, prevents storing tokens/PII/internal flags.
-

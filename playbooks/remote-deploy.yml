@@ -1,0 +1,138 @@
+---
+#===============================================================================
+# VPS RDP Developer Workstation - Remote Deployment Playbook
+#===============================================================================
+# Deploys to remote server using test_server inventory
+# Uses vault for credentials
+#
+# Usage:
+#   ansible-playbook -i inventory/test_server.yml playbooks/remote-deploy.yml \
+#     -e @inventory/group_vars/vault.yml \
+#     -e "ansible_password={{ vault_vps_root_password }}"
+#===============================================================================
+
+- name: "Phase 1: System Preparation & Checkpoint Creation"
+  hosts: all
+  become: true
+  gather_facts: true
+  tags:
+    - phase1
+    - preparation
+
+  tasks:
+    - name: Include Phase 1 playbook
+      ansible.builtin.include_tasks: tasks/phase1-preparation.yml
+
+- name: "Phase 2: User Management & Access Configuration"
+  hosts: all
+  become: true
+  gather_facts: false
+  tags:
+    - phase2
+    - users
+
+  tasks:
+    - name: Include Phase 2 playbook
+      ansible.builtin.include_tasks: tasks/phase2-user-management.yml
+
+- name: "Phase 3: Environment Validation & Dependency Installation"
+  hosts: all
+  become: true
+  gather_facts: false
+  tags:
+    - phase3
+    - dependencies
+
+  tasks:
+    - name: Include Phase 3 playbook
+      ansible.builtin.include_tasks: tasks/phase3-dependencies.yml
+
+- name: "Phase 4: Desktop Environment & RDP"
+  hosts: all
+  become: true
+  gather_facts: true
+  tags:
+    - phase4
+    - desktop
+
+  tasks:
+    - name: Include Phase 4 playbook
+      ansible.builtin.include_tasks: tasks/phase4-desktop-environment.yml
+
+- name: "Phase 5: Development Tools Installation"
+  hosts: all
+  become: true
+  gather_facts: true
+  tags:
+    - phase5
+    - development
+
+  tasks:
+    - name: Include Phase 5 playbook
+      ansible.builtin.include_tasks: tasks/phase5-development-tools.yml
+
+- name: "Phase 6: Installation Validation"
+  hosts: all
+  become: true
+  gather_facts: false
+  tags:
+    - phase6
+    - validation
+
+  tasks:
+    - name: Include Phase 6 playbook
+      ansible.builtin.include_tasks: tasks/phase6-validation.yml
+
+- name: "Phase 7: Configuration Optimization & Best Practices"
+  hosts: all
+  become: true
+  gather_facts: false
+  tags:
+    - phase7
+    - optimization
+
+  tasks:
+    - name: Include Phase 7 playbook
+      ansible.builtin.include_tasks: tasks/phase7-optimization.yml
+
+- name: "Phase 8: Enhancements & Extensions"
+  hosts: all
+  become: true
+  gather_facts: false
+  tags:
+    - phase8
+    - enhancements
+
+  tasks:
+    - name: Include Phase 8 playbook
+      ansible.builtin.include_tasks: tasks/phase8-enhancements.yml
+
+- name: "Phase 9: Final Validation & Optimization Verification"
+  hosts: all
+  become: true
+  gather_facts: false
+  tags:
+    - phase9
+    - final
+
+  tasks:
+    - name: Include Phase 9 playbook
+      ansible.builtin.include_tasks: tasks/phase9-enhancements.yml
+
+- name: "Deployment Complete - Generate Summary"
+  hosts: all
+  become: true
+  gather_facts: false
+  tags:
+    - always
+
+  tasks:
+    - name: Generate deployment summary
+      ansible.builtin.debug:
+        msg: |
+          ==========================================
+          VPS RDP Workstation Deployment Complete!
+          ==========================================
+          Target: {{ inventory_hostname }}
+          Username: {{ vps_username | default('apexdev') }}
+          ==========================================

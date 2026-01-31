@@ -43,13 +43,13 @@
       Phase 8 Enhancements Completed
       ==============================
       Date: {{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }}
-      
+
       Features Enabled:
       - Codeium: {{ enable_codeium | default(true) }}
       - Zsh Plugins: {{ enable_zsh_plugins | default(true) }}
       - Modern CLI: {{ enable_modern_cli | default(true) }}
       - Git Tools: {{ enable_git_tools | default(true) }}
-      
+
       Validation Status: {{ 'Success' if validation_result.rc | default(0) == 0 else 'Failed' }}
     dest: "{{ vps_setup_log_dir }}/phase8-enhancements.txt"
     mode: '0644'

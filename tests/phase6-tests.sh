@@ -1,6 +1,6 @@
 #!/bin/bash
 #===============================================================================
-# Phase 6 Tests - Configuration Optimization  
+# Phase 6 Tests - Configuration Optimization
 #===============================================================================
 set -e
 

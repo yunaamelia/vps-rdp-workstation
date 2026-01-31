@@ -12,6 +12,7 @@ FAILED=0
 echo "Test 1: Checking external repositories..."
 REPOS=("nodesource" "docker" "vscode" "github-cli")
 for repo in "${REPOS[@]}"; do
+    # shellcheck disable=SC2010
     if ls /etc/apt/sources.list.d/ 2>/dev/null | grep -q "$repo"; then
         echo "  ✅ $repo repository configured"
     else
@@ -67,7 +68,7 @@ fi
 # Test 6: Git tools
 echo "Test 6: Checking Git tools..."
 for tool in git gh lazygit; do
-    if command -v $tool &>/dev/null; then
+    if command -v "$tool" &>/dev/null; then
         echo "  ✅ $tool installed"
     else
         echo "  ❌ $tool not installed"
@@ -88,7 +89,7 @@ done
 
 # Summary
 echo ""
-if [ $FAILED -eq 0 ]; then
+if [ "$FAILED" -eq 0 ]; then
     echo "=== Phase 3 Validation: ALL TESTS PASSED ✅ ==="
     exit 0
 else

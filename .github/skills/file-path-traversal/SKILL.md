@@ -420,7 +420,7 @@ def safe_file_access(base_dir, filename):
     # Resolve to absolute path
     base = os.path.realpath(base_dir)
     file_path = os.path.realpath(os.path.join(base, filename))
-    
+
     # Verify file is within base directory
     if file_path.startswith(base):
         return open(file_path, 'r').read()

@@ -3,6 +3,7 @@
 # Error Handler - Comprehensive error handling for deployment
 #===============================================================================
 
+# shellcheck disable=SC1091
 source "$(dirname "$0")/logger.sh" 2>/dev/null || true
 
 # Error codes
@@ -31,15 +32,15 @@ handle_error() {
     local line_number=$1
     local command="$2"
     local error_type="${3:-GENERAL_ERROR}"
-    
+
     log_error "Error occurred in script at line $line_number"
     log_error "Failed command: $command"
     log_error "Exit code: $exit_code"
-    
+
     # Log to error file
     echo "$(date -Iseconds) | Line: $line_number | Command: $command | Exit: $exit_code" \
         >> "${LOG_DIR:-/var/log/vps-setup}/errors.log"
-    
+
     return $(get_error_code "$error_type")
 }
 
@@ -52,7 +53,7 @@ setup_error_trap() {
 # Cleanup on exit
 cleanup_on_exit() {
     local exit_code=$?
-    if [ $exit_code -ne 0 ]; then
+    if [ "$exit_code" -ne 0 ]; then
         log_warn "Script exiting with code: $exit_code"
         # Optionally trigger rollback
         if [ "${AUTO_ROLLBACK:-false}" = "true" ]; then
@@ -69,15 +70,16 @@ cleanup_on_exit() {
 retry_command() {
     local max_attempts=${1:-3}
     local delay=${2:-5}
+    # shellcheck disable=SC2124
     local command="${@:3}"
     local attempt=1
-    
-    while [ $attempt -le $max_attempts ]; do
+
+    while [ "$attempt" -le "$max_attempts" ]; do
         log_debug "Attempt $attempt/$max_attempts: $command"
         if eval "$command"; then
             return 0
         fi
-        
+
         if [ $attempt -lt $max_attempts ]; then
             log_warn "Command failed, retrying in ${delay}s..."
             sleep $delay
@@ -85,7 +87,7 @@ retry_command() {
         fi
         ((attempt++))
     done
-    
+
     log_error "Command failed after $max_attempts attempts: $command"
     return 1
 }
@@ -94,7 +96,7 @@ retry_command() {
 assert() {
     local condition="$1"
     local message="${2:-Assertion failed}"
-    
+
     if ! eval "$condition"; then
         log_error "ASSERTION FAILED: $message"
         log_error "Condition: $condition"

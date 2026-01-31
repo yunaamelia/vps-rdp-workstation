@@ -5,7 +5,7 @@
   ansible.builtin.get_url:
     url: https://download.docker.com/linux/debian/gpg
     dest: /usr/share/keyrings/docker-archive-keyring.asc
-    mode: '0644'
+    mode: "0644"
 
 - name: Add Docker repository
   ansible.builtin.apt_repository:
@@ -22,7 +22,7 @@
       - docker-buildx-plugin
       - docker-compose-plugin
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Create Docker daemon configuration
   ansible.builtin.template:
@@ -30,17 +30,17 @@
     dest: /etc/docker/daemon.json
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   notify: restart docker
 
 - name: Add user to docker group
   ansible.builtin.user:
     name: "{{ vps_username }}"
     groups: docker
-    append: yes
+    append: true
 
 - name: Enable Docker service
   ansible.builtin.systemd:
     name: docker
-    enabled: yes
+    enabled: true
     state: started

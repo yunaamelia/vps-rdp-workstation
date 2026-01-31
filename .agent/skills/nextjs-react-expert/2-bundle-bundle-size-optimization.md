@@ -13,8 +13,8 @@ This section contains **5 rules** focused on bundle size optimization.
 
 ## Rule 2.1: Avoid Barrel File Imports
 
-**Impact:** CRITICAL  
-**Tags:** bundle, imports, tree-shaking, barrel-files, performance  
+**Impact:** CRITICAL
+**Tags:** bundle, imports, tree-shaking, barrel-files, performance
 
 ## Avoid Barrel File Imports
 
@@ -73,8 +73,8 @@ Reference: [How we optimized package imports in Next.js](https://vercel.com/blog
 
 ## Rule 2.2: Conditional Module Loading
 
-**Impact:** HIGH  
-**Tags:** bundle, conditional-loading, lazy-loading  
+**Impact:** HIGH
+**Tags:** bundle, conditional-loading, lazy-loading
 
 ## Conditional Module Loading
 
@@ -105,8 +105,8 @@ The `typeof window !== 'undefined'` check prevents bundling this module for SSR,
 
 ## Rule 2.3: Defer Non-Critical Third-Party Libraries
 
-**Impact:** MEDIUM  
-**Tags:** bundle, third-party, analytics, defer  
+**Impact:** MEDIUM
+**Tags:** bundle, third-party, analytics, defer
 
 ## Defer Non-Critical Third-Party Libraries
 
@@ -155,8 +155,8 @@ export default function RootLayout({ children }) {
 
 ## Rule 2.4: Dynamic Imports for Heavy Components
 
-**Impact:** CRITICAL  
-**Tags:** bundle, dynamic-import, code-splitting, next-dynamic  
+**Impact:** CRITICAL
+**Tags:** bundle, dynamic-import, code-splitting, next-dynamic
 
 ## Dynamic Imports for Heavy Components
 
@@ -191,8 +191,8 @@ function CodePanel({ code }: { code: string }) {
 
 ## Rule 2.5: Preload Based on User Intent
 
-**Impact:** MEDIUM  
-**Tags:** bundle, preload, user-intent, hover  
+**Impact:** MEDIUM
+**Tags:** bundle, preload, user-intent, hover
 
 ## Preload Based on User Intent
 
@@ -237,4 +237,3 @@ function FlagsProvider({ children, flags }: Props) {
 ```
 
 The `typeof window !== 'undefined'` check prevents bundling preloaded modules for SSR, optimizing server bundle size and build speed.
-

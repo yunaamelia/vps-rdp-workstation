@@ -182,7 +182,7 @@ CURSOR (Good for mobile):
 ```
 Instead of:
 GET /users/1
-GET /users/2  
+GET /users/2
 GET /users/3
 (3 round trips, 3x latency)
 

@@ -1,0 +1,70 @@
+---
+# ===============================================================================
+# Phase 9.10: AI Code Completion (Codeium)
+# ===============================================================================
+# Installs Codeium VS Code extension for AI-powered code completion
+# ===============================================================================
+
+# -------------------------------------------------------------------------------
+# Check VS Code availability
+# -------------------------------------------------------------------------------
+
+- name: Check if VS Code is installed
+  ansible.builtin.stat:
+    path: /usr/bin/code
+  register: enhancements_vscode_installed
+
+#-------------------------------------------------------------------------------
+# Install Codeium Extension
+#-------------------------------------------------------------------------------
+
+- name: Install Codeium extension for VS Code
+  ansible.builtin.command: code --install-extension Codeium.codeium --force
+  become: true
+  become_user: "{{ vps_username }}"
+  environment:
+    HOME: "/home/{{ vps_username }}"
+  when: enhancements_vscode_installed.stat.exists
+  register: enhancements_codeium_install
+  changed_when: "'already installed' not in enhancements_codeium_install.stdout | default('')"
+  failed_when: false
+
+#-------------------------------------------------------------------------------
+# Verify Installation
+#-------------------------------------------------------------------------------
+
+- name: Check Codeium installation status
+  ansible.builtin.command: code --list-extensions
+  become: true
+  become_user: "{{ vps_username }}"
+  environment:
+    HOME: "/home/{{ vps_username }}"
+  register: enhancements_vscode_extensions
+  changed_when: false
+  failed_when: false
+  when: enhancements_vscode_installed.stat.exists
+
+- name: Set Codeium verification status
+  ansible.builtin.set_fact:
+    enhancements_codeium_verified: "{{ 'Codeium.codeium' in (enhancements_vscode_extensions.stdout | default('')) }}"
+  when: enhancements_vscode_installed.stat.exists
+
+#-------------------------------------------------------------------------------
+# Log Result
+#-------------------------------------------------------------------------------
+
+- name: Log Codeium installation success
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Codeium AI Code Completion installed"
+    create: true
+    mode: "0644"
+  when: enhancements_codeium_verified | default(false)
+
+- name: Log Codeium installation skip
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Codeium skipped (VS Code not found or install failed)"
+    create: true
+    mode: "0644"
+  when: not (enhancements_codeium_verified | default(false))

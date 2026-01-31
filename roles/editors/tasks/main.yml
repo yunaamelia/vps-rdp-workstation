@@ -5,7 +5,7 @@
   ansible.builtin.get_url:
     url: https://packages.microsoft.com/keys/microsoft.asc
     dest: /usr/share/keyrings/packages.microsoft.asc
-    mode: '0644'
+    mode: "0644"
 
 - name: Add VS Code repository
   ansible.builtin.apt_repository:
@@ -17,7 +17,7 @@
   ansible.builtin.apt:
     name: code
     state: present
-    update_cache: yes
+    update_cache: true
 
 - name: Create VS Code config directory
   ansible.builtin.file:
@@ -25,9 +25,10 @@
     state: directory
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0755'
+    mode: "0755"
 
 - name: Install VS Code extensions
+  become: true
   become_user: "{{ vps_username }}"
   ansible.builtin.command: "code --install-extension {{ item }}"
   loop:
@@ -49,5 +50,5 @@
 - name: Install OpenCode AI
   community.general.npm:
     name: opencode-ai
-    global: yes
+    global: true
     state: present

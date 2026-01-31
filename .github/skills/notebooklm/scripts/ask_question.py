@@ -102,7 +102,7 @@ def ask_notebooklm(question: str, notebook_url: str, headless: bool = True) -> s
 
         # Type question (human-like, fast)
         print("  ⏳ Typing question...")
-        
+
         # Use primary selector for typing
         input_selector = QUERY_INPUT_SELECTORS[0]
         StealthUtils.human_type(page, input_selector, question)

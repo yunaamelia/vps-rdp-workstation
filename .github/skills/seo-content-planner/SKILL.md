@@ -83,7 +83,7 @@ I. Introduction
 II. Main Section 1
     A. Subtopic
     B. Subtopic
-    
+
 III. Main Section 2
     [etc.]
 ```

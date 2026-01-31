@@ -36,10 +36,10 @@ if [ -d ~/projects ]; then
         PROJECT_DIR=$(dirname "$gitdir")
         PROJECT_NAME=$(basename "$PROJECT_DIR")
         cd "$PROJECT_DIR" || continue
-        
+
         BRANCH=$(git branch --show-current 2>/dev/null)
         MODIFIED=$(git status --porcelain 2>/dev/null | wc -l)
-        
+
         if [ "$MODIFIED" -gt 0 ]; then
             echo "  📝 $PROJECT_NAME (branch: $BRANCH, $MODIFIED change(s))"
         else

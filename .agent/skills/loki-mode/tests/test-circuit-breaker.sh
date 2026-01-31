@@ -20,11 +20,12 @@ log_fail() { echo -e "${RED}[FAIL]${NC} $1"; ((FAILED++)); }
 log_test() { echo -e "${YELLOW}[TEST]${NC} $1"; }
 
 cleanup() {
+    # shellcheck disable=SC2317
     rm -rf "$TEST_DIR"
 }
 trap cleanup EXIT
 
-cd "$TEST_DIR"
+cd "$TEST_DIR" || exit 1
 
 echo "========================================"
 echo "Loki Mode Circuit Breaker Tests"
@@ -380,7 +381,7 @@ echo -e "${GREEN}Passed: $PASSED${NC}"
 echo -e "${RED}Failed: $FAILED${NC}"
 echo ""
 
-if [ $FAILED -eq 0 ]; then
+if [ "$FAILED" -eq 0 ]; then
     echo -e "${GREEN}All tests passed!${NC}"
     exit 0
 else

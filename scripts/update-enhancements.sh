@@ -27,7 +27,7 @@ fi
 if [[ -d "$HOME/.oh-my-zsh" ]]; then
     echo "🐚 Updating Oh My Zsh..."
     env ZSH="$HOME/.oh-my-zsh" sh "$HOME/.oh-my-zsh/tools/upgrade.sh"
-    
+
     # Update plugins
     echo "   Updating Zsh plugins..."
     find "$HOME/.oh-my-zsh/custom/plugins" -type d -mindepth 1 -maxdepth 1 -exec git -C {} pull \;

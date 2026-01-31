@@ -112,7 +112,7 @@ Fix: Add explicit return types to route handlers
 // Current
 router.post('/todos', (req: Request, res: Response) => {
 
-// Fixed  
+// Fixed
 router.post('/todos', (req: Request, res: Response): void => {
 ```
 
@@ -165,7 +165,7 @@ db.run('...', function(this: any, err: Error | null) { ... this.lastID ... })
   - POST /api/todos - Creates new todo with validation
   - PATCH /api/todos/:id - Updates completion status
   - DELETE /api/todos/:id - Deletes todo by ID
-  
+
   Error handling properly returns:
   - 400 for validation errors (invalid input)
   - 404 for not found (todo doesn't exist)
@@ -485,10 +485,10 @@ npm run dev    # Starts Vite dev server
    ```typescript
    // In db/db.ts
    const db = new sqlite3.Database(dbPath, (err: Error | null) => { ... })
-   
+
    // In routes/todos.ts
    router.post('/todos', (req: Request, res: Response): void => { ... }
-   
+
    // In callbacks
    function(this: any, err: Error | null) { ... }
    ```

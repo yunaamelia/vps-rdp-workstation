@@ -8,27 +8,27 @@ modern_cli_tools:
     apt_package: eza
     cargo_package: eza
     binary_url: "https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz"
-  
+
   - name: bat
     description: "Cat clone with syntax highlighting"
     apt_package: bat
     cargo_package: bat
-  
+
   - name: fd
     description: "Simple, fast and user-friendly alternative to find"
     apt_package: fd-find
     cargo_package: fd-find
-  
+
   - name: ripgrep
     description: "Line-oriented search tool that strictly respects gitignore"
     apt_package: ripgrep
     cargo_package: ripgrep
-  
+
   - name: dust
     description: "More intuitive version of du"
     cargo_package: du-dust
     binary_name: dust
-  
+
   - name: procs
     description: "Modern replacement for ps"
     cargo_package: procs
@@ -38,7 +38,7 @@ git_tools:
   - name: lazygit
     description: "Simple terminal UI for git commands"
     binary_url_template: "https://github.com/jesseduffield/lazygit/releases/download/v{{ version }}/lazygit_{{ version }}_Linux_x86_64.tar.gz"
-  
+
   - name: delta
     description: "Syntax-highlighting pager for git, diff, and grep output"
     cargo_package: git-delta
@@ -48,23 +48,23 @@ git_tools:
 tmux_plugins:
   - name: tpm
     repo: "https://github.com/tmux-plugins/tpm"
-    dest: "{{ enhancement_home }}/.tmux/plugins/tpm"
-  
+    dest: "{{ enhancements_home }}/.tmux/plugins/tpm"
+
   - name: tmux-resurrect
     repo: "https://github.com/tmux-plugins/tmux-resurrect"
-  
+
   - name: tmux-continuum
     repo: "https://github.com/tmux-plugins/tmux-continuum"
-  
+
   - name: tmux-yank
     repo: "https://github.com/tmux-plugins/tmux-yank"
-  
+
   - name: tmux-fzf
     repo: "https://github.com/sainnhe/tmux-fzf"
 
 # Paths
-enhancement_paths:
+enhancements_paths:
   bin: "/usr/local/bin"
-  config: "{{ enhancement_home }}/.config"
+  config: "{{ enhancements_home }}/.config"
   backups: "/var/backups/vps-workstation/enhancements"
   logs: "/var/log/vps-setup/enhancements"

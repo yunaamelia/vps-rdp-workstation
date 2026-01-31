@@ -356,4 +356,3 @@ Before finalizing code:
 
 **Status:** Stable, opinionated, and enforceable
 **Intended Use:** Production React codebases with long-term maintenance horizons
-

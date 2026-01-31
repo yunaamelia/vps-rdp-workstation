@@ -46,7 +46,8 @@ check_os() {
 
 check_architecture() {
     echo -n "Checking architecture... "
-    local arch=$(uname -m)
+    local arch
+    arch=$(uname -m)
     if [ "$arch" = "x86_64" ]; then
         echo -e "${GREEN}✅ $arch${NC}"
         return 0
@@ -59,9 +60,10 @@ check_architecture() {
 
 check_memory() {
     echo -n "Checking memory... "
-    local ram_mb=$(free -m | awk '/^Mem:/{print $2}')
+    local ram_mb
+    ram_mb=$(free -m | awk '/^Mem:/{print $2}')
     local ram_gb=$((ram_mb / 1024))
-    
+
     if [ "$ram_gb" -ge 4 ]; then
         echo -e "${GREEN}✅ ${ram_gb}GB (minimum: 4GB)${NC}"
         return 0
@@ -77,8 +79,9 @@ check_memory() {
 
 check_disk() {
     echo -n "Checking disk space... "
-    local disk_gb=$(df -BG / | awk 'NR==2{print $4}' | tr -d 'G')
-    
+    local disk_gb
+    disk_gb=$(df -BG / | awk 'NR==2{print $4}' | tr -d 'G')
+
     if [ "$disk_gb" -ge 40 ]; then
         echo -e "${GREEN}✅ ${disk_gb}GB free (minimum: 40GB)${NC}"
         return 0
@@ -94,8 +97,9 @@ check_disk() {
 
 check_cpu() {
     echo -n "Checking CPU cores... "
-    local cores=$(nproc 2>/dev/null || grep -c ^processor /proc/cpuinfo)
-    
+    local cores
+    cores=$(nproc 2>/dev/null || grep -c ^processor /proc/cpuinfo)
+
     if [ "$cores" -ge 4 ]; then
         echo -e "${GREEN}✅ ${cores} cores (excellent)${NC}"
     elif [ "$cores" -ge 2 ]; then
@@ -175,19 +179,29 @@ check_ports() {
 echo ""
 echo "System Requirements:"
 echo "─────────────────────────────────────"
+# shellcheck disable=SC2310
 check_os || true
+# shellcheck disable=SC2310
 check_architecture || true
+# shellcheck disable=SC2310
 check_cpu || true
+# shellcheck disable=SC2310
 check_memory || true
+# shellcheck disable=SC2310
 check_disk || true
 
 echo ""
 echo "Access & Connectivity:"
 echo "─────────────────────────────────────"
+# shellcheck disable=SC2310
 check_privileges || true
+# shellcheck disable=SC2310
 check_internet || true
+# shellcheck disable=SC2310
 check_dns || true
+# shellcheck disable=SC2310
 check_apt || true
+# shellcheck disable=SC2310
 check_ports || true
 
 #-------------------------------------------------------------------------------
@@ -196,7 +210,7 @@ check_ports || true
 
 echo ""
 echo "─────────────────────────────────────"
-if [ $ERRORS -eq 0 ]; then
+if [ "$ERRORS" -eq 0 ]; then
     echo -e "${GREEN}✅ All pre-flight checks passed!${NC}"
     echo ""
     echo "You can proceed with: sudo ./setup.sh"

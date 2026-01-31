@@ -14,8 +14,8 @@
       =================
       Timestamp: {{ ansible_date_time.iso8601 }}
       Result: {{ 'PASSED' if validation_result.rc == 0 else 'FAILED' }}
-      
+
       Output:
       {{ validation_result.stdout | default('No output') }}
     dest: "{{ vps_setup_log_dir }}/validation-report.txt"
-    mode: '0644'
+    mode: "0644"

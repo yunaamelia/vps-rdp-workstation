@@ -20,7 +20,7 @@ echo "=================================="
 check_command() {
     local cmd=$1
     local name=${2:-$cmd}
-    
+
     if command -v "$cmd" &> /dev/null; then
         echo -e "${GREEN}✓${NC} $name is installed ($(command -v "$cmd"))"
         ((PASS++))
@@ -35,7 +35,7 @@ check_command() {
 check_file() {
     local file=$1
     local name=$2
-    
+
     if [[ -f "$file" ]]; then
         echo -e "${GREEN}✓${NC} $name exists ($file)"
         ((PASS++))
@@ -50,7 +50,7 @@ check_file() {
 check_dir() {
     local dir=$1
     local name=$2
-    
+
     if [[ -d "$dir" ]]; then
         echo -e "${GREEN}✓${NC} $name exists ($dir)"
         ((PASS++))

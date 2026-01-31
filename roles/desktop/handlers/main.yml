@@ -1,11 +1,11 @@
 ---
 # Desktop role handlers
-- name: restart xrdp
+- name: Restart xrdp
   ansible.builtin.systemd:
     name: xrdp
     state: restarted
 
-- name: restart sddm
+- name: Restart sddm
   ansible.builtin.systemd:
     name: sddm
     state: restarted

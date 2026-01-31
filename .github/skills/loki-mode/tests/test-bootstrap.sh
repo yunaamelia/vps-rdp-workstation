@@ -21,11 +21,12 @@ log_fail() { echo -e "${RED}[FAIL]${NC} $1"; ((FAILED++)); }
 log_test() { echo -e "${YELLOW}[TEST]${NC} $1"; }
 
 cleanup() {
+    # shellcheck disable=SC2317
     rm -rf "$TEST_DIR"
 }
 trap cleanup EXIT
 
-cd "$TEST_DIR"
+cd "$TEST_DIR" || exit 1
 
 echo "========================================"
 echo "Loki Mode Bootstrap Tests"
@@ -81,7 +82,7 @@ cat > .loki/state/orchestrator.json << 'EOF'
 EOF
 
 if [ -f ".loki/state/orchestrator.json" ]; then
-    version=$(cat .loki/state/orchestrator.json | grep -o '"version": "[^"]*"' | cut -d'"' -f4)
+    version=$(grep -o '"version": "[^"]*"' .loki/state/orchestrator.json | cut -d'"' -f4)
     if [ "$version" = "2.1.0" ]; then
         log_pass "Orchestrator state created with correct version"
     else
@@ -157,7 +158,7 @@ LOCK_FILE=".loki/state/locks/test.lock"
 ) &
 LOCK_PID=$!
 sleep 0.2
-wait $LOCK_PID 2>/dev/null || true
+wait "$LOCK_PID" 2>/dev/null || true
 
 if [ -f "$LOCK_FILE.status" ] && grep -q "locked" "$LOCK_FILE.status"; then
     log_pass "File locking works"
@@ -187,7 +188,7 @@ echo -e "${GREEN}Passed: $PASSED${NC}"
 echo -e "${RED}Failed: $FAILED${NC}"
 echo ""
 
-if [ $FAILED -eq 0 ]; then
+if [ "$FAILED" -eq 0 ]; then
     echo -e "${GREEN}All tests passed!${NC}"
     exit 0
 else

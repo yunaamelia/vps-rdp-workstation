@@ -55,7 +55,8 @@ log() {
     local level="$1"
     shift
     local message="$*"
-    local timestamp=$(date -Iseconds)
+    local timestamp
+    timestamp=$(date -Iseconds)
     echo -e "${timestamp} [${level}] ${message}" | tee -a "$LOG_FILE" 2>/dev/null || echo -e "${timestamp} [${level}] ${message}"
 }
 
@@ -81,7 +82,7 @@ show_banner() {
 ║     ╚═══╝  ╚═╝     ╚══════╝    ╚═╝  ╚═╝╚═════╝ ╚═╝                           ║
 ║                                                                              ║
 ║   Developer Workstation Automation                                           ║
-║   Version 1.0.0 | Target: Debian 13 (Trixie)                                ║
+║   Version 1.0.0 | Target: Debian 13 (Trixie)                                 ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 EOF
@@ -119,19 +120,21 @@ check_architecture() {
 }
 
 check_resources() {
-    local ram_gb=$(free -g | awk '/^Mem:/{print $2}')
-    local disk_gb=$(df -BG / | awk 'NR==2{print $4}' | tr -d 'G')
-    
+    local ram_gb
+    ram_gb=$(free -g | awk '/^Mem:/{print $2}')
+    local disk_gb
+    disk_gb=$(df -BG / | awk 'NR==2{print $4}' | tr -d 'G')
+
     if [ "$ram_gb" -lt 4 ]; then
         log_error "Minimum 4GB RAM required. Found: ${ram_gb}GB"
         exit 1
     fi
-    
+
     if [ "$disk_gb" -lt 40 ]; then
         log_error "Minimum 40GB free disk required. Found: ${disk_gb}GB"
         exit 1
     fi
-    
+
     log_success "Resources: ${ram_gb}GB RAM, ${disk_gb}GB free disk"
 }
 
@@ -147,13 +150,13 @@ run_preflight_checks() {
     echo ""
     echo -e "${BLUE}Running pre-flight checks...${NC}"
     echo ""
-    
+
     check_root
     check_debian_version
     check_architecture
     check_resources
     check_internet
-    
+
     echo ""
     log_success "All pre-flight checks passed"
     echo ""
@@ -167,7 +170,7 @@ prompt_configuration() {
     echo -e "${BLUE}Configuration${NC}"
     echo "============="
     echo ""
-    
+
     # Username
     if [ -z "${VPS_USERNAME:-}" ]; then
         if [ "${NON_INTERACTIVE:-false}" = "true" ]; then
@@ -181,7 +184,7 @@ prompt_configuration() {
             fi
         fi
     fi
-    
+
     # Password
     if [ -z "${VPS_PASSWORD:-}" ]; then
         if [ "${NON_INTERACTIVE:-false}" = "true" ]; then
@@ -204,13 +207,13 @@ prompt_configuration() {
             fi
         fi
     fi
-    
+
     # Optional parameters with defaults
     VPS_TIMEZONE="${VPS_TIMEZONE:-UTC}"
     VPS_HOSTNAME="${VPS_HOSTNAME:-vps-workstation}"
     VPS_THEME="${VPS_THEME:-dark}"
     VPS_LOCALE="${VPS_LOCALE:-en_US.UTF-8}"
-    
+
     echo ""
     echo -e "${BLUE}Configuration Summary${NC}"
     echo "====================="
@@ -220,7 +223,7 @@ prompt_configuration() {
     echo "Theme:     $VPS_THEME"
     echo "Locale:    $VPS_LOCALE"
     echo ""
-    
+
     if [ "${NON_INTERACTIVE:-false}" != "true" ]; then
         read -p "Proceed with this configuration? [Y/n] " confirm
         if [[ "$confirm" =~ ^[Nn] ]]; then
@@ -245,13 +248,14 @@ hash_password() {
 #===============================================================================
 
 install_ansible() {
-    if which ansible-playbook &>/dev/null; then
-        local version=$(ansible --version | head -n1)
+    if command -v ansible-playbook &>/dev/null; then
+        local version
+        version=$(ansible --version | head -n1)
         log_success "Ansible already installed: $version"
         mkdir -p /var/log/vps-setup/retry /var/log/vps-setup/facts_cache
         return 0
     fi
-    
+
     log_info "Installing Ansible..."
     apt-get update
     apt-get install -y ansible python3-apt
@@ -260,7 +264,7 @@ install_ansible() {
 
     # Pre-generate locale to avoid Ansible hang
     log_info "Pre-generating locale en_US.UTF-8..."
-    
+
     # Ensure locales package is installed
     if ! dpkg -s locales >/dev/null 2>&1; then
         apt-get install -y locales
@@ -291,7 +295,7 @@ install_ansible() {
 
 init_state() {
     mkdir -p "$LOG_DIR"
-    
+
     cat > "$STATE_FILE" << EOF
 {
     "deployment_id": "$(uuidgen 2>/dev/null || cat /proc/sys/kernel/random/uuid)",
@@ -303,14 +307,14 @@ init_state() {
     "hostname": "$VPS_HOSTNAME"
 }
 EOF
-    
-    log_success "Deployment state initialized: $(cat "$STATE_FILE" | jq -r '.deployment_id')"
+
+    log_success "Deployment state initialized: $(jq -r '.deployment_id' "$STATE_FILE")"
 }
 
 update_phase() {
     local phase="$1"
     local status="$2"
-    
+
     # Update current phase in state file
     if command -v jq &>/dev/null; then
         local tmp=$(mktemp)
@@ -324,11 +328,11 @@ update_phase() {
 
 run_ansible_deployment() {
     local password_hash=$(hash_password "$VPS_PASSWORD")
-    
+
     log_info "Starting Ansible deployment..."
-    
+
     cd "$SCRIPT_DIR"
-    
+
     # Export variables for Ansible
     export VPS_USERNAME
     export VPS_PASSWORD_HASH="$password_hash"
@@ -336,7 +340,7 @@ run_ansible_deployment() {
     export VPS_HOSTNAME
     export VPS_THEME
     export VPS_LOCALE
-    
+
     # Run main playbook
     ansible-playbook \
         -i inventory/hosts.yml \
@@ -357,7 +361,7 @@ run_ansible_deployment() {
 
 show_completion() {
     local ip_addr=$(hostname -I | awk '{print $1}')
-    
+
     echo ""
     echo -e "${GREEN}"
     cat << EOF
@@ -381,10 +385,10 @@ show_completion() {
 ║   ─────────────────────────────────────────────────────────────────────────  ║
 ║   • KDE Plasma Desktop with dark theme                                       ║
 ║   • VS Code, OpenCode AI, and development tools                              ║
-║   • Node.js LTS, Python 3.12+, PHP 8.x                                      ║
+║   • Node.js LTS, Python 3.12+, PHP 8.x                                       ║
 ║   • Docker with Compose V2                                                   ║
-║   • Zsh with Oh My Zsh and Starship prompt                                  ║
-║   • JetBrains Mono Nerd Font                                                ║
+║   • Zsh with Oh My Zsh and Starship prompt                                   ║
+║   • JetBrains Mono Nerd Font                                                 ║
 ║   • fail2ban and UFW firewall configured                                    ║
 ║                                                                              ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
@@ -425,16 +429,16 @@ main() {
                 ;;
         esac
     done
-    
+
     show_banner
     run_preflight_checks
     prompt_configuration
-    
+
     # Ensure we're root for the rest
     if [ "$(id -u)" -ne 0 ]; then
         exec sudo -E "$0" "$@"
     fi
-    
+
     init_state
     install_ansible
     run_ansible_deployment

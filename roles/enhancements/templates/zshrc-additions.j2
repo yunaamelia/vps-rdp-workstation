@@ -5,7 +5,7 @@
 #-------------------------------------------------------------------------------
 # Modern CLI Tool Aliases
 #-------------------------------------------------------------------------------
-{% if enable_modern_cli | default(true) %}
+{% if enhancements_enable_modern_cli | default(true) %}
 # Modern replacement for ls
 if command -v eza &> /dev/null; then
   alias ls='eza --icons --git'
@@ -16,7 +16,7 @@ fi
 # Modern replacement for cat
 if command -v bat &> /dev/null; then
   alias cat='bat --style=plain'
-  export BAT_THEME="{{ bat_theme | default('Catppuccin-mocha') }}"
+  export BAT_THEME="{{ enhancements_bat_theme | default('Catppuccin-mocha') }}"
 fi
 
 # Modern replacement for find
@@ -46,7 +46,7 @@ fi
 #-------------------------------------------------------------------------------
 # Git Enhancements
 #-------------------------------------------------------------------------------
-{% if enable_git_tools | default(true) %}
+{% if enhancements_enable_git_tools | default(true) %}
 if command -v lazygit &> /dev/null; then
   alias lg='lazygit'
 fi
@@ -55,10 +55,10 @@ fi
 #-------------------------------------------------------------------------------
 # File Manager
 #-------------------------------------------------------------------------------
-{% if enable_file_manager | default(true) %}
+{% if enhancements_enable_file_manager | default(true) %}
 if command -v yazi &> /dev/null; then
   alias y='yazi'
-  
+
   # Function to change directory when quitting yazi
   function ya() {
     local tmp="$(mktemp -t "yazi-cwd.XXXXX")"

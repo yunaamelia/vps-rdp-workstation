@@ -304,13 +304,13 @@ HOW CRITICAL IS OFFLINE?
 ```
 1. CACHE-FIRST (Simple)
    Request → Check cache → If stale, fetch → Update cache
-   
+
 2. STALE-WHILE-REVALIDATE
    Request → Return cached → Fetch update → Update UI
-   
+
 3. OFFLINE-FIRST (Complex)
    Action → Write to local DB → Queue sync → Sync when online
-   
+
 4. SYNC ENGINE
    Use: Firebase, Realm Sync, Supabase realtime
    Handles conflict resolution automatically

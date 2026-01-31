@@ -1,13 +1,13 @@
 ---
-#===============================================================================
+# ===============================================================================
 # Phase 9.4: Fuzzy Finding & Navigation
-#===============================================================================
+# ===============================================================================
 # Configures fzf for fuzzy file search, history search, and directory navigation
-#===============================================================================
+# ===============================================================================
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # FZF Configuration
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 - name: Add FZF configuration to enhancements file
   ansible.builtin.blockinfile:
@@ -20,36 +20,36 @@
         export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
         export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
       fi
-      
+
       # FZF Catppuccin Mocha theme
       export FZF_DEFAULT_OPTS="
         --height 40%
         --layout=reverse
         --border rounded
         --info=inline
-        --color={{ fzf_colors }}
+        --color={{ enhancements_fzf_colors }}
       "
-      
+
       # Ctrl+T: Fuzzy file search with bat preview
       export FZF_CTRL_T_OPTS="
-        --preview 'bat --color=always --style=numbers --line-range=:{{ fzf_preview_max_size }} {} 2>/dev/null || cat {}'
+        --preview 'bat --color=always --style=numbers --line-range=:{{ enhancements_fzf_preview_max_size }} {} 2>/dev/null || cat {}'
         --preview-window right:60%:wrap
         --bind 'ctrl-/:toggle-preview'
       "
-      
+
       # Ctrl+R: Fuzzy history search
       export FZF_CTRL_R_OPTS="
         --preview 'echo {}'
         --preview-window down:3:wrap
         --bind 'ctrl-y:execute-silent(echo -n {2..} | xclip -selection clipboard)+abort'
       "
-      
+
       # Alt+C: Fuzzy directory navigation
       export FZF_ALT_C_OPTS="
         --preview 'eza --tree --level=2 --icons --color=always {} 2>/dev/null || ls -la {}'
         --preview-window right:50%
       "
-      
+
       # Load FZF keybindings and completion
       if [[ -f /usr/share/doc/fzf/examples/key-bindings.zsh ]]; then
         source /usr/share/doc/fzf/examples/key-bindings.zsh
@@ -57,9 +57,9 @@
       if [[ -f /usr/share/doc/fzf/examples/completion.zsh ]]; then
         source /usr/share/doc/fzf/examples/completion.zsh
       fi
-      
+
       # Custom FZF functions
-      
+
       # fkill - fuzzy kill process
       fkill() {
         local pid
@@ -68,7 +68,7 @@
           echo "$pid" | xargs kill -${1:-9}
         fi
       }
-      
+
       # fco - checkout git branch
       fco() {
         local branches branch
@@ -76,21 +76,21 @@
         branch=$(echo "$branches" | fzf --ansi +m) &&
         git checkout $(echo "$branch" | sed "s/.* //" | sed "s#remotes/[^/]*/##")
       }
-      
+
       # fenv - search environment variables
       fenv() {
         local var
         var=$(printenv | fzf) &&
         echo "$var"
       }
-    create: yes
+    create: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 - name: Log FZF installation
   ansible.builtin.lineinfile:
-    path: "{{ enhancement_log_dir }}/install.log"
+    path: "{{ enhancements_log_dir }}/install.log"
     line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - FZF Fuzzy Finding configured"
-    create: yes
-    mode: '0644'
+    create: true
+    mode: "0644"

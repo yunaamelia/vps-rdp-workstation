@@ -6,34 +6,34 @@
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     state: present
-    reload: yes
+    reload: true
     sysctl_file: /etc/sysctl.d/99-vps-rdp-performance.conf
   loop:
     # Memory management
-    - { key: 'vm.swappiness', value: '10' }
-    - { key: 'vm.vfs_cache_pressure', value: '50' }
-    - { key: 'vm.dirty_ratio', value: '10' }
-    - { key: 'vm.dirty_background_ratio', value: '5' }
+    - { key: "vm.swappiness", value: "10" }
+    - { key: "vm.vfs_cache_pressure", value: "50" }
+    - { key: "vm.dirty_ratio", value: "10" }
+    - { key: "vm.dirty_background_ratio", value: "5" }
     # Network optimization for RDP
-    - { key: 'net.core.rmem_max', value: '16777216' }
-    - { key: 'net.core.wmem_max', value: '16777216' }
-    - { key: 'net.ipv4.tcp_fastopen', value: '3' }
-    - { key: 'net.ipv4.tcp_slow_start_after_idle', value: '0' }
-  become: yes
-  ignore_errors: yes
+    - { key: "net.core.rmem_max", value: "16777216" }
+    - { key: "net.core.wmem_max", value: "16777216" }
+    - { key: "net.ipv4.tcp_fastopen", value: "3" }
+    - { key: "net.ipv4.tcp_slow_start_after_idle", value: "0" }
+  become: true
+  ignore_errors: true
 
 - name: Enable BBR congestion control
   ansible.posix.sysctl:
     name: "{{ item.key }}"
     value: "{{ item.value }}"
     state: present
-    reload: yes
+    reload: true
     sysctl_file: /etc/sysctl.d/99-vps-rdp-performance.conf
   loop:
-    - { key: 'net.ipv4.tcp_congestion_control', value: 'bbr' }
-    - { key: 'net.core.default_qdisc', value: 'fq' }
-  become: yes
-  ignore_errors: yes
+    - { key: "net.ipv4.tcp_congestion_control", value: "bbr" }
+    - { key: "net.core.default_qdisc", value: "fq" }
+  become: true
+  ignore_errors: true
 
 - name: Configure I/O scheduler for SSD
   ansible.builtin.copy:
@@ -44,25 +44,25 @@
     dest: /etc/udev/rules.d/60-scheduler.rules
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
 
 - name: Disable unnecessary services
   ansible.builtin.systemd:
     name: "{{ item }}"
-    enabled: no
+    enabled: false
     state: stopped
   loop:
     - bluetooth.service
     - cups.service
     - avahi-daemon.service
-  become: yes
-  ignore_errors: yes
+  become: true
+  ignore_errors: true
 
 - name: Enable TRIM timer for SSD
   ansible.builtin.systemd:
     name: fstrim.timer
-    enabled: yes
+    enabled: true
     state: started
-  become: yes
-  ignore_errors: yes
+  become: true
+  ignore_errors: true

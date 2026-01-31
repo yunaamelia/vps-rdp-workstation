@@ -13,8 +13,8 @@ This section contains **5 rules** focused on eliminating waterfalls.
 
 ## Rule 1.1: Defer Await Until Needed
 
-**Impact:** HIGH  
-**Tags:** async, await, conditional, optimization  
+**Impact:** HIGH
+**Tags:** async, await, conditional, optimization
 
 ## Defer Await Until Needed
 
@@ -25,12 +25,12 @@ Move `await` operations into the branches where they're actually used to avoid b
 ```typescript
 async function handleRequest(userId: string, skipProcessing: boolean) {
   const userData = await fetchUserData(userId)
-  
+
   if (skipProcessing) {
     // Returns immediately but still waited for userData
     return { skipped: true }
   }
-  
+
   // Only this branch uses userData
   return processUserData(userData)
 }
@@ -44,7 +44,7 @@ async function handleRequest(userId: string, skipProcessing: boolean) {
     // Returns immediately without waiting
     return { skipped: true }
   }
-  
+
   // Fetch only when needed
   const userData = await fetchUserData(userId)
   return processUserData(userData)
@@ -58,32 +58,32 @@ async function handleRequest(userId: string, skipProcessing: boolean) {
 async function updateResource(resourceId: string, userId: string) {
   const permissions = await fetchPermissions(userId)
   const resource = await getResource(resourceId)
-  
+
   if (!resource) {
     return { error: 'Not found' }
   }
-  
+
   if (!permissions.canEdit) {
     return { error: 'Forbidden' }
   }
-  
+
   return await updateResourceData(resource, permissions)
 }
 
 // Correct: fetches only when needed
 async function updateResource(resourceId: string, userId: string) {
   const resource = await getResource(resourceId)
-  
+
   if (!resource) {
     return { error: 'Not found' }
   }
-  
+
   const permissions = await fetchPermissions(userId)
-  
+
   if (!permissions.canEdit) {
     return { error: 'Forbidden' }
   }
-  
+
   return await updateResourceData(resource, permissions)
 }
 ```
@@ -94,8 +94,8 @@ This optimization is especially valuable when the skipped branch is frequently t
 
 ## Rule 1.2: Dependency-Based Parallelization
 
-**Impact:** CRITICAL  
-**Tags:** async, parallelization, dependencies, better-all  
+**Impact:** CRITICAL
+**Tags:** async, parallelization, dependencies, better-all
 
 ## Dependency-Based Parallelization
 
@@ -146,8 +146,8 @@ Reference: [https://github.com/shuding/better-all](https://github.com/shuding/be
 
 ## Rule 1.3: Prevent Waterfall Chains in API Routes
 
-**Impact:** CRITICAL  
-**Tags:** api-routes, server-actions, waterfalls, parallelization  
+**Impact:** CRITICAL
+**Tags:** api-routes, server-actions, waterfalls, parallelization
 
 ## Prevent Waterfall Chains in API Routes
 
@@ -185,8 +185,8 @@ For operations with more complex dependency chains, use `better-all` to automati
 
 ## Rule 1.4: Promise.all() for Independent Operations
 
-**Impact:** CRITICAL  
-**Tags:** async, parallelization, promises, waterfalls  
+**Impact:** CRITICAL
+**Tags:** async, parallelization, promises, waterfalls
 
 ## Promise.all() for Independent Operations
 
@@ -214,8 +214,8 @@ const [user, posts, comments] = await Promise.all([
 
 ## Rule 1.5: Strategic Suspense Boundaries
 
-**Impact:** HIGH  
-**Tags:** async, suspense, streaming, layout-shift  
+**Impact:** HIGH
+**Tags:** async, suspense, streaming, layout-shift
 
 ## Strategic Suspense Boundaries
 
@@ -226,7 +226,7 @@ Instead of awaiting data in async components before returning JSX, use Suspense 
 ```tsx
 async function Page() {
   const data = await fetchData() // Blocks entire page
-  
+
   return (
     <div>
       <div>Sidebar</div>
@@ -274,7 +274,7 @@ Sidebar, Header, and Footer render immediately. Only DataDisplay waits for data.
 function Page() {
   // Start fetch immediately, but don't await
   const dataPromise = fetchData()
-  
+
   return (
     <div>
       <div>Sidebar</div>
@@ -309,4 +309,3 @@ Both components share the same promise, so only one fetch occurs. Layout renders
 - When you want to avoid layout shift (loading → content jump)
 
 **Trade-off:** Faster initial paint vs potential layout shift. Choose based on your UX priorities.
-

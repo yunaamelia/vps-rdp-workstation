@@ -1,20 +1,20 @@
 ---
-#===============================================================================
+# ===============================================================================
 # Enhancement Role - Main Tasks
-#===============================================================================
+# ===============================================================================
 # Orchestrates installation of all terminal & coding speed enhancements
-#===============================================================================
+# ===============================================================================
 
 - name: Setup enhancement directories
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: '0755'
+    mode: "0755"
   loop:
-    - "{{ enhancement_backup_dir }}"
-    - "{{ enhancement_log_dir }}"
-    - "{{ enhancement_cache_dir }}"
-    - "{{ enhancement_docs_dir }}"
+    - "{{ enhancements_backup_dir }}"
+    - "{{ enhancements_log_dir }}"
+    - "{{ enhancements_cache_dir }}"
+    - "{{ enhancements_docs_dir }}"
 
 - name: Create user enhancement directories
   ansible.builtin.file:
@@ -22,7 +22,7 @@
     state: directory
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0755'
+    mode: "0755"
   loop:
     - "/home/{{ vps_username }}/.config/pet"
     - "/home/{{ vps_username }}/.config/lazygit"
@@ -35,63 +35,63 @@
 #-------------------------------------------------------------------------------
 - name: Install Modern CLI Tools
   ansible.builtin.include_tasks: modern-cli.yml
-  when: enable_modern_cli | default(true)
+  when: enhancements_enable_modern_cli | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.3: Zsh Plugins
 #-------------------------------------------------------------------------------
 - name: Install Zsh Plugins
   ansible.builtin.include_tasks: zsh-plugins.yml
-  when: enable_zsh_plugins | default(true)
+  when: enhancements_enable_zsh_plugins | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.4: Fuzzy Finding Tools
 #-------------------------------------------------------------------------------
 - name: Install Fuzzy Finding Tools
   ansible.builtin.include_tasks: fuzzy-tools.yml
-  when: enable_fuzzy_tools | default(true)
+  when: enhancements_enable_fuzzy_tools | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.5: Atuin Shell History
 #-------------------------------------------------------------------------------
 - name: Install Atuin Shell History
   ansible.builtin.include_tasks: atuin.yml
-  when: enable_atuin | default(true)
+  when: enhancements_enable_atuin | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.6: Git Enhancement Tools
 #-------------------------------------------------------------------------------
 - name: Install Git Enhancement Tools
   ansible.builtin.include_tasks: git-enhancements.yml
-  when: enable_git_enhancements | default(true)
+  when: enhancements_enable_git_enhancements | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.7: Terminal File Manager
 #-------------------------------------------------------------------------------
 - name: Install Terminal File Manager
   ansible.builtin.include_tasks: file-manager.yml
-  when: enable_file_manager | default(true)
+  when: enhancements_enable_file_manager | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.8: Tmux Plugin Suite
 #-------------------------------------------------------------------------------
 - name: Install Tmux Plugin Suite
   ansible.builtin.include_tasks: tmux-plugins.yml
-  when: enable_tmux_plugins | default(true)
+  when: enhancements_enable_tmux_plugins | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.9: Command Snippet Manager
 #-------------------------------------------------------------------------------
 - name: Install Command Snippet Manager
   ansible.builtin.include_tasks: snippets.yml
-  when: enable_snippet_manager | default(true)
+  when: enhancements_enable_snippet_manager | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.10: AI Code Completion
 #-------------------------------------------------------------------------------
 - name: Install AI Code Completion (Codeium)
   ansible.builtin.include_tasks: codeium.yml
-  when: enable_codeium | default(true)
+  when: enhancements_enable_codeium | default(true)
 
 #-------------------------------------------------------------------------------
 # Phase 9.11: UI/UX Consistency & Shell Integration
@@ -111,5 +111,5 @@
 - name: Generate enhancement summary
   ansible.builtin.template:
     src: enhancement-summary.j2
-    dest: "{{ enhancement_log_dir }}/summary.txt"
-    mode: '0644'
+    dest: "{{ enhancements_log_dir }}/summary.txt"
+    mode: "0644"

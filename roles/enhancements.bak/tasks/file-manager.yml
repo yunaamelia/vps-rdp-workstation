@@ -1,0 +1,89 @@
+---
+# ===============================================================================
+# Phase 9.7: Terminal File Manager (yazi)
+# ===============================================================================
+# Installs yazi GPU-accelerated terminal file manager
+# ===============================================================================
+
+# -------------------------------------------------------------------------------
+# Install yazi
+# -------------------------------------------------------------------------------
+
+- name: Check if yazi is installed
+  ansible.builtin.command: which yazi
+  register: enhancements_yazi_check
+  changed_when: false
+  failed_when: false
+
+- name: Download yazi
+  when: enhancements_yazi_check.rc != 0
+  block:
+    - name: Download yazi binary
+      ansible.builtin.get_url:
+        url: "https://github.com/sxyazi/yazi/releases/download/v{{ yazi_version }}/yazi-x86_64-unknown-linux-gnu.zip"
+        dest: "{{ enhancement_cache_dir }}/yazi.zip"
+        mode: "0644"
+
+    - name: Extract yazi
+      ansible.builtin.unarchive:
+        src: "{{ enhancement_cache_dir }}/yazi.zip"
+        dest: "{{ enhancement_cache_dir }}"
+        remote_src: true
+
+    - name: Install yazi
+      ansible.builtin.copy:
+        src: "{{ enhancement_cache_dir }}/yazi-x86_64-unknown-linux-gnu/yazi"
+        dest: /usr/local/bin/yazi
+        remote_src: true
+        mode: "0755"
+
+#-------------------------------------------------------------------------------
+# Configure yazi
+#-------------------------------------------------------------------------------
+
+- name: Create yazi config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/yazi"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: "0755"
+
+- name: Configure yazi
+  ansible.builtin.template:
+    src: "yazi-config.toml.j2"
+    dest: "/home/{{ vps_username }}/.config/yazi/yazi.toml"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: "0644"
+
+#-------------------------------------------------------------------------------
+# Add yazi shell function
+#-------------------------------------------------------------------------------
+
+- name: Add yazi shell function to enhancements file
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc.enhancements"
+    marker: "# {mark} YAZI FILE MANAGER"
+    block: |
+      # Yazi file manager quick launch
+      # Changes to directory on exit
+      function y() {
+        local tmp="$(mktemp -t "yazi-cwd.XXXXX")"
+        yazi "$@" --cwd-file="$tmp"
+        if cwd="$(cat -- "$tmp")" && [ -n "$cwd" ] && [ "$cwd" != "$PWD" ]; then
+          cd -- "$cwd"
+        fi
+        rm -f -- "$tmp"
+      }
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: "0644"
+
+- name: Log yazi installation
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Yazi File Manager installed"
+    create: true
+    mode: "0644"

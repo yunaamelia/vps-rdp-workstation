@@ -4,4 +4,3 @@
   ansible.builtin.file:
     path: "{{ vps_setup_log_dir }}/phase9-enhancements.txt"
     state: absent
-

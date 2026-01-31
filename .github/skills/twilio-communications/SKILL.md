@@ -279,7 +279,7 @@ def menu_selection():
 
     elif digit == "3":
         # Voicemail
-        response.say("Please leave a message after 
+        response.say("Please leave a message after
 ```
 
 ## ⚠️ Sharp Edges

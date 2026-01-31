@@ -85,6 +85,7 @@ CONVERT_PREDS
 if [ -d "$RESULTS_DIR/trajs" ]; then
     log_info "Copying trajectory files..."
     cp -r "$RESULTS_DIR/trajs" "$SUBMISSION_DIR/"
+    # shellcheck disable=SC2012
     TRAJ_COUNT=$(ls -1 "$SUBMISSION_DIR/trajs" 2>/dev/null | wc -l | tr -d ' ')
     log_success "Copied $TRAJ_COUNT trajectory files"
 else
@@ -96,6 +97,7 @@ fi
 if [ -d "$RESULTS_DIR/logs" ]; then
     log_info "Copying log files..."
     cp -r "$RESULTS_DIR/logs" "$SUBMISSION_DIR/"
+    # shellcheck disable=SC2012
     LOG_COUNT=$(ls -1 "$SUBMISSION_DIR/logs" 2>/dev/null | wc -l | tr -d ' ')
     log_success "Copied $LOG_COUNT log directories"
 else
@@ -135,7 +137,7 @@ with open("$SUBMISSION_DIR/metadata.yaml", 'w') as f:
     yaml.dump(metadata, f, default_flow_style=False, sort_keys=False)
 
 print("Metadata updated with actual results")
-CONVERT_PREDS
+UPDATE_META
 
 # Generate submission summary
 log_info "Generating submission summary..."

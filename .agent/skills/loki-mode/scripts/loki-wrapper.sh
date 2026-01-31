@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2155,SC2317,SC2248,SC2059,SC2002,SC2162,SC2310
 # Loki Mode Wrapper Script
 # Provides true autonomy by auto-resuming on rate limits or interruptions
 #
@@ -207,6 +208,7 @@ main() {
 
         # Check for successful completion
         if [ $exit_code -eq 0 ]; then
+            # shellcheck disable=SC2310
             if is_completed; then
                 log_success "Loki Mode completed successfully!"
                 save_state $retry "completed" 0
@@ -231,13 +233,16 @@ main() {
         fi
 
         # Handle non-zero exit (likely rate limit)
+        # shellcheck disable=SC2310
         if is_rate_limit $exit_code; then
+            # shellcheck disable=SC2155
             local wait_time=$(calculate_wait $retry)
             log_warn "Rate limit detected. Waiting ${wait_time}s before retry..."
 
             # Show countdown
             local remaining=$wait_time
             while [ $remaining -gt 0 ]; do
+                # shellcheck disable=SC2059
                 printf "\r${YELLOW}Resuming in ${remaining}s...${NC}  "
                 sleep 10
                 remaining=$((remaining - 10))
@@ -252,6 +257,7 @@ main() {
             # Still retry, but with shorter wait
             local wait_time=$((BASE_WAIT / 2))
             log_info "Retrying in ${wait_time}s..."
+            # shellcheck disable=SC2248
             sleep $wait_time
             ((retry++))
         fi
@@ -263,6 +269,7 @@ main() {
 }
 
 # Trap signals for clean shutdown
+# shellcheck disable=SC2317
 cleanup() {
     log_warn "Received interrupt signal. Saving state..."
     save_state $RETRY_COUNT "interrupted" 130

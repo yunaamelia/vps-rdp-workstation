@@ -1,0 +1,199 @@
+---
+# ===============================================================================
+# Phase 9.11: UI/UX Consistency
+# ===============================================================================
+# Configures visual consistency across all tools and creates helper functions
+# ===============================================================================
+
+# -------------------------------------------------------------------------------
+# Verify Nerd Font installed
+# -------------------------------------------------------------------------------
+
+- name: Check JetBrains Mono Nerd Font is installed
+  ansible.builtin.find:
+    paths: "/home/{{ vps_username }}/.local/share/fonts"
+    patterns: "*JetBrainsMono*Nerd*"
+  register: nerd_font_check
+
+- name: Note if Nerd Font is missing
+  ansible.builtin.debug:
+    msg: "JetBrains Mono Nerd Font not found - icons may not display correctly"
+  when: enhancements_nerd_font_check.matched == 0
+
+#-------------------------------------------------------------------------------
+# Configure Shell Aliases (Modern CLI)
+#-------------------------------------------------------------------------------
+
+- name: Add modern CLI aliases to enhancements file
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc.enhancements"
+    marker: "# {mark} MODERN CLI ALIASES"
+    block: |
+      # Modern CLI Tool Aliases
+      # Original commands available at /usr/bin/ls etc.
+
+      # eza (modern ls)
+      if command -v eza &> /dev/null; then
+        alias ls='eza --icons --git --group-directories-first'
+        alias ll='eza -la --icons --git --header --git-ignore'
+        alias la='eza -a --icons'
+        alias tree='eza --tree --icons --level=3 --git-ignore'
+        alias lt='eza -la --sort=modified --icons'  # Sort by time
+      fi
+
+      # bat (modern cat)
+      if command -v bat &> /dev/null; then
+        alias cat='bat --style=auto'
+        alias catp='bat -p'  # Plain mode
+      fi
+
+      # fd (modern find)
+      if command -v fd &> /dev/null; then
+        alias find='fd'
+      fi
+
+      # ripgrep (modern grep)
+      if command -v rg &> /dev/null; then
+        alias grep='rg --smart-case'
+      fi
+
+      # dust (modern du)
+      if command -v dust &> /dev/null; then
+        alias du='dust'
+      fi
+
+      # procs (modern ps)
+      if command -v procs &> /dev/null; then
+        alias ps='procs'
+      fi
+
+      # Access original commands
+      alias oldls='/usr/bin/ls'
+      alias oldcat='/bin/cat'
+      alias oldfind='/usr/bin/find'
+      alias oldgrep='/bin/grep'
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: "0644"
+
+#-------------------------------------------------------------------------------
+# Add Helper Functions
+#-------------------------------------------------------------------------------
+
+- name: Add helper functions to enhancements file
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc.enhancements"
+    marker: "# {mark} ENHANCEMENT HELPER FUNCTIONS"
+    block: |
+      # Enhancement Helper Functions
+
+      function shortcuts() {
+        if command -v bat &> /dev/null; then
+          bat ~/.local/share/vps-workstation/SHORTCUTS.md
+        else
+          less ~/.local/share/vps-workstation/SHORTCUTS.md
+        fi
+      }
+
+      function enhancements-help() {
+        if command -v bat &> /dev/null; then
+          bat ~/.local/share/vps-workstation/ENHANCEMENTS.md
+        else
+          less ~/.local/share/vps-workstation/ENHANCEMENTS.md
+        fi
+      }
+
+      function terminal-guide() {
+        if command -v bat &> /dev/null; then
+          bat ~/.local/share/vps-workstation/TERMINAL_GUIDE.md
+        else
+          less ~/.local/share/vps-workstation/TERMINAL_GUIDE.md
+        fi
+      }
+
+      function enhancement-stats() {
+        echo ""
+        echo "🚀 VPS Workstation Enhancement Status"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        command -v eza &> /dev/null && echo "✓ Modern CLI Tools (eza, bat, fd, rg)" || echo "✗ Modern CLI Tools"
+        [[ -d ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions ]] && echo "✓ Zsh Plugins" || echo "✗ Zsh Plugins"
+        command -v fzf &> /dev/null && echo "✓ Fuzzy Finding (fzf)" || echo "✗ Fuzzy Finding"
+        command -v atuin &> /dev/null && echo "✓ Enhanced History (Atuin)" || echo "✗ Enhanced History"
+        command -v lazygit &> /dev/null && echo "✓ Git Enhancement Tools" || echo "✗ Git Enhancement Tools"
+        command -v yazi &> /dev/null && echo "✓ File Manager (yazi)" || echo "✗ File Manager"
+        [[ -d ~/.tmux/plugins/tpm ]] && echo "✓ Tmux Enhancements" || echo "✗ Tmux Enhancements"
+        command -v pet &> /dev/null && echo "✓ Snippet Manager (pet)" || echo "✗ Snippet Manager"
+        code --list-extensions 2>/dev/null | grep -q "Codeium.codeium" && \
+          echo "✓ AI Code Completion (Codeium)" || echo "✗ AI Code Completion"
+        echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+        echo ""
+      }
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: "0644"
+
+#-------------------------------------------------------------------------------
+# Add Welcome Message
+#-------------------------------------------------------------------------------
+
+- name: Add welcome message to enhancements file
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc.enhancements"
+    marker: "# {mark} WELCOME MESSAGE"
+    block: |
+      # Welcome Message (shown once)
+      if [[ ! -f ~/.enhancements-welcomed ]]; then
+        cat << 'WELCOME'
+      ╔════════════════════════════════════════════════════════════════╗
+      ║         🚀 VPS Workstation Enhancements Installed! 🚀         ║
+      ╠════════════════════════════════════════════════════════════════╣
+      ║ New features available:                                        ║
+      ║  • AI Code Completion (Codeium in VS Code)                    ║
+      ║  • Smart command suggestions (just start typing!)             ║
+      ║  • Modern CLI tools (prettier ls, cat, find, grep)            ║
+      ║  • Enhanced Git UI (try: lazygit)                             ║
+      ║  • Fuzzy finding (Ctrl+R for history, Ctrl+T for files)       ║
+      ║  • File manager (try: yazi or y)                              ║
+      ║  • Tmux session persistence (auto-save/restore)               ║
+      ║  • Command snippets (Ctrl+X Ctrl+P)                           ║
+      ║                                                                ║
+      ║ ⚡ Quick start:                                                ║
+      ║  • Press Ctrl+R to search command history                     ║
+      ║  • Press Ctrl+T to find files with fuzzy search               ║
+      ║  • Type 'lazygit' to see beautiful Git UI                     ║
+      ║  • Type 'ls' to see modern file listing with icons            ║
+      ║                                                                ║
+      ║ 📚 Learn more:                                                 ║
+      ║  • shortcuts        - See all keyboard shortcuts              ║
+      ║  • enhancements-help - Open full documentation                ║
+      ║  • enhancement-stats - Check what's installed                 ║
+      ╚════════════════════════════════════════════════════════════════╝
+      WELCOME
+        touch ~/.enhancements-welcomed
+      fi
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: "0644"
+
+#-------------------------------------------------------------------------------
+# Source enhancements from main .zshrc
+#-------------------------------------------------------------------------------
+
+- name: Ensure .zshrc sources enhancements
+  ansible.builtin.lineinfile:
+    path: "/home/{{ vps_username }}/.zshrc"
+    line: "[ -f ~/.zshrc.enhancements ] && source ~/.zshrc.enhancements"
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: "0644"
+
+- name: Log UI consistency configuration
+  ansible.builtin.lineinfile:
+    path: "{{ enhancement_log_dir }}/install.log"
+    line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - UI/UX Consistency configured"
+    create: true
+    mode: "0644"

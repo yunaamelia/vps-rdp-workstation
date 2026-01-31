@@ -2,64 +2,63 @@
 # defaults/main.yml for enhancements role
 
 # User Configuration
-enhancement_user: "{{ vps_username | default(ansible_user_id) }}"
-enhancement_home: "/home/{{ enhancement_user }}"
+enhancements_user: "{{ vps_username | default(ansible_user_id) }}"
+enhancements_home: "/home/{{ enhancements_user }}"
 
 # Feature Toggles
-enable_codeium: true
-enable_zsh_plugins: true
-enable_modern_cli: true
-enable_git_tools: true
-enable_fuzzy_tools: true
-enable_file_manager: true
-enable_tmux_plugins: true
-enable_snippet_manager: true
+enhancements_enable_codeium: true
+enhancements_enable_zsh_plugins: true
+enhancements_enable_modern_cli: true
+enhancements_enable_git_tools: true
+enhancements_enable_fuzzy_tools: true
+enhancements_enable_file_manager: true
+enhancements_enable_tmux_plugins: true
+enhancements_enable_snippet_manager: true
 
 # Installation Preferences
 # Options: apt, cargo, binary
-install_method_preference: ["apt", "cargo", "binary"]
-
+enhancements_install_method_preference: ["apt", "cargo", "binary"]
 # Tool Configuration
-fzf_preview_max_size: 500         # Max file size in KB for preview
-atuin_history_max_entries: 100000
-backup_retention_days: 30
+enhancements_fzf_preview_max_size: 500 # Max file size in KB for preview
+enhancements_atuin_history_max_entries: 100000
+enhancements_backup_retention_days: 30
 
 # Privacy Settings
-atuin_sync_enabled: false
-pet_gist_sync_enabled: false
+enhancements_atuin_sync_enabled: false
+enhancements_pet_gist_sync_enabled: false
 
 # UI Preferences
-terminal_theme: "catppuccin-mocha"
-bat_theme: "Catppuccin Mocha"
-lazygit_create_desktop_launcher: true
-yazi_create_desktop_launcher: false
+enhancements_terminal_theme: "catppuccin-mocha"
+enhancements_bat_theme: "Catppuccin Mocha"
+enhancements_lazygit_create_desktop_launcher: true
+enhancements_yazi_create_desktop_launcher: false
 
 # Tool Versions
-codeium_version: "1.2.95" # Pinning for stability
-lazygit_version: "0.41.0"
-yazi_version: "0.2.5"
-pet_version: "0.4.0"
-eza_version: "0.18.11"
-bat_version: "0.24.0"
-fd_version: "10.1.0"
-ripgrep_version: "14.1.0"
-dust_version: "1.1.1"
-procs_version: "0.14.5"
-delta_version: "0.17.0"
+enhancements_codeium_version: "1.2.95" # Pinning for stability
+enhancements_lazygit_version: "0.41.0"
+enhancements_yazi_version: "0.2.5"
+enhancements_pet_version: "0.4.0"
+enhancements_eza_version: "0.18.11"
+enhancements_bat_version: "0.24.0"
+enhancements_fd_version: "10.1.0"
+enhancements_ripgrep_version: "14.1.0"
+enhancements_dust_version: "1.1.1"
+enhancements_procs_version: "0.14.5"
+enhancements_delta_version: "0.17.0"
 # Directory Paths
-enhancement_backup_dir: "/var/backups/vps-workstation/enhancements"
-enhancement_log_dir: "/var/log/vps-setup/enhancements"
-enhancement_cache_dir: "/var/cache/vps-workstation/binaries"
-enhancement_docs_dir: "/usr/local/share/doc/vps-workstation"
+enhancements_backup_dir: "/var/backups/vps-workstation/enhancements"
+enhancements_log_dir: "/var/log/vps-setup/enhancements"
+enhancements_cache_dir: "/var/cache/vps-workstation/binaries"
+enhancements_docs_dir: "/usr/local/share/doc/vps-workstation"
 # FZF Configuration
-fzf_preview_command: "bat --style=numbers --color=always --line-range :500 {}"
-fzf_colors: "bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
+enhancements_fzf_preview_command: "bat --style=numbers --color=always --line-range :500 {}"
+enhancements_fzf_colors: "bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8,fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc,marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8"
 
 # Tmux Configuration
-tmux_save_interval: 15
+enhancements_tmux_save_interval: 15
 
 # Summary Configuration
-enhancement_theme: "{{ terminal_theme }}"
+enhancements_theme: "{{ enhancements_terminal_theme }}"
 
 # Atuin Configuration
-atuin_max_history: 100000
+enhancements_atuin_max_history: 100000

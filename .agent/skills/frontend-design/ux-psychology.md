@@ -24,7 +24,7 @@ Where n = number of choices
 **Example:**
 ```
 ❌ Bad: 15 menu items in one nav
-✅ Good: 5 main categories + "More" 
+✅ Good: 5 main categories + "More"
 
 ❌ Bad: 20 form fields at once
 ✅ Good: 3-step wizard with 5-7 fields each
@@ -103,7 +103,7 @@ Where D = distance, W = width
 
 /* Recommended plan highlighted */
 .pricing-card { border: 1px solid #E5E7EB; }
-.pricing-card.popular { 
+.pricing-card.popular {
   border: 2px solid #3B82F6;
   box-shadow: var(--shadow-lg);
 }
@@ -185,7 +185,7 @@ Long landing page:
 button.onclick = () => {
   button.disabled = true;
   button.textContent = 'Saving...';
-  
+
   save().then(() => {
     showSuccess('Saved!');  // Immediate confirmation
   });
@@ -359,8 +359,8 @@ button.onclick = () => {
 <!-- Don't make users remember -->
 <label>
   Card Number
-  <input type="text" inputmode="numeric" 
-         autocomplete="cc-number" 
+  <input type="text" inputmode="numeric"
+         autocomplete="cc-number"
          placeholder="1234 5678 9012 3456">
 </label>
 

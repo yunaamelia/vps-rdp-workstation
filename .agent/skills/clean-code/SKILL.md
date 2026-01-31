@@ -198,4 +198,3 @@ File to edit: UserService.ts
 > 🔴 **VIOLATION:** Running script and ignoring output = FAILED task.
 > 🔴 **VIOLATION:** Auto-fixing without asking = Not allowed.
 > 🔴 **Rule:** Always READ output → SUMMARIZE → ASK → then fix.
-

@@ -14,9 +14,9 @@ $ARGUMENTS
 ## 🔴 CRITICAL: Minimum Agent Requirement
 
 > ⚠️ **ORCHESTRATION = MINIMUM 3 DIFFERENT AGENTS**
-> 
+>
 > If you use fewer than 3 agents, you are NOT orchestrating - you're just delegating.
-> 
+>
 > **Validation before completion:**
 > - Count invoked agents
 > - If `agent_count < 3` → STOP and invoke more agents

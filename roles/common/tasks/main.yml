@@ -3,14 +3,14 @@
 
 - name: Update apt cache
   ansible.builtin.apt:
-    update_cache: yes
+    update_cache: true
     cache_valid_time: 3600
 
 - name: Upgrade all packages
   ansible.builtin.apt:
     upgrade: dist
-    autoremove: yes
-    autoclean: yes
+    autoremove: true
+    autoclean: true
   register: system_upgrade
 
 - name: Install essential packages
@@ -48,6 +48,6 @@
 - name: Update /etc/hosts with hostname
   ansible.builtin.lineinfile:
     path: /etc/hosts
-    regexp: '^127\.0\.1\.1'
+    regexp: "^127\\.0\\.1\\.1"
     line: "127.0.1.1 {{ vps_hostname }}"
     state: present

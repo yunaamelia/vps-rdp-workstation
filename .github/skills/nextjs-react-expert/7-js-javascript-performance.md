@@ -13,8 +13,8 @@ This section contains **12 rules** focused on javascript performance.
 
 ## Rule 7.1: Avoid Layout Thrashing
 
-**Impact:** MEDIUM  
-**Tags:** javascript, dom, css, performance, reflow, layout-thrashing  
+**Impact:** MEDIUM
+**Tags:** javascript, dom, css, performance, reflow, layout-thrashing
 
 ## Avoid Layout Thrashing
 
@@ -49,7 +49,7 @@ function updateElementStyles(element: HTMLElement) {
   element.style.height = '200px'
   element.style.backgroundColor = 'blue'
   element.style.border = '1px solid black'
-  
+
   // Read after all writes are done (single reflow)
   const { width, height } = element.getBoundingClientRect()
 }
@@ -62,7 +62,7 @@ function avoidThrashing(element: HTMLElement) {
   const rect1 = element.getBoundingClientRect()
   const offsetWidth = element.offsetWidth
   const offsetHeight = element.offsetHeight
-  
+
   // Write phase - all style changes after
   element.style.width = '100px'
   element.style.height = '200px'
@@ -81,7 +81,7 @@ function avoidThrashing(element: HTMLElement) {
 ```typescript
 function updateElementStyles(element: HTMLElement) {
   element.classList.add('highlighted-box')
-  
+
   const { width, height } = element.getBoundingClientRect()
 }
 ```
@@ -91,7 +91,7 @@ function updateElementStyles(element: HTMLElement) {
 // Incorrect: interleaving style changes with layout queries
 function Box({ isHighlighted }: { isHighlighted: boolean }) {
   const ref = useRef<HTMLDivElement>(null)
-  
+
   useEffect(() => {
     if (ref.current && isHighlighted) {
       ref.current.style.width = '100px'
@@ -99,7 +99,7 @@ function Box({ isHighlighted }: { isHighlighted: boolean }) {
       ref.current.style.height = '200px'
     }
   }, [isHighlighted])
-  
+
   return <div ref={ref}>Content</div>
 }
 
@@ -121,8 +121,8 @@ See [this gist](https://gist.github.com/paulirish/5d52fb081b3570c81e3a) and [CSS
 
 ## Rule 7.2: Build Index Maps for Repeated Lookups
 
-**Impact:** LOW-MEDIUM  
-**Tags:** javascript, map, indexing, optimization, performance  
+**Impact:** LOW-MEDIUM
+**Tags:** javascript, map, indexing, optimization, performance
 
 ## Build Index Maps for Repeated Lookups
 
@@ -159,8 +159,8 @@ For 1000 orders × 1000 users: 1M ops → 2K ops.
 
 ## Rule 7.3: Cache Property Access in Loops
 
-**Impact:** LOW-MEDIUM  
-**Tags:** javascript, loops, optimization, caching  
+**Impact:** LOW-MEDIUM
+**Tags:** javascript, loops, optimization, caching
 
 ## Cache Property Access in Loops
 
@@ -188,8 +188,8 @@ for (let i = 0; i < len; i++) {
 
 ## Rule 7.4: Cache Repeated Function Calls
 
-**Impact:** MEDIUM  
-**Tags:** javascript, cache, memoization, performance  
+**Impact:** MEDIUM
+**Tags:** javascript, cache, memoization, performance
 
 ## Cache Repeated Function Calls
 
@@ -204,7 +204,7 @@ function ProjectList({ projects }: { projects: Project[] }) {
       {projects.map(project => {
         // slugify() called 100+ times for same project names
         const slug = slugify(project.name)
-        
+
         return <ProjectCard key={project.id} slug={slug} />
       })}
     </div>
@@ -233,7 +233,7 @@ function ProjectList({ projects }: { projects: Project[] }) {
       {projects.map(project => {
         // Computed only once per unique project name
         const slug = cachedSlugify(project.name)
-        
+
         return <ProjectCard key={project.id} slug={slug} />
       })}
     </div>
@@ -250,7 +250,7 @@ function isLoggedIn(): boolean {
   if (isLoggedInCache !== null) {
     return isLoggedInCache
   }
-  
+
   isLoggedInCache = document.cookie.includes('auth=')
   return isLoggedInCache
 }
@@ -269,8 +269,8 @@ Reference: [How we made the Vercel Dashboard twice as fast](https://vercel.com/b
 
 ## Rule 7.5: Cache Storage API Calls
 
-**Impact:** LOW-MEDIUM  
-**Tags:** javascript, localStorage, storage, caching, performance  
+**Impact:** LOW-MEDIUM
+**Tags:** javascript, localStorage, storage, caching, performance
 
 ## Cache Storage API Calls
 
@@ -340,8 +340,8 @@ document.addEventListener('visibilitychange', () => {
 
 ## Rule 7.6: Combine Multiple Array Iterations
 
-**Impact:** LOW-MEDIUM  
-**Tags:** javascript, arrays, loops, performance  
+**Impact:** LOW-MEDIUM
+**Tags:** javascript, arrays, loops, performance
 
 ## Combine Multiple Array Iterations
 
@@ -373,8 +373,8 @@ for (const user of users) {
 
 ## Rule 7.7: Early Length Check for Array Comparisons
 
-**Impact:** MEDIUM-HIGH  
-**Tags:** javascript, arrays, performance, optimization, comparison  
+**Impact:** MEDIUM-HIGH
+**Tags:** javascript, arrays, performance, optimization, comparison
 
 ## Early Length Check for Array Comparisons
 
@@ -423,8 +423,8 @@ This new approach is more efficient because:
 
 ## Rule 7.8: Early Return from Functions
 
-**Impact:** LOW-MEDIUM  
-**Tags:** javascript, functions, optimization, early-return  
+**Impact:** LOW-MEDIUM
+**Tags:** javascript, functions, optimization, early-return
 
 ## Early Return from Functions
 
@@ -436,7 +436,7 @@ Return early when result is determined to skip unnecessary processing.
 function validateUsers(users: User[]) {
   let hasError = false
   let errorMessage = ''
-  
+
   for (const user of users) {
     if (!user.email) {
       hasError = true
@@ -448,7 +448,7 @@ function validateUsers(users: User[]) {
     }
     // Continues checking all users even after error found
   }
-  
+
   return hasError ? { valid: false, error: errorMessage } : { valid: true }
 }
 ```
@@ -474,8 +474,8 @@ function validateUsers(users: User[]) {
 
 ## Rule 7.9: Hoist RegExp Creation
 
-**Impact:** LOW-MEDIUM  
-**Tags:** javascript, regexp, optimization, memoization  
+**Impact:** LOW-MEDIUM
+**Tags:** javascript, regexp, optimization, memoization
 
 ## Hoist RegExp Creation
 
@@ -520,8 +520,8 @@ regex.test('foo')  // false, lastIndex = 0
 
 ## Rule 7.10: Use Loop for Min/Max Instead of Sort
 
-**Impact:** LOW  
-**Tags:** javascript, arrays, performance, sorting, algorithms  
+**Impact:** LOW
+**Tags:** javascript, arrays, performance, sorting, algorithms
 
 ## Use Loop for Min/Max Instead of Sort
 
@@ -560,29 +560,29 @@ Still sorts unnecessarily when only min/max are needed.
 ```typescript
 function getLatestProject(projects: Project[]) {
   if (projects.length === 0) return null
-  
+
   let latest = projects[0]
-  
+
   for (let i = 1; i < projects.length; i++) {
     if (projects[i].updatedAt > latest.updatedAt) {
       latest = projects[i]
     }
   }
-  
+
   return latest
 }
 
 function getOldestAndNewest(projects: Project[]) {
   if (projects.length === 0) return { oldest: null, newest: null }
-  
+
   let oldest = projects[0]
   let newest = projects[0]
-  
+
   for (let i = 1; i < projects.length; i++) {
     if (projects[i].updatedAt < oldest.updatedAt) oldest = projects[i]
     if (projects[i].updatedAt > newest.updatedAt) newest = projects[i]
   }
-  
+
   return { oldest, newest }
 }
 ```
@@ -603,8 +603,8 @@ This works for small arrays, but can be slower or just throw an error for very l
 
 ## Rule 7.11: Use Set/Map for O(1) Lookups
 
-**Impact:** LOW-MEDIUM  
-**Tags:** javascript, set, map, data-structures, performance  
+**Impact:** LOW-MEDIUM
+**Tags:** javascript, set, map, data-structures, performance
 
 ## Use Set/Map for O(1) Lookups
 
@@ -628,8 +628,8 @@ items.filter(item => allowedIds.has(item.id))
 
 ## Rule 7.12: Use toSorted() Instead of sort() for Immutability
 
-**Impact:** MEDIUM-HIGH  
-**Tags:** javascript, arrays, immutability, react, state, mutation  
+**Impact:** MEDIUM-HIGH
+**Tags:** javascript, arrays, immutability, react, state, mutation
 
 ## Use toSorted() Instead of sort() for Immutability
 
@@ -681,4 +681,3 @@ const sorted = [...items].sort((a, b) => a.value - b.value)
 - `.toReversed()` - immutable reverse
 - `.toSpliced()` - immutable splice
 - `.with()` - immutable element replacement
-

@@ -101,13 +101,13 @@ class UXAuditor:
         self.warnings = []
         self.passed_count = 0
         self.files_checked = 0
-    
+
     def audit_file(self, filepath: str) -> None:
         try:
             with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read()
         except: return
-        
+
         self.files_checked += 1
         filename = os.path.basename(filepath)
 
@@ -121,16 +121,16 @@ class UXAuditor:
         nav_items = len(re.findall(r'<NavLink|<Link|<a\s+href|nav-item', content, re.IGNORECASE))
         if nav_items > 7:
             self.issues.append(f"[Hick's Law] {filename}: {nav_items} nav items (Max 7)")
-        
+
         # Fitts' Law
         if re.search(r'height:\s*([0-3]\d)px', content) or re.search(r'h-[1-9]\b|h-10\b', content):
             self.warnings.append(f"[Fitts' Law] {filename}: Small targets (< 44px)")
-        
+
         # Miller's Law
         form_fields = len(re.findall(r'<input|<select|<textarea', content, re.IGNORECASE))
         if form_fields > 7 and not re.search(r'step|wizard|stage', content, re.IGNORECASE):
             self.warnings.append(f"[Miller's Law] {filename}: Complex form ({form_fields} fields)")
-            
+
         # Von Restorff
         if 'button' in content.lower() and not re.search(r'primary|bg-primary|Button.*primary|variant=["\']primary', content, re.IGNORECASE):
             self.warnings.append(f"[Von Restorff] {filename}: No primary CTA")
@@ -377,18 +377,18 @@ class UXAuditor:
                 self.warnings.append(f"[Typography] {filename}: Long content without subheadings. Add h2/h3 to break up text.")
 
         # --- 3. VISUAL EFFECTS (visual-effects.md) ---
-        
+
         # Glassmorphism Check
         if 'backdrop-filter' in content or 'blur(' in content:
             if not re.search(r'background:\s*rgba|bg-opacity|bg-[a-z0-9]+\/\d+', content):
                 self.warnings.append(f"[Visual] {filename}: Blur used without semi-transparent background (Glassmorphism fail)")
-        
+
         # GPU Acceleration / Performance
         if re.search(r'@keyframes|transition:', content):
             expensive_props = re.findall(r'width|height|top|left|right|bottom|margin|padding', content)
             if expensive_props:
                 self.warnings.append(f"[Performance] {filename}: Animating expensive properties ({', '.join(set(expensive_props))}). Use transform/opacity where possible.")
-            
+
             # Reduced Motion
             if not re.search(r'prefers-reduced-motion', content):
                 self.warnings.append(f"[Accessibility] {filename}: Animations found without prefers-reduced-motion check")
@@ -690,16 +690,16 @@ class UXAuditor:
 
 def main():
     if len(sys.argv) < 2: sys.exit(1)
-    
+
     path = sys.argv[1]
     is_json = "--json" in sys.argv
-    
+
     auditor = UXAuditor()
     if os.path.isfile(path): auditor.audit_file(path)
     else: auditor.audit_directory(path)
-    
+
     report = auditor.get_report()
-    
+
     if is_json:
         print(json.dumps(report))
     else:

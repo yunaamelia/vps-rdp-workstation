@@ -24,15 +24,15 @@ Key Properties:
   /* Transparency: adjust opacity based on content readability */
   background: rgba(R, G, B, OPACITY);
   /* OPACITY: 0.1-0.3 for dark bg, 0.5-0.8 for light bg */
-  
+
   /* Blur: higher = more frosted */
   backdrop-filter: blur(AMOUNT);
   /* AMOUNT: 8-12px subtle, 16-24px strong */
-  
+
   /* Border: defines edges */
   border: 1px solid rgba(255, 255, 255, OPACITY);
   /* OPACITY: 0.1-0.3 typically */
-  
+
   /* Radius: match your design system */
   border-radius: YOUR_RADIUS;
 }
@@ -69,19 +69,19 @@ Key Concept: Soft, extruded elements using DUAL shadows
 .neo-raised {
   /* Background MUST match parent */
   background: SAME_AS_PARENT;
-  
+
   /* Two shadows: light direction + dark direction */
-  box-shadow: 
+  box-shadow:
     OFFSET OFFSET BLUR rgba(light-color),
     -OFFSET -OFFSET BLUR rgba(dark-color);
-  
+
   /* OFFSET: typically 6-12px */
   /* BLUR: typically 12-20px */
 }
 
 .neo-pressed {
   /* Inset creates "pushed in" effect */
-  box-shadow: 
+  box-shadow:
     inset OFFSET OFFSET BLUR rgba(dark-color),
     inset -OFFSET -OFFSET BLUR rgba(light-color);
 }
@@ -222,7 +222,7 @@ box-shadow:
 ### Text Glow
 
 ```css
-text-shadow: 
+text-shadow:
   0 0 BLUR-1 COLOR,
   0 0 BLUR-2 COLOR,
   0 0 BLUR-3 COLOR;
@@ -282,7 +282,7 @@ Position: Where text will appear
 
 ```css
 /* Blend mode or layered gradient */
-background: 
+background:
   linear-gradient(YOUR-COLOR-WITH-OPACITY),
   url('image.jpg');
 ```

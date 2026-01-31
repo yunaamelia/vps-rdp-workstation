@@ -218,7 +218,7 @@ You may exit multi-agent brainstorming **only when all are true**:
 - All objections are resolved or explicitly rejected
 - Decision Log is complete
 - Arbiter has declared the design acceptable
-- 
+-
 If any criterion is unmet:
 - Continue review
 - Do NOT proceed to implementation
@@ -253,4 +253,3 @@ This skill exists to answer one question with confidence:
 > “If this design fails, did we do everything reasonable to catch it early?”
 
 If the answer is unclear, **do not exit this skill**.
-

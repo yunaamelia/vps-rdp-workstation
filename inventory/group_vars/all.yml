@@ -6,7 +6,7 @@
 # === System Configuration ===
 vps_username: "apexdev"           # Primary workstation user (REQUIRED)
 vps_password_hash: "$6$test$QoG/jLk8dlVZC4Ig4XQXv5F9KlM3qR6UPbWTvKnH3RmZ1KjHqYB2kLVpF8Jh1Qd5vN0wM."  # TEST HASH - Replace via setup.sh
-vps_timezone: "GMT+8"                 # System timezone
+vps_timezone: "Asia/Singapore"         # System timezone (IANA format)
 vps_hostname: "dev-workstation"     # System hostname
 vps_locale: "en_US.UTF-8"           # System locale
 vps_keyboard: "us"                  # Keyboard layout

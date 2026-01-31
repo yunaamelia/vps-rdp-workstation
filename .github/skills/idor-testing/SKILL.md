@@ -406,11 +406,11 @@ Cookie: session=regular_user_session
 # Django example - validate ownership
 def update_address(request, address_id):
     address = Address.objects.get(id=address_id)
-    
+
     # Verify ownership before allowing update
     if address.user != request.user:
         return HttpResponseForbidden("Unauthorized")
-    
+
     # Proceed with update
     address.update(request.data)
 ```
@@ -434,9 +434,9 @@ def download_receipt(request, receipt_id):
         id=receipt_id,
         user=request.user  # Critical: filter by current user
     ).first()
-    
+
     if not receipt:
         return HttpResponseNotFound()
-    
+
     return FileResponse(receipt.file)
 ```

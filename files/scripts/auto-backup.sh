@@ -35,7 +35,7 @@ if [ -d "/home/$VPS_USERNAME/projects" ]; then
         --exclude='__pycache__' \
         --exclude='.git' \
         2>/dev/null || true
-    
+
     echo "Projects backup: $BACKUP_DIR/projects-$TIMESTAMP.tar.gz"
 fi
 

@@ -158,17 +158,17 @@ public sealed class ProductService(
     ILogger<ProductService> logger) : IProductService
 {
     public async Task<Result<Product>> GetByIdAsync(
-        string id, 
+        string id,
         CancellationToken ct = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(id);
-        
+
         var cached = await cache.GetAsync<Product>($"product:{id}", ct);
         if (cached is not null)
             return Result.Success(cached);
-        
+
         var product = await repository.GetByIdAsync(id, ct);
-        
+
         return product is not null
             ? Result.Success(product)
             : Result.Failure<Product>("Product not found", "NOT_FOUND");

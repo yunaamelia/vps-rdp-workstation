@@ -16,6 +16,7 @@ function init-node() {
 
 function init-python() {
     python3 -m venv venv
+    # shellcheck disable=SC1091
     source venv/bin/activate
     pip install black pylint pytest
     echo "venv/" > .gitignore
@@ -152,7 +153,7 @@ function mkproject() {
         echo "Usage: mkproject <project-name>"
         return 1
     fi
-    
+
     mkdir -p ~/projects/"$1"
     cd ~/projects/"$1" || return
     git init
@@ -202,12 +203,12 @@ function backup-project() {
         echo "Usage: backup-project <project-directory>"
         return 1
     fi
-    
+
     BACKUP_DIR=~/backups
     mkdir -p "$BACKUP_DIR"
     TIMESTAMP=$(date +%Y%m%d-%H%M%S)
     BACKUP_FILE="$BACKUP_DIR/$(basename "$1")-$TIMESTAMP.tar.gz"
-    
+
     tar -czf "$BACKUP_FILE" -C "$(dirname "$1")" "$(basename "$1")"
     echo "✅ Backup created: $BACKUP_FILE"
 }

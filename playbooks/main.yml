@@ -22,7 +22,7 @@
 
   tasks:
     - name: Include Phase 1 playbook
-      ansible.builtin.include_tasks: phase1-preparation.yml
+      ansible.builtin.include_tasks: tasks/phase1-preparation.yml
 
 - name: "Phase 2: User Management & Access Configuration"
   hosts: localhost
@@ -34,7 +34,7 @@
 
   tasks:
     - name: Include Phase 2 playbook
-      ansible.builtin.include_tasks: phase2-user-management.yml
+      ansible.builtin.include_tasks: tasks/phase2-user-management.yml
 
 - name: "Phase 3: Environment Validation & Dependency Installation"
   hosts: localhost
@@ -46,7 +46,7 @@
 
   tasks:
     - name: Include Phase 3 playbook
-      ansible.builtin.include_tasks: phase3-dependencies.yml
+      ansible.builtin.include_tasks: tasks/phase3-dependencies.yml
 
 - name: "Phase 4: Desktop Environment & RDP"
   hosts: localhost
@@ -59,7 +59,7 @@
 
   tasks:
     - name: Include Phase 4 playbook
-      ansible.builtin.include_tasks: phase4-desktop-environment.yml
+      ansible.builtin.include_tasks: tasks/phase4-desktop-environment.yml
 
 - name: "Phase 5: Development Tools Installation"
   hosts: localhost
@@ -72,7 +72,7 @@
 
   tasks:
     - name: Include Phase 5 playbook
-      ansible.builtin.include_tasks: phase5-development-tools.yml
+      ansible.builtin.include_tasks: tasks/phase5-development-tools.yml
 
 - name: "Phase 6: Installation Validation"
   hosts: localhost
@@ -84,7 +84,7 @@
 
   tasks:
     - name: Include Phase 6 playbook
-      ansible.builtin.include_tasks: phase6-validation.yml
+      ansible.builtin.include_tasks: tasks/phase6-validation.yml
       when: not ansible_check_mode
 
     - name: Phase 6 skipped notice (check mode)
@@ -102,7 +102,7 @@
 
   tasks:
     - name: Include Phase 7 playbook
-      ansible.builtin.include_tasks: phase7-optimization.yml
+      ansible.builtin.include_tasks: tasks/phase7-optimization.yml
 
   handlers:
     - name: Import handlers
@@ -118,7 +118,7 @@
 
   tasks:
     - name: Include Phase 8 playbook
-      ansible.builtin.include_tasks: phase8-enhancements.yml
+      ansible.builtin.include_tasks: tasks/phase8-enhancements.yml
 
 - name: "Phase 9: Final Validation & Optimization Verification"
   hosts: localhost
@@ -131,7 +131,7 @@
 
   tasks:
     - name: Include Phase 8 playbook
-      ansible.builtin.include_tasks: phase8-final-validation.yml
+      ansible.builtin.include_tasks: tasks/phase8-final-validation.yml
 
 - name: "Phase 10: Additional Extensions (Optional)"
   hosts: localhost
@@ -143,7 +143,7 @@
 
   tasks:
     - name: Include Phase 9 playbook
-      ansible.builtin.include_tasks: phase9-enhancements.yml
+      ansible.builtin.include_tasks: tasks/phase9-enhancements.yml
       when: install_enhancements | default(false)
 
 - name: "Deployment Complete - Generate Summary"

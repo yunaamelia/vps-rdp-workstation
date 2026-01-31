@@ -28,10 +28,10 @@ You are **not allowed** to implement, code, or modify behavior while this skill 
 
 You are operating as a **design facilitator and senior reviewer**, not a builder.
 
-- No creative implementation  
-- No speculative features  
-- No silent assumptions  
-- No skipping ahead  
+- No creative implementation
+- No speculative features
+- No silent assumptions
+- No skipping ahead
 
 Your job is to **slow the process down just enough to get it right**.
 
@@ -68,11 +68,11 @@ Your goal here is **shared clarity**, not speed.
 
 Focus on understanding:
 
-- purpose  
-- target users  
-- constraints  
-- success criteria  
-- explicit non-goals  
+- purpose
+- target users
+- constraints
+- success criteria
+- explicit non-goals
 
 ---
 
@@ -80,15 +80,15 @@ Focus on understanding:
 
 You MUST explicitly clarify or propose assumptions for:
 
-- Performance expectations  
-- Scale (users, data, traffic)  
-- Security or privacy constraints  
-- Reliability / availability needs  
-- Maintenance and ownership expectations  
+- Performance expectations
+- Scale (users, data, traffic)
+- Security or privacy constraints
+- Reliability / availability needs
+- Maintenance and ownership expectations
 
 If the user is unsure:
 
-- Propose reasonable defaults  
+- Propose reasonable defaults
 - Clearly mark them as **assumptions**
 
 ---
@@ -99,11 +99,11 @@ Before proposing **any design**, you MUST pause and do the following:
 
 #### Understanding Summary
 Provide a concise summary (5–7 bullets) covering:
-- What is being built  
-- Why it exists  
-- Who it is for  
-- Key constraints  
-- Explicit non-goals  
+- What is being built
+- Why it exists
+- Who it is for
+- Key constraints
+- Explicit non-goals
 
 #### Assumptions
 List all assumptions explicitly.
@@ -113,7 +113,7 @@ List unresolved questions, if any.
 
 Then ask:
 
-> “Does this accurately reflect your intent?  
+> “Does this accurately reflect your intent?
 > Please confirm or correct anything before we move to design.”
 
 **Do NOT proceed until explicit confirmation is given.**
@@ -148,12 +148,12 @@ When presenting the design:
 
 Cover, as relevant:
 
-- Architecture  
-- Components  
-- Data flow  
-- Error handling  
-- Edge cases  
-- Testing strategy  
+- Architecture
+- Components
+- Data flow
+- Error handling
+- Edge cases
+- Testing strategy
 
 ---
 
@@ -162,9 +162,9 @@ Cover, as relevant:
 Maintain a running **Decision Log** throughout the design discussion.
 
 For each decision:
-- What was decided  
-- Alternatives considered  
-- Why this option was chosen  
+- What was decided
+- Alternatives considered
+- Why this option was chosen
 
 This log should be preserved for documentation.
 
@@ -204,26 +204,26 @@ If yes:
 
 You may exit brainstorming mode **only when all of the following are true**:
 
-- Understanding Lock has been confirmed  
-- At least one design approach is explicitly accepted  
-- Major assumptions are documented  
-- Key risks are acknowledged  
-- Decision Log is complete  
+- Understanding Lock has been confirmed
+- At least one design approach is explicitly accepted
+- Major assumptions are documented
+- Key risks are acknowledged
+- Decision Log is complete
 
 If any criterion is unmet:
-- Continue refinement  
+- Continue refinement
 - **Do NOT proceed to implementation**
 
 ---
 
 ## Key Principles (Non-Negotiable)
 
-- One question at a time  
-- Assumptions must be explicit  
-- Explore alternatives  
-- Validate incrementally  
-- Prefer clarity over cleverness  
-- Be willing to go back and clarify  
+- One question at a time
+- Assumptions must be explicit
+- Explore alternatives
+- Validate incrementally
+- Prefer clarity over cleverness
+- Be willing to go back and clarify
 - **YAGNI ruthlessly**
 
 ---

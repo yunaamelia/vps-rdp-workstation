@@ -42,4 +42,3 @@ allowed-tools: Read, Glob, Grep, Bash
 |--------|---------|---------|
 | `scripts/lint_runner.py` | Unified lint check | `python scripts/lint_runner.py <project_path>` |
 | `scripts/type_coverage.py` | Type coverage analysis | `python scripts/type_coverage.py <project_path>` |
-

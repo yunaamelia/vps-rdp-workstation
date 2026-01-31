@@ -25,7 +25,7 @@ set -g @resurrect-strategy-nvim 'session'
 
 # Continuum (auto-save)
 set -g @continuum-restore 'on'
-set -g @continuum-save-interval '{{ tmux_save_interval | default(15) }}'
+set -g @continuum-save-interval '{{ enhancements_tmux_save_interval | default(15) }}'
 
 # Yank (clipboard)
 set -g @yank_selection 'clipboard'

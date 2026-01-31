@@ -117,7 +117,7 @@ URL?id=<LEGIT>&id=<VICTIM>
 
 ```json
 {"id":"56456"}                    → OK
-{"id":"56456 AND 1=1#"}           → OK  
+{"id":"56456 AND 1=1#"}           → OK
 {"id":"56456 AND 1=2#"}           → OK
 {"id":"56456 AND 1=3#"}           → ERROR (vulnerable!)
 {"id":"56456 AND sleep(15)#"}     → SLEEP 15 SEC

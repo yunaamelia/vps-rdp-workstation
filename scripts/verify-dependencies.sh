@@ -34,7 +34,7 @@ echo ""
 check_url() {
     local name="$1"
     local url="$2"
-    
+
     echo -n "Checking $name... "
     if curl -sSfL --connect-timeout 10 --max-time 30 "$url" -o /dev/null 2>/dev/null; then
         echo -e "${GREEN}✅ Accessible${NC}"
@@ -50,7 +50,7 @@ check_url() {
 check_api() {
     local name="$1"
     local url="$2"
-    
+
     echo -n "Checking $name... "
     local response=$(curl -sSL --connect-timeout 10 --max-time 30 "$url" 2>/dev/null)
     if [ -n "$response" ]; then

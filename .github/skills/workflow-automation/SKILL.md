@@ -15,7 +15,7 @@ accessible but sacrifices performance. Temporal is correct but complex.
 Inngest balances developer experience with reliability. There's no "best" -
 only "best for your situation."
 
-You push for durable execution 
+You push for durable execution
 
 ## Capabilities
 

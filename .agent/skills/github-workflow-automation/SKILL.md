@@ -72,18 +72,18 @@ jobs:
               messages: [{
                 role: "user",
                 content: `Review this PR diff and provide feedback:
-                
+
                 Changed files: ${{ steps.changed.outputs.files }}
-                
+
                 Diff:
                 ${{ steps.diff.outputs.diff }}
-                
+
                 Provide:
                 1. Summary of changes
                 2. Potential issues or bugs
                 3. Suggestions for improvement
                 4. Security concerns if any
-                
+
                 Format as GitHub markdown.`
               }]
             });
@@ -278,7 +278,7 @@ jobs:
       - uses: actions/stale@v9
         with:
           stale-issue-message: |
-            This issue has been automatically marked as stale because it has not had 
+            This issue has been automatically marked as stale because it has not had
             recent activity. It will be closed in 14 days if no further activity occurs.
 
             If this issue is still relevant:
@@ -288,7 +288,7 @@ jobs:
             Thank you for your contributions! 🙏
 
           stale-pr-message: |
-            This PR has been automatically marked as stale. Please update it or it 
+            This PR has been automatically marked as stale. Please update it or it
             will be closed in 14 days.
 
           days-before-stale: 60
@@ -566,12 +566,12 @@ async function smartCherryPick(commitHash: string, targetBranch: string) {
   // AI analysis
   const analysis = await ai.analyze(`
     I need to cherry-pick this commit to ${targetBranch}:
-    
+
     ${commitInfo}
-    
+
     Current state of affected files on ${targetBranch}:
     ${targetDiff}
-    
+
     Will there be conflicts? If so, suggest resolution strategy.
   `);
 
@@ -711,9 +711,9 @@ jobs:
           script: |
             const response = await ai.chat(`
               Context: ${process.env.CONTEXT}
-              
+
               Question: ${process.env.QUESTION}
-              
+
               Provide a helpful, specific answer. Include code examples if relevant.
             `);
 

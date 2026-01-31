@@ -5,9 +5,9 @@
   ansible.builtin.copy:
     src: /etc/xrdp/xrdp.ini
     dest: /etc/xrdp/xrdp.ini.backup
-    remote_src: yes
-  become: yes
-  ignore_errors: yes
+    remote_src: true
+  become: true
+  ignore_errors: true
 
 - name: Configure XRDP for performance
   ansible.builtin.template:
@@ -15,8 +15,8 @@
     dest: /etc/xrdp/xrdp.ini
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
 
 - name: Generate XRDP SSL certificate
   ansible.builtin.command: >
@@ -25,22 +25,22 @@
     -days 365 -subj "/C=US/ST=State/L=City/O=Organization/CN={{ ansible_hostname }}"
   args:
     creates: /etc/xrdp/cert.pem
-  become: yes
+  become: true
 
 - name: Set XRDP certificate permissions
   ansible.builtin.file:
     path: "{{ item }}"
     owner: xrdp
     group: xrdp
-    mode: '0400'
+    mode: "0400"
   loop:
     - /etc/xrdp/key.pem
     - /etc/xrdp/cert.pem
-  become: yes
-  ignore_errors: yes
+  become: true
+  ignore_errors: true
 
 - name: Restart XRDP service
   ansible.builtin.systemd:
     name: xrdp
     state: restarted
-  become: yes
+  become: true

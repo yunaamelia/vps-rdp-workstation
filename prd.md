@@ -341,10 +341,10 @@ The system doesn't overwhelm users with all features at once. Instead:
      ```
      docker-compose -f prod.yml up -d
      ✓ Exit 0 · 2m 34s · /home/developer/projects/webapp · 2 days ago
-     
+
      docker-compose -f prod.yml logs --tail=100
      ✓ Exit 0 · 1m 12s · /home/developer/projects/webapp · 2 days ago
-     
+
      docker deploy webapp:latest --env production
      ✗ Exit 1 · 0m 3s · /home/developer/projects/webapp · 2 days ago
      ```
@@ -371,10 +371,10 @@ The system doesn't overwhelm users with all features at once. Instead:
      ```
      [Docker] Clean unused volumes
      docker volume prune -f
-     
+
      [Docker] Clean all unused resources
      docker system prune -a --volumes -f
-     
+
      [Docker] Remove exited containers
      docker rm $(docker ps -a -q -f status=exited)
      ```
@@ -855,11 +855,11 @@ The workstation doesn't just work—it anticipates your needs, remembers your pr
   become: yes
   vars_files:
     - ../inventory/group_vars/all.yml
-  
+
   pre_tasks:
     - name: Verify base system is ready
       include_tasks: ../roles/validation/tasks/check-base-system.yml
-    
+
     - name: Create enhancement directories
       file:
         path: "{{ item }}"
@@ -869,7 +869,7 @@ The workstation doesn't just work—it anticipates your needs, remembers your pr
         - /var/log/vps-setup/enhancements
         - /var/backups/vps-workstation/enhancements
         - /var/cache/vps-workstation/binaries
-  
+
   roles:
     - role: enhancements
       vars:
@@ -878,13 +878,13 @@ The workstation doesn't just work—it anticipates your needs, remembers your pr
       tags:
         - enhancements
         - phase8
-  
+
   post_tasks:
     - name: Validate enhancement installation
       script: ../scripts/validation/validate-enhancements.sh
       register: validation_result
       changed_when: false
-    
+
     - name: Generate enhancement summary
       template:
         src: ../templates/enhancement-summary.j2
@@ -1735,7 +1735,7 @@ CREATE INDEX IF NOT EXISTS idx_history_command ON history(command);
     subgraph "Ansible Automation Layer"
         MainPlaybook[Phase 8 Playbook]
         EnhancementRole[Enhancement Role]
-        
+
         subgraph "Task Files"
             TaskCodeium[codeium.yml]
             TaskZsh[zsh-plugins.yml]
@@ -1778,18 +1778,18 @@ CREATE INDEX IF NOT EXISTS idx_history_command ON history(command);
     Zsh -.alias.-> Rg
     Zsh -.alias.-> Dust
     Zsh -.alias.-> Procs
-    
+
     Terminal --> Yazi
     Terminal --> Lazygit
-    
+
     FZF --> Fd
     FZF --> Bat
     Lazygit --> Delta
     Delta --> GitCore
-    
+
     VSCode --> VSCodeCore
     VSCodeCore --> Codeium
-    
+
     Tmux --> TPM
     TPM --> TmuxPlugins
 
@@ -1846,100 +1846,100 @@ CREATE INDEX IF NOT EXISTS idx_history_command ON history(command);
 ```mermaid
 flowchart TD
     Start([Phase 8: Enhancement Installation Starts]) --> PreCheck{Pre-requisites<br/>Met?}
-    
+
     PreCheck -->|No| PreInstall[Install Prerequisites:<br/>- cargo/rustup<br/>- build-essential<br/>- git]
     PreCheck -->|Yes| CreateDirs[Create Directories:<br/>- /var/log/vps-setup/enhancements<br/>- /var/backups/vps-workstation<br/>- /var/cache/vps-workstation]
     PreInstall --> CreateDirs
-    
+
     CreateDirs --> BackupConfigs[Backup Existing Configs:<br/>- ~/.zshrc<br/>- ~/.tmux.conf<br/>- ~/.gitconfig]
-    
+
     BackupConfigs --> ParallelInstall{Start Parallel<br/>Installation}
-    
+
     ParallelInstall -->|Thread 1| InstallCLI[Install Modern CLI Tools:<br/>eza, bat, fd, rg, dust, procs]
     ParallelInstall -->|Thread 2| InstallGit[Install Git Tools:<br/>lazygit, delta]
     ParallelInstall -->|Thread 3| InstallFuzzy[Install Fuzzy Tools:<br/>fzf, atuin]
     ParallelInstall -->|Thread 4| InstallTmux[Install Tmux Plugins:<br/>TPM + 5 plugins]
-    
+
     InstallCLI --> CLICheck{All CLI Tools<br/>Installed?}
     InstallGit --> GitCheck{Git Tools<br/>Installed?}
     InstallFuzzy --> FuzzyCheck{Fuzzy Tools<br/>Installed?}
     InstallTmux --> TmuxCheck{Tmux Plugins<br/>Installed?}
-    
+
     CLICheck -->|Yes| ConfigCLI[Configure Aliases<br/>in ~/.zshrc.enhancements]
     CLICheck -->|No| LogCLIError[Log Failed Tools]
-    
+
     GitCheck -->|Yes| ConfigGit[Configure Git:<br/>delta as pager<br/>lazygit theme]
     GitCheck -->|No| LogGitError[Log Failed Tools]
-    
+
     FuzzyCheck -->|Yes| ConfigFuzzy[Configure:<br/>FZF keybindings<br/>Atuin history]
     FuzzyCheck -->|No| LogFuzzyError[Log Failed Tools]
-    
+
     TmuxCheck -->|Yes| ConfigTmux[Configure:<br/>tmux.conf additions<br/>plugin settings]
     TmuxCheck -->|No| LogTmuxError[Log Failed Tools]
-    
+
     LogCLIError --> ConfigCLI
     LogGitError --> ConfigGit
     LogFuzzyError --> ConfigFuzzy
     LogTmuxError --> ConfigTmux
-    
+
     ConfigCLI --> WaitParallel{Wait for All<br/>Parallel Tasks}
     ConfigGit --> WaitParallel
     ConfigFuzzy --> WaitParallel
     ConfigTmux --> WaitParallel
-    
+
     WaitParallel --> InstallSequential[Sequential Installation:<br/>- Zsh Plugins<br/>- Yazi<br/>- Pet<br/>- VS Code Codeium]
-    
+
     InstallSequential --> InstallZshPlugins[Install Zsh Plugins:<br/>autosuggestions<br/>syntax-highlighting<br/>enable z]
-    
+
     InstallZshPlugins --> ZshCheck{Zsh Plugins<br/>Loaded?}
     ZshCheck -->|Yes| InstallYazi[Install Yazi File Manager]
     ZshCheck -->|No| LogZshError[Log Failed Plugins]
     LogZshError --> InstallYazi
-    
+
     InstallYazi --> YaziCheck{Yazi<br/>Installed?}
     YaziCheck -->|Yes| ConfigYazi[Configure Yazi:<br/>theme, preview, keybindings]
     YaziCheck -->|No| LogYaziError[Log Failed Installation]
     LogYaziError --> InstallPet
     ConfigYazi --> InstallPet
-    
+
     InstallPet[Install Pet Snippet Manager] --> PetCheck{Pet<br/>Installed?}
     PetCheck -->|Yes| ConfigPet[Configure Pet:<br/>config.toml<br/>pre-load snippets]
     PetCheck -->|No| LogPetError[Log Failed Installation]
     LogPetError --> InstallCodeium
     ConfigPet --> InstallCodeium
-    
+
     InstallCodeium[Install Codeium Extension] --> VSCodeCheck{VS Code<br/>Available?}
     VSCodeCheck -->|Yes| CodeiumInstall[code --install-extension<br/>Codeium.codeium]
     VSCodeCheck -->|No| SkipCodeium[Skip Codeium<br/>Log Warning]
-    
+
     CodeiumInstall --> CodeiumCheck{Extension<br/>Installed?}
     CodeiumCheck -->|Yes| MarkCodeiumSuccess[Mark Success]
     CodeiumCheck -->|No| LogCodeiumError[Log Failed Installation]
-    
+
     MarkCodeiumSuccess --> GenerateConfigs
     LogCodeiumError --> GenerateConfigs
     SkipCodeium --> GenerateConfigs
-    
+
     GenerateConfigs[Generate Configuration Files:<br/>- ~/.zshrc.enhancements<br/>- ~/.config/atuin/config.toml<br/>- ~/.config/yazi/yazi.toml<br/>- ~/.config/pet/config.toml] --> SourceConfigs
-    
+
     SourceConfigs[Add Source Line to ~/.zshrc:<br/>source ~/.zshrc.enhancements] --> SetPermissions
-    
+
     SetPermissions[Set Secure Permissions:<br/>- 0600 for sensitive files<br/>- 0755 for directories] --> CreateHelpers
-    
+
     CreateHelpers[Create Helper Functions:<br/>- shortcuts<br/>- enhancements-help<br/>- terminal-guide<br/>- enhancement-stats] --> CreateWelcome
-    
+
     CreateWelcome[Create Welcome Message<br/>for First Login] --> RunValidation
-    
+
     RunValidation[Run Validation Script:<br/>validate-enhancements.sh] --> ValidationCheck{All Critical<br/>Features OK?}
-    
+
     ValidationCheck -->|Yes| GenerateSummary[Generate Success Summary:<br/>- List installed features<br/>- Performance metrics<br/>- Documentation links]
     ValidationCheck -->|Partial| GeneratePartialSummary[Generate Partial Summary:<br/>- List successes<br/>- List failures<br/>- Remediation steps]
     ValidationCheck -->|No| GenerateFailSummary[Generate Failure Summary:<br/>- List all failures<br/>- Troubleshooting guide<br/>- Rollback instructions]
-    
+
     GenerateSummary --> Success([Installation Complete<br/>✓ All Features Active])
     GeneratePartialSummary --> PartialSuccess([Installation Complete<br/>⚠ Some Features Failed])
     GenerateFailSummary --> Failure([Installation Failed<br/>✗ Critical Errors])
-    
+
     style Start fill:#a6e3a1
     style Success fill:#a6e3a1
     style PartialSuccess fill:#f9e2af
@@ -2078,7 +2078,7 @@ sequenceDiagram
     participant HistoryDB as History Database
 
     Note over User,HistoryDB: Scenario 1: User Types Command with Autosuggestion
-    
+
     User->>Zsh: Types "doc" (partial command)
     Zsh->>ZshPlugins: Check syntax
     ZshPlugins-->>Zsh: Valid command prefix (green)
@@ -2097,7 +2097,7 @@ sequenceDiagram
     Zsh->>User: Display results
 
     Note over User,HistoryDB: Scenario 2: Fuzzy File Search with Preview
-    
+
     User->>Zsh: Presses Ctrl+T
     Zsh->>FZF: Launch fuzzy finder
     FZF->>Tool: fd --type f (find all files)
@@ -2113,7 +2113,7 @@ sequenceDiagram
     Zsh->>User: Insert path into command line
 
     Note over User,HistoryDB: Scenario 3: Command History Search
-    
+
     User->>Zsh: Presses Ctrl+R
     Zsh->>Atuin: Open history search
     Atuin->>HistoryDB: SELECT * FROM history ORDER BY timestamp DESC
@@ -2133,29 +2133,29 @@ sequenceDiagram
 ```mermaid
 stateDiagram-v2
     [*] --> WorkingInTmux: User starts tmux session
-    
+
     WorkingInTmux --> AutoSave: Every 15 minutes
     AutoSave --> SaveMetadata: tmux-continuum triggers save
-    
+
     SaveMetadata --> CaptureWindows: Save window layout
     CaptureWindows --> CapturePanes: Save pane splits
     CapturePanes --> CaptureWorkingDirs: Save working directories
     CaptureWorkingDirs --> CaptureRunningProgs: Save running programs
     CaptureRunningProgs --> WriteResurrectFile: Write to ~/.tmux/resurrect/
     WriteResurrectFile --> WorkingInTmux: Continue working
-    
+
     WorkingInTmux --> ManualSave: User presses Prefix+Ctrl+S
     ManualSave --> SaveMetadata
-    
+
     WorkingInTmux --> Disconnect: RDP connection drops
     Disconnect --> TmuxDetached: Tmux session detaches
     TmuxDetached --> SessionPersists: Session stays alive on server
-    
+
     SessionPersists --> Reconnect: User reconnects via RDP
     Reconnect --> AttachSession: tmux attach -t session_name
     AttachSession --> RestoreComplete: Session restored exactly
     RestoreComplete --> WorkingInTmux
-    
+
     WorkingInTmux --> Reboot: System reboots
     Reboot --> SessionLost: Tmux sessions terminate
     SessionLost --> SystemStartup: System boots up
@@ -2168,7 +2168,7 @@ stateDiagram-v2
     RestoreWorkingDirs --> RestartPrograms: Restart vim, editors
     RestartPrograms --> UserReconnects: User connects via RDP
     UserReconnects --> WorkingInTmux: Continue where left off
-    
+
     note right of WriteResurrectFile
         Saved data:
         - Window names
@@ -2177,7 +2177,7 @@ stateDiagram-v2
         - Running processes
         - Environment variables
     end note
-    
+
     note right of AutoRestore
         Runs automatically on:
         - tmux server start
@@ -2974,7 +2974,7 @@ stateDiagram-v2
 **Risk 1: Network-Dependent Installations**
 - **Probability:** Medium
 - **Impact:** High (blocks progress)
-- **Mitigation:** 
+- **Mitigation:**
   - Implement robust retry logic (3 attempts)
   - Cache downloaded binaries
   - Pre-download critical binaries if possible
@@ -3394,13 +3394,13 @@ stateDiagram-v2
   alias oldcat='/bin/cat'
   alias oldfind='/usr/bin/find'
   alias oldgrep='/bin/grep'
-  
+
   # Modern replacements
   alias ls='eza --icons --git --group-directories-first'
   alias ll='eza -la --icons --git --header --git-ignore'
   alias tree='eza --tree --icons --level=3'
   alias cat='bat --style=auto --theme="catppuccin-mocha"'
-  
+
   # Conditional aliases (only if tool installed)
   command -v fd &>/dev/null && alias find='fd'
   command -v rg &>/dev/null && alias grep='rg --smart-case'
@@ -3598,7 +3598,7 @@ Given the extensive length of the detailed implementation checklists, I'll provi
 
 test_tool_name() {
   echo "Testing ${TOOL_NAME}..."
-  
+
   # Test 1: Installation verification
   if command -v ${TOOL_CMD} &>/dev/null; then
     echo "✓ ${TOOL_NAME} command exists"
@@ -3606,7 +3606,7 @@ test_tool_name() {
     echo "✗ ${TOOL_NAME} not found in PATH"
     return 1
   fi
-  
+
   # Test 2: Version check
   version=$(${TOOL_CMD} --version 2>&1 | head -n1)
   if [[ -n "$version" ]]; then
@@ -3615,17 +3615,17 @@ test_tool_name() {
     echo "✗ ${TOOL_NAME} version check failed"
     return 1
   fi
-  
+
   # Test 3: Basic functionality
   # ... tool-specific test
-  
+
   # Test 4: Configuration exists
   if [[ -f "${CONFIG_PATH}" ]]; then
     echo "✓ ${TOOL_NAME} configuration found"
   else
     echo "⚠ ${TOOL_NAME} configuration missing (may be optional)"
   fi
-  
+
   return 0
 }
 ```
@@ -3636,13 +3636,13 @@ test_tool_name() {
 ```bash
 test_codeium() {
   echo "Testing Codeium extension..."
-  
+
   # Check VS Code installed
   if ! command -v code &>/dev/null; then
     echo "⚠ VS Code not installed, skipping Codeium test"
     return 0
   fi
-  
+
   # Check extension installed
   if code --list-extensions | grep -q "Codeium.codeium"; then
     echo "✓ Codeium extension installed"
@@ -3650,11 +3650,11 @@ test_codeium() {
     echo "✗ Codeium extension not found"
     return 1
   fi
-  
+
   # Check extension enabled
   # Note: Can't easily test functionality without opening VS Code
   echo "ℹ Manual test required: Open VS Code and verify suggestions appear"
-  
+
   return 0
 }
 ```
@@ -3663,7 +3663,7 @@ test_codeium() {
 ```bash
 test_zsh_plugins() {
   echo "Testing Zsh plugins..."
-  
+
   # Test autosuggestions
   if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions ]]; then
     echo "✓ zsh-autosuggestions installed"
@@ -3671,7 +3671,7 @@ test_zsh_plugins() {
     echo "✗ zsh-autosuggestions not found"
     return 1
   fi
-  
+
   # Test syntax-highlighting
   if [[ -d ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting ]]; then
     echo "✓ zsh-syntax-highlighting installed"
@@ -3679,7 +3679,7 @@ test_zsh_plugins() {
     echo "✗ zsh-syntax-highlighting not found"
     return 1
   fi
-  
+
   # Test plugins loaded in zshrc
   if grep -q "zsh-autosuggestions" ~/.zshrc.enhancements; then
     echo "✓ Plugins configured in zshrc"
@@ -3687,12 +3687,12 @@ test_zsh_plugins() {
     echo "✗ Plugins not configured"
     return 1
   fi
-  
+
   # Test in new shell (requires manual verification)
   echo "ℹ Manual test: Open new shell and verify:"
   echo "  - Gray suggestions appear when typing"
   echo "  - Commands turn green (valid) or red (invalid)"
-  
+
   return 0
 }
 ```
@@ -3701,10 +3701,10 @@ test_zsh_plugins() {
 ```bash
 test_modern_cli_tools() {
   echo "Testing modern CLI tools..."
-  
+
   tools=("eza" "bat" "fd" "rg" "dust" "procs")
   failed=0
-  
+
   for tool in "${tools[@]}"; do
     if command -v "$tool" &>/dev/null; then
       version=$($tool --version 2>&1 | head -n1)
@@ -3714,7 +3714,7 @@ test_modern_cli_tools() {
       ((failed++))
     fi
   done
-  
+
   # Test aliases
   if alias ls | grep -q "eza"; then
     echo "✓ ls alias configured"
@@ -3722,14 +3722,14 @@ test_modern_cli_tools() {
     echo "✗ ls alias missing"
     ((failed++))
   fi
-  
+
   # Test original commands still accessible
   if /usr/bin/ls --version &>/dev/null; then
     echo "✓ Original ls still accessible"
   else
     echo "⚠ Original ls not found (may be in /bin)"
   fi
-  
+
   return $failed
 }
 ```
@@ -3738,7 +3738,7 @@ test_modern_cli_tools() {
 ```bash
 test_git_tools() {
   echo "Testing Git enhancement tools..."
-  
+
   # Test lazygit
   if command -v lazygit &>/dev/null; then
     version=$(lazygit --version | head -n1)
@@ -3747,7 +3747,7 @@ test_git_tools() {
     echo "✗ lazygit not found"
     return 1
   fi
-  
+
   # Test delta
   if command -v delta &>/dev/null; then
     version=$(delta --version)
@@ -3756,7 +3756,7 @@ test_git_tools() {
     echo "✗ delta not found"
     return 1
   fi
-  
+
   # Test git configuration
   pager=$(git config --global core.pager)
   if [[ "$pager" == "delta" ]]; then
@@ -3765,14 +3765,14 @@ test_git_tools() {
     echo "✗ delta not set as git pager (current: $pager)"
     return 1
   fi
-  
+
   # Test lazygit config
   if [[ -f ~/.config/lazygit/config.yml ]]; then
     echo "✓ lazygit configuration exists"
   else
     echo "⚠ lazygit configuration missing"
   fi
-  
+
   return 0
 }
 ```
@@ -3781,7 +3781,7 @@ test_git_tools() {
 ```bash
 test_fuzzy_tools() {
   echo "Testing fuzzy finding tools..."
-  
+
   # Test fzf
   if command -v fzf &>/dev/null; then
     version=$(fzf --version)
@@ -3790,14 +3790,14 @@ test_fuzzy_tools() {
     echo "✗ fzf not found"
     return 1
   fi
-  
+
   # Test fzf keybindings
   if [[ -n "$FZF_DEFAULT_COMMAND" ]]; then
     echo "✓ FZF_DEFAULT_COMMAND configured"
   else
     echo "⚠ FZF_DEFAULT_COMMAND not set"
   fi
-  
+
   # Test Atuin
   if command -v atuin &>/dev/null; then
     version=$(atuin --version)
@@ -3806,7 +3806,7 @@ test_fuzzy_tools() {
     echo "✗ Atuin not found"
     return 1
   fi
-  
+
   # Test Atuin database
   if [[ -f ~/.local/share/atuin/history.db ]]; then
     db_size=$(du -h ~/.local/share/atuin/history.db | cut -f1)
@@ -3814,7 +3814,7 @@ test_fuzzy_tools() {
   else
     echo "⚠ Atuin database not initialized yet"
   fi
-  
+
   # Test Atuin configuration
   if [[ -f ~/.config/atuin/config.toml ]]; then
     echo "✓ Atuin configuration exists"
@@ -3828,7 +3828,7 @@ test_fuzzy_tools() {
     echo "✗ Atuin configuration missing"
     return 1
   fi
-  
+
   return 0
 }
 ```
@@ -3837,7 +3837,7 @@ test_fuzzy_tools() {
 ```bash
 test_yazi() {
   echo "Testing yazi file manager..."
-  
+
   if command -v yazi &>/dev/null; then
     version=$(yazi --version)
     echo "✓ yazi installed: $version"
@@ -3845,21 +3845,21 @@ test_yazi() {
     echo "✗ yazi not found"
     return 1
   fi
-  
+
   # Test configuration
   if [[ -f ~/.config/yazi/yazi.toml ]]; then
     echo "✓ yazi configuration exists"
   else
     echo "⚠ yazi configuration missing"
   fi
-  
+
   # Test shell function
   if type y &>/dev/null; then
     echo "✓ yazi shell function 'y' configured"
   else
     echo "⚠ yazi shell function not found"
   fi
-  
+
   return 0
 }
 ```
@@ -3868,7 +3868,7 @@ test_yazi() {
 ```bash
 test_tmux_plugins() {
   echo "Testing tmux enhancements..."
-  
+
   # Test TPM
   if [[ -d ~/.tmux/plugins/tpm ]]; then
     echo "✓ TPM installed"
@@ -3876,11 +3876,11 @@ test_tmux_plugins() {
     echo "✗ TPM not found"
     return 1
   fi
-  
+
   # Test individual plugins
   plugins=("tmux-resurrect" "tmux-continuum" "tmux-yank" "tmux-fzf")
   failed=0
-  
+
   for plugin in "${plugins[@]}"; do
     if [[ -d ~/.tmux/plugins/$plugin ]]; then
       echo "✓ $plugin installed"
@@ -3889,7 +3889,7 @@ test_tmux_plugins() {
       ((failed++))
     fi
   done
-  
+
   # Test tmux configuration
   if grep -q "tmux-plugins/tpm" ~/.tmux.conf; then
     echo "✓ TPM configured in tmux.conf"
@@ -3897,14 +3897,14 @@ test_tmux_plugins() {
     echo "✗ TPM not configured"
     ((failed++))
   fi
-  
+
   # Test Catppuccin theme
   if grep -q "catppuccin" ~/.tmux.conf; then
     echo "✓ Catppuccin theme configured"
   else
     echo "⚠ Catppuccin theme not found"
   fi
-  
+
   return $failed
 }
 ```
@@ -3913,7 +3913,7 @@ test_tmux_plugins() {
 ```bash
 test_pet() {
   echo "Testing pet snippet manager..."
-  
+
   if command -v pet &>/dev/null; then
     version=$(pet version)
     echo "✓ pet installed: $version"
@@ -3921,7 +3921,7 @@ test_pet() {
     echo "✗ pet not found"
     return 1
   fi
-  
+
   # Test configuration
   if [[ -f ~/.config/pet/config.toml ]]; then
     echo "✓ pet configuration exists"
@@ -3929,7 +3929,7 @@ test_pet() {
     echo "✗ pet configuration missing"
     return 1
   fi
-  
+
   # Test snippets file
   if [[ -f ~/.config/pet/snippet.toml ]]; then
     snippet_count=$(grep -c "^\[\[snippets\]\]" ~/.config/pet/snippet.toml)
@@ -3937,14 +3937,14 @@ test_pet() {
   else
     echo "⚠ pet snippets file not found"
   fi
-  
+
   # Test shell function
   if type pet-select &>/dev/null; then
     echo "✓ pet shell function configured"
   else
     echo "⚠ pet shell function not found"
   fi
-  
+
   return 0
 }
 ```
@@ -3957,31 +3957,31 @@ test_pet() {
 ```bash
 test_fzf_integration() {
   echo "Testing fzf integration with fd and bat..."
-  
+
   # Create test directory with files
   test_dir=$(mktemp -d)
   echo "console.log('test');" > "$test_dir/test.js"
   echo "print('test')" > "$test_dir/test.py"
-  
+
   cd "$test_dir"
-  
+
   # Test fzf uses fd as backend
   if echo "$FZF_DEFAULT_COMMAND" | grep -q "fd"; then
     echo "✓ fzf configured to use fd"
   else
     echo "⚠ fzf not using fd as backend"
   fi
-  
+
   # Test fzf preview uses bat
   if echo "$FZF_CTRL_T_OPTS" | grep -q "bat"; then
     echo "✓ fzf preview configured to use bat"
   else
     echo "⚠ fzf preview not using bat"
   fi
-  
+
   # Cleanup
   rm -rf "$test_dir"
-  
+
   return 0
 }
 ```
@@ -3990,7 +3990,7 @@ test_fzf_integration() {
 ```bash
 test_lazygit_delta_integration() {
   echo "Testing lazygit integration with delta..."
-  
+
   # Create test git repository
   test_repo=$(mktemp -d)
   cd "$test_repo"
@@ -3999,7 +3999,7 @@ test_lazygit_delta_integration() {
   git add test.txt
   git commit -m "Initial commit"
   echo "modified content" > test.txt
-  
+
   # Test delta configured in git
   diff_output=$(git diff test.txt 2>&1)
   if [[ $? -eq 0 ]]; then
@@ -4009,7 +4009,7 @@ test_lazygit_delta_integration() {
     rm -rf "$test_repo"
     return 1
   fi
-  
+
   # Test lazygit config points to delta
   if [[ -f ~/.config/lazygit/config.yml ]]; then
     if grep -q "delta" ~/.config/lazygit/config.yml; then
@@ -4018,10 +4018,10 @@ test_lazygit_delta_integration() {
       echo "⚠ lazygit may not be using delta"
     fi
   fi
-  
+
   # Cleanup
   rm -rf "$test_repo"
-  
+
   return 0
 }
 ```
@@ -4030,18 +4030,18 @@ test_lazygit_delta_integration() {
 ```bash
 test_tmux_persistence() {
   echo "Testing tmux session persistence..."
-  
+
   # Create test session
   session_name="test-persist-$$"
   tmux new-session -d -s "$session_name"
   tmux send-keys -t "$session_name" "cd /tmp" C-m
   tmux split-window -t "$session_name" -h
   tmux send-keys -t "$session_name" "cd /var" C-m
-  
+
   # Save session
   echo "ℹ Saving tmux session..."
   tmux run-shell "~/.tmux/plugins/tmux-resurrect/scripts/save.sh"
-  
+
   # Check save file created
   save_file=$(ls -t ~/.tmux/resurrect/ | head -n1)
   if [[ -f ~/.tmux/resurrect/$save_file ]]; then
@@ -4051,14 +4051,14 @@ test_tmux_persistence() {
     tmux kill-session -t "$session_name"
     return 1
   fi
-  
+
   # Kill session
   tmux kill-session -t "$session_name"
-  
+
   # Restore session
   echo "ℹ Restoring tmux session..."
   tmux run-shell "~/.tmux/plugins/tmux-resurrect/scripts/restore.sh"
-  
+
   # Check session restored
   if tmux has-session -t "$session_name" 2>/dev/null; then
     echo "✓ Tmux session restored successfully"
@@ -4067,7 +4067,7 @@ test_tmux_persistence() {
     echo "✗ Tmux session restoration failed"
     return 1
   fi
-  
+
   return 0
 }
 ```
@@ -4076,7 +4076,7 @@ test_tmux_persistence() {
 ```bash
 test_yazi_bat_integration() {
   echo "Testing yazi integration with bat..."
-  
+
   # Check yazi config mentions bat
   if [[ -f ~/.config/yazi/yazi.toml ]]; then
     if grep -q "bat" ~/.config/yazi/yazi.toml; then
@@ -4088,12 +4088,12 @@ test_yazi_bat_integration() {
     echo "✗ yazi configuration missing"
     return 1
   fi
-  
+
   # Manual test required for actual preview
   echo "ℹ Manual test: Launch yazi and verify:"
   echo "  - Navigate to a code file"
   echo "  - Preview pane shows syntax-highlighted content"
-  
+
   return 0
 }
 ```
@@ -4106,11 +4106,11 @@ test_yazi_bat_integration() {
 ```bash
 test_shell_startup_time() {
   echo "Testing shell startup time..."
-  
+
   # Measure startup time 5 times, take average
   total=0
   iterations=5
-  
+
   for i in $(seq 1 $iterations); do
     time_output=$( { time zsh -i -c exit; } 2>&1 )
     real_time=$(echo "$time_output" | grep real | awk '{print $2}')
@@ -4118,12 +4118,12 @@ test_shell_startup_time() {
     ms=$(echo "$real_time" | awk -F'[ms]' '{print ($1 * 60 + $2) * 1000 + $3}')
     total=$((total + ms))
   done
-  
+
   avg=$((total / iterations))
   avg_seconds=$(echo "scale=3; $avg / 1000" | bc)
-  
+
   echo "Average shell startup time: ${avg_seconds}s"
-  
+
   # Check against target (500ms = 0.5s)
   if (( $(echo "$avg_seconds < 0.5" | bc -l) )); then
     echo "✓ Shell startup time within target (< 0.5s)"
@@ -4139,21 +4139,21 @@ test_shell_startup_time() {
 ```bash
 test_fzf_preview_performance() {
   echo "Testing fzf preview performance..."
-  
+
   # Create test file with 500 lines
   test_file=$(mktemp)
   for i in $(seq 1 500); do
     echo "Line $i: some content here" >> "$test_file"
   done
-  
+
   # Measure bat preview time
   start=$(date +%s%N)
   bat --color=always --style=numbers "$test_file" > /dev/null
   end=$(date +%s%N)
-  
+
   duration_ms=$(( (end - start) / 1000000 ))
   echo "Bat preview time for 500 lines: ${duration_ms}ms"
-  
+
   # Check against target (100ms)
   if (( duration_ms < 100 )); then
     echo "✓ Preview performance within target (< 100ms)"
@@ -4171,21 +4171,21 @@ test_fzf_preview_performance() {
 ```bash
 test_atuin_search_performance() {
   echo "Testing Atuin history search performance..."
-  
+
   # Add test commands to history
   for i in $(seq 1 100); do
     atuin history start "test-command-$i"
     atuin history end --exit 0
   done
-  
+
   # Measure search time
   start=$(date +%s%N)
   atuin search "test-command" --limit 10 > /dev/null
   end=$(date +%s%N)
-  
+
   duration_ms=$(( (end - start) / 1000000 ))
   echo "Atuin search time: ${duration_ms}ms"
-  
+
   # Check against target (100ms for moderate history)
   if (( duration_ms < 100 )); then
     echo "✓ Atuin search performance within target"
@@ -4201,40 +4201,40 @@ test_atuin_search_performance() {
 ```bash
 test_tool_speed_benchmarks() {
   echo "Testing tool performance vs. traditional tools..."
-  
+
   # Create test directory with many files
   test_dir=$(mktemp -d)
   for i in $(seq 1 1000); do
     echo "content" > "$test_dir/file$i.txt"
   done
-  
+
   cd "$test_dir"
-  
+
   # Benchmark fd vs find
   echo "Benchmarking fd vs. find..."
   start=$(date +%s%N)
   find . -type f > /dev/null
   end=$(date +%s%N)
   find_time=$(( (end - start) / 1000000 ))
-  
+
   start=$(date +%s%N)
   fd --type f > /dev/null
   end=$(date +%s%N)
   fd_time=$(( (end - start) / 1000000 ))
-  
+
   echo "  find: ${find_time}ms"
   echo "  fd:   ${fd_time}ms"
-  
+
   if (( fd_time < find_time )); then
     speedup=$(echo "scale=2; $find_time / $fd_time" | bc)
     echo "✓ fd is ${speedup}x faster than find"
   else
     echo "⚠ fd not faster than find (small dataset)"
   fi
-  
+
   # Cleanup
   rm -rf "$test_dir"
-  
+
   return 0
 }
 ```
@@ -4247,19 +4247,19 @@ test_tool_speed_benchmarks() {
 ```bash
 test_playbook_idempotency() {
   echo "Testing playbook idempotency..."
-  
+
   echo "ℹ Running playbook first time..."
   first_run=$(ansible-playbook playbooks/phase8-enhancements.yml 2>&1)
   first_changed=$(echo "$first_run" | grep "changed=" | sed 's/.*changed=\([0-9]*\).*/\1/')
-  
+
   echo "First run: $first_changed tasks changed"
-  
+
   echo "ℹ Running playbook second time..."
   second_run=$(ansible-playbook playbooks/phase8-enhancements.yml 2>&1)
   second_changed=$(echo "$second_run" | grep "changed=" | sed 's/.*changed=\([0-9]*\).*/\1/')
-  
+
   echo "Second run: $second_changed tasks changed"
-  
+
   if (( second_changed == 0 )); then
     echo "✓ Playbook is fully idempotent (0 changes on second run)"
     return 0
@@ -4276,14 +4276,14 @@ test_playbook_idempotency() {
 ```bash
 test_config_idempotency() {
   echo "Testing configuration file idempotency..."
-  
+
   # Backup current configs
   cp ~/.zshrc.enhancements ~/.zshrc.enhancements.backup 2>/dev/null
   cp ~/.tmux.conf ~/.tmux.conf.backup 2>/dev/null
-  
+
   # Run playbook
   ansible-playbook playbooks/phase8-enhancements.yml > /dev/null 2>&1
-  
+
   # Compare configs
   if diff ~/.zshrc.enhancements ~/.zshrc.enhancements.backup > /dev/null 2>&1; then
     echo "✓ .zshrc.enhancements unchanged on re-run"
@@ -4291,17 +4291,17 @@ test_config_idempotency() {
     echo "✗ .zshrc.enhancements modified on re-run"
     return 1
   fi
-  
+
   if diff ~/.tmux.conf ~/.tmux.conf.backup > /dev/null 2>&1; then
     echo "✓ .tmux.conf unchanged on re-run"
   else
     echo "✗ .tmux.conf modified on re-run"
     return 1
   fi
-  
+
   # Cleanup
   rm ~/.zshrc.enhancements.backup ~/.tmux.conf.backup 2>/dev/null
-  
+
   return 0
 }
 ```
@@ -4481,10 +4481,10 @@ main() {
   echo "VPS Workstation Enhancement Validation"
   echo "========================================="
   echo ""
-  
+
   info "Starting validation at $(date)"
   echo ""
-  
+
   # Run all tests
   test_codeium
   test_zsh_plugins
@@ -4494,19 +4494,19 @@ main() {
   test_yazi
   test_tmux_plugins
   test_pet
-  
+
   echo ""
   info "Running integration tests..."
   test_fzf_integration
   test_lazygit_delta_integration
   test_yazi_bat_integration
-  
+
   echo ""
   info "Running performance tests..."
   test_shell_startup_time
   test_fzf_preview_performance
   test_atuin_search_performance
-  
+
   echo ""
   echo "========================================="
   echo "Validation Summary"
@@ -4515,7 +4515,7 @@ main() {
   echo -e "${GREEN}Passed: $passed_tests${NC}"
   echo -e "${RED}Failed: $failed_tests${NC}"
   echo -e "${YELLOW}Warnings: $warnings${NC}"
-  
+
   if (( failed_tests > 0 )); then
     echo ""
     echo "Failed tests:"
@@ -4523,7 +4523,7 @@ main() {
       echo "  - $test_name"
     done
   fi
-  
+
   echo ""
   if (( failed_tests == 0 )); then
     echo -e "${GREEN}✓ All validations passed!${NC}"
@@ -4572,7 +4572,7 @@ main "$@"
 
 ## Unit Tests
 - [x] Codeium Extension: PASS
-- [x] Zsh Plugins: PASS  
+- [x] Zsh Plugins: PASS
 - [x] Modern CLI Tools: PASS (6/6 tools installed)
 - [x] Git Tools: PASS
 - [x] Fuzzy Tools: PASS

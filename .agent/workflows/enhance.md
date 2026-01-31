@@ -29,7 +29,7 @@ This command adds features or makes updates to existing application.
    - I'll create 15 new files
    - Update 8 files
    - Takes ~10 minutes
-   
+
    Should I start?"
    ```
 

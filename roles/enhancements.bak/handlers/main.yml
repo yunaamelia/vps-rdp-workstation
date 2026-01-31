@@ -1,0 +1,33 @@
+---
+# handlers/main.yml for enhancements role
+
+- name: Reload Zsh configuration
+  ansible.builtin.shell: |
+    rm -f {{ enhancement_home }}/.zcompdump*
+  become: true
+  become_user: "{{ enhancement_user }}"
+
+- name: Restart Tmux server
+  ansible.builtin.shell: |
+    if pgrep -u {{ enhancement_user }} tmux > /dev/null; then
+      tmux kill-server || true
+    fi
+  become: true
+  become_user: "{{ enhancement_user }}"
+  ignore_errors: true
+
+- name: Recompile Zsh config
+  ansible.builtin.shell: |
+    # If zcompdump exists, remove it
+    rm -f {{ enhancement_home }}/.zcompdump*
+  become: true
+  become_user: "{{ enhancement_user }}"
+- name: Install tmux plugins
+  ansible.builtin.shell: |
+    if [ -f ~/.tmux/plugins/tpm/bin/install_plugins ]; then
+      export TMUX_PLUGIN_MANAGER_PATH=~/.tmux/plugins
+      ~/.tmux/plugins/tpm/bin/install_plugins
+    fi
+  become: true
+  become_user: "{{ enhancement_user }}"
+  ignore_errors: true

@@ -313,7 +313,7 @@ Platform: iOS / Android / Both
 
 1. Default pattern I will NOT use in this project:
    └── _______________
-   
+
 2. Context-specific focus for this project:
    └── _______________
 

@@ -299,7 +299,7 @@ class AnthropicComputerUse:
             subprocess.run(["scrot", "/tmp/screenshot.png"])
 
             with open("/tmp/screenshot.png", "rb") as f:
-            
+
 ```
 
 ## ⚠️ Sharp Edges

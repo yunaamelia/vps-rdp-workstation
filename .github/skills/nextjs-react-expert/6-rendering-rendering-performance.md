@@ -13,8 +13,8 @@ This section contains **9 rules** focused on rendering performance.
 
 ## Rule 6.1: Animate SVG Wrapper Instead of SVG Element
 
-**Impact:** LOW  
-**Tags:** rendering, svg, css, animation, performance  
+**Impact:** LOW
+**Tags:** rendering, svg, css, animation, performance
 
 ## Animate SVG Wrapper Instead of SVG Element
 
@@ -25,10 +25,10 @@ Many browsers don't have hardware acceleration for CSS3 animations on SVG elemen
 ```tsx
 function LoadingSpinner() {
   return (
-    <svg 
+    <svg
       className="animate-spin"
-      width="24" 
-      height="24" 
+      width="24"
+      height="24"
       viewBox="0 0 24 24"
     >
       <circle cx="12" cy="12" r="10" stroke="currentColor" />
@@ -43,9 +43,9 @@ function LoadingSpinner() {
 function LoadingSpinner() {
   return (
     <div className="animate-spin">
-      <svg 
-        width="24" 
-        height="24" 
+      <svg
+        width="24"
+        height="24"
         viewBox="0 0 24 24"
       >
         <circle cx="12" cy="12" r="10" stroke="currentColor" />
@@ -61,8 +61,8 @@ This applies to all CSS transforms and transitions (`transform`, `opacity`, `tra
 
 ## Rule 6.2: CSS content-visibility for Long Lists
 
-**Impact:** HIGH  
-**Tags:** rendering, css, content-visibility, long-lists  
+**Impact:** HIGH
+**Tags:** rendering, css, content-visibility, long-lists
 
 ## CSS content-visibility for Long Lists
 
@@ -100,8 +100,8 @@ For 1000 messages, browser skips layout/paint for ~990 off-screen items (10× fa
 
 ## Rule 6.3: Hoist Static JSX Elements
 
-**Impact:** LOW  
-**Tags:** rendering, jsx, static, optimization  
+**Impact:** LOW
+**Tags:** rendering, jsx, static, optimization
 
 ## Hoist Static JSX Elements
 
@@ -147,8 +147,8 @@ This is especially helpful for large and static SVG nodes, which can be expensiv
 
 ## Rule 6.4: Optimize SVG Precision
 
-**Impact:** LOW  
-**Tags:** rendering, svg, optimization, svgo  
+**Impact:** LOW
+**Tags:** rendering, svg, optimization, svgo
 
 ## Optimize SVG Precision
 
@@ -176,8 +176,8 @@ npx svgo --precision=1 --multipass icon.svg
 
 ## Rule 6.5: Prevent Hydration Mismatch Without Flickering
 
-**Impact:** MEDIUM  
-**Tags:** rendering, ssr, hydration, localStorage, flicker  
+**Impact:** MEDIUM
+**Tags:** rendering, ssr, hydration, localStorage, flicker
 
 ## Prevent Hydration Mismatch Without Flickering
 
@@ -189,7 +189,7 @@ When rendering content that depends on client-side storage (localStorage, cookie
 function ThemeWrapper({ children }: { children: ReactNode }) {
   // localStorage is not available on server - throws error
   const theme = localStorage.getItem('theme') || 'light'
-  
+
   return (
     <div className={theme}>
       {children}
@@ -205,7 +205,7 @@ Server-side rendering will fail because `localStorage` is undefined.
 ```tsx
 function ThemeWrapper({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState('light')
-  
+
   useEffect(() => {
     // Runs after hydration - causes visible flash
     const stored = localStorage.getItem('theme')
@@ -213,7 +213,7 @@ function ThemeWrapper({ children }: { children: ReactNode }) {
       setTheme(stored)
     }
   }, [])
-  
+
   return (
     <div className={theme}>
       {children}
@@ -259,8 +259,8 @@ This pattern is especially useful for theme toggles, user preferences, authentic
 
 ## Rule 6.6: Suppress Expected Hydration Mismatches
 
-**Impact:** LOW-MEDIUM  
-**Tags:** rendering, hydration, ssr, nextjs  
+**Impact:** LOW-MEDIUM
+**Tags:** rendering, hydration, ssr, nextjs
 
 ## Suppress Expected Hydration Mismatches
 
@@ -290,8 +290,8 @@ function Timestamp() {
 
 ## Rule 6.7: Use Activity Component for Show/Hide
 
-**Impact:** MEDIUM  
-**Tags:** rendering, activity, visibility, state-preservation  
+**Impact:** MEDIUM
+**Tags:** rendering, activity, visibility, state-preservation
 
 ## Use Activity Component for Show/Hide
 
@@ -317,8 +317,8 @@ Avoids expensive re-renders and state loss.
 
 ## Rule 6.8: Use Explicit Conditional Rendering
 
-**Impact:** LOW  
-**Tags:** rendering, conditional, jsx, falsy-values  
+**Impact:** LOW
+**Tags:** rendering, conditional, jsx, falsy-values
 
 ## Use Explicit Conditional Rendering
 
@@ -358,8 +358,8 @@ function Badge({ count }: { count: number }) {
 
 ## Rule 6.9: Use useTransition Over Manual Loading States
 
-**Impact:** LOW  
-**Tags:** rendering, transitions, useTransition, loading, state  
+**Impact:** LOW
+**Tags:** rendering, transitions, useTransition, loading, state
 
 ## Use useTransition Over Manual Loading States
 
@@ -403,7 +403,7 @@ function SearchResults() {
 
   const handleSearch = (value: string) => {
     setQuery(value) // Update input immediately
-    
+
     startTransition(async () => {
       // Fetch and update results
       const data = await fetchResults(value)
@@ -429,4 +429,3 @@ function SearchResults() {
 - **Interrupt handling**: New transitions automatically cancel pending ones
 
 Reference: [useTransition](https://react.dev/reference/react/useTransition)
-

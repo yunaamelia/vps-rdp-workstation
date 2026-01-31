@@ -55,7 +55,7 @@
     dest: /etc/fail2ban/jail.local
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   notify: restart fail2ban
 
 - name: Create XRDP fail2ban filter
@@ -68,13 +68,13 @@
     dest: /etc/fail2ban/filter.d/xrdp.conf
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"
   notify: restart fail2ban
 
 - name: Enable fail2ban service
   ansible.builtin.systemd:
     name: fail2ban
-    enabled: yes
+    enabled: true
     state: started
 
 - name: Configure unattended-upgrades
@@ -86,4 +86,4 @@
     dest: /etc/apt/apt.conf.d/20auto-upgrades
     owner: root
     group: root
-    mode: '0644'
+    mode: "0644"

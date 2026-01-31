@@ -233,27 +233,27 @@ function calculateTotalPrice(quantity, unitPrice, tax) {
 function processOrder(order) {
   // Validate order
   if (!order.items) throw new Error('No items');
-  
+
   // Calculate total
   let total = 0;
   for (let item of order.items) {
     total += item.price * item.quantity;
   }
-  
+
   // Apply discount
   if (order.coupon) {
     total *= 0.9;
   }
-  
+
   // Process payment
   const payment = stripe.charge(total);
-  
+
   // Send email
   sendEmail(order.email, 'Order confirmed');
-  
+
   // Update inventory
   updateInventory(order.items);
-  
+
   return { orderId: order.id, total };
 }
 \`\`\`
@@ -266,7 +266,7 @@ function processOrder(order) {
   const payment = processPayment(total);
   sendOrderConfirmation(order.email);
   updateInventory(order.items);
-  
+
   return { orderId: order.id, total };
 }
 \`\`\`

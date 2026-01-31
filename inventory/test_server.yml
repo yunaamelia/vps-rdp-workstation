@@ -1,9 +1,18 @@
+---
+# VPS RDP Workstation - Remote Test Server Inventory
+# Target: Remote VPS for deployment
+
 all:
   hosts:
-    localhost:
+    testserver:
       ansible_host: 159.223.73.252
       ansible_user: root
-      ansible_connection: ssh
-      ansible_ssh_pass: "gg123123@"
-      ansible_become_pass: "gg123123@"
       ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      ansible_python_interpreter: /usr/bin/python3
+
+  children:
+    vps:
+      hosts:
+        testserver:
+      vars:
+        # Inherit from group_vars/all.yml

@@ -58,7 +58,7 @@ fi
 echo "Test 5: Validating backup system..."
 if [ -f /usr/local/bin/auto-backup ]; then
     echo "  ✅ Automated backup script installed"
-    
+
     if crontab -l -u "$VPS_USERNAME" 2>/dev/null | grep -q "auto-backup"; then
         echo "  ✅ Backup cron job configured"
     else
@@ -72,7 +72,7 @@ fi
 echo "Test 6: Validating tmux enhancements..."
 if [ -f "/home/$VPS_USERNAME/.tmux.conf" ]; then
     echo "  ✅ tmux configuration present"
-    
+
     if [ -d "/home/$VPS_USERNAME/.tmux/plugins/tpm" ]; then
         echo "  ✅ tmux plugin manager installed"
     else

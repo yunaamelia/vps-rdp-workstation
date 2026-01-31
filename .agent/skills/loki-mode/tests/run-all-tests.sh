@@ -65,7 +65,7 @@ echo -e "${GREEN}Passed:       ${TOTAL_PASSED}${NC}"
 echo -e "${RED}Failed:       ${TOTAL_FAILED}${NC}"
 echo ""
 
-if [ $TOTAL_FAILED -eq 0 ]; then
+if [ "$TOTAL_FAILED" -eq 0 ]; then
     echo -e "${GREEN}╔════════════════════════════════════════════════════════════════╗${NC}"
     echo -e "${GREEN}║              ALL TESTS PASSED SUCCESSFULLY!                    ║${NC}"
     echo -e "${GREEN}╚════════════════════════════════════════════════════════════════╝${NC}"

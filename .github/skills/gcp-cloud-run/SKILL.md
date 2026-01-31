@@ -104,7 +104,7 @@ steps:
       - '--cpu=1'
       - '--min-instances=1'
       - '--max-instances=100'
-     
+
 ```
 
 ### Cloud Run Functions Pattern

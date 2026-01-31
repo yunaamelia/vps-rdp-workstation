@@ -1,21 +1,21 @@
 ---
-#===============================================================================
+# ===============================================================================
 # Phase 9.2: Modern CLI Tool Suite
-#===============================================================================
+# ===============================================================================
 # Installs modern Rust-based CLI tools as replacements for traditional Unix utils
-#===============================================================================
+# ===============================================================================
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Install via APT (preferred)
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 - name: Install modern CLI tools from APT
   ansible.builtin.apt:
     name:
-      - bat          # cat with syntax highlighting
-      - fd-find      # fast find replacement
-      - ripgrep      # modern grep
-      - fzf          # fuzzy finder (also used in Phase 9.4)
+      - bat # cat with syntax highlighting
+      - fd-find # fast find replacement
+      - ripgrep # modern grep
+      - fzf # fuzzy finder (also used in Phase 9.4)
     state: present
   register: enhancements_apt_cli_tools
 
@@ -31,7 +31,7 @@
 
 - name: Install eza via cargo
   ansible.builtin.command: cargo install eza
-  become: yes
+  become: true
   become_user: "{{ vps_username }}"
   environment:
     HOME: "/home/{{ vps_username }}"
@@ -46,14 +46,14 @@
     - name: Download eza binary
       ansible.builtin.get_url:
         url: "https://github.com/eza-community/eza/releases/latest/download/eza_x86_64-unknown-linux-gnu.tar.gz"
-        dest: "{{ enhancement_cache_dir }}/eza.tar.gz"
-        mode: '0644'
+        dest: "{{ enhancements_cache_dir }}/eza.tar.gz"
+        mode: "0644"
 
     - name: Extract eza binary
       ansible.builtin.unarchive:
-        src: "{{ enhancement_cache_dir }}/eza.tar.gz"
+        src: "{{ enhancements_cache_dir }}/eza.tar.gz"
         dest: /usr/local/bin
-        remote_src: yes
+        remote_src: true
         creates: /usr/local/bin/eza
 
 #-------------------------------------------------------------------------------
@@ -71,22 +71,22 @@
   block:
     - name: Download dust
       ansible.builtin.get_url:
-        url: "https://github.com/bootandy/dust/releases/download/v{{ dust_version }}/dust-v{{ dust_version }}-x86_64-unknown-linux-gnu.tar.gz"
-        dest: "{{ enhancement_cache_dir }}/dust.tar.gz"
-        mode: '0644'
+        url: "https://github.com/bootandy/dust/releases/download/v{{ enhancements_dust_version }}/dust-v{{ enhancements_dust_version }}-x86_64-unknown-linux-gnu.tar.gz"
+        dest: "{{ enhancements_cache_dir }}/dust.tar.gz"
+        mode: "0644"
 
     - name: Extract dust
       ansible.builtin.unarchive:
-        src: "{{ enhancement_cache_dir }}/dust.tar.gz"
-        dest: "{{ enhancement_cache_dir }}"
-        remote_src: yes
+        src: "{{ enhancements_cache_dir }}/dust.tar.gz"
+        dest: "{{ enhancements_cache_dir }}"
+        remote_src: true
 
     - name: Install dust
       ansible.builtin.copy:
-        src: "{{ enhancement_cache_dir }}/dust-v{{ dust_version }}-x86_64-unknown-linux-gnu/dust"
+        src: "{{ enhancements_cache_dir }}/dust-v{{ enhancements_dust_version }}-x86_64-unknown-linux-gnu/dust"
         dest: /usr/local/bin/dust
-        remote_src: yes
-        mode: '0755'
+        remote_src: true
+        mode: "0755"
 
 #-------------------------------------------------------------------------------
 # Install procs (modern ps)
@@ -103,21 +103,21 @@
   block:
     - name: Download procs
       ansible.builtin.get_url:
-        url: "https://github.com/dalance/procs/releases/download/v{{ procs_version }}/procs-v{{ procs_version }}-x86_64-linux.zip"
-        dest: "{{ enhancement_cache_dir }}/procs.zip"
-        mode: '0644'
+        url: "https://github.com/dalance/procs/releases/download/v{{ enhancements_procs_version }}/procs-v{{ enhancements_procs_version }}-x86_64-linux.zip"
+        dest: "{{ enhancements_cache_dir }}/procs.zip"
+        mode: "0644"
 
     - name: Extract procs
       ansible.builtin.unarchive:
-        src: "{{ enhancement_cache_dir }}/procs.zip"
+        src: "{{ enhancements_cache_dir }}/procs.zip"
         dest: /usr/local/bin
-        remote_src: yes
+        remote_src: true
         creates: /usr/local/bin/procs
 
     - name: Set procs executable
       ansible.builtin.file:
         path: /usr/local/bin/procs
-        mode: '0755'
+        mode: "0755"
 
 #-------------------------------------------------------------------------------
 # Create Symlinks for Debian naming
@@ -147,7 +147,7 @@
     state: directory
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0755'
+    mode: "0755"
 
 - name: Create bat themes directory
   ansible.builtin.file:
@@ -155,7 +155,7 @@
     state: directory
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0755'
+    mode: "0755"
 
 - name: Download Catppuccin Mocha theme for bat
   ansible.builtin.get_url:
@@ -163,27 +163,26 @@
     dest: "/home/{{ vps_username }}/.config/bat/themes/Catppuccin Mocha.tmTheme"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
   register: enhancements_bat_theme_download
 
 - name: Rebuild bat cache
   ansible.builtin.command: bat cache --build
-  become: yes
+  become: true
   become_user: "{{ vps_username }}"
   when: enhancements_bat_theme_download.changed
 
 - name: Configure bat
   ansible.builtin.copy:
     content: |
-      --theme="{{ bat_theme }}"
+      --theme="{{ enhancements_bat_theme }}"
       --style="numbers,changes,header"
       --italic-text=always
       --paging=auto
     dest: "/home/{{ vps_username }}/.config/bat/config"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 #-------------------------------------------------------------------------------
 # Set bat as MANPAGER
@@ -196,14 +195,14 @@
     block: |
       # Use bat for man pages
       export MANPAGER="sh -c 'col -bx | bat -l man -p'"
-    create: yes
+    create: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 - name: Log modern CLI tools installation
   ansible.builtin.lineinfile:
-    path: "{{ enhancement_log_dir }}/install.log"
+    path: "{{ enhancements_log_dir }}/install.log"
     line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - Modern CLI Tools installed"
-    create: yes
-    mode: '0644'
+    create: true
+    mode: "0644"

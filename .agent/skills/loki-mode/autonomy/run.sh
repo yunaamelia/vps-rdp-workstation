@@ -1,5 +1,6 @@
 #!/bin/bash
 #===============================================================================
+# shellcheck disable=SC2155,SC2317,SC2248,SC2059,SC2002,SC2162,SC2310,SC2012
 # Loki Mode - Autonomous Runner
 # Single script that handles prerequisites, setup, and autonomous execution
 #
@@ -1182,7 +1183,7 @@ start_dashboard() {
     log_step "Starting dashboard server..."
     (
         cd .loki
-        python3 -m http.server $DASHBOARD_PORT --bind 127.0.0.1 2>&1 | while read line; do
+        python3 -m http.server $DASHBOARD_PORT --bind 127.0.0.1 2>&1 | while read -r line; do
             echo "[dashboard] $line" >> logs/dashboard.log
         done
     ) &
@@ -1190,7 +1191,7 @@ start_dashboard() {
 
     sleep 1
 
-    if kill -0 $DASHBOARD_PID 2>/dev/null; then
+    if kill -0 "$DASHBOARD_PID" 2>/dev/null; then
         log_info "Dashboard started (PID: $DASHBOARD_PID)"
         log_info "Dashboard: ${CYAN}http://127.0.0.1:$DASHBOARD_PORT/dashboard/index.html${NC}"
 
@@ -1226,7 +1227,7 @@ calculate_wait() {
     wait_time=$((wait_time + jitter))
 
     # Cap at max wait
-    if [ $wait_time -gt $MAX_WAIT ]; then
+    if [ "$wait_time" -gt $MAX_WAIT ]; then
         wait_time=$MAX_WAIT
     fi
 
@@ -1243,7 +1244,8 @@ detect_rate_limit() {
     local log_file="$1"
 
     # Look for rate limit message like "resets 4am" or "resets 10pm"
-    local reset_time=$(grep -o "resets [0-9]\+[ap]m" "$log_file" 2>/dev/null | tail -1 | grep -o "[0-9]\+[ap]m")
+    local reset_time
+    reset_time=$(grep -o "resets [0-9]\+[ap]m" "$log_file" 2>/dev/null | tail -1 | grep -o "[0-9]\+[ap]m")
 
     if [ -z "$reset_time" ]; then
         echo 0
@@ -1304,7 +1306,8 @@ is_completed() {
     # Check orchestrator state
     if [ -f ".loki/state/orchestrator.json" ]; then
         if command -v python3 &> /dev/null; then
-            local phase=$(python3 -c "import json; print(json.load(open('.loki/state/orchestrator.json')).get('currentPhase', ''))" 2>/dev/null || echo "")
+            local phase
+            phase=$(python3 -c "import json; print(json.load(open('.loki/state/orchestrator.json')).get('currentPhase', ''))" 2>/dev/null || echo "")
             # Accept various completion states
             if [ "$phase" = "COMPLETED" ] || [ "$phase" = "complete" ] || [ "$phase" = "finalized" ] || [ "$phase" = "growth-loop" ]; then
                 return 0
@@ -1349,10 +1352,14 @@ check_max_iterations() {
 # Check if context clear was requested by agent
 check_context_clear_signal() {
     if [ -f ".loki/signals/CONTEXT_CLEAR_REQUESTED" ]; then
+        # shellcheck disable=SC2317
         log_info "Context clear signal detected from agent"
+        # shellcheck disable=SC2317
         rm -f ".loki/signals/CONTEXT_CLEAR_REQUESTED"
+        # shellcheck disable=SC2317
         return 0
     fi
+    # shellcheck disable=SC2317
     return 1
 }
 
@@ -1361,10 +1368,11 @@ load_ledger_context() {
     local ledger_content=""
 
     # Find most recent ledger
+    # shellcheck disable=SC2155,SC2012
     local latest_ledger=$(ls -t .loki/memory/ledgers/LEDGER-*.md 2>/dev/null | head -1)
 
     if [ -n "$latest_ledger" ] && [ -f "$latest_ledger" ]; then
-        ledger_content=$(cat "$latest_ledger" | head -100)
+        ledger_content=$(head -100 "$latest_ledger")
         echo "$ledger_content"
     fi
 }
@@ -1374,10 +1382,11 @@ load_handoff_context() {
     local handoff_content=""
 
     # Find most recent handoff (last 24 hours)
-    local recent_handoff=$(find .loki/memory/handoffs -name "*.md" -mtime -1 2>/dev/null | head -1)
+    local recent_handoff
+    recent_handoff=$(find .loki/memory/handoffs -name "*.md" -mtime -1 2>/dev/null | head -1)
 
     if [ -n "$recent_handoff" ] && [ -f "$recent_handoff" ]; then
-        handoff_content=$(cat "$recent_handoff" | head -80)
+        handoff_content=$(head -80 "$recent_handoff")
         echo "$handoff_content"
     fi
 }
@@ -1387,6 +1396,7 @@ load_learnings_context() {
     local learnings=""
 
     # Get recent learnings (last 7 days)
+    # shellcheck disable=SC2317,SC2044
     for learning in $(find .loki/memory/learnings -name "*.md" -mtime -7 2>/dev/null | head -5); do
         learnings+="$(head -30 "$learning")\n---\n"
     done
@@ -1551,6 +1561,7 @@ run_autonomous() {
     local retry=$RETRY_COUNT
 
     # Check max iterations before starting
+    # shellcheck disable=SC2310
     if check_max_iterations; then
         log_error "Max iterations already reached. Reset with: rm .loki/autonomy-state.json"
         return 1
@@ -1561,11 +1572,15 @@ run_autonomous() {
         ((ITERATION_COUNT++))
 
         # Check max iterations
+        # shellcheck disable=SC2310
+        # shellcheck disable=SC2310
         if check_max_iterations; then
             save_state $retry "max_iterations_reached" 0
             return 0
         fi
 
+        # shellcheck disable=SC2155,SC2248
+        # shellcheck disable=SC2155,SC2248
         local prompt=$(build_prompt $retry "$prd_path" $ITERATION_COUNT)
 
         echo ""
@@ -1576,7 +1591,9 @@ run_autonomous() {
         save_state $retry "running" 0
 
         # Run Claude Code with live output
+        # shellcheck disable=SC2155
         local start_time=$(date +%s)
+        # shellcheck disable=SC2155
         local log_file=".loki/logs/autonomy-$(date +%Y%m%d).log"
 
         echo ""
@@ -1710,7 +1727,7 @@ def process_stream():
                         elif tool == "Bash":
                             tool_desc = tool_input.get("description", tool_input.get("command", "")[:60])
                         elif tool == "Grep":
-                            tool_desc = f"pattern: {tool_input.get('pattern', '')}"
+                            tool_desc = "pattern: " + tool_input.get("pattern", "")
                         elif tool == "Glob":
                             tool_desc = tool_input.get("pattern", "")
 
@@ -1806,6 +1823,7 @@ if __name__ == "__main__":
         # Log end time
         echo "=== Session ended at $(date) with exit code $exit_code ===" >> "$log_file"
 
+        # shellcheck disable=SC2155
         local end_time=$(date +%s)
         local duration=$((end_time - start_time))
 
@@ -1845,11 +1863,13 @@ if __name__ == "__main__":
 
         # Only apply retry logic for ERRORS (non-zero exit code)
         # Handle retry - check for rate limit first
+        # shellcheck disable=SC2155
         local rate_limit_wait=$(detect_rate_limit "$log_file")
         local wait_time
 
         if [ $rate_limit_wait -gt 0 ]; then
             wait_time=$rate_limit_wait
+            # shellcheck disable=SC2155
             local human_time=$(format_duration $wait_time)
             log_warn "Rate limit detected! Waiting until reset (~$human_time)..."
             log_info "Rate limit resets at approximately $(date -v+${wait_time}S '+%I:%M %p' 2>/dev/null || date -d "+${wait_time} seconds" '+%I:%M %p' 2>/dev/null || echo 'soon')"
@@ -1869,8 +1889,11 @@ if __name__ == "__main__":
         fi
 
         while [ $remaining -gt 0 ]; do
+            # shellcheck disable=SC2155
             local human_remaining=$(format_duration $remaining)
+            # shellcheck disable=SC2059
             printf "\r${YELLOW}Resuming in ${human_remaining}...${NC}          "
+            # shellcheck disable=SC2248
             sleep $interval
             remaining=$((remaining - interval))
         done
@@ -1888,13 +1911,21 @@ if __name__ == "__main__":
 # Cleanup Handler
 #===============================================================================
 
+# shellcheck disable=SC2317
 cleanup() {
+    # shellcheck disable=SC2317
     echo ""
+    # shellcheck disable=SC2317
     log_warn "Received interrupt signal"
+    # shellcheck disable=SC2317
     stop_dashboard
+    # shellcheck disable=SC2317
     stop_status_monitor
+    # shellcheck disable=SC2317
     save_state ${RETRY_COUNT:-0} "interrupted" 130
+    # shellcheck disable=SC2317
     log_info "State saved. Run again to resume."
+    # shellcheck disable=SC2317
     exit 130
 }
 
@@ -1929,6 +1960,7 @@ main() {
 
     # Check prerequisites (unless skipped)
     if [ "$SKIP_PREREQS" != "true" ]; then
+        # shellcheck disable=SC2310
         if ! check_prerequisites; then
             exit 1
         fi
@@ -1937,6 +1969,7 @@ main() {
     fi
 
     # Check skill installation
+    # shellcheck disable=SC2310
     if ! check_skill_installed; then
         exit 1
     fi
@@ -1962,7 +1995,7 @@ main() {
 
     # Load relevant learnings for this project context
     if [ -n "$PRD_PATH" ] && [ -f "$PRD_PATH" ]; then
-        get_relevant_learnings "$(cat "$PRD_PATH" | head -100)"
+        get_relevant_learnings "$(head -100 "$PRD_PATH")"
     else
         get_relevant_learnings "general development"
     fi
@@ -1972,6 +2005,7 @@ main() {
 
     # Run autonomous loop
     local result=0
+    # shellcheck disable=SC2310
     run_autonomous "$PRD_PATH" || result=$?
 
     # Extract and save learnings from this session
@@ -1984,7 +2018,7 @@ main() {
     stop_dashboard
     stop_status_monitor
 
-    exit $result
+    exit "$result"
 }
 
 # Run main

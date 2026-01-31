@@ -5,13 +5,13 @@
   ansible.builtin.file:
     path: /usr/share/fonts/truetype/jetbrains-mono-nerd
     state: directory
-    mode: '0755'
+    mode: "0755"
 
 - name: Download JetBrains Mono Nerd Font
   ansible.builtin.get_url:
     url: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.zip
     dest: /tmp/JetBrainsMono.zip
-    mode: '0644'
+    mode: "0644"
 
 - name: Install unzip
   ansible.builtin.apt:
@@ -22,7 +22,7 @@
   ansible.builtin.unarchive:
     src: /tmp/JetBrainsMono.zip
     dest: /usr/share/fonts/truetype/jetbrains-mono-nerd/
-    remote_src: yes
+    remote_src: true
 
 - name: Refresh font cache
   ansible.builtin.command: fc-cache -fv

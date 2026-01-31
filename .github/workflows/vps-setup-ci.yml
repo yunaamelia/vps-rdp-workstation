@@ -83,7 +83,7 @@ jobs:
         run: |
           ansible-playbook -i inventory/test_hosts playbooks/main.yml \
             --syntax-check
-          
+
           ansible-playbook -i inventory/test_hosts playbooks/main.yml \
             --check \
             -e "vps_username=runner" \

@@ -10,9 +10,9 @@ STATE_FILE="${VPS_SETUP_LOG_DIR:-/var/log/vps-setup}/deployment-state.json"
 # Initialize state
 init_state() {
     local deployment_id="${1:-$(date +%s)}"
-    
+
     mkdir -p "$(dirname "$STATE_FILE")"
-    
+
     cat > "$STATE_FILE" << EOF
 {
     "deployment_id": "$deployment_id",
@@ -40,7 +40,7 @@ get_state() {
 set_state() {
     local key="$1"
     local value="$2"
-    
+
     if [ -f "$STATE_FILE" ]; then
         local tmp=$(mktemp)
         jq ".$key = $value | .last_updated = \"$(date -Iseconds)\"" "$STATE_FILE" > "$tmp"
@@ -58,7 +58,7 @@ set_current_phase() {
 # Mark phase as completed
 complete_phase() {
     local phase="$1"
-    
+
     if [ -f "$STATE_FILE" ]; then
         local tmp=$(mktemp)
         jq ".completed_phases += [\"$phase\"] | .current_phase = \"$phase\" | .last_updated = \"$(date -Iseconds)\"" "$STATE_FILE" > "$tmp"
@@ -71,7 +71,7 @@ complete_phase() {
 fail_phase() {
     local phase="$1"
     local reason="${2:-Unknown error}"
-    
+
     if [ -f "$STATE_FILE" ]; then
         local tmp=$(mktemp)
         jq ".failed_phases += [{\"phase\": \"$phase\", \"reason\": \"$reason\", \"time\": \"$(date -Iseconds)\"}] | .last_updated = \"$(date -Iseconds)\"" "$STATE_FILE" > "$tmp"

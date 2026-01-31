@@ -13,8 +13,8 @@ This section contains **7 rules** focused on server-side performance.
 
 ## Rule 3.1: Authenticate Server Actions Like API Routes
 
-**Impact:** CRITICAL  
-**Tags:** server, server-actions, authentication, security, authorization  
+**Impact:** CRITICAL
+**Tags:** server, server-actions, authentication, security, authorization
 
 ## Authenticate Server Actions Like API Routes
 
@@ -47,16 +47,16 @@ import { unauthorized } from '@/lib/errors'
 export async function deleteUser(userId: string) {
   // Always check auth inside the action
   const session = await verifySession()
-  
+
   if (!session) {
     throw unauthorized('Must be logged in')
   }
-  
+
   // Check authorization too
   if (session.user.role !== 'admin' && session.user.id !== userId) {
     throw unauthorized('Cannot delete other users')
   }
-  
+
   await db.user.delete({ where: { id: userId } })
   return { success: true }
 }
@@ -79,18 +79,18 @@ const updateProfileSchema = z.object({
 export async function updateProfile(data: unknown) {
   // Validate input first
   const validated = updateProfileSchema.parse(data)
-  
+
   // Then authenticate
   const session = await verifySession()
   if (!session) {
     throw new Error('Unauthorized')
   }
-  
+
   // Then authorize
   if (session.user.id !== validated.userId) {
     throw new Error('Can only update own profile')
   }
-  
+
   // Finally perform the mutation
   await db.user.update({
     where: { id: validated.userId },
@@ -99,7 +99,7 @@ export async function updateProfile(data: unknown) {
       email: validated.email
     }
   })
-  
+
   return { success: true }
 }
 ```
@@ -110,8 +110,8 @@ Reference: [https://nextjs.org/docs/app/guides/authentication](https://nextjs.or
 
 ## Rule 3.2: Avoid Duplicate Serialization in RSC Props
 
-**Impact:** LOW  
-**Tags:** server, rsc, serialization, props, client-components  
+**Impact:** LOW
+**Tags:** server, rsc, serialization, props, client-components
 
 ## Avoid Duplicate Serialization in RSC Props
 
@@ -176,8 +176,8 @@ users={[{id:1},{id:2}]} sorted={users.toSorted()} // sends 2 arrays + 2 unique o
 
 ## Rule 3.3: Cross-Request LRU Caching
 
-**Impact:** HIGH  
-**Tags:** server, cache, lru, cross-request  
+**Impact:** HIGH
+**Tags:** server, cache, lru, cross-request
 
 ## Cross-Request LRU Caching
 
@@ -218,8 +218,8 @@ Reference: [https://github.com/isaacs/node-lru-cache](https://github.com/isaacs/
 
 ## Rule 3.4: Minimize Serialization at RSC Boundaries
 
-**Impact:** HIGH  
-**Tags:** server, rsc, serialization, props  
+**Impact:** HIGH
+**Tags:** server, rsc, serialization, props
 
 ## Minimize Serialization at RSC Boundaries
 
@@ -257,8 +257,8 @@ function Profile({ name }: { name: string }) {
 
 ## Rule 3.5: Parallel Data Fetching with Component Composition
 
-**Impact:** CRITICAL  
-**Tags:** server, rsc, parallel-fetching, composition  
+**Impact:** CRITICAL
+**Tags:** server, rsc, parallel-fetching, composition
 
 ## Parallel Data Fetching with Component Composition
 
@@ -341,8 +341,8 @@ export default function Page() {
 
 ## Rule 3.6: Per-Request Deduplication with React.cache()
 
-**Impact:** MEDIUM  
-**Tags:** server, cache, react-cache, deduplication  
+**Impact:** MEDIUM
+**Tags:** server, cache, react-cache, deduplication
 
 ## Per-Request Deduplication with React.cache()
 
@@ -418,8 +418,8 @@ Reference: [React.cache documentation](https://react.dev/reference/react/cache)
 
 ## Rule 3.7: Use after() for Non-Blocking Operations
 
-**Impact:** MEDIUM  
-**Tags:** server, async, logging, analytics, side-effects  
+**Impact:** MEDIUM
+**Tags:** server, async, logging, analytics, side-effects
 
 ## Use after() for Non-Blocking Operations
 
@@ -433,11 +433,11 @@ import { logUserAction } from '@/app/utils'
 export async function POST(request: Request) {
   // Perform mutation
   await updateDatabase(request)
-  
+
   // Logging blocks the response
   const userAgent = request.headers.get('user-agent') || 'unknown'
   await logUserAction({ userAgent })
-  
+
   return new Response(JSON.stringify({ status: 'success' }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
@@ -455,15 +455,15 @@ import { logUserAction } from '@/app/utils'
 export async function POST(request: Request) {
   // Perform mutation
   await updateDatabase(request)
-  
+
   // Log after response is sent
   after(async () => {
     const userAgent = (await headers()).get('user-agent') || 'unknown'
     const sessionCookie = (await cookies()).get('session-id')?.value || 'anonymous'
-    
+
     logUserAction({ sessionCookie, userAgent })
   })
-  
+
   return new Response(JSON.stringify({ status: 'success' }), {
     status: 200,
     headers: { 'Content-Type': 'application/json' }
@@ -487,4 +487,3 @@ The response is sent immediately while logging happens in the background.
 - Works in Server Actions, Route Handlers, and Server Components
 
 Reference: [https://nextjs.org/docs/app/api-reference/functions/after](https://nextjs.org/docs/app/api-reference/functions/after)
-

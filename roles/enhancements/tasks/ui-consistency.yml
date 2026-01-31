@@ -1,19 +1,19 @@
 ---
-#===============================================================================
+# ===============================================================================
 # Phase 9.11: UI/UX Consistency
-#===============================================================================
+# ===============================================================================
 # Configures visual consistency across all tools and creates helper functions
-#===============================================================================
+# ===============================================================================
 
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Verify Nerd Font installed
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 - name: Check JetBrains Mono Nerd Font is installed
   ansible.builtin.find:
     paths: "/home/{{ vps_username }}/.local/share/fonts"
     patterns: "*JetBrainsMono*Nerd*"
-  register: nerd_font_check
+  register: enhancements_nerd_font_check
 
 - name: Note if Nerd Font is missing
   ansible.builtin.debug:
@@ -31,7 +31,7 @@
     block: |
       # Modern CLI Tool Aliases
       # Original commands available at /usr/bin/ls etc.
-      
+
       # eza (modern ls)
       if command -v eza &> /dev/null; then
         alias ls='eza --icons --git --group-directories-first'
@@ -40,42 +40,42 @@
         alias tree='eza --tree --icons --level=3 --git-ignore'
         alias lt='eza -la --sort=modified --icons'  # Sort by time
       fi
-      
+
       # bat (modern cat)
       if command -v bat &> /dev/null; then
         alias cat='bat --style=auto'
         alias catp='bat -p'  # Plain mode
       fi
-      
+
       # fd (modern find)
       if command -v fd &> /dev/null; then
         alias find='fd'
       fi
-      
+
       # ripgrep (modern grep)
       if command -v rg &> /dev/null; then
         alias grep='rg --smart-case'
       fi
-      
+
       # dust (modern du)
       if command -v dust &> /dev/null; then
         alias du='dust'
       fi
-      
+
       # procs (modern ps)
       if command -v procs &> /dev/null; then
         alias ps='procs'
       fi
-      
+
       # Access original commands
       alias oldls='/usr/bin/ls'
       alias oldcat='/bin/cat'
       alias oldfind='/usr/bin/find'
       alias oldgrep='/bin/grep'
-    create: yes
+    create: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 #-------------------------------------------------------------------------------
 # Add Helper Functions
@@ -87,7 +87,7 @@
     marker: "# {mark} ENHANCEMENT HELPER FUNCTIONS"
     block: |
       # Enhancement Helper Functions
-      
+
       function shortcuts() {
         if command -v bat &> /dev/null; then
           bat ~/.local/share/vps-workstation/SHORTCUTS.md
@@ -95,7 +95,7 @@
           less ~/.local/share/vps-workstation/SHORTCUTS.md
         fi
       }
-      
+
       function enhancements-help() {
         if command -v bat &> /dev/null; then
           bat ~/.local/share/vps-workstation/ENHANCEMENTS.md
@@ -103,7 +103,7 @@
           less ~/.local/share/vps-workstation/ENHANCEMENTS.md
         fi
       }
-      
+
       function terminal-guide() {
         if command -v bat &> /dev/null; then
           bat ~/.local/share/vps-workstation/TERMINAL_GUIDE.md
@@ -111,7 +111,7 @@
           less ~/.local/share/vps-workstation/TERMINAL_GUIDE.md
         fi
       }
-      
+
       function enhancement-stats() {
         echo ""
         echo "🚀 VPS Workstation Enhancement Status"
@@ -129,10 +129,10 @@
         echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
         echo ""
       }
-    create: yes
+    create: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 #-------------------------------------------------------------------------------
 # Add Welcome Message
@@ -173,10 +173,10 @@
       WELCOME
         touch ~/.enhancements-welcomed
       fi
-    create: yes
+    create: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 #-------------------------------------------------------------------------------
 # Source enhancements from main .zshrc
@@ -185,15 +185,15 @@
 - name: Ensure .zshrc sources enhancements
   ansible.builtin.lineinfile:
     path: "/home/{{ vps_username }}/.zshrc"
-    line: '[ -f ~/.zshrc.enhancements ] && source ~/.zshrc.enhancements'
-    create: yes
+    line: "[ -f ~/.zshrc.enhancements ] && source ~/.zshrc.enhancements"
+    create: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    mode: '0644'
+    mode: "0644"
 
 - name: Log UI consistency configuration
   ansible.builtin.lineinfile:
-    path: "{{ enhancement_log_dir }}/install.log"
+    path: "{{ enhancements_log_dir }}/install.log"
     line: "{{ now(utc=true, fmt='%Y-%m-%dT%H:%M:%SZ') }} - UI/UX Consistency configured"
-    create: yes
-    mode: '0644'
+    create: true
+    mode: "0644"

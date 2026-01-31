@@ -85,13 +85,13 @@ Use factors such as:
 
 ### Step 3 — Conditional Escalation
 
-- **Low risk**  
+- **Low risk**
   → Proceed to implementation planning
 
-- **Moderate risk**  
+- **Moderate risk**
   → Recommend `multi-agent-brainstorming`
 
-- **High risk**  
+- **High risk**
   → REQUIRE `multi-agent-brainstorming`
 
 Skipping escalation when required is prohibited.

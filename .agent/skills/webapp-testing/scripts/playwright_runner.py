@@ -35,13 +35,13 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
             "error": "Playwright not installed",
             "fix": "pip install playwright && playwright install chromium"
         }
-    
+
     result = {
         "url": url,
         "timestamp": datetime.now().isoformat(),
         "status": "pending"
     }
-    
+
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
@@ -50,17 +50,17 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
                 user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
             )
             page = context.new_page()
-            
+
             # Navigate
             response = page.goto(url, wait_until="networkidle", timeout=30000)
-            
+
             # Basic info
             result["page"] = {
                 "title": page.title(),
                 "url": page.url,
                 "status_code": response.status if response else None
             }
-            
+
             # Health checks
             result["health"] = {
                 "loaded": response.ok if response else False,
@@ -69,17 +69,17 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
                 "has_links": page.locator("a").count() > 0,
                 "has_images": page.locator("img").count() > 0
             }
-            
+
             # Console errors
             console_errors = []
             page.on("console", lambda msg: console_errors.append(msg.text) if msg.type == "error" else None)
-            
+
             # Performance metrics
             result["performance"] = {
                 "dom_content_loaded": page.evaluate("window.performance.timing.domContentLoadedEventEnd - window.performance.timing.navigationStart"),
                 "load_complete": page.evaluate("window.performance.timing.loadEventEnd - window.performance.timing.navigationStart")
             }
-            
+
             # Screenshot - uses system temp directory (cross-platform, auto-cleaned)
             if take_screenshot:
                 # Cross-platform: Windows=%TEMP%, Linux/macOS=/tmp
@@ -89,7 +89,7 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
                 page.screenshot(path=screenshot_path, full_page=True)
                 result["screenshot"] = screenshot_path
                 result["screenshot_note"] = "Saved to temp directory (auto-cleaned by OS)"
-            
+
             # Element counts
             result["elements"] = {
                 "links": page.locator("a").count(),
@@ -98,17 +98,17 @@ def run_basic_test(url: str, take_screenshot: bool = False) -> dict:
                 "images": page.locator("img").count(),
                 "forms": page.locator("form").count()
             }
-            
+
             browser.close()
-            
+
             result["status"] = "success" if result["health"]["loaded"] else "failed"
             result["summary"] = "[OK] Page loaded successfully" if result["status"] == "success" else "[X] Page failed to load"
-            
+
     except Exception as e:
         result["status"] = "error"
         result["error"] = str(e)
         result["summary"] = f"[X] Error: {str(e)[:100]}"
-    
+
     return result
 
 
@@ -116,15 +116,15 @@ def run_accessibility_check(url: str) -> dict:
     """Run basic accessibility check."""
     if not PLAYWRIGHT_AVAILABLE:
         return {"error": "Playwright not installed"}
-    
+
     result = {"url": url, "accessibility": {}}
-    
+
     try:
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page()
             page.goto(url, wait_until="networkidle", timeout=30000)
-            
+
             # Basic a11y checks
             result["accessibility"] = {
                 "images_with_alt": page.locator("img[alt]").count(),
@@ -138,14 +138,14 @@ def run_accessibility_check(url: str) -> dict:
                     "h3": page.locator("h3").count()
                 }
             }
-            
+
             browser.close()
             result["status"] = "success"
-            
+
     except Exception as e:
         result["status"] = "error"
         result["error"] = str(e)
-    
+
     return result
 
 
@@ -160,14 +160,14 @@ if __name__ == "__main__":
             ]
         }, indent=2))
         sys.exit(1)
-    
+
     url = sys.argv[1]
     take_screenshot = "--screenshot" in sys.argv
     check_a11y = "--a11y" in sys.argv
-    
+
     if check_a11y:
         result = run_accessibility_check(url)
     else:
         result = run_basic_test(url, take_screenshot)
-    
+
     print(json.dumps(result, indent=2))

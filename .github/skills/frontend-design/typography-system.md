@@ -185,7 +185,7 @@ font-size: clamp(
   MAXIMUM_SIZE
 );
 
-/* FLUID_CALCULATION typically: 
+/* FLUID_CALCULATION typically:
    base + viewport-relative-unit */
 ```
 

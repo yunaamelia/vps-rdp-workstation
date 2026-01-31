@@ -180,7 +180,7 @@ Multiple PRD formats for different contexts:
 Score = (Reach × Impact × Confidence) / Effort
 
 Reach: # of users/quarter
-Impact: 
+Impact:
   - Massive = 3x
   - High = 2x
   - Medium = 1x
@@ -196,10 +196,10 @@ Effort: Person-months
 ### Value vs Effort Matrix
 ```
          Low Effort    High Effort
-         
+
 High     QUICK WINS    BIG BETS
 Value    [Prioritize]   [Strategic]
-         
+
 Low      FILL-INS      TIME SINKS
 Value    [Maybe]       [Avoid]
 ```

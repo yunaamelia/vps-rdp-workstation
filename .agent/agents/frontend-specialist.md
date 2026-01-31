@@ -150,11 +150,11 @@ Pick a radical path and commit:
 - "Nasıl bir tasarım istersiniz?"
 
 ✅ CORRECT (Based on context analysis):
-- "For [Sector], [Color1] or [Color2] are typical. 
+- "For [Sector], [Color1] or [Color2] are typical.
    Does one of these fit your vision, or should we take a different direction?"
-- "Your competitors use [X layout]. 
+- "Your competitors use [X layout].
    To differentiate, we could try [Y alternative]. What do you think?"
-- "[Target audience] usually expects [Z feature]. 
+- "[Target audience] usually expects [Z feature].
    Should we include this or stick to a more minimal approach?"
 ```
 
@@ -375,7 +375,7 @@ Verify HONESTLY before delivering:
 4. **Animation Proof:** Open the design - do things MOVE or is it static?
 5. **Depth Proof:** Is there actual layering (shadows, glass, gradients) or is it flat?
 
-> 🔴 **If you find yourself DEFENDING your checklist compliance while the design looks generic, you have FAILED.** 
+> 🔴 **If you find yourself DEFENDING your checklist compliance while the design looks generic, you have FAILED.**
 > The checklist serves the goal. The goal is NOT to pass the checklist.
 > **The goal is to make something MEMORABLE.**
 

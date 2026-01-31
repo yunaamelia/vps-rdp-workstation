@@ -6,30 +6,30 @@
     direction: "{{ item.direction }}"
     policy: "{{ item.policy }}"
   loop:
-    - { direction: 'incoming', policy: 'deny' }
-    - { direction: 'outgoing', policy: 'allow' }
-  become: yes
+    - { direction: "incoming", policy: "deny" }
+    - { direction: "outgoing", policy: "allow" }
+  become: true
 
 - name: Allow SSH through UFW
   community.general.ufw:
     rule: allow
-    port: '22'
+    port: "22"
     proto: tcp
-    comment: 'SSH Access'
-  become: yes
+    comment: "SSH Access"
+  become: true
 
 - name: Allow RDP through UFW
   community.general.ufw:
     rule: allow
-    port: '3389'
+    port: "3389"
     proto: tcp
-    comment: 'RDP Access'
-  become: yes
+    comment: "RDP Access"
+  become: true
 
 - name: Enable UFW firewall
   community.general.ufw:
     state: enabled
-  become: yes
+  become: true
 
 - name: Create fail2ban jail configuration
   ansible.builtin.template:
@@ -37,8 +37,8 @@
     dest: /etc/fail2ban/jail.local
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
   notify: restart fail2ban
 
 - name: Create XRDP fail2ban filter
@@ -52,8 +52,8 @@
     dest: /etc/fail2ban/filter.d/xrdp.conf
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
 
 - name: Configure unattended-upgrades settings
   ansible.builtin.template:
@@ -61,8 +61,8 @@
     dest: /etc/apt/apt.conf.d/50unattended-upgrades
     owner: root
     group: root
-    mode: '0644'
-  become: yes
+    mode: "0644"
+  become: true
 
 - name: Harden SSH configuration
   ansible.builtin.lineinfile:
@@ -71,12 +71,12 @@
     line: "{{ item.line }}"
     state: present
   loop:
-    - { regexp: '^#?PermitRootLogin', line: 'PermitRootLogin no' }
-    - { regexp: '^#?PasswordAuthentication', line: 'PasswordAuthentication yes' }
-    - { regexp: '^#?PubkeyAuthentication', line: 'PubkeyAuthentication yes' }
-    - { regexp: '^#?X11Forwarding', line: 'X11Forwarding no' }
-    - { regexp: '^#?MaxAuthTries', line: 'MaxAuthTries 3' }
-    - { regexp: '^#?ClientAliveInterval', line: 'ClientAliveInterval 300' }
-    - { regexp: '^#?ClientAliveCountMax', line: 'ClientAliveCountMax 2' }
-  become: yes
+    - { regexp: "^#?PermitRootLogin", line: "PermitRootLogin no" }
+    - { regexp: "^#?PasswordAuthentication", line: "PasswordAuthentication yes" }
+    - { regexp: "^#?PubkeyAuthentication", line: "PubkeyAuthentication yes" }
+    - { regexp: "^#?X11Forwarding", line: "X11Forwarding no" }
+    - { regexp: "^#?MaxAuthTries", line: "MaxAuthTries 3" }
+    - { regexp: "^#?ClientAliveInterval", line: "ClientAliveInterval 300" }
+    - { regexp: "^#?ClientAliveCountMax", line: "ClientAliveCountMax 2" }
+  become: true
   notify: restart sshd

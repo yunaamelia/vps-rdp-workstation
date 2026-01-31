@@ -321,11 +321,11 @@ Show selection reasoning:
 
 **intelligent-routing skill enables:**
 
-✅ Zero-command operation (no need for `/orchestrate`)  
-✅ Automatic specialist selection based on request analysis  
-✅ Transparent communication of which expertise is being applied  
-✅ Seamless integration with existing workflows  
-✅ Override capability for explicit agent mentions  
+✅ Zero-command operation (no need for `/orchestrate`)
+✅ Automatic specialist selection based on request analysis
+✅ Transparent communication of which expertise is being applied
+✅ Seamless integration with existing workflows
+✅ Override capability for explicit agent mentions
 ✅ Fallback to orchestrator for complex tasks
 
 **Result**: User gets specialist-level responses without needing to know the system architecture.

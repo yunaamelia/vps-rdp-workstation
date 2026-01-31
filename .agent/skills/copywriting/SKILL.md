@@ -221,5 +221,5 @@ This skill is complete ONLY when:
 Good copy does not persuade everyone.
 It persuades **the right person** to take **the right action**.
 
-If the copy feels clever but unclear,  
+If the copy feels clever but unclear,
 rewrite it until it feels obvious.

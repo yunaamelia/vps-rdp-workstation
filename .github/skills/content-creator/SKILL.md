@@ -49,7 +49,7 @@ When creating content for a new brand or client:
    ```bash
    python scripts/brand_voice_analyzer.py existing_content.txt
    ```
-   
+
 2. **Define Voice Attributes**
    - Review brand personality archetypes in `references/brand_guidelines.md`
    - Select primary and secondary archetypes

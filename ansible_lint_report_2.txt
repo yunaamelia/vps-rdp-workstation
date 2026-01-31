@@ -1,0 +1,1047 @@
+yaml[comments]: Missing starting space in comment
+playbooks/main.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/main.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/main.yml:13
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:11
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:23
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:25
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:61
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:63
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:90
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:92
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:181
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:183
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:242
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:244
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:271
+
+yaml[comments]: Missing starting space in comment
+playbooks/rollback.yml:273
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase1-preparation.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase1-preparation.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase1-preparation.yml:6
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase2-user-management.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase2-user-management.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase2-user-management.yml:6
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:6
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:8
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:10
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:41
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:43
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:69
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:71
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:77
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:79
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:119
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:121
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:140
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:142
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:189
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:191
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:202
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:204
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:238
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase3-dependencies.yml:240
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:6
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:8
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:10
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:39
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:41
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:78
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:80
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:136
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase4-desktop-environment.yml:138
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:6
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:8
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:11
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:52
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:54
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:88
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:90
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:96
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:98
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:152
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:154
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:175
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:177
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:247
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:249
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:282
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:284
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:342
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:344
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:356
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:358
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:442
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase5-development-tools.yml:444
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:6
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:12
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:14
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:41
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:43
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:59
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:61
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:133
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:135
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:174
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:176
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:186
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase6-validation.yml:188
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:6
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:8
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:10
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:54
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:56
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:103
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:105
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:125
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:127
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:145
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:147
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:159
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:161
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:238
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:240
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:251
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:253
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:266
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase7-optimization.yml:268
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_codeium)
+playbooks/tasks/phase8-enhancements.yml:30:5 Task/Handler: Include enhancements role tasks
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_zsh_plugins)
+playbooks/tasks/phase8-enhancements.yml:31:5 Task/Handler: Include enhancements role tasks
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:2
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:4
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:6
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:12
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:14
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:36
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:38
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:65
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:67
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:82
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:84
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:97
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:99
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:122
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:124
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:143
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase8-final-validation.yml:145
+
+yaml[comments]: Missing starting space in comment
+playbooks/tasks/phase9-enhancements.yml:2
+
+var-naming[no-role-prefix]: Variables names from within roles should use common_ as a prefix. (register: system_upgrade)
+roles/common/tasks/main.yml:9:13 Task/Handler: Upgrade all packages
+
+name[casing]: All names should start with an uppercase letter.
+roles/desktop/handlers/main.yml:3:9 Task/Handler: restart xrdp
+
+name[casing]: All names should start with an uppercase letter.
+roles/desktop/handlers/main.yml:8:9 Task/Handler: restart sddm
+
+var-naming[no-role-prefix]: Variables names from within roles should use desktop_ as a prefix. (register: kde_install)
+roles/desktop/tasks/main.yml:4:13 Task/Handler: Install KDE Plasma desktop
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/desktop/tasks/theme.yml:18 Task/Handler: Configure KDE dark theme
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/desktop/tasks/theme.yml:27 Task/Handler: Disable KDE compositor for RDP performance
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/desktop/tasks/theme.yml:45 Task/Handler: Set Konsole as default terminal
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/git-configure.yml:4 Task/Handler: Configure Git global settings
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/git-configure.yml:52 Task/Handler: Configure global .gitignore
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/global-packages.yml:13 Task/Handler: Configure npm to use global directory
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/global-packages.yml:19 Task/Handler: Install npm global packages
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/development/tasks/global-packages.yml:46 Task/Handler: Install pipx packages
+
+var-naming[no-role-prefix]: Variables names from within roles should use development_ as a prefix. (register: pipx_result)
+roles/development/tasks/global-packages.yml:46:13 Task/Handler: Install pipx packages
+
+name[casing]: All names should start with an uppercase letter.
+roles/docker/handlers/main.yml:3:9 Task/Handler: restart docker
+
+yaml[line-length]: Line too long (168 > 160 characters)
+roles/docker/tasks/main.yml:12
+
+partial-become[task]: ``become_user`` should have a corresponding ``become`` at the same level as itself.
+roles/editors/tasks/main.yml:30 Task/Handler: Install VS Code extensions
+
+var-naming[no-role-prefix]: Variables names from within roles should use editors_ as a prefix. (register: extension_result)
+roles/editors/tasks/main.yml:30:13 Task/Handler: Install VS Code extensions
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_user)
+roles/enhancements/defaults/main.yml:5:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_home)
+roles/enhancements/defaults/main.yml:6:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_codeium)
+roles/enhancements/defaults/main.yml:9:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_zsh_plugins)
+roles/enhancements/defaults/main.yml:10:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_modern_cli)
+roles/enhancements/defaults/main.yml:11:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_git_tools)
+roles/enhancements/defaults/main.yml:12:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_fuzzy_tools)
+roles/enhancements/defaults/main.yml:13:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_file_manager)
+roles/enhancements/defaults/main.yml:14:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_tmux_plugins)
+roles/enhancements/defaults/main.yml:15:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enable_snippet_manager)
+roles/enhancements/defaults/main.yml:16:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: install_method_preference)
+roles/enhancements/defaults/main.yml:20:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: fzf_preview_max_size)
+roles/enhancements/defaults/main.yml:23:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: atuin_history_max_entries)
+roles/enhancements/defaults/main.yml:24:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: backup_retention_days)
+roles/enhancements/defaults/main.yml:25:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: atuin_sync_enabled)
+roles/enhancements/defaults/main.yml:28:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: pet_gist_sync_enabled)
+roles/enhancements/defaults/main.yml:29:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: terminal_theme)
+roles/enhancements/defaults/main.yml:32:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: bat_theme)
+roles/enhancements/defaults/main.yml:33:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: lazygit_create_desktop_launcher)
+roles/enhancements/defaults/main.yml:34:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: yazi_create_desktop_launcher)
+roles/enhancements/defaults/main.yml:35:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: codeium_version)
+roles/enhancements/defaults/main.yml:38:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: lazygit_version)
+roles/enhancements/defaults/main.yml:39:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: yazi_version)
+roles/enhancements/defaults/main.yml:40:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: pet_version)
+roles/enhancements/defaults/main.yml:41:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: eza_version)
+roles/enhancements/defaults/main.yml:42:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: bat_version)
+roles/enhancements/defaults/main.yml:43:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: fd_version)
+roles/enhancements/defaults/main.yml:44:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: ripgrep_version)
+roles/enhancements/defaults/main.yml:45:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: dust_version)
+roles/enhancements/defaults/main.yml:46:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: procs_version)
+roles/enhancements/defaults/main.yml:47:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: delta_version)
+roles/enhancements/defaults/main.yml:48:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_backup_dir)
+roles/enhancements/defaults/main.yml:50:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_log_dir)
+roles/enhancements/defaults/main.yml:51:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_cache_dir)
+roles/enhancements/defaults/main.yml:52:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_docs_dir)
+roles/enhancements/defaults/main.yml:53:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: fzf_preview_command)
+roles/enhancements/defaults/main.yml:55:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: fzf_colors)
+roles/enhancements/defaults/main.yml:56:1
+
+yaml[line-length]: Line too long (172 > 160 characters)
+roles/enhancements/defaults/main.yml:56
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: tmux_save_interval)
+roles/enhancements/defaults/main.yml:59:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_theme)
+roles/enhancements/defaults/main.yml:62:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: atuin_max_history)
+roles/enhancements/defaults/main.yml:65:1
+
+name[casing]: All names should start with an uppercase letter.
+roles/enhancements/handlers/main.yml:25:9 Task/Handler: install tmux plugins
+
+schema[meta]: $.galaxy_info.min_ansible_version 2.11 is not of type 'string'. See https://docs.ansible.com/projects/ansible/latest/playbook_guide/playbooks_reuse_roles.html#using-role-dependencies
+roles/enhancements/meta/main.yml:1  Returned errors will not include exact line numbers, but they will mention
+the schema name being used as a tag, like ``schema[playbook]``,
+``schema[tasks]``.
+
+This rule is not skippable and stops further processing of the file.
+
+If incorrect schema was picked, you might want to either:
+
+* move the file to standard location, so its file is detected correctly.
+* use ``kinds:`` option in linter config to help it pick correct file type.
+[/]
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:10
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (register: atuin_install)
+roles/enhancements/tasks/atuin.yml:25:13 Task/Handler: Run Atuin installer
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:36
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:38
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:56
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/atuin.yml:58
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:10
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:17
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:19
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:32
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:34
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:52
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/codeium.yml:54
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/documentation.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/documentation.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/documentation.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/documentation.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/documentation.yml:10
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:10
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:40
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:42
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:60
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/file-manager.yml:62
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/fuzzy-tools.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/fuzzy-tools.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/fuzzy-tools.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/fuzzy-tools.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/fuzzy-tools.yml:10
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:10
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:41
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:43
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:73
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:75
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:119
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:121
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:141
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/git-enhancements.yml:143
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:33
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:35
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:40
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:42
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:47
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:49
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:54
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:56
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:61
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:63
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:68
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:70
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:75
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:77
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:82
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:84
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:89
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:91
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:96
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:98
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:102
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:104
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:108
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/main.yml:110
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:10
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:22
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:24
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:59
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:61
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:91
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:93
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:122
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:124
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:140
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:142
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:187
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/modern-cli.yml:189
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:10
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:40
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:42
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:60
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:62
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:132
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/snippets.yml:134
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/tmux-plugins.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/tmux-plugins.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/tmux-plugins.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/tmux-plugins.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/tmux-plugins.yml:10
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (register: tpm_dir)
+roles/enhancements/tasks/tmux-plugins.yml:12:13 Task/Handler: Check if TPM is installed
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/tmux-plugins.yml:27
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/tmux-plugins.yml:29
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:10
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (register: nerd_font_check)
+roles/enhancements/tasks/ui-consistency.yml:12:13 Task/Handler: Check JetBrains Mono Nerd Font is installed
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:23
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:25
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:80
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:82
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:137
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:139
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:181
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/ui-consistency.yml:183
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:2
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:4
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:6
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:8
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:10
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:21
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:23
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:34
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:36
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:47
+
+yaml[comments]: Missing starting space in comment
+roles/enhancements/tasks/zsh-plugins.yml:49
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: modern_cli_tools)
+roles/enhancements/vars/main.yml:5:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: git_tools)
+roles/enhancements/vars/main.yml:37:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: tmux_plugins)
+roles/enhancements/vars/main.yml:48:1
+
+var-naming[no-role-prefix]: Variables names from within roles should use enhancements_ as a prefix. (vars: enhancement_paths)
+roles/enhancements/vars/main.yml:66:1
+
+name[casing]: All names should start with an uppercase letter.
+roles/security/handlers/main.yml:3:9 Task/Handler: restart fail2ban
+
+name[casing]: All names should start with an uppercase letter.
+roles/security/handlers/main.yml:8:9 Task/Handler: reload ufw
+
+name[casing]: All names should start with an uppercase letter.
+roles/security/handlers/main.yml:12:9 Task/Handler: restart sshd
+
+var-naming[no-role-prefix]: Variables names from within roles should use user_config_ as a prefix. (register: user_created)
+roles/user_config/tasks/main.yml:3:13 Task/Handler: Create primary workstation user

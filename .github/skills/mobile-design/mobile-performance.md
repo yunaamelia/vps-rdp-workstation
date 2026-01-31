@@ -159,7 +159,7 @@ Animated.timing(value, {
 // Native driver supports ONLY:
 // ├── transform (translate, scale, rotate)
 // └── opacity
-// 
+//
 // Does NOT support:
 // ├── width, height
 // ├── backgroundColor
@@ -211,7 +211,7 @@ useEffect(() => {
   const interval = setInterval(() => {
     fetchData();
   }, 5000);
-  
+
   return () => clearInterval(interval); // CLEANUP!
 }, []);
 
@@ -261,13 +261,13 @@ class BadCounter extends StatefulWidget {
 
 class _BadCounterState extends State<BadCounter> {
   int _counter = 0;
-  
+
   void _increment() {
     setState(() {
       _counter++; // This rebuilds EVERYTHING below!
     });
   }
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -288,14 +288,14 @@ class _BadCounterState extends State<BadCounter> {
 
 class GoodCounter extends StatefulWidget {
   const GoodCounter({super.key}); // CONST constructor!
-  
+
   @override
   State<GoodCounter> createState() => _GoodCounterState();
 }
 
 class _GoodCounterState extends State<GoodCounter> {
   int _counter = 0;
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -320,7 +320,7 @@ setState(() => _value = newValue);
 // ✅ ValueListenableBuilder: surgical rebuilds
 class TargetedState extends StatelessWidget {
   final ValueNotifier<int> counter = ValueNotifier(0);
-  
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -410,7 +410,7 @@ class _MyWidgetState extends State<MyWidget> {
   late final StreamSubscription _subscription;
   late final AnimationController _controller;
   late final TextEditingController _textController;
-  
+
   @override
   void initState() {
     super.initState();
@@ -418,7 +418,7 @@ class _MyWidgetState extends State<MyWidget> {
     _controller = AnimationController(vsync: this);
     _textController = TextEditingController();
   }
-  
+
   @override
   void dispose() {
     // ALWAYS dispose in reverse order of creation
@@ -427,7 +427,7 @@ class _MyWidgetState extends State<MyWidget> {
     _subscription.cancel();
     super.dispose();
   }
-  
+
   @override
   Widget build(BuildContext context) => Container();
 }

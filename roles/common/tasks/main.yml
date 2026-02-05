@@ -45,6 +45,7 @@
       - file
       - less
       - man-db
+      - fontconfig
     state: present
   tags: [common, packages]
 

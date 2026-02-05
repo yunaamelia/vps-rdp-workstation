@@ -1,0 +1,77 @@
+# Zsh Enhancements Role - External Plugins
+# Advanced Zsh plugins and zoxide
+---
+- name: Create custom plugins directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [zsh-plugins]
+
+- name: Clone external Zsh plugins
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
+    depth: 1
+  become: true
+  become_user: "{{ vps_username }}"
+  loop: "{{ vps_omz_external_plugins }}"
+  tags: [zsh-plugins]
+
+- name: Install fzf for fuzzy finding
+  ansible.builtin.apt:
+    name: fzf
+    state: present
+  tags: [zsh-plugins]
+
+- name: Install zoxide for smart directory jumping
+  ansible.builtin.shell: |
+    curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
+  args:
+    creates: /usr/local/bin/zoxide
+  when: vps_install_zoxide
+  tags: [zsh-plugins]
+
+- name: Move zoxide to accessible location
+  ansible.builtin.shell: |
+    mv ~/.local/bin/zoxide /usr/local/bin/zoxide 2>/dev/null || true
+  changed_when: false
+  ignore_errors: true
+  when: vps_install_zoxide
+  tags: [zsh-plugins]
+
+- name: Configure external plugins in zshrc
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - EXTERNAL PLUGINS"
+    block: |
+      # External plugins (loaded after Oh My Zsh)
+      source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+      source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+      source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+      
+      # fzf-tab
+      source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-tab/fzf-tab.plugin.zsh
+      
+      # you-should-use
+      source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/you-should-use/you-should-use.plugin.zsh
+      
+      # forgit
+      source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/forgit/forgit.plugin.zsh
+      
+      # Zoxide initialization
+      eval "$(zoxide init zsh)"
+      
+      # Keybindings for history substring search
+      bindkey '^[[A' history-substring-search-up
+      bindkey '^[[B' history-substring-search-down
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  tags: [zsh-plugins]
+
+- name: Log zsh-enhancements role completion
+  ansible.builtin.debug:
+    msg: "✓ Zsh Enhancements role completed - External plugins and zoxide installed"
+  tags: [zsh-plugins]

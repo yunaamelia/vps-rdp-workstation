@@ -1,0 +1,215 @@
+# Desktop Role - KDE Plasma + XRDP + Nordic Theme
+# Full desktop environment for RDP access
+---
+# =============================================================================
+#  KDE Plasma Desktop Installation
+# =============================================================================
+
+- name: Install KDE Plasma Desktop
+  ansible.builtin.apt:
+    name:
+      - kde-plasma-desktop
+      - sddm
+      - plasma-workspace
+      - konsole
+      - dolphin
+      - ark
+      - kate
+      - okular
+      - gwenview
+      - spectacle
+      - plasma-nm
+      - plasma-pa
+      - kscreen
+      - breeze
+      - breeze-gtk-theme
+      - kde-config-gtk-style
+    state: present
+  tags: [desktop, kde]
+
+- name: Install icon theme
+  ansible.builtin.apt:
+    name: papirus-icon-theme
+    state: present
+  tags: [desktop, kde]
+
+- name: Install Firefox ESR
+  ansible.builtin.apt:
+    name: firefox-esr
+    state: present
+  when: install_firefox | default(true)
+  tags: [desktop, browser]
+
+# =============================================================================
+#  XRDP Installation and Configuration
+# =============================================================================
+
+- name: Install XRDP
+  ansible.builtin.apt:
+    name:
+      - xrdp
+      - xorgxrdp
+    state: present
+  when: vps_install_xrdp
+  tags: [desktop, xrdp]
+
+- name: Add xrdp user to ssl-cert group
+  ansible.builtin.user:
+    name: xrdp
+    groups: ssl-cert
+    append: true
+  when: vps_install_xrdp
+  tags: [desktop, xrdp]
+
+- name: Configure XRDP main settings
+  ansible.builtin.template:
+    src: xrdp.ini.j2
+    dest: /etc/xrdp/xrdp.ini
+    mode: '0644'
+    backup: true
+  when: vps_install_xrdp
+  notify: Restart XRDP
+  tags: [desktop, xrdp]
+
+- name: Configure XRDP session startup
+  ansible.builtin.template:
+    src: startwm.sh.j2
+    dest: /etc/xrdp/startwm.sh
+    mode: '0755'
+  when: vps_install_xrdp
+  notify: Restart XRDP
+  tags: [desktop, xrdp]
+
+- name: Create user .xsession file
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.xsession"
+    content: |
+      #!/bin/bash
+      export XDG_SESSION_TYPE=x11
+      export XDG_CURRENT_DESKTOP=KDE
+      export KDE_SESSION_VERSION=5
+      startplasma-x11
+    mode: '0755'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  when: vps_install_xrdp
+  tags: [desktop, xrdp]
+
+# =============================================================================
+#  Nordic Theme Installation
+# =============================================================================
+
+- name: Clone Nordic theme repository
+  ansible.builtin.git:
+    repo: https://github.com/EliverLara/Nordic.git
+    dest: /tmp/Nordic
+    depth: 1
+  tags: [desktop, theme]
+
+- name: Create Plasma theme directory
+  ansible.builtin.file:
+    path: /usr/share/plasma/desktoptheme/Nordic
+    state: directory
+    mode: '0755'
+  tags: [desktop, theme]
+
+- name: Install Nordic Plasma theme
+  ansible.builtin.copy:
+    src: /tmp/Nordic/kde/plasma/look-and-feel/
+    dest: /usr/share/plasma/look-and-feel/
+    remote_src: true
+    mode: '0755'
+  tags: [desktop, theme]
+
+- name: Create GTK themes directory
+  ansible.builtin.file:
+    path: /usr/share/themes
+    state: directory
+    mode: '0755'
+  tags: [desktop, theme]
+
+- name: Install Nordic GTK theme
+  ansible.builtin.copy:
+    src: /tmp/Nordic/gtk-3.0/
+    dest: /usr/share/themes/Nordic/gtk-3.0/
+    remote_src: true
+    mode: '0755'
+  ignore_errors: true
+  tags: [desktop, theme]
+
+# =============================================================================
+#  KDE Configuration for RDP Performance
+# =============================================================================
+
+- name: Create KDE config directory for user
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, kde]
+
+- name: Disable KDE compositor for RDP performance
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.config/kwinrc"
+    content: |
+      [Compositing]
+      Enabled=false
+      OpenGLIsUnsafe=true
+      
+      [Windows]
+      Placement=Smart
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: not (vps_kde_compositor_enabled | default(false))
+  tags: [desktop, kde]
+
+- name: Configure KDE global settings
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.config/kdeglobals"
+    content: |
+      [General]
+      ColorScheme=Nordic
+      
+      [Icons]
+      Theme=Papirus-Dark
+      
+      [KDE]
+      AnimationDurationFactor=0.5
+      SingleClick=false
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [desktop, kde]
+
+# =============================================================================
+#  Service Management
+# =============================================================================
+
+- name: Enable SDDM display manager
+  ansible.builtin.systemd:
+    name: sddm
+    enabled: true
+    state: started
+  tags: [desktop, sddm]
+
+- name: Enable and start XRDP service
+  ansible.builtin.systemd:
+    name: xrdp
+    enabled: true
+    state: started
+  when: vps_install_xrdp
+  tags: [desktop, xrdp]
+
+- name: Clean up temporary files
+  ansible.builtin.file:
+    path: /tmp/Nordic
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Log desktop role completion
+  ansible.builtin.debug:
+    msg: "✓ Desktop role completed - KDE Plasma + XRDP + Nordic theme"
+  tags: [desktop]

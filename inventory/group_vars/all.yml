@@ -1,0 +1,301 @@
+# VPS RDP Workstation - Master Configuration
+# All configurable variables for the automation system
+# Version: 3.0.0-secure-enhanced
+---
+
+# =============================================================================
+#  SYSTEM CONFIGURATION
+# =============================================================================
+
+# Basic system settings
+vps_hostname: "dev-workstation"          # System hostname (RFC 1123 compliant)
+vps_timezone: "UTC"                       # System timezone (timedatectl list-timezones)
+vps_locale: "en_US.UTF-8"                 # System locale
+vps_keyboard_layout: "us"                 # Keyboard layout
+
+# =============================================================================
+#  USER ACCOUNT (Credentials provided via secure input, not here)
+# =============================================================================
+
+vps_username: ""                          # Set via environment or secure input
+vps_user_shell: "/bin/zsh"                # Default shell for user
+vps_user_groups:                          # Groups for the user
+  - sudo
+  - docker
+  - adm
+
+# =============================================================================
+#  SECURITY CONFIGURATION
+# =============================================================================
+
+# Security profile: standard | hardened | paranoid
+vps_security_level: "standard"
+
+# SSH Configuration
+vps_ssh_port: 22                          # SSH port (change for security)
+vps_ssh_password_auth: true               # Allow password authentication
+vps_ssh_pubkey_auth: true                 # Allow public key authentication
+vps_ssh_root_login: false                 # Disable root login
+vps_ssh_max_auth_tries: 3                 # Max authentication attempts
+vps_ssh_client_alive_interval: 300        # Keepalive interval (seconds)
+
+# Firewall (UFW)
+vps_firewall_enabled: true
+vps_firewall_default_incoming: "deny"     # Default incoming policy
+vps_firewall_default_outgoing: "allow"    # Default outgoing policy
+vps_firewall_logging: "medium"            # low | medium | high
+
+# Fail2ban Configuration
+vps_fail2ban_enabled: true
+vps_fail2ban_bantime: 3600                # Ban duration in seconds (1 hour)
+vps_fail2ban_findtime: 600                # Time window for retries (10 min)
+vps_fail2ban_maxretry: 5                  # Max retries before ban
+
+# Automatic Security Updates
+vps_unattended_upgrades: true             # Enable unattended upgrades
+vps_auto_reboot: true                     # Auto reboot for updates
+vps_auto_reboot_time: "03:00"             # Reboot time (24h format)
+
+# =============================================================================
+#  DESKTOP ENVIRONMENT
+# =============================================================================
+
+vps_install_desktop: true
+vps_desktop_environment: "kde-plasma"     # Desktop environment
+
+# Theme Configuration
+vps_kde_theme: "nordic"                   # KDE theme: nordic
+vps_icon_theme: "papirus-dark"            # Icon theme
+vps_kde_compositor_enabled: false         # Disable for RDP performance
+vps_kde_effects_enabled: false            # Disable heavy effects
+
+# Display Manager
+vps_display_manager: "sddm"
+vps_sddm_autologin: false                 # Auto-login (security risk)
+
+# XRDP Configuration  
+vps_install_xrdp: true
+vps_xrdp_port: 3389                       # RDP port
+vps_xrdp_color_depth: 24                  # Color depth (16, 24, 32)
+vps_xrdp_encryption: "high"               # Encryption level
+vps_xrdp_audio: true                      # Enable audio redirection
+
+# =============================================================================
+#  TERMINAL CONFIGURATION
+# =============================================================================
+
+vps_shell: "zsh"                          # Default shell
+vps_zsh_theme: "agnoster"                 # Oh My Zsh theme
+vps_terminal_emulator: "konsole"          # Terminal emulator
+vps_install_omz: true                     # Install Oh My Zsh
+
+# Oh My Zsh Plugins (Built-in)
+vps_omz_builtin_plugins:
+  - git
+  - docker
+  - npm
+  - pip
+  - node
+  - python
+  - composer
+  - sudo
+  - command-not-found
+  - rsync
+  - systemd
+  - extract
+  - colored-man-pages
+  - copypath
+  - copyfile
+  - vscode
+
+# External Zsh Plugins
+vps_install_zsh_external_plugins: true
+vps_omz_external_plugins:
+  - name: zsh-completions
+    repo: https://github.com/zsh-users/zsh-completions
+  - name: zsh-autosuggestions
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+  - name: zsh-syntax-highlighting
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting
+  - name: zsh-history-substring-search
+    repo: https://github.com/zsh-users/zsh-history-substring-search
+  - name: fzf-tab
+    repo: https://github.com/Aloxaf/fzf-tab
+  - name: you-should-use
+    repo: https://github.com/MichaelAquilina/zsh-you-should-use
+  - name: forgit
+    repo: https://github.com/wfxr/forgit
+
+vps_install_zoxide: true                  # Smart directory jumping
+
+# =============================================================================
+#  DEVELOPMENT LANGUAGES
+# =============================================================================
+
+# Node.js
+install_nodejs: true
+nodejs_version: "lts"                     # LTS or specific version (e.g., "20")
+npm_global_packages:
+  - yarn
+  - pnpm
+  - typescript
+  - ts-node
+  - prettier
+  - eslint
+
+# Python
+install_python: true
+python_pipx_packages:
+  - black
+  - pylint
+  - pytest
+  - ipython
+  - poetry
+  - rich-cli
+  - tqdm
+
+# PHP
+install_php: true
+php_extensions:
+  - curl
+  - mbstring
+  - xml
+  - mysql
+  - zip
+  - gd
+  - intl
+  - bcmath
+install_composer: true
+
+# =============================================================================
+#  DOCKER CONFIGURATION
+# =============================================================================
+
+install_docker: true
+docker_log_max_size: "10m"                # Max log size per container
+docker_log_max_file: "3"                  # Max log files to keep
+docker_storage_driver: "overlay2"         # Storage driver
+
+# =============================================================================
+#  CODE EDITORS
+# =============================================================================
+
+install_vscode: true
+vscode_extensions:
+  - esbenp.prettier-vscode
+  - dbaeumer.vscode-eslint
+  - ms-python.python
+  - ms-python.vscode-pylance
+  - bmewburn.vscode-intelephense-client
+  - eamodio.gitlens
+  - rangav.vscode-thunder-client
+  - pkief.material-icon-theme
+  - equinusocio.vsc-material-theme
+  - github.copilot
+  - github.copilot-chat
+  - continue.continue
+  - codeium.codeium
+  - tabnine.tabnine-vscode
+
+install_opencode: true                    # OpenCode AI agent
+install_antigravity: true                 # Google Antigravity IDE
+
+# =============================================================================
+#  TOOL INSTALLATION FLAGS
+# =============================================================================
+
+install_tui_tools: true                   # lazygit, tig, ranger, mc
+install_network_tools: true               # nmap, mtr, iftop, httpie
+install_security_scanners: true           # lynis, rkhunter, chkrootkit
+install_performance_tools: true           # btop, dstat, inxi
+install_text_processing: true             # ag, fd, jq, yq, pandoc
+install_file_management: true             # rsync, rclone, ncdu
+install_dev_debugging: true               # gdb, valgrind, cmake
+install_code_quality: true                # shellcheck, hadolint
+install_productivity: true                # thefuck, tldr, cheat
+install_log_visualization: true           # lnav, gum, sampler
+install_ai_devtools: true                 # aider, shell-gpt
+install_cloud_native_tools: false         # kubectl, helm, k9s (optional)
+
+# =============================================================================
+#  LOGGING CONFIGURATION
+# =============================================================================
+
+# Log levels: quiet | normal | verbose | debug
+vps_log_level: "normal"
+
+# Output modes: interactive | ci | quiet
+vps_output_mode: "interactive"
+
+# Visual feedback
+vps_show_progress: true                   # Show progress bars
+vps_show_spinner: true                    # Show spinners
+vps_color_output: true                    # Colored output
+vps_unicode_symbols: true                 # Unicode status symbols
+
+# Log files
+vps_log_file: "/var/log/vps-setup.log"
+vps_error_log: "/var/log/vps-setup-error.log"
+vps_summary_log: "/var/log/vps-setup-summary.log"
+vps_log_rotation: true
+vps_log_keep_days: 30
+
+# Progress tracking
+vps_progress_state_file: "/var/lib/vps-setup/progress.json"
+vps_enable_checkpoints: true
+vps_enable_resume: true
+
+# Dashboard
+vps_dashboard_enabled: true
+vps_dashboard_refresh_ms: 1000
+
+# =============================================================================
+#  PERFORMANCE OPTIMIZATION
+# =============================================================================
+
+vps_swappiness: 10                        # Lower = prefer RAM over swap
+vps_disable_unnecessary_services: true    # Disable bluetooth, cups, etc.
+vps_optimize_for_rdp: true                # RDP-specific optimizations
+
+# =============================================================================
+#  BACKUP AND ROLLBACK
+# =============================================================================
+
+vps_backup_dir: "/var/backups/vps-setup"
+vps_enable_rollback: true
+vps_backup_before_changes: true
+
+# =============================================================================
+#  BROWSER CONFIGURATION
+# =============================================================================
+
+install_firefox: true
+firefox_default_browser: true
+firefox_privacy_mode: "strict"            # standard | strict
+
+# =============================================================================
+#  FONTS
+# =============================================================================
+
+install_nerd_fonts: true
+install_powerline_fonts: true
+default_monospace_font: "JetBrainsMono Nerd Font"
+default_font_size: 11
+
+# =============================================================================
+#  CHECKSUMS FOR VERIFIED DOWNLOADS
+#  Update these when versions change
+# =============================================================================
+
+checksums:
+  # JetBrains Mono Nerd Font (update for each release)
+  jetbrains_mono_nerd_sha256: ""          # Will be fetched from release
+  
+  # Gum CLI tool
+  gum_sha256: ""                          # Will be verified at download
+  
+  # Lazygit
+  lazygit_sha256: ""
+  
+  # Lazydocker  
+  lazydocker_sha256: ""

@@ -1,0 +1,23 @@
+# Fail2ban Jail Configuration
+# Managed by Ansible - Do not edit manually
+[DEFAULT]
+bantime = {{ vps_fail2ban_bantime }}
+findtime = {{ vps_fail2ban_findtime }}
+maxretry = {{ vps_fail2ban_maxretry }}
+backend = systemd
+banaction = ufw
+
+[sshd]
+enabled = true
+port = {{ vps_ssh_port }}
+filter = sshd
+logpath = /var/log/auth.log
+
+{% if vps_install_xrdp | default(true) %}
+[xrdp]
+enabled = true
+port = {{ vps_xrdp_port }}
+filter = xrdp
+logpath = /var/log/xrdp.log
+maxretry = 5
+{% endif %}

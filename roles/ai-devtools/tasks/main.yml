@@ -1,0 +1,43 @@
+# AI DevTools Role
+---
+- name: Install aider AI coding assistant
+  community.general.pipx:
+    name: aider-chat
+    state: present
+  become: true
+  become_user: "{{ vps_username }}"
+  ignore_errors: true
+  tags: [tools, ai]
+
+- name: Install shell-gpt
+  community.general.pipx:
+    name: shell-gpt
+    state: present
+  become: true
+  become_user: "{{ vps_username }}"
+  ignore_errors: true
+  tags: [tools, ai]
+
+- name: Create AI tools configuration note
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.ai-tools-setup.md"
+    content: |
+      # AI Development Tools Setup
+      
+      ## Aider (AI Pair Programming)
+      Configure with: aider --config
+      Docs: https://aider.chat
+      
+      ## Shell-GPT
+      Configure with: sgpt --init
+      Set API key: export OPENAI_API_KEY=your_key
+      Docs: https://github.com/TheR1D/shell_gpt
+    mode: '0644'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  tags: [tools, ai]
+
+- name: Log ai-devtools role completion
+  ansible.builtin.debug:
+    msg: "✓ AI DevTools role completed"
+  tags: [tools, ai]

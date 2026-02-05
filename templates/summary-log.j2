@@ -1,0 +1,66 @@
+{# Summary Log Template - Jinja2 #}
+╔══════════════════════════════════════════════════════════════════╗
+║              VPS RDP Workstation - Installation Summary          ║
+╚══════════════════════════════════════════════════════════════════╝
+
+📅 Installation Details
+━━━━━━━━━━━━━━━━━━━━━━━━
+  Started:   {{ installation_start_time }}
+  Completed: {{ ansible_date_time.iso8601 }}
+  Host:      {{ vps_hostname }}
+
+👤 User Account
+━━━━━━━━━━━━━━━━━━━━━━━━
+  Username:  {{ vps_username }}
+  Shell:     {{ vps_user_shell }}
+  Groups:    {{ vps_user_groups | join(', ') }}
+
+🖥️ Desktop Environment
+━━━━━━━━━━━━━━━━━━━━━━━━
+  Desktop:   KDE Plasma
+  Theme:     {{ vps_kde_theme | capitalize }}
+  Icons:     {{ vps_icon_theme }}
+  Display:   SDDM
+
+🔌 Remote Access
+━━━━━━━━━━━━━━━━━━━━━━━━
+  RDP:       {{ ansible_default_ipv4.address | default('localhost') }}:{{ vps_xrdp_port }}
+  Depth:     {{ vps_xrdp_color_depth }}-bit color
+  Encrypt:   {{ vps_xrdp_encryption }}
+
+🔒 Security
+━━━━━━━━━━━━━━━━━━━━━━━━
+  Firewall:  UFW (enabled)
+  SSH:       Port {{ vps_ssh_port }} (root login {{ 'enabled' if vps_ssh_root_login else 'disabled' }})
+  Fail2ban:  {{ 'enabled' if vps_fail2ban_enabled else 'disabled' }}
+  Updates:   {{ 'automatic' if vps_unattended_upgrades else 'manual' }}
+
+📦 Development Tools
+━━━━━━━━━━━━━━━━━━━━━━━━
+{% if install_nodejs %}
+  ✓ Node.js with npm, yarn, pnpm
+{% endif %}
+{% if install_python %}
+  ✓ Python with pipx tools
+{% endif %}
+{% if install_php %}
+  ✓ PHP with Composer
+{% endif %}
+{% if install_docker %}
+  ✓ Docker with Compose V2
+{% endif %}
+{% if install_vscode %}
+  ✓ Visual Studio Code
+{% endif %}
+
+🐚 Shell Environment
+━━━━━━━━━━━━━━━━━━━━━━━━
+  Shell:     Zsh + Oh My Zsh
+  Theme:     {{ vps_zsh_theme }}
+  Terminal:  Konsole (Nordic)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Installation Complete!
+
+To connect: mstsc.exe → {{ ansible_default_ipv4.address | default('localhost') }}:3389

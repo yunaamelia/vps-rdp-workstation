@@ -1,0 +1,21 @@
+# Code Quality Role
+---
+- name: Install code quality tools from apt
+  ansible.builtin.apt:
+    name:
+      - shellcheck
+      - yamllint
+    state: present
+  tags: [tools, quality]
+
+- name: Install hadolint for Dockerfile linting
+  ansible.builtin.get_url:
+    url: https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64
+    dest: /usr/local/bin/hadolint
+    mode: '0755'
+  tags: [tools, quality]
+
+- name: Log code-quality role completion
+  ansible.builtin.debug:
+    msg: "✓ Code Quality role completed"
+  tags: [tools, quality]

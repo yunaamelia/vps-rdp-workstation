@@ -1,0 +1,43 @@
+# System Performance Role
+---
+- name: Install performance monitoring tools
+  ansible.builtin.apt:
+    name:
+      - htop
+      - dstat
+      - sysstat
+      - iotop
+      - inxi
+      - lsof
+      - strace
+      - psmisc
+    state: present
+  tags: [tools, performance]
+
+- name: Install btop from repository
+  ansible.builtin.apt:
+    name: btop
+    state: present
+  ignore_errors: true
+  tags: [tools, performance]
+
+- name: Install ncdu for disk usage
+  ansible.builtin.apt:
+    name: ncdu
+    state: present
+  tags: [tools, performance]
+
+- name: Install duf (du alternative)
+  ansible.builtin.shell: |
+    curl -LO https://github.com/muesli/duf/releases/latest/download/duf_0.8.1_linux_amd64.deb
+    dpkg -i duf_0.8.1_linux_amd64.deb
+  args:
+    chdir: /tmp
+    creates: /usr/bin/duf
+  ignore_errors: true
+  tags: [tools, performance]
+
+- name: Log system-performance role completion
+  ansible.builtin.debug:
+    msg: "✓ System Performance role completed"
+  tags: [tools, performance]

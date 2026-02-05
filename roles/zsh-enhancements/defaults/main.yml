@@ -1,0 +1,20 @@
+# Zsh Enhancements Role - Default Variables
+---
+vps_install_zsh_external_plugins: true
+vps_install_zoxide: true
+
+vps_omz_external_plugins:
+  - name: zsh-completions
+    repo: https://github.com/zsh-users/zsh-completions
+  - name: zsh-autosuggestions
+    repo: https://github.com/zsh-users/zsh-autosuggestions
+  - name: zsh-syntax-highlighting
+    repo: https://github.com/zsh-users/zsh-syntax-highlighting
+  - name: zsh-history-substring-search
+    repo: https://github.com/zsh-users/zsh-history-substring-search
+  - name: fzf-tab
+    repo: https://github.com/Aloxaf/fzf-tab
+  - name: you-should-use
+    repo: https://github.com/MichaelAquilina/zsh-you-should-use
+  - name: forgit
+    repo: https://github.com/wfxr/forgit

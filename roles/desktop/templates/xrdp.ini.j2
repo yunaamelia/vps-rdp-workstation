@@ -1,0 +1,53 @@
+# XRDP Configuration Template
+# Managed by Ansible
+[Globals]
+; Port to listen on
+port={{ vps_xrdp_port }}
+; TCP receive/send buffer size
+tcp_recv_buffer_bytes=32768
+tcp_send_buffer_bytes=32768
+
+[Logging]
+LogFile=xrdp.log
+LogLevel=WARNING
+
+[Channels]
+; Channel handling
+rdpdr=true
+rdpsnd=true
+drdynvc=true
+cliprdr=true
+rail=true
+
+[Security]
+; Security settings
+certificate=
+key_file=
+security_layer=negotiate
+crypt_level={{ vps_xrdp_encryption }}
+allow_channels=true
+max_bpp={{ vps_xrdp_color_depth }}
+
+[Session types]
+; Session settings
+bash_path=/bin/bash
+username=ask
+password=ask
+greyscale=false
+
+[Xorg]
+name=Xorg
+lib=libxup.so
+username=ask
+password=ask
+ip=127.0.0.1
+port=-1
+code=20
+
+[Xvnc]
+name=Xvnc
+lib=libvnc.so
+username=ask
+password=ask
+ip=127.0.0.1
+port=-1

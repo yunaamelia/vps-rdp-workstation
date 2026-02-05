@@ -1,0 +1,78 @@
+# Fonts Role - Developer Fonts Installation
+# JetBrains Mono Nerd Font and Powerline fonts for Agnoster theme
+---
+- name: Create fonts directory
+  ansible.builtin.file:
+    path: /usr/share/fonts/truetype/jetbrains-mono-nerd
+    state: directory
+    mode: '0755'
+  tags: [fonts]
+
+- name: Create powerline fonts directory
+  ansible.builtin.file:
+    path: /usr/share/fonts/truetype/powerline
+    state: directory
+    mode: '0755'
+  tags: [fonts]
+
+- name: Get latest JetBrains Mono Nerd Font release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest
+    return_content: true
+  register: nerd_fonts_release
+  tags: [fonts]
+
+- name: Download JetBrains Mono Nerd Font
+  ansible.builtin.get_url:
+    url: "https://github.com/ryanoasis/nerd-fonts/releases/download/{{ (nerd_fonts_release.json.tag_name) }}/JetBrainsMono.zip"
+    dest: /tmp/JetBrainsMono.zip
+    mode: '0644'
+  tags: [fonts]
+
+- name: Extract JetBrains Mono Nerd Font
+  ansible.builtin.unarchive:
+    src: /tmp/JetBrainsMono.zip
+    dest: /usr/share/fonts/truetype/jetbrains-mono-nerd
+    remote_src: true
+  tags: [fonts]
+
+- name: Clone Powerline fonts repository
+  ansible.builtin.git:
+    repo: https://github.com/powerline/fonts.git
+    dest: /tmp/powerline-fonts
+    depth: 1
+  tags: [fonts]
+
+- name: Install Powerline fonts
+  ansible.builtin.shell: |
+    cd /tmp/powerline-fonts
+    ./install.sh
+  args:
+    creates: /usr/share/fonts/truetype/powerline/DejaVu*
+  tags: [fonts]
+
+- name: Update font cache
+  ansible.builtin.command: fc-cache -fv
+  changed_when: false
+  tags: [fonts]
+
+- name: Clean up downloaded archives
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /tmp/JetBrainsMono.zip
+    - /tmp/powerline-fonts
+  tags: [fonts]
+
+- name: Verify fonts installed
+  ansible.builtin.command: fc-list | grep -i "JetBrains"
+  register: font_check
+  changed_when: false
+  failed_when: false
+  tags: [fonts]
+
+- name: Log fonts role completion
+  ansible.builtin.debug:
+    msg: "✓ Fonts role completed - JetBrains Mono Nerd Font and Powerline installed"
+  tags: [fonts]

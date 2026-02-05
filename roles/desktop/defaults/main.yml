@@ -1,0 +1,24 @@
+# Desktop Role - Default Variables
+---
+vps_install_desktop: true
+vps_desktop_environment: "kde-plasma"
+
+# Theme Configuration
+vps_kde_theme: "nordic"
+vps_icon_theme: "papirus-dark"
+vps_kde_compositor_enabled: false
+vps_kde_effects_enabled: false
+
+# Display Manager
+vps_display_manager: "sddm"
+vps_sddm_autologin: false
+
+# XRDP Configuration
+vps_install_xrdp: true
+vps_xrdp_port: 3389
+vps_xrdp_color_depth: 24
+vps_xrdp_encryption: "high"
+vps_xrdp_audio: true
+
+# Browser
+install_firefox: true

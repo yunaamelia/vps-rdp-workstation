@@ -1,0 +1,29 @@
+# Development Debugging Role
+---
+- name: Install debugging tools
+  ansible.builtin.apt:
+    name:
+      - gdb
+      - valgrind
+      - cmake
+      - make
+      - automake
+      - autoconf
+      - libtool
+      - pkg-config
+      - ltrace
+      - binutils
+    state: present
+  tags: [tools, debugging]
+
+- name: Install shfmt for shell formatting
+  ansible.builtin.get_url:
+    url: https://github.com/mvdan/sh/releases/latest/download/shfmt_linux_amd64
+    dest: /usr/local/bin/shfmt
+    mode: '0755'
+  tags: [tools, debugging]
+
+- name: Log dev-debugging role completion
+  ansible.builtin.debug:
+    msg: "✓ Dev Debugging role completed"
+  tags: [tools, debugging]

@@ -1,0 +1,26 @@
+# Network Tools Role
+---
+- name: Install network analysis tools
+  ansible.builtin.apt:
+    name:
+      - nmap
+      - mtr
+      - iftop
+      - nethogs
+      - tcpdump
+      - curl
+      - wget
+      - httpie
+      - netcat-openbsd
+      - dnsutils
+      - iproute2
+      - net-tools
+      - traceroute
+      - whois
+    state: present
+  tags: [tools, network]
+
+- name: Log network-tools role completion
+  ansible.builtin.debug:
+    msg: "✓ Network Tools role completed"
+  tags: [tools, network]

@@ -1,0 +1,13 @@
+# Common Role - Metadata
+---
+dependencies: []
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: System foundation role - updates, packages, user setup
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

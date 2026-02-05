@@ -1,0 +1,168 @@
+# Development Role - Programming Languages
+# Node.js, Python, PHP with all extensions
+---
+# =============================================================================
+#  Node.js Installation (via NodeSource)
+# =============================================================================
+
+- name: Install Node.js prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+  when: install_nodejs
+  tags: [development, nodejs]
+
+- name: Add NodeSource GPG key
+  ansible.builtin.get_url:
+    url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
+    dest: /usr/share/keyrings/nodesource.asc
+    mode: '0644'
+  when: install_nodejs
+  tags: [development, nodejs]
+
+- name: Add NodeSource repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/nodesource.asc] https://deb.nodesource.com/node_20.x nodistro main"
+    state: present
+    filename: nodesource
+  when: install_nodejs
+  tags: [development, nodejs]
+
+- name: Install Node.js
+  ansible.builtin.apt:
+    name: nodejs
+    state: present
+    update_cache: true
+  when: install_nodejs
+  tags: [development, nodejs]
+
+- name: Configure npm global directory for user
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.npm-global"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  when: install_nodejs
+  tags: [development, nodejs]
+
+- name: Configure npm prefix
+  ansible.builtin.command: |
+    sudo -u {{ vps_username }} npm config set prefix "/home/{{ vps_username }}/.npm-global"
+  changed_when: true
+  when: install_nodejs
+  tags: [development, nodejs]
+
+- name: Install global npm packages
+  community.general.npm:
+    name: "{{ item }}"
+    global: true
+    state: present
+  loop: "{{ npm_global_packages }}"
+  become: true
+  become_user: "{{ vps_username }}"
+  when: install_nodejs
+  tags: [development, nodejs]
+
+# =============================================================================
+#  Python Installation
+# =============================================================================
+
+- name: Install Python and development packages
+  ansible.builtin.apt:
+    name:
+      - python3
+      - python3-pip
+      - python3-venv
+      - python3-dev
+      - python3-setuptools
+      - python3-wheel
+      - python3-apt
+      - pipx
+    state: present
+  when: install_python
+  tags: [development, python]
+
+- name: Ensure pipx is in PATH for user
+  ansible.builtin.command: |
+    sudo -u {{ vps_username }} pipx ensurepath
+  changed_when: true
+  when: install_python
+  tags: [development, python]
+
+- name: Install Python tools via pipx
+  community.general.pipx:
+    name: "{{ item }}"
+    state: present
+  loop: "{{ python_pipx_packages }}"
+  become: true
+  become_user: "{{ vps_username }}"
+  when: install_python
+  tags: [development, python]
+
+# =============================================================================
+#  PHP Installation
+# =============================================================================
+
+- name: Install PHP and core packages
+  ansible.builtin.apt:
+    name:
+      - php
+      - php-cli
+      - php-fpm
+      - php-common
+    state: present
+  when: install_php
+  tags: [development, php]
+
+- name: Install PHP extensions
+  ansible.builtin.apt:
+    name: "php-{{ item }}"
+    state: present
+  loop: "{{ php_extensions }}"
+  when: install_php
+  tags: [development, php]
+
+- name: Download Composer installer
+  ansible.builtin.get_url:
+    url: https://getcomposer.org/installer
+    dest: /tmp/composer-setup.php
+    mode: '0644'
+  when: install_composer
+  tags: [development, php]
+
+- name: Verify Composer installer signature
+  ansible.builtin.shell: |
+    EXPECTED_CHECKSUM="$(php -r 'copy("https://composer.github.io/installer.sig", "php://stdout");')"
+    ACTUAL_CHECKSUM="$(php -r "echo hash_file('sha384', '/tmp/composer-setup.php');")"
+    if [ "$EXPECTED_CHECKSUM" != "$ACTUAL_CHECKSUM" ]; then
+      echo 'ERROR: Invalid installer checksum'
+      rm /tmp/composer-setup.php
+      exit 1
+    fi
+  changed_when: false
+  when: install_composer
+  tags: [development, php]
+
+- name: Install Composer globally
+  ansible.builtin.command: |
+    php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
+  args:
+    creates: /usr/local/bin/composer
+  when: install_composer
+  tags: [development, php]
+
+- name: Remove Composer installer
+  ansible.builtin.file:
+    path: /tmp/composer-setup.php
+    state: absent
+  when: install_composer
+  tags: [development, php]
+
+- name: Log development role completion
+  ansible.builtin.debug:
+    msg: "✓ Development role completed - Node.js, Python, PHP installed"
+  tags: [development]

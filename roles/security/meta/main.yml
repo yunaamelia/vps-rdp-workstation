@@ -1,0 +1,14 @@
+# Security Role - Metadata
+---
+dependencies:
+  - common
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: Security hardening - UFW, fail2ban, SSH, unattended-upgrades
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

@@ -1,0 +1,28 @@
+# File Management Role
+---
+- name: Install file management tools
+  ansible.builtin.apt:
+    name:
+      - rsync
+      - p7zip-full
+      - unzip
+      - zip
+      - tar
+      - gzip
+      - xz-utils
+      - tree
+      - rename
+    state: present
+  tags: [tools, files]
+
+- name: Install rclone
+  ansible.builtin.shell: |
+    curl https://rclone.org/install.sh | bash
+  args:
+    creates: /usr/bin/rclone
+  tags: [tools, files]
+
+- name: Log file-management role completion
+  ansible.builtin.debug:
+    msg: "✓ File Management role completed"
+  tags: [tools, files]

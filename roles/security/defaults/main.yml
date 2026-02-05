@@ -1,0 +1,27 @@
+# Security Role - Default Variables
+---
+vps_security_level: "standard"
+
+# SSH Configuration
+vps_ssh_port: 22
+vps_ssh_password_auth: true
+vps_ssh_pubkey_auth: true
+vps_ssh_root_login: false
+vps_ssh_max_auth_tries: 3
+vps_ssh_client_alive_interval: 300
+
+# Firewall
+vps_firewall_enabled: true
+vps_firewall_logging: "medium"
+
+# Fail2ban
+vps_fail2ban_enabled: true
+vps_fail2ban_bantime: 3600
+vps_fail2ban_findtime: 600
+vps_fail2ban_maxretry: 5
+
+# Automatic updates
+vps_unattended_upgrades: true
+
+# XRDP port (for firewall rule)
+vps_xrdp_port: 3389

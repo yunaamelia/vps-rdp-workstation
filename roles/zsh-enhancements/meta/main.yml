@@ -1,0 +1,14 @@
+# Zsh Enhancements Role - Metadata
+---
+dependencies:
+  - terminal
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: External Zsh plugins and zoxide
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

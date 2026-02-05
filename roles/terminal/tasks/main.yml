@@ -1,0 +1,101 @@
+# Terminal Role - Zsh and Oh My Zsh
+# Shell configuration for developer productivity
+---
+- name: Install Zsh
+  ansible.builtin.apt:
+    name: zsh
+    state: present
+  tags: [terminal, zsh]
+
+- name: Set Zsh as default shell for user
+  ansible.builtin.user:
+    name: "{{ vps_username }}"
+    shell: /bin/zsh
+  tags: [terminal, zsh]
+
+- name: Check if Oh My Zsh is installed
+  ansible.builtin.stat:
+    path: "/home/{{ vps_username }}/.oh-my-zsh"
+  register: omz_check
+  tags: [terminal, zsh]
+
+- name: Download Oh My Zsh installer
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh
+    dest: /tmp/install_omz.sh
+    mode: '0755'
+  when: not omz_check.stat.exists
+  tags: [terminal, zsh]
+
+- name: Install Oh My Zsh
+  ansible.builtin.command: |
+    sudo -u {{ vps_username }} /tmp/install_omz.sh --unattended
+  args:
+    creates: "/home/{{ vps_username }}/.oh-my-zsh"
+  when: vps_install_omz
+  tags: [terminal, zsh]
+
+- name: Configure Zsh theme
+  ansible.builtin.lineinfile:
+    path: "/home/{{ vps_username }}/.zshrc"
+    regexp: '^ZSH_THEME='
+    line: 'ZSH_THEME="{{ vps_zsh_theme }}"'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  tags: [terminal, zsh]
+
+- name: Configure Oh My Zsh plugins
+  ansible.builtin.lineinfile:
+    path: "/home/{{ vps_username }}/.zshrc"
+    regexp: '^plugins='
+    line: 'plugins=({{ vps_omz_builtin_plugins | join(" ") }})'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  tags: [terminal, zsh]
+
+- name: Add PATH configuration to zshrc
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - PATH"
+    block: |
+      # Node.js global packages
+      export PATH="$HOME/.npm-global/bin:$PATH"
+      
+      # Local bin
+      export PATH="$HOME/.local/bin:$PATH"
+      
+      # Pipx
+      export PATH="$HOME/.local/bin:$PATH"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  tags: [terminal, zsh]
+
+- name: Install Konsole terminal emulator
+  ansible.builtin.apt:
+    name: konsole
+    state: present
+  when: vps_terminal_emulator == "konsole"
+  tags: [terminal, konsole]
+
+- name: Create Konsole profile directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/konsole"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [terminal, konsole]
+
+- name: Configure Konsole Nordic profile
+  ansible.builtin.template:
+    src: konsole-profile.j2
+    dest: "/home/{{ vps_username }}/.local/share/konsole/Nordic.profile"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [terminal, konsole]
+
+- name: Log terminal role completion
+  ansible.builtin.debug:
+    msg: "✓ Terminal role completed - Zsh, Oh My Zsh, Konsole configured"
+  tags: [terminal]

@@ -1,0 +1,36 @@
+# Development Role - Default Variables
+---
+# Node.js
+install_nodejs: true
+nodejs_version: "lts"
+npm_global_packages:
+  - yarn
+  - pnpm
+  - typescript
+  - ts-node
+  - prettier
+  - eslint
+
+# Python  
+install_python: true
+python_pipx_packages:
+  - black
+  - pylint
+  - pytest
+  - ipython
+  - poetry
+  - rich-cli
+  - tqdm
+
+# PHP
+install_php: true
+php_extensions:
+  - curl
+  - mbstring
+  - xml
+  - mysql
+  - zip
+  - gd
+  - intl
+  - bcmath
+install_composer: true

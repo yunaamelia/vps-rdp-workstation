@@ -1,0 +1,15 @@
+# Editors Role - Metadata
+---
+dependencies:
+  - common
+  - development
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: Code editors - VS Code, OpenCode AI agent
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

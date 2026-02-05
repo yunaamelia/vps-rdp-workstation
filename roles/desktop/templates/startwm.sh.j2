@@ -1,0 +1,30 @@
+#!/bin/bash
+# XRDP Session Startup Script
+# Managed by Ansible
+
+# Unset session manager variables from SSH/console
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+# Set up environment for KDE Plasma
+export XDG_SESSION_TYPE=x11
+export XDG_CURRENT_DESKTOP=KDE
+export XDG_CONFIG_DIRS=/etc/xdg
+export KDE_SESSION_VERSION=5
+export DESKTOP_SESSION=plasma
+
+# Set locale
+if [ -r /etc/default/locale ]; then
+    . /etc/default/locale
+    export LANG LANGUAGE
+fi
+
+# Required for some KDE applications
+export QT_QPA_PLATFORMTHEME=kde
+
+# Disable GPU for RDP session
+export KWIN_COMPOSE=N
+export QT_GRAPHICSSYSTEM=native
+
+# Launch KDE Plasma
+exec startplasma-x11

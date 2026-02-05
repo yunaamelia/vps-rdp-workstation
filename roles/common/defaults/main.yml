@@ -1,0 +1,14 @@
+# Common Role - Default Variables
+---
+vps_hostname: "dev-workstation"
+vps_timezone: "UTC"
+vps_locale: "en_US.UTF-8"
+vps_keyboard_layout: "us"
+
+vps_user_shell: "/bin/zsh"
+vps_user_groups:
+  - sudo
+  - docker
+  - adm
+
+vps_backup_dir: "/var/backups/vps-setup"

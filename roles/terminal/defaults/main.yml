@@ -1,0 +1,26 @@
+# Terminal Role - Default Variables
+---
+vps_shell: "zsh"
+vps_zsh_theme: "agnoster"
+vps_terminal_emulator: "konsole"
+vps_install_omz: true
+
+vps_omz_builtin_plugins:
+  - git
+  - docker
+  - npm
+  - pip
+  - node
+  - python
+  - composer
+  - sudo
+  - command-not-found
+  - rsync
+  - systemd
+  - extract
+  - colored-man-pages
+  - copypath
+  - copyfile
+  - vscode
+
+default_font_size: 11

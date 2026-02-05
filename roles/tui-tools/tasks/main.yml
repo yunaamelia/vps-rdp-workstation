@@ -1,0 +1,38 @@
+# TUI Tools Role - Terminal User Interface Tools
+---
+- name: Install TUI tools from apt
+  ansible.builtin.apt:
+    name:
+      - tig
+      - ranger
+      - mc
+      - vifm
+    state: present
+  tags: [tools, tui]
+
+- name: Get lazygit latest release
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
+    return_content: true
+  register: lazygit_release
+  tags: [tools, tui]
+
+- name: Download lazygit
+  ansible.builtin.get_url:
+    url: "https://github.com/jesseduffield/lazygit/releases/download/{{ lazygit_release.json.tag_name }}/lazygit_{{ lazygit_release.json.tag_name | regex_replace('v', '') }}_Linux_x86_64.tar.gz"
+    dest: /tmp/lazygit.tar.gz
+    mode: '0644'
+  tags: [tools, tui]
+
+- name: Extract lazygit
+  ansible.builtin.unarchive:
+    src: /tmp/lazygit.tar.gz
+    dest: /usr/local/bin
+    remote_src: true
+    creates: /usr/local/bin/lazygit
+  tags: [tools, tui]
+
+- name: Log tui-tools role completion
+  ansible.builtin.debug:
+    msg: "✓ TUI Tools role completed - lazygit, tig, ranger, mc installed"
+  tags: [tools, tui]

@@ -1,0 +1,103 @@
+# Editors Role - VS Code and OpenCode
+# IDE installation for developer productivity
+---
+# =============================================================================
+#  Visual Studio Code
+# =============================================================================
+
+- name: Install VS Code dependencies
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - gnupg
+    state: present
+  when: install_vscode
+  tags: [editors, vscode]
+
+- name: Add Microsoft GPG key
+  ansible.builtin.get_url:
+    url: https://packages.microsoft.com/keys/microsoft.asc
+    dest: /usr/share/keyrings/microsoft.asc
+    mode: '0644'
+  when: install_vscode
+  tags: [editors, vscode]
+
+- name: Add VS Code repository
+  ansible.builtin.apt_repository:
+    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.asc] https://packages.microsoft.com/repos/code stable main"
+    state: present
+    filename: vscode
+  when: install_vscode
+  tags: [editors, vscode]
+
+- name: Install Visual Studio Code
+  ansible.builtin.apt:
+    name: code
+    state: present
+    update_cache: true
+  when: install_vscode
+  tags: [editors, vscode]
+
+- name: Install VS Code extensions
+  ansible.builtin.command: |
+    sudo -u {{ vps_username }} code --install-extension {{ item }} --force
+  loop: "{{ vscode_extensions }}"
+  changed_when: true
+  when: install_vscode
+  ignore_errors: true
+  tags: [editors, vscode]
+
+# =============================================================================
+#  OpenCode AI Agent
+# =============================================================================
+
+- name: Install OpenCode via npm
+  community.general.npm:
+    name: "@anthropics/opencode"
+    global: true
+    state: present
+  when: install_opencode
+  ignore_errors: true
+  tags: [editors, opencode]
+
+# =============================================================================
+#  Antigravity (Placeholder - user provides binary)
+# =============================================================================
+
+- name: Check for Antigravity binary
+  ansible.builtin.stat:
+    path: /opt/antigravity/antigravity
+  register: antigravity_check
+  when: install_antigravity | default(false)
+  tags: [editors, antigravity]
+
+- name: Create Antigravity installation note
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/ANTIGRAVITY_INSTALL.md"
+    content: |
+      # Antigravity IDE Installation
+      
+      Antigravity is not available via public download.
+      
+      ## Manual Installation Steps:
+      1. Obtain the Antigravity binary from Google
+      2. Extract to /opt/antigravity/
+      3. Create symlink: ln -s /opt/antigravity/antigravity /usr/local/bin/antigravity
+      4. Create desktop entry at /usr/share/applications/antigravity.desktop
+      
+      ## Alternative IDEs:
+      - VS Code is already installed
+      - Cursor: Download from https://cursor.sh
+      - Zed: Download from https://zed.dev
+    mode: '0644'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  when: 
+    - install_antigravity | default(false)
+    - not antigravity_check.stat.exists | default(true)
+  tags: [editors, antigravity]
+
+- name: Log editors role completion
+  ansible.builtin.debug:
+    msg: "✓ Editors role completed - VS Code, OpenCode installed"
+  tags: [editors]

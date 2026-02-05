@@ -1,0 +1,33 @@
+# Productivity Role
+---
+- name: Install thefuck
+  community.general.pipx:
+    name: thefuck
+    state: present
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [tools, productivity]
+
+- name: Install tldr
+  community.general.pipx:
+    name: tldr
+    state: present
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [tools, productivity]
+
+- name: Add thefuck to zshrc
+  ansible.builtin.blockinfile:
+    path: "/home/{{ vps_username }}/.zshrc"
+    marker: "# {mark} ANSIBLE MANAGED BLOCK - THEFUCK"
+    block: |
+      eval $(thefuck --alias)
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  ignore_errors: true
+  tags: [tools, productivity]
+
+- name: Log productivity role completion
+  ansible.builtin.debug:
+    msg: "✓ Productivity role completed"
+  tags: [tools, productivity]

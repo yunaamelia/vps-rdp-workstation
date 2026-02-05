@@ -1,0 +1,41 @@
+# Text Processing Role
+---
+- name: Install text processing tools
+  ansible.builtin.apt:
+    name:
+      - ripgrep
+      - silversearcher-ag
+      - jq
+      - pandoc
+      - sed
+      - gawk
+      - grep
+      - bat
+    state: present
+  tags: [tools, text]
+
+- name: Install fd-find
+  ansible.builtin.apt:
+    name: fd-find
+    state: present
+  tags: [tools, text]
+
+- name: Create fd symlink
+  ansible.builtin.file:
+    src: /usr/bin/fdfind
+    dest: /usr/local/bin/fd
+    state: link
+  ignore_errors: true
+  tags: [tools, text]
+
+- name: Install yq (YAML processor)
+  ansible.builtin.get_url:
+    url: https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    dest: /usr/local/bin/yq
+    mode: '0755'
+  tags: [tools, text]
+
+- name: Log text-processing role completion
+  ansible.builtin.debug:
+    msg: "✓ Text Processing role completed"
+  tags: [tools, text]

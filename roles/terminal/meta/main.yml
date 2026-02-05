@@ -1,0 +1,15 @@
+# Terminal Role - Metadata
+---
+dependencies:
+  - common
+  - fonts
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: Zsh shell with Oh My Zsh and Konsole terminal
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

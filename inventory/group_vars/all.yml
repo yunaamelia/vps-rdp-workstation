@@ -21,7 +21,6 @@ vps_username: ""                          # Set via environment or secure input
 vps_user_shell: "/bin/zsh"                # Default shell for user
 vps_user_groups:                          # Groups for the user
   - sudo
-  - docker
   - adm
 
 # =============================================================================

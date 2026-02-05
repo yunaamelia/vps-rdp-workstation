@@ -28,7 +28,9 @@ set -euo pipefail
 
 # Script metadata
 readonly SCRIPT_VERSION="3.0.0"
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR=""
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
 readonly LOG_DIR="/var/log"
 readonly STATE_DIR="/var/lib/vps-setup"
 readonly BACKUP_DIR="/var/backups/vps-setup"
@@ -39,7 +41,7 @@ readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[0;33m'
 readonly BLUE='\033[0;34m'
 readonly CYAN='\033[0;36m'
-readonly MAGENTA='\033[0;35m'
+# MAGENTA removed - unused
 readonly BOLD='\033[1m'
 readonly DIM='\033[2m'
 readonly NC='\033[0m'  # No Color
@@ -658,15 +660,15 @@ main() {
                 shift
                 ;;
             --rollback)
-                ROLLBACK_MODE=true
+                export ROLLBACK_MODE=true  # shellcheck: exported for future use
                 shift
                 ;;
             --resume)
-                RESUME_MODE=true
+                export RESUME_MODE=true  # shellcheck: exported for future use
                 shift
                 ;;
             --ci)
-                CI_MODE=true
+                export CI_MODE=true  # shellcheck: exported for future use
                 shift
                 ;;
             *)

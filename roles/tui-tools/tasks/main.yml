@@ -1,12 +1,6 @@
 # TUI Tools Role - Terminal User Interface Tools
 # Version: 3.0.0
 ---
-# Tool versions for checksum verification
-# Update these when upgrading tools
-vars:
-  lazygit_version: "0.40.2"
-  lazygit_checksum: "sha256:513b97b7d3c3b28b58dd3dc12efb62f2b4f3d5f8f3f7e5e0d9c8a7b6c5d4e3f2"
-
 - name: Install TUI tools from apt
   ansible.builtin.apt:
     name:

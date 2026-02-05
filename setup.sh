@@ -365,6 +365,7 @@ check_os() {
         return 1
     fi
     
+    # shellcheck disable=SC1091
     source /etc/os-release
     
     if [[ "$ID" != "debian" ]]; then
@@ -706,6 +707,7 @@ main() {
 }
 
 # Trap for cleanup
+# shellcheck disable=SC2317
 cleanup() {
     # Ensure sensitive variables are cleared
     unset VPS_USER_PASSWORD_HASH

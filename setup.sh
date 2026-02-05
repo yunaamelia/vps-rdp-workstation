@@ -544,6 +544,11 @@ run_rollback() {
     ansible_args+=("-i" "inventory/hosts.yml")
     ansible_args+=("-e" "vps_username=${VPS_USERNAME:-rollback_user}")
     
+    # Pass confirmation if provided (for CI/automation)
+    if [[ -n "${CONFIRM_ROLLBACK:-}" ]]; then
+        ansible_args+=("-e" "confirm_rollback=${CONFIRM_ROLLBACK}")
+    fi
+    
     if [[ "$DRY_RUN" == "true" ]]; then
         ansible_args+=("--check" "--diff")
     fi

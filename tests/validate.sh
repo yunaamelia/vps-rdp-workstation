@@ -40,21 +40,8 @@ check() {
     else
         echo -e " ${RED}✗${RESET} [${category}] ${criteria}"
         ((FAIL++))
-        return 1
-    fi
-}
-
-warn() {
-    local category="$1"
-    local criteria="$2"
-    local test_cmd="$3"
-    
-    if eval "$test_cmd" &>/dev/null; then
-        echo -e " ${GREEN}✓${RESET} [${category}] ${criteria}"
-        ((PASS++))
-    else
-        echo -e " ${YELLOW}⚠${RESET} [${category}] ${criteria} (optional)"
-        ((WARN++))
+        # Don't return 1 to prevent set -e from exiting the script
+        return 0
     fi
 }
 

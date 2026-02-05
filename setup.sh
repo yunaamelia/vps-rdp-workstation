@@ -660,15 +660,18 @@ main() {
                 shift
                 ;;
             --rollback)
-                export ROLLBACK_MODE=true  # shellcheck: exported for future use
+                # shellcheck disable=SC2034
+                export ROLLBACK_MODE=true
                 shift
                 ;;
             --resume)
-                export RESUME_MODE=true  # shellcheck: exported for future use
+                # shellcheck disable=SC2034
+                export RESUME_MODE=true
                 shift
                 ;;
             --ci)
-                export CI_MODE=true  # shellcheck: exported for future use
+                # shellcheck disable=SC2034
+                export CI_MODE=true
                 shift
                 ;;
             *)

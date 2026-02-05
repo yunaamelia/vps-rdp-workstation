@@ -1,0 +1,173 @@
+# =============================================================================
+# VPS RDP Workstation - Rollback Playbook
+# Safely restores system to pre-installation state
+# CRITICAL: Requires user confirmation to prevent accidental rollback
+# Version: 3.0.0
+# =============================================================================
+---
+- name: Rollback VPS Setup
+  hosts: localhost
+  become: yes
+  
+  vars:
+    backup_dir: /var/backups/vps-setup
+    
+  vars_prompt:
+    - name: confirm_rollback
+      prompt: |
+        
+        ⚠️  WARNING: This will rollback the VPS RDP Workstation setup!
+        
+        This action will:
+          - Restore SSH configuration to backup
+          - Restore firewall rules to backup
+          - Stop XRDP service
+          - Remove installed packages (optional)
+        
+        Type 'yes' to confirm rollback
+      private: no
+
+  pre_tasks:
+    - name: Verify user confirmation
+      ansible.builtin.fail:
+        msg: "Rollback cancelled by user. Confirmation was: '{{ confirm_rollback }}'"
+      when: confirm_rollback != "yes"
+      
+    - name: Display rollback warning
+      ansible.builtin.debug:
+        msg: |
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          🔄 Starting VPS RDP Workstation Rollback
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  tasks:
+    # =========================================================================
+    # PHASE 1: Find Latest Backup
+    # =========================================================================
+    
+    - name: Check backup directory exists
+      ansible.builtin.stat:
+        path: "{{ backup_dir }}"
+      register: backup_check
+      
+    - name: Fail if no backups found
+      ansible.builtin.fail:
+        msg: "No backup directory found at {{ backup_dir }}. Cannot rollback."
+      when: not backup_check.stat.exists
+      
+    - name: Find backup files
+      ansible.builtin.find:
+        paths: "{{ backup_dir }}"
+        patterns: "*.backup"
+      register: backup_files
+      
+    # =========================================================================
+    # PHASE 2: Stop Services
+    # =========================================================================
+    
+    - name: Stop XRDP service
+      ansible.builtin.systemd:
+        name: xrdp
+        state: stopped
+      ignore_errors: yes
+      
+    - name: Stop fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: stopped
+      ignore_errors: yes
+      
+    # =========================================================================
+    # PHASE 3: Restore Configurations
+    # =========================================================================
+    
+    - name: Restore SSH configuration
+      ansible.builtin.copy:
+        src: "{{ backup_dir }}/sshd_config.backup"
+        dest: /etc/ssh/sshd_config
+        remote_src: yes
+        backup: yes
+      when: backup_files.matched > 0
+      ignore_errors: yes
+      notify: Restart SSH
+      
+    - name: Restore UFW rules
+      ansible.builtin.copy:
+        src: "{{ backup_dir }}/ufw-user.rules.backup"
+        dest: /etc/ufw/user.rules
+        remote_src: yes
+        backup: yes
+      when: backup_files.matched > 0
+      ignore_errors: yes
+      notify: Reload UFW
+      
+    # =========================================================================
+    # PHASE 4: Reload Services
+    # =========================================================================
+    
+    - name: Reload SSH service
+      ansible.builtin.systemd:
+        name: sshd
+        state: reloaded
+      ignore_errors: yes
+      
+    - name: Reload UFW
+      ansible.builtin.shell: ufw reload
+      ignore_errors: yes
+      
+    # =========================================================================
+    # PHASE 5: Cleanup (Optional)
+    # =========================================================================
+    
+    - name: Remove installation logs (optional)
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /var/log/vps-setup.log
+        - /var/log/vps-setup-error.log
+        - /var/log/vps-setup-summary.log
+      when: remove_logs | default(false)
+      ignore_errors: yes
+      
+    - name: Remove state directory (optional)
+      ansible.builtin.file:
+        path: /var/lib/vps-setup
+        state: absent
+      when: remove_state | default(false)
+      ignore_errors: yes
+      
+    # =========================================================================
+    # PHASE 6: Summary
+    # =========================================================================
+    
+    - name: Display rollback summary
+      ansible.builtin.debug:
+        msg: |
+          
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          ✅ Rollback Complete
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+          
+          Actions taken:
+            ✓ XRDP service stopped
+            ✓ Fail2ban service stopped
+            ✓ SSH configuration restored
+            ✓ Firewall rules restored
+          
+          Note: Installed packages were NOT removed.
+          To completely remove packages, run with:
+            ansible-playbook playbooks/rollback.yml -e remove_packages=true
+          
+          ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  handlers:
+    - name: Restart SSH
+      ansible.builtin.systemd:
+        name: sshd
+        state: restarted
+      ignore_errors: yes
+        
+    - name: Reload UFW
+      ansible.builtin.shell: ufw reload
+      ignore_errors: yes

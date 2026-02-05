@@ -532,6 +532,42 @@ install_ansible() {
 #  MAIN EXECUTION
 # =============================================================================
 
+run_rollback() {
+    print_header "Rolling Back ⏪"
+    
+    local ansible_args=()
+    
+    # Enable color output
+    export ANSIBLE_FORCE_COLOR=true
+    
+    # Build arguments
+    ansible_args+=("-i" "inventory/hosts.yml")
+    ansible_args+=("-e" "vps_username=${VPS_USERNAME:-rollback_user}")
+    
+    if [[ "$DRY_RUN" == "true" ]]; then
+        ansible_args+=("--check" "--diff")
+    fi
+    
+    if [[ "$VERBOSE" == "true" ]]; then
+        ansible_args+=("-v")
+    fi
+    
+    # Create state directory if needed (for logs)
+    mkdir -p "$STATE_DIR"
+    
+    cd "$SCRIPT_DIR"
+    
+    log_info "Starting rollback (this will remove all customizations)..."
+    
+    if ansible-playbook playbooks/rollback.yml "${ansible_args[@]}"; then
+        log_success "Rollback completed successfully!"
+        return 0
+    else
+        log_error "Rollback failed."
+        return 1
+    fi
+}
+
 run_ansible() {
     print_section "Running Ansible Playbook ${PACKAGE}"
     

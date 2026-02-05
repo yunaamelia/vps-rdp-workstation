@@ -21,8 +21,9 @@ jobs:
 
       - name: Install Linting Tools
         run: |
-          pip install yamllint ansible-lint pylint
+          pip install yamllint ansible-lint pylint ansible
           sudo apt-get install -y shellcheck
+          ansible-galaxy collection install community.general
 
       - name: YAML Lint
         run: yamllint .

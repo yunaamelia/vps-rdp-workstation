@@ -1,0 +1,14 @@
+# Code Quality Role - Metadata
+---
+dependencies:
+  - common
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: Code quality tools - shellcheck, hadolint, yamllint
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

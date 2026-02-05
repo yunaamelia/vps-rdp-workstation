@@ -1,0 +1,14 @@
+# Dev Debugging Role - Metadata
+---
+dependencies:
+  - common
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: Development debugging tools - gdb, valgrind, cmake
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

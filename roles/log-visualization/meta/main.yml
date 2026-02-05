@@ -1,0 +1,14 @@
+# Log Visualization Role - Metadata
+---
+dependencies:
+  - common
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: Log visualization tools - lnav, gum CLI
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

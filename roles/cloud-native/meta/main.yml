@@ -1,0 +1,15 @@
+# Cloud Native Role - Metadata
+---
+dependencies:
+  - common
+  - docker
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: Cloud native tools - kubectl, helm, k9s
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

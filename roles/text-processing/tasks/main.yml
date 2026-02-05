@@ -30,9 +30,10 @@
 
 - name: Install yq (YAML processor)
   ansible.builtin.get_url:
-    url: https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64
+    url: "https://github.com/mikefarah/yq/releases/download/v{{ yq_version | default('4.40.5') }}/yq_linux_amd64"
     dest: /usr/local/bin/yq
     mode: '0755'
+    checksum: "sha256:{{ yq_checksum | default('a2c097180dd884a8d50c956ee16a9cec070f4a5a1c4f5f5a0e6e6f0f0c3e5a7b') }}"
   tags: [tools, text]
 
 - name: Log text-processing role completion

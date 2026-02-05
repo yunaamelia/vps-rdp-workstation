@@ -1,0 +1,14 @@
+# System Performance Role - Metadata
+---
+dependencies:
+  - common
+
+galaxy_info:
+  author: VPS RDP Workstation
+  description: Performance monitoring - btop, dstat, ncdu, inxi
+  license: MIT
+  min_ansible_version: "2.14"
+  platforms:
+    - name: Debian
+      versions:
+        - trixie

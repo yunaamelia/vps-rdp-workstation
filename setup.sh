@@ -246,18 +246,27 @@ validate_password() {
 
 hash_password() {
     local password="$1"
-    local hash
+    local hash=""
     
-    # Use Python's crypt module for SHA-512 hashing
-    hash=$(python3 -c "
+    # Try openssl first (standard on Debian)
+    if command -v openssl &>/dev/null; then
+        hash=$(openssl passwd -6 "$password")
+    fi
+    
+    # Fallback to python crypt if openssl failed/missing
+    if [[ -z "$hash" ]]; then
+        hash=$(python3 -c "
 import crypt
 import secrets
 salt = crypt.mksalt(crypt.METHOD_SHA512)
 print(crypt.crypt('$password', salt))
-" 2>/dev/null) || {
-        log_error "Failed to hash password"
+" 2>/dev/null)
+    fi
+    
+    if [[ -z "$hash" ]]; then
+        log_error "Failed to hash password. Install openssl or python3."
         return 1
-    }
+    fi
     
     echo "$hash"
 }
@@ -728,28 +737,23 @@ main() {
     show_banner
     
     # Run pre-flight checks
+    # Run pre-flight checks
     if [[ "$SKIP_VALIDATION" != "true" ]]; then
         run_preflight_checks || exit 1
     fi
     
+    # Install Ansible (Ensure prerequisites for rollback/setup)
+    install_ansible || exit 1
+    
     # Check for rollback
     if [[ "${ROLLBACK_MODE:-false}" == "true" ]]; then
         log_info "Starting rollback procedure..."
-        
-        # Ensure Ansible is available for rollback
-        if ! command -v ansible-playbook &>/dev/null; then
-            install_ansible || exit 1
-        fi
-        
         run_rollback || exit 1
         exit 0
     fi
     
-    # Get credentials
+    # Get credentials (after ansible install to ensure deps)
     get_credentials || exit 1
-    
-    # Install Ansible
-    install_ansible || exit 1
     
     # Run main playbook
     run_ansible || exit 1

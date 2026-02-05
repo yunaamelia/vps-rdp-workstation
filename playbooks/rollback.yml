@@ -7,7 +7,7 @@
 ---
 - name: Rollback VPS Setup
   hosts: localhost
-  become: yes
+  become: true
 
   vars:
     backup_dir: /var/backups/vps-setup
@@ -25,7 +25,7 @@
           - Remove installed packages (optional)
 
         Type 'yes' to confirm rollback
-      private: no
+      private: false
 
   pre_tasks:
     - name: Verify user confirmation
@@ -69,13 +69,13 @@
       ansible.builtin.systemd:
         name: xrdp
         state: stopped
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Stop fail2ban
       ansible.builtin.systemd:
         name: fail2ban
         state: stopped
-      ignore_errors: yes
+      ignore_errors: true
 
     # =========================================================================
     # PHASE 3: Restore Configurations
@@ -85,20 +85,20 @@
       ansible.builtin.copy:
         src: "{{ backup_dir }}/sshd_config.backup"
         dest: /etc/ssh/sshd_config
-        remote_src: yes
-        backup: yes
+        remote_src: true
+        backup: true
       when: backup_files.matched > 0
-      ignore_errors: yes
+      ignore_errors: true
       notify: Restart SSH
 
     - name: Restore UFW rules
       ansible.builtin.copy:
         src: "{{ backup_dir }}/ufw-user.rules.backup"
         dest: /etc/ufw/user.rules
-        remote_src: yes
-        backup: yes
+        remote_src: true
+        backup: true
       when: backup_files.matched > 0
-      ignore_errors: yes
+      ignore_errors: true
       notify: Reload UFW
 
     # =========================================================================
@@ -109,11 +109,11 @@
       ansible.builtin.systemd:
         name: sshd
         state: reloaded
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Reload UFW
       ansible.builtin.shell: ufw reload
-      ignore_errors: yes
+      ignore_errors: true
 
     # =========================================================================
     # PHASE 5: Cleanup (Optional)
@@ -128,14 +128,14 @@
         - /var/log/vps-setup-error.log
         - /var/log/vps-setup-summary.log
       when: remove_logs | default(false)
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Remove state directory (optional)
       ansible.builtin.file:
         path: /var/lib/vps-setup
         state: absent
       when: remove_state | default(false)
-      ignore_errors: yes
+      ignore_errors: true
 
     # =========================================================================
     # PHASE 6: Summary
@@ -166,8 +166,8 @@
       ansible.builtin.systemd:
         name: sshd
         state: restarted
-      ignore_errors: yes
+      ignore_errors: true
 
     - name: Reload UFW
       ansible.builtin.shell: ufw reload
-      ignore_errors: yes
+      ignore_errors: true

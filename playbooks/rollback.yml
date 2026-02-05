@@ -31,7 +31,7 @@
     - name: Verify user confirmation
       ansible.builtin.fail:
         msg: "Rollback cancelled by user. Confirmation was: '{{ confirm_rollback }}'"
-      when: confirm_rollback != "yes"
+      when: confirm_rollback | string | lower not in ['yes', 'true']
 
     - name: Display rollback warning
       ansible.builtin.debug:

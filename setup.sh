@@ -691,6 +691,19 @@ main() {
         run_preflight_checks || exit 1
     fi
     
+    # Check for rollback
+    if [[ "${ROLLBACK_MODE:-false}" == "true" ]]; then
+        log_info "Starting rollback procedure..."
+        
+        # Ensure Ansible is available for rollback
+        if ! command -v ansible-playbook &>/dev/null; then
+            install_ansible || exit 1
+        fi
+        
+        run_rollback || exit 1
+        exit 0
+    fi
+    
     # Get credentials
     get_credentials || exit 1
     

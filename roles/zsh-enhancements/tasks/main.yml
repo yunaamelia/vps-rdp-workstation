@@ -15,6 +15,7 @@
     repo: "{{ item.repo }}"
     dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
     depth: 1
+    version: master
   become: true
   become_user: "{{ vps_username }}"
   loop: "{{ vps_omz_external_plugins }}"
@@ -28,9 +29,11 @@
 
 - name: Install zoxide for smart directory jumping
   ansible.builtin.shell: |
+    set -o pipefail
     curl -sS https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | bash
   args:
     creates: /usr/local/bin/zoxide
+    executable: /bin/bash
   when: vps_install_zoxide
   tags: [zsh-plugins]
 
@@ -38,7 +41,6 @@
   ansible.builtin.shell: |
     mv ~/.local/bin/zoxide /usr/local/bin/zoxide 2>/dev/null || true
   changed_when: false
-  ignore_errors: true
   when: vps_install_zoxide
   tags: [zsh-plugins]
 

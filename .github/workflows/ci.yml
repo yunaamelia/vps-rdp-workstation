@@ -1,0 +1,57 @@
+---
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Linting Tools
+        run: |
+          pip install yamllint ansible-lint pylint
+          sudo apt-get install -y shellcheck
+
+      - name: YAML Lint
+        run: yamllint .
+
+      - name: ShellCheck
+        run: shellcheck setup.sh tests/validate.sh
+
+      - name: Python Lint (Callback Plugin)
+        run: pylint plugins/callback/clean_progress.py --disable=C0114,C0115,C0116,R0903 --exit-zero
+
+      - name: Ansible Lint
+        run: ansible-lint playbooks/*.yml roles/*/tasks/*.yml
+
+  syntax-check:
+    name: Ansible Syntax Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Ansible Syntax Check (Main)
+        run: ansible-playbook playbooks/main.yml --syntax-check
+
+      - name: Ansible Syntax Check (Rollback)
+        run: ansible-playbook playbooks/rollback.yml --syntax-check

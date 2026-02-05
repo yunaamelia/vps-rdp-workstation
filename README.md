@@ -2,6 +2,7 @@
 
 > 🚀 Single-command automation to transform a fresh Debian 13 VPS into a fully-configured RDP developer workstation with security hardening and beautiful logging.
 
+[![CI](https://github.com/yunaamelia/vps-rdp-workstation/actions/workflows/ci.yml/badge.svg)](https://github.com/yunaamelia/vps-rdp-workstation/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/badge/version-3.0.0-blue.svg)](https://github.com/example/vps-rdp-workstation)
 [![Debian](https://img.shields.io/badge/debian-13%20trixie-green.svg)](https://www.debian.org/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)

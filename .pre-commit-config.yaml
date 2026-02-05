@@ -1,0 +1,57 @@
+---
+# Pre-commit Configuration - VPS RDP Workstation
+# Defines hooks for automated code quality checks
+#
+# Usage:
+#   1. Install pre-commit: pip install pre-commit
+#   2. Install hooks: pre-commit install
+#   3. Run manually: pre-commit run --all-files
+
+repos:
+  # Standard Hooks - Basic file hygiene
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+
+  # Shell Scripting - Statistical analysis for shell scripts
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning", "--exclude=SC1091"]
+
+  # Ansible Linting - Best practices for playbooks and roles
+  - repo: https://github.com/ansible/ansible-lint
+    rev: v24.2.0
+    hooks:
+      - id: ansible-lint
+        exclude: ^collections/
+        additional_dependencies:
+          - ansible-core>=2.16,<2.17
+          - yamllint
+          - community.general
+
+  # YAML Linting - Strict YAML syntax checking
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: ["-c=.yamllint"]
+
+  # Python Linting - Code quality for custom plugins/scripts
+  - repo: local
+    hooks:
+      - id: pylint
+        name: pylint
+        entry: pylint
+        language: system
+        types: [python]
+        files: ^plugins/callback/clean_progress\.py$
+        args: ["--disable=C0114,C0115,C0116,R0903", "--exit-zero"]

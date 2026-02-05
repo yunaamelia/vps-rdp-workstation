@@ -1,7 +1,7 @@
 ---
 name: CI
 
-on:
+"on":
   push:
     branches: [main]
   pull_request:
@@ -19,23 +19,15 @@ jobs:
         with:
           python-version: '3.x'
 
-      - name: Install Linting Tools
+      - name: Install Ansible
         run: |
-          pip install yamllint ansible-lint pylint ansible
-          sudo apt-get install -y shellcheck
-          ansible-galaxy collection install community.general
+          pip install ansible-core
+          ansible-galaxy collection install -r requirements.yml
 
-      - name: YAML Lint
-        run: yamllint .
-
-      - name: ShellCheck
-        run: shellcheck setup.sh tests/validate.sh
-
-      - name: Python Lint (Callback Plugin)
-        run: pylint plugins/callback/clean_progress.py --disable=C0114,C0115,C0116,R0903 --exit-zero
-
-      - name: Ansible Lint
-        run: ansible-lint playbooks/*.yml roles/*/tasks/*.yml
+      - name: Run pre-commit
+        uses: pre-commit/action@v3.0.1
+        with:
+          extra_args: --all-files
 
   syntax-check:
     name: Ansible Syntax Check

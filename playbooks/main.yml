@@ -5,10 +5,10 @@
   hosts: all
   become: true
   gather_facts: true
-  
+
   vars:
     installation_start_time: "{{ ansible_date_time.iso8601 }}"
-  
+
   pre_tasks:
     - name: Display installation banner
       ansible.builtin.debug:
@@ -18,7 +18,7 @@
           ║     Security-Hardened | Debian 13 | Nordic Theme         ║
           ╚══════════════════════════════════════════════════════════╝
       tags: always
-    
+
     - name: Verify required variables
       ansible.builtin.assert:
         that:
@@ -29,21 +29,21 @@
         fail_msg: "Required variables vps_username and vps_user_password_hash must be set"
       no_log: true
       tags: always
-    
+
     - name: Create state tracking directory
       ansible.builtin.file:
         path: /var/lib/vps-setup
         state: directory
         mode: '0755'
       tags: always
-    
+
     - name: Create backup directory
       ansible.builtin.file:
         path: "{{ vps_backup_dir }}"
         state: directory
         mode: '0750'
       tags: always
-    
+
     - name: Initialize progress tracking
       ansible.builtin.copy:
         dest: "{{ vps_progress_state_file }}"
@@ -59,122 +59,122 @@
         mode: '0644'
         force: false
       tags: always
-  
+
   roles:
     # =========================================================================
     #  PHASE 1: System Foundation
     # =========================================================================
-    
+
     - role: common
       tags: [common, foundation]
-    
+
     # =========================================================================
     #  PHASE 2: Security (BEFORE any services exposed)
     # =========================================================================
-    
+
     - role: security
       tags: [security]
-    
+
     # =========================================================================
     #  PHASE 3: Visual Foundation
     # =========================================================================
-    
+
     - role: fonts
       tags: [fonts, visual]
-    
+
     # =========================================================================
     #  PHASE 4: Desktop Environment
     # =========================================================================
-    
+
     - role: desktop
       tags: [desktop, kde, xrdp]
       when: vps_install_desktop | default(true)
-    
+
     # =========================================================================
     #  PHASE 5: Development Languages
     # =========================================================================
-    
+
     - role: development
       tags: [development, languages]
-    
+
     # =========================================================================
     #  PHASE 6: Containerization
     # =========================================================================
-    
+
     - role: docker
       tags: [docker, containers]
       when: install_docker | default(true)
-    
+
     # =========================================================================
     #  PHASE 7: Terminal Environment
     # =========================================================================
-    
+
     - role: terminal
       tags: [terminal, zsh]
-    
+
     - role: zsh-enhancements
       tags: [terminal, zsh-plugins]
       when: vps_install_zsh_external_plugins | default(true)
-    
+
     # =========================================================================
     #  PHASE 8: Code Editors
     # =========================================================================
-    
+
     - role: editors
       tags: [editors, vscode, opencode]
-    
+
     # =========================================================================
     #  PHASE 9: Development Tools
     # =========================================================================
-    
+
     - role: tui-tools
       tags: [tools, tui]
       when: install_tui_tools | default(true)
-    
+
     - role: network-tools
       tags: [tools, network]
       when: install_network_tools | default(true)
-    
+
     - role: system-performance
       tags: [tools, performance]
       when: install_performance_tools | default(true)
-    
+
     - role: text-processing
       tags: [tools, text]
       when: install_text_processing | default(true)
-    
+
     - role: file-management
       tags: [tools, files]
       when: install_file_management | default(true)
-    
+
     - role: dev-debugging
       tags: [tools, debugging]
       when: install_dev_debugging | default(true)
-    
+
     - role: code-quality
       tags: [tools, quality]
       when: install_code_quality | default(true)
-    
+
     - role: productivity
       tags: [tools, productivity]
       when: install_productivity | default(true)
-    
+
     - role: log-visualization
       tags: [tools, logging]
       when: install_log_visualization | default(true)
-    
+
     - role: ai-devtools
       tags: [tools, ai]
       when: install_ai_devtools | default(true)
-    
+
     # =========================================================================
     #  PHASE 10: Optional Cloud-Native Tools
     # =========================================================================
-    
+
     - role: cloud-native
       tags: [tools, cloud, kubernetes]
       when: install_cloud_native_tools | default(false)
-  
+
   post_tasks:
     - name: Update progress tracking - completed
       ansible.builtin.copy:
@@ -191,7 +191,7 @@
           }
         mode: '0644'
       tags: always
-    
+
     - name: Generate summary log
       ansible.builtin.template:
         src: templates/summary-log.j2
@@ -199,11 +199,11 @@
         mode: '0640'
       ignore_errors: true
       tags: always
-    
+
     - name: Display completion message
       ansible.builtin.debug:
         msg: |
-          
+
           ╔══════════════════════════════════════════════════════════╗
           ║  ✓ Installation Complete!                                ║
           ╠══════════════════════════════════════════════════════════╣

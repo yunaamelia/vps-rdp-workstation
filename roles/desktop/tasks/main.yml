@@ -157,7 +157,7 @@
       [Compositing]
       Enabled=false
       OpenGLIsUnsafe=true
-      
+
       [Windows]
       Placement=Smart
     owner: "{{ vps_username }}"
@@ -172,10 +172,10 @@
     content: |
       [General]
       ColorScheme=Nordic
-      
+
       [Icons]
       Theme=Papirus-Dark
-      
+
       [KDE]
       AnimationDurationFactor=0.5
       SingleClick=false

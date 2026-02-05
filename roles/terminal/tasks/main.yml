@@ -60,10 +60,10 @@
     block: |
       # Node.js global packages
       export PATH="$HOME/.npm-global/bin:$PATH"
-      
+
       # Local bin
       export PATH="$HOME/.local/bin:$PATH"
-      
+
       # Pipx
       export PATH="$HOME/.local/bin:$PATH"
     owner: "{{ vps_username }}"

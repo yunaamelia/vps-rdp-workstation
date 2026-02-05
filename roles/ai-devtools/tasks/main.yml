@@ -23,11 +23,11 @@
     dest: "/home/{{ vps_username }}/.ai-tools-setup.md"
     content: |
       # AI Development Tools Setup
-      
+
       ## Aider (AI Pair Programming)
       Configure with: aider --config
       Docs: https://aider.chat
-      
+
       ## Shell-GPT
       Configure with: sgpt --init
       Set API key: export OPENAI_API_KEY=your_key

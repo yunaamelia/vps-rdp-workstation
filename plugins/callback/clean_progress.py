@@ -21,7 +21,6 @@ import time
 from datetime import datetime
 
 from ansible.plugins.callback import CallbackBase
-from ansible import constants as C
 
 # ANSI Color codes
 class Colors:

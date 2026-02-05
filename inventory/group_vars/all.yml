@@ -73,7 +73,7 @@ vps_kde_effects_enabled: false            # Disable heavy effects
 vps_display_manager: "sddm"
 vps_sddm_autologin: false                 # Auto-login (security risk)
 
-# XRDP Configuration  
+# XRDP Configuration
 vps_install_xrdp: true
 vps_xrdp_port: 3389                       # RDP port
 vps_xrdp_color_depth: 24                  # Color depth (16, 24, 32)
@@ -290,12 +290,12 @@ default_font_size: 11
 checksums:
   # JetBrains Mono Nerd Font (update for each release)
   jetbrains_mono_nerd_sha256: ""          # Will be fetched from release
-  
+
   # Gum CLI tool
   gum_sha256: ""                          # Will be verified at download
-  
+
   # Lazygit
   lazygit_sha256: ""
-  
-  # Lazydocker  
+
+  # Lazydocker
   lazydocker_sha256: ""

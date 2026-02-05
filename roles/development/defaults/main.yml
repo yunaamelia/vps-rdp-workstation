@@ -11,7 +11,7 @@ npm_global_packages:
   - prettier
   - eslint
 
-# Python  
+# Python
 install_python: true
 python_pipx_packages:
   - black

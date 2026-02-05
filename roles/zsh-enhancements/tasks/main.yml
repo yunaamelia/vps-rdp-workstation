@@ -51,19 +51,19 @@
       source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
       source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
       source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
-      
+
       # fzf-tab
       source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/fzf-tab/fzf-tab.plugin.zsh
-      
+
       # you-should-use
       source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/you-should-use/you-should-use.plugin.zsh
-      
+
       # forgit
       source ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/forgit/forgit.plugin.zsh
-      
+
       # Zoxide initialization
       eval "$(zoxide init zsh)"
-      
+
       # Keybindings for history substring search
       bindkey '^[[A' history-substring-search-up
       bindkey '^[[B' history-substring-search-down

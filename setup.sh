@@ -284,9 +284,9 @@ read_password_secure() {
     # Disable echo for password input
     stty -echo 2>/dev/null || true
 
-    echo -ne "${CYAN}${LOCK}${NC} $prompt: "
+    echo -ne "${CYAN}${LOCK}${NC} $prompt: " >&2
     read -r password
-    echo ""
+    echo "" >&2
 
     # Re-enable echo
     stty echo 2>/dev/null || true

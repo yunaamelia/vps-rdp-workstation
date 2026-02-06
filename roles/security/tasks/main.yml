@@ -150,6 +150,7 @@
     enabled: true
     state: started
   when: vps_fail2ban_enabled
+  ignore_errors: "{{ ansible_check_mode }}"
   tags: [security, fail2ban]
 
 # =============================================================================

@@ -53,6 +53,7 @@
         path: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}"
         state: directory
         mode: '0750'
+      check_mode: false
       tags: always
 
     - name: Initialize progress tracking

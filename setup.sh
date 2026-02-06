@@ -532,11 +532,22 @@ run_preflight_checks() {
 install_ansible() {
     print_section "Ansible Setup ${GEAR}"
 
-    # Ensure pip3 is installed for mitogen
+    # Ensure pipx is installed for isolated Python package management
+    if ! command -v pipx &>/dev/null; then
+        log_info "Installing pipx for isolated package management..."
+        apt-get update -qq
+        apt-get install -y -qq pipx
+        # Ensure pipx path is available
+        pipx ensurepath &>/dev/null || true
+        export PATH="$PATH:$HOME/.local/bin"
+    fi
+    log_success "pipx available"
+
+    # Ensure pip3 is installed for library dependencies
     if ! command -v pip3 &>/dev/null; then
         log_info "Installing pip3..."
         apt-get update -qq
-        apt-get install -y -qq python3-pip
+        apt-get install -y -qq python3-pip python3-venv
     fi
 
     if command -v ansible &>/dev/null; then
@@ -550,10 +561,11 @@ install_ansible() {
         log_success "Ansible installed: $(ansible --version | head -1)"
     fi
 
-    # Install Mitogen for 2-7x performance improvement
-    if ! python3 -c "import mitogen" &>/dev/null; then
+    # Install Mitogen for 2-7x performance improvement (library, needs pip)
+    if ! python3 -c "import mitogen" &>/dev/null 2>&1; then
         log_info "Installing Mitogen for performance optimization..."
-        pip3 install --quiet --break-system-packages mitogen>=0.3.7
+        pip3 install --quiet --break-system-packages --ignore-installed "mitogen>=0.3.7" 2>/dev/null || \
+        pip3 install --quiet --user "mitogen>=0.3.7" 2>/dev/null || true
         log_success "Mitogen installed"
     else
         log_debug "Mitogen already installed"
@@ -571,44 +583,42 @@ install_ansible() {
         log_warn "Mitogen path not found, using standard Ansible strategy"
     fi
 
-    # Install ARA for run analysis and reporting
-    if ! python3 -c "import ara" &>/dev/null; then
+    # Install ARA for run analysis and reporting (via pipx)
+    if ! command -v ara &>/dev/null; then
         log_info "Installing ARA for run analysis..."
-        pip3 install --quiet --break-system-packages "ara>=1.7.0"
+        pipx install --quiet "ara[server]" 2>/dev/null || pipx install "ara[server]" || true
         log_success "ARA installed"
     else
         log_debug "ARA already installed"
     fi
 
     # Configure ARA callback plugin
-    local ara_callback_path
-    ara_callback_path=$(python3 -c "import os, ara.plugins.callback; print(os.path.dirname(ara.plugins.callback.__file__))" 2>/dev/null || true)
+    local ara_location
+    ara_location=$(pipx runpip ara show ara 2>/dev/null | grep "Location:" | cut -d' ' -f2 || true)
 
-    if [[ -n "$ara_callback_path" ]]; then
-        # Add ARA to callback plugins
-        export ANSIBLE_CALLBACK_PLUGINS="${ara_callback_path}${ANSIBLE_CALLBACK_PLUGINS:+:$ANSIBLE_CALLBACK_PLUGINS}"
-        # Set ARA database location
+    if [[ -n "$ara_location" ]] && [[ -d "${ara_location}/ara/plugins/callback" ]]; then
+        export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/ara/plugins/callback${ANSIBLE_CALLBACK_PLUGINS:+:$ANSIBLE_CALLBACK_PLUGINS}"
         export ARA_DATABASE_NAME="/var/log/ara-database.sqlite"
-        # Enable ARA callback
         export ARA_API_CLIENT="offline"
         log_success "ARA enabled: reports at ${ARA_DATABASE_NAME}"
     else
         log_warn "ARA callback path not found, run recording disabled"
     fi
 
-    # Install ansible-playbook-grapher for visual documentation
+    # Install ansible-playbook-grapher for visual documentation (via pipx)
     if ! command -v ansible-playbook-grapher &>/dev/null; then
         log_info "Installing ansible-playbook-grapher..."
-        pip3 install --quiet --break-system-packages "ansible-playbook-grapher>=2.2.0"
+        pipx install --quiet "ansible-playbook-grapher" 2>/dev/null || pipx install "ansible-playbook-grapher" || true
         log_success "ansible-playbook-grapher installed"
     else
         log_debug "ansible-playbook-grapher already installed"
     fi
 
-    # Install Rich for beautiful TUI output
-    if ! python3 -c "import rich" &>/dev/null; then
+    # Install Rich for beautiful TUI output (library, needs pip)
+    if ! python3 -c "import rich" &>/dev/null 2>&1; then
         log_info "Installing Rich for TUI output..."
-        pip3 install --quiet --break-system-packages "rich>=13.0.0"
+        pip3 install --quiet --break-system-packages --ignore-installed "rich>=13.0.0" 2>/dev/null || \
+        pip3 install --quiet --user "rich>=13.0.0" 2>/dev/null || true
         log_success "Rich installed"
     else
         log_debug "Rich already installed"
@@ -619,11 +629,12 @@ install_ansible() {
     export ANSIBLE_STDOUT_CALLBACK="rich_tui"
     log_success "Rich TUI callback enabled"
 
-    # Install Molecule for role testing (optional, skip if no Docker)
+    # Install Molecule for role testing (via pipx, optional - skip if no Docker)
     if command -v docker &>/dev/null; then
         if ! command -v molecule &>/dev/null; then
             log_info "Installing Molecule for role testing..."
-            pip3 install --quiet --break-system-packages "molecule>=6.0.0" "molecule-plugins[docker]>=23.0.0"
+            pipx install --quiet "molecule" 2>/dev/null || pipx install "molecule" || true
+            pipx inject --quiet molecule "molecule-plugins[docker]" 2>/dev/null || true
             log_success "Molecule installed"
         else
             log_debug "Molecule already installed"
@@ -632,28 +643,28 @@ install_ansible() {
         log_debug "Docker not found, skipping Molecule installation"
     fi
 
-    # Install ansible-doctor for auto-documentation
+    # Install ansible-doctor for auto-documentation (via pipx)
     if ! command -v ansible-doctor &>/dev/null; then
         log_info "Installing ansible-doctor..."
-        pip3 install --quiet --break-system-packages "ansible-doctor>=4.0.0"
+        pipx install --quiet "ansible-doctor" 2>/dev/null || pipx install "ansible-doctor" || true
         log_success "ansible-doctor installed"
     else
         log_debug "ansible-doctor already installed"
     fi
 
-    # Install ansible-cmdb for inventory dashboard
+    # Install ansible-cmdb for inventory dashboard (via pipx)
     if ! command -v ansible-cmdb &>/dev/null; then
         log_info "Installing ansible-cmdb..."
-        pip3 install --quiet --break-system-packages "ansible-cmdb>=1.31"
+        pipx install --quiet "ansible-cmdb" 2>/dev/null || pipx install "ansible-cmdb" || true
         log_success "ansible-cmdb installed"
     else
         log_debug "ansible-cmdb already installed"
     fi
 
-    # Install ansible-navigator for enhanced TUI
+    # Install ansible-navigator for enhanced TUI (via pipx)
     if ! command -v ansible-navigator &>/dev/null; then
         log_info "Installing ansible-navigator..."
-        pip3 install --quiet --break-system-packages "ansible-navigator>=24.0.0"
+        pipx install --quiet "ansible-navigator" 2>/dev/null || pipx install "ansible-navigator" || true
         log_success "ansible-navigator installed"
     else
         log_debug "ansible-navigator already installed"

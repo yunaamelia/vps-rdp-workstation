@@ -78,6 +78,7 @@ jobs:
           echo "vps_timezone: UTC" >> inventory/group_vars/all.yml
           echo "vps_progress_state_file: /tmp/vps-progress.json" >> inventory/group_vars/all.yml
           echo "vps_summary_log: /tmp/vps-summary.log" >> inventory/group_vars/all.yml
+          echo "vps_backup_dir: /tmp/vps-backups" >> inventory/group_vars/all.yml
       - name: Run Ansible Playbook (Check Mode)
         env:
           ANSIBLE_FORCE_COLOR: '1'

@@ -26,7 +26,9 @@
           - vps_username | length > 0
           - vps_user_password_hash is defined
           - vps_user_password_hash | length > 0
-        fail_msg: "Required variables vps_username and vps_user_password_hash must be set"
+          - vps_progress_state_file is defined
+          - vps_summary_log is defined
+        fail_msg: "Required variables (username, password hash, progress file, summary log) must be set"
       no_log: true
       tags: always
 

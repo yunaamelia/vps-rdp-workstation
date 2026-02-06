@@ -76,6 +76,8 @@ jobs:
           # Add other required variables for basic syntax check
           echo "vps_username: runner" >> inventory/group_vars/all.yml
           echo "vps_timezone: UTC" >> inventory/group_vars/all.yml
+          echo "vps_progress_state_file: /tmp/vps-progress.json" >> inventory/group_vars/all.yml
+          echo "vps_summary_log: /tmp/vps-summary.log" >> inventory/group_vars/all.yml
       - name: Run Ansible Playbook (Check Mode)
         env:
           ANSIBLE_FORCE_COLOR: '1'

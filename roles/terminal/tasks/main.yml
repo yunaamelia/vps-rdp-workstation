@@ -37,8 +37,11 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     force: false
+  become: true
   when: vps_install_omz
+  ignore_errors: "{{ ansible_check_mode }}"
   tags: [terminal, zsh]
+
 
 - name: Configure Zsh theme
   ansible.builtin.lineinfile:

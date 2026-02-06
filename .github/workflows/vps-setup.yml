@@ -42,12 +42,13 @@ jobs:
         run: yamllint .
 
       - name: Run ansible-lint
-        run: ansible-lint playbooks/*.yml
+        run: ansible-lint playbooks/*.yml roles/*/tasks/*.yml
 
       - name: Run ShellCheck
         uses: ludeeus/action-shellcheck@master
         with:
           scandir: '.'
+          ignore_paths: 'collections'
           ignore_names: 'get-docker.sh'
 
   test:

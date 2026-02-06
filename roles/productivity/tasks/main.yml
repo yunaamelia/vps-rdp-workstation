@@ -8,11 +8,20 @@
   become: true
   tags: [tools, productivity]
 
-- name: Inject setuptools into thefuck (Fix Python 3.12+ distutils)
-  ansible.builtin.shell: |
-    sudo -u {{ vps_username }} pipx inject thefuck setuptools
+- name: Patch thefuck for Python 3.12+ (replace distutils with shutil)
+  ansible.builtin.replace:
+    path: "/home/{{ vps_username }}/.local/share/pipx/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages/thefuck/system/unix.py"
+    regexp: '^from distutils\.spawn import find_executable$'
+    replace: 'import shutil'
   become: true
-  changed_when: false
+  tags: [tools, productivity]
+
+- name: Patch thefuck find_executable to shutil.which
+  ansible.builtin.replace:
+    path: "/home/{{ vps_username }}/.local/share/pipx/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages/thefuck/system/unix.py"
+    regexp: 'find_executable\('
+    replace: 'shutil.which('
+  become: true
   tags: [tools, productivity]
 
 - name: Install tldr via pipx

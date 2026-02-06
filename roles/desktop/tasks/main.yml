@@ -141,21 +141,12 @@
     depth: 1
   tags: [desktop, tiling]
 
-- name: Build and install Polonium (requires kpackagetool6 & npm)
-  ansible.builtin.shell: |
-    cd /tmp/polonium
-    # Determine which kpackagetool to use
-    if command -v kpackagetool6 &> /dev/null; then
-        KPKG=kpackagetool6
-    elif command -v kpackagetool5 &> /dev/null; then
-        KPKG=kpackagetool5
-    else
-        echo "No kpackagetool found"
-        exit 0
-    fi
-    # Remove existing installation if present, then install fresh
-    $KPKG --type KWin/Script -r polonium 2>/dev/null || true
-    $KPKG --type KWin/Script -i .
+- name: Build and install Polonium tiling extension
+  ansible.builtin.shell:
+    cmd: |
+      cd /tmp/polonium
+      rm -rf ~/.local/share/kwin/scripts/polonium
+      make
   become: true
   become_user: "{{ vps_username }}"
   ignore_errors: true

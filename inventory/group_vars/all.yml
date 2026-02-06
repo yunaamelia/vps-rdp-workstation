@@ -76,10 +76,30 @@ vps_sddm_autologin: false                 # Auto-login (security risk)
 vps_install_xrdp: true
 vps_xrdp_port: 3389                       # RDP port
 vps_xrdp_color_depth: 24                  # Color depth (16, 24, 32)
-vps_xrdp_encryption: "high"               # Encryption level: low, medium, high
-vps_xrdp_security_layer: "negotiate"      # Security layer: tls, rdp, negotiate
+vps_xrdp_encryption: "high"               # Encryption level: low, medium, high, fips
+vps_xrdp_security_layer: "tls"            # Security layer: tls (recommended), rdp, negotiate
 vps_xrdp_ssl_protocols: "TLSv1.2, TLSv1.3"  # TLS versions (security)
+vps_xrdp_tls_ciphers: "HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5"  # TLS cipher suites
 vps_xrdp_log_level: "INFO"                # Log level: TRACE, DEBUG, INFO, WARNING, ERROR
+vps_xrdp_syslog_level: "INFO"             # Syslog level
+
+# XRDP Display & Performance
+vps_xrdp_default_dpi: 96                  # Default DPI for HiDPI scaling
+vps_xrdp_use_vsock: false                 # Enable vsock for VM environments
+vps_xrdp_rail: false                      # RemoteApp support (Windows integration)
+
+# XRDP Login Screen Customization (Nordic theme)
+vps_xrdp_ls_title: "Remote Desktop"       # Login screen title
+vps_xrdp_ls_width: 350                    # Login dialog width
+vps_xrdp_ls_height: 430                   # Login dialog height
+vps_xrdp_ls_bg_color: "0x2e3440"          # Background color (Nordic Polar Night)
+vps_xrdp_ls_txt_color: "0xeceff4"         # Text color (Nordic Snow)
+vps_xrdp_ls_input_color: "0x3b4252"       # Input field color
+vps_xrdp_ls_logo: ""                      # Custom logo path (leave empty for none)
+
+# XRDP TLS Certificate (leave empty for built-in self-signed)
+vps_xrdp_certificate: ""                  # Path to TLS certificate (PEM)
+vps_xrdp_key_file: ""                     # Path to TLS private key (PEM)
 
 # XRDP Features
 vps_xrdp_audio: true                      # Enable audio redirection
@@ -89,11 +109,34 @@ vps_xrdp_drive_redirect: true             # Enable drive/file redirection
 # XRDP Session Manager (sesman) Settings
 vps_xrdp_max_sessions: 50                 # Max concurrent sessions (0 = unlimited)
 vps_xrdp_max_login_retry: 4               # Max login attempts
-vps_xrdp_allow_root: false                # Allow root login via RDP
+vps_xrdp_allow_root: false                # Allow root login via RDP (NEVER in production)
 vps_xrdp_kill_disconnected: false         # Kill sessions on disconnect
-vps_xrdp_disconnected_timeout: 0          # Disconnected timeout (0 = never)
-vps_xrdp_idle_timeout: 0                  # Idle timeout (0 = never)
+vps_xrdp_disconnected_timeout: 0          # Disconnected timeout in seconds (0 = never)
+vps_xrdp_idle_timeout: 0                  # Idle timeout in seconds (0 = never)
 vps_xrdp_restrict_clipboard: "none"       # Clipboard restriction: none, text, file, image, all
+vps_xrdp_session_policy: "UBI"            # Session reconnect policy: Default, UB, UBI, UBD, UBDI, Separate
+
+# XRDP Advanced Security
+vps_xrdp_allow_alternate_shell: true      # Allow custom session scripts
+vps_xrdp_xorg_no_new_privs: true          # AppArmor/SELinux compatibility
+vps_xrdp_ts_users: ""                     # Terminal server users group (blank = any)
+vps_xrdp_ts_admins: ""                    # Terminal server admins group
+
+# XRDP Sesman Logging
+vps_xrdp_sesman_log_level: "INFO"         # Sesman log level
+vps_xrdp_sesman_syslog_level: "INFO"      # Sesman syslog level
+vps_xrdp_chansrv_log_level: "INFO"        # Channel service log level
+
+# XRDP Chansrv (Channel Service) Settings
+vps_xrdp_fuse_mount_name: "thinclient_drives"  # FUSE mount name in file manager
+vps_xrdp_enable_fuse_mount: true          # Enable drive redirection via FUSE
+vps_xrdp_file_umask: "077"                # File permissions for redirected files
+vps_xrdp_nautilus3_flist: true            # GNOME Files compatibility
+
+# XRDP Sound Redirection Tuning
+vps_xrdp_sound_silent_frames_aac: 4       # Silent frames for AAC (reduce noise)
+vps_xrdp_sound_silent_frames_mp3: 2       # Silent frames for MP3
+vps_xrdp_sound_msec_do_not_send: 1000     # Ms of silence before stopping stream
 
 # =============================================================================
 #  TERMINAL CONFIGURATION

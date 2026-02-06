@@ -1,6 +1,7 @@
 # XRDP Configuration - Managed by Ansible
-# Comprehensive template based on XRDP best practices
-# Debian 13 + KDE Plasma optimized
+# Comprehensive template based on XRDP 0.10.x best practices
+# Debian 13 + KDE Plasma optimized with security hardening
+# Reference: https://github.com/neutrinolabs/xrdp/wiki
 
 # =============================================================================
 #  Global Settings
@@ -13,20 +14,23 @@ port={{ vps_xrdp_port | default(3389) }}
 
 ; Fork a new process for each connection
 fork=true
-; TCP performance settings
+; TCP performance settings (nodelay reduces latency)
 tcp_nodelay=true
 tcp_keepalive=true
-tcp_send_buffer_bytes=32768
-tcp_recv_buffer_bytes=32768
+; NOTE: Static buffer sizes removed - XRDP uses dynamic buffers since 0.9.x
+; which provide better performance across varying network conditions
 
-; Bitmap settings for better performance
+; Bitmap settings for performance
 bitmap_cache=true
 bitmap_compression=true
 bulk_compression=true
 
 ; Display settings
 max_bpp={{ vps_xrdp_color_depth | default(24) }}
+; Default DPI for HiDPI support (used when client doesn't report monitor size)
+default_dpi={{ vps_xrdp_default_dpi | default(96) }}
 new_cursors=true
+; Fastpath input/output for better performance
 use_fastpath=both
 
 ; Multi-monitor support
@@ -39,19 +43,78 @@ allow_channels=true
 autorun=
 hidelogwindow=true
 
-; Security settings
-crypt_level={{ vps_xrdp_encryption | default('high') }}
-; Security layer: tls, rdp, negotiate
-security_layer={{ vps_xrdp_security_layer | default('negotiate') }}
-; SSL/TLS protocols (TLS 1.2 and 1.3 only for security)
-ssl_protocols={{ vps_xrdp_ssl_protocols | default('TLSv1.2, TLSv1.3') }}
-; Certificate files (blank = use built-in)
-certificate=
-key_file=
+; vsock support (for VMs using virtio-vsock)
+use_vsock={{ vps_xrdp_use_vsock | default('false') }}
 
-; Connection settings
+# =============================================================================
+#  Security Settings (Hardened)
+# =============================================================================
+; Encryption level: low, medium, high, fips
+crypt_level={{ vps_xrdp_encryption | default('high') }}
+
+; Security layer: tls (recommended), rdp (legacy/insecure), negotiate
+; TLS is strongly recommended for production - provides encryption + authentication
+security_layer={{ vps_xrdp_security_layer | default('tls') }}
+
+; SSL/TLS protocol versions (TLS 1.2+ only for security)
+ssl_protocols={{ vps_xrdp_ssl_protocols | default('TLSv1.2, TLSv1.3') }}
+
+; TLS cipher suites (OpenSSL format)
+; HIGH = high-strength ciphers, exclude weak/export ciphers
+tls_ciphers={{ vps_xrdp_tls_ciphers | default('HIGH:!aNULL:!eNULL:!EXPORT:!DES:!RC4:!MD5') }}
+
+; Certificate files (blank = use built-in self-signed)
+; For production, use proper certificates from Let's Encrypt or internal CA
+certificate={{ vps_xrdp_certificate | default('') }}
+key_file={{ vps_xrdp_key_file | default('') }}
+
+; Require credentials (disable for token-based auth scenarios)
 require_credentials=true
+
+; Domain user separator (uncomment to change from default @)
+;domain_user_separator=@
+
+; Login screen background color (Gruvbox dark theme)
 blue_color=0x1d2021
+
+# =============================================================================
+#  Login Screen Customization
+# =============================================================================
+; Login screen title
+ls_title={{ vps_xrdp_ls_title | default('Remote Desktop') }}
+; Top window background color
+ls_top_window_bg_color={{ vps_xrdp_ls_bg_color | default('0x2e3440') }}
+; Window dimensions
+ls_width={{ vps_xrdp_ls_width | default(350) }}
+ls_height={{ vps_xrdp_ls_height | default(430) }}
+; Background color
+ls_bg_color={{ vps_xrdp_ls_bg_color | default('0x2e3440') }}
+
+; Logo settings (Nordic theme colors)
+ls_logo_filename={{ vps_xrdp_ls_logo | default('') }}
+ls_logo_x_pos=55
+ls_logo_y_pos=50
+
+; Label text colors (Nordic Snow)
+ls_label_x_pos=30
+ls_label_width=65
+ls_txt_color={{ vps_xrdp_ls_txt_color | default('0xeceff4') }}
+
+; Input field styling (Nordic Frost)
+ls_input_x_pos=110
+ls_input_width=210
+ls_input_y_pos=220
+ls_input_color={{ vps_xrdp_ls_input_color | default('0x3b4252') }}
+
+; Button styling
+ls_btn_ok_x_pos=142
+ls_btn_ok_y_pos=370
+ls_btn_ok_width=85
+ls_btn_ok_height=30
+ls_btn_cancel_x_pos=237
+ls_btn_cancel_y_pos=370
+ls_btn_cancel_width=85
+ls_btn_cancel_height=30
 
 # =============================================================================
 #  Logging Configuration
@@ -63,17 +126,25 @@ LogFile=xrdp.log
 LogLevel={{ vps_xrdp_log_level | default('INFO') }}
 ; Enable syslog integration
 EnableSyslog=true
-SyslogLevel=INFO
-; Enable console output (useful for debugging)
+SyslogLevel={{ vps_xrdp_syslog_level | default('INFO') }}
+; Enable console output (useful for debugging with systemd)
 EnableConsole=false
 ; Enable processor ID in log (for multi-core debugging)
 EnableProcessId=true
+
+; Per-logger configuration for fine-grained debugging
+[LoggingPerLogger]
+; Uncomment to enable debug for specific components:
+; xrdp.c=DEBUG
+; xrdp_mm.c=DEBUG
+; libxrdp.c=DEBUG
+; xrdp_encoder.c=DEBUG
 
 # =============================================================================
 #  Channel Configuration
 # =============================================================================
 [Channels]
-; Drive redirection (allows file transfer)
+; Drive redirection (allows file transfer via FUSE)
 rdpdr={{ vps_xrdp_drive_redirect | default('true') }}
 ; Sound redirection
 rdpsnd={{ vps_xrdp_audio | default('true') }}
@@ -81,15 +152,15 @@ rdpsnd={{ vps_xrdp_audio | default('true') }}
 drdynvc=true
 ; Clipboard redirection
 cliprdr={{ vps_xrdp_clipboard | default('true') }}
-; RemoteApp support
-rail=false
+; RemoteApp support (Windows app integration)
+rail={{ vps_xrdp_rail | default('false') }}
 ; Video redirection
 xrdpvr=true
 
 # =============================================================================
 #  Session Types
 # =============================================================================
-; Xorg session (primary - best for KDE Plasma)
+; Xorg session (primary - best performance for KDE Plasma)
 [Xorg]
 name=Xorg
 lib=libxup.so
@@ -99,7 +170,7 @@ ip=127.0.0.1
 port=-1
 code=20
 
-; Xvnc session (alternative backend)
+; Xvnc session (alternative backend - useful for debugging)
 [Xvnc]
 name=Xvnc
 lib=libvnc.so
@@ -107,10 +178,12 @@ username=ask
 password=ask
 ip=127.0.0.1
 port=-1
-#xserverbpp=24
-#delay_ms=2000
+; Color depth for VNC session
+;xserverbpp=24
+; Delay before starting (helps with slow X startup)
+;delay_ms=2000
 
-; Console session (for session reconnection)
+; Console session (reconnect to existing display :0)
 [console]
 name=console
 lib=libvnc.so
@@ -118,9 +191,9 @@ ip=127.0.0.1
 port=5900
 username=na
 password=ask
-#delay_ms=2000
+;delay_ms=2000
 
-; Custom session using sesman
+; Sesman-managed Xorg session
 [sesman-Xorg]
 name=Sesman-Xorg
 lib=libxup.so
@@ -131,7 +204,7 @@ port=-1
 xserverbpp={{ vps_xrdp_color_depth | default(24) }}
 code=20
 
-; VNC any (connect to existing VNC)
+; VNC any (connect to external VNC server)
 [vnc-any]
 name=vnc-any
 lib=libvnc.so
@@ -139,12 +212,13 @@ ip=ask
 port=ask5900
 username=na
 password=ask
-#pamusername=asksame
-#pampassword=asksame
-#pamsessionmng=127.0.0.1
-#delay_ms=2000
+; PAM authentication for VNC proxy scenarios
+;pamusername=asksame
+;pampassword=asksame
+;pamsessionmng=127.0.0.1
+;delay_ms=2000
 
-; Neutrinordp any (RDP proxy)
+; NeutrinoRDP any (RDP proxy to another RDP server)
 [neutrinordp-any]
 name=neutrinordp-any
 lib=libxrdpneutrinordp.so

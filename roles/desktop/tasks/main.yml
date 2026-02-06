@@ -134,6 +134,12 @@
   ignore_errors: true
   tags: [desktop, theme]
 
+- name: Remove stale Polonium clone (ownership fix)
+  ansible.builtin.file:
+    path: /tmp/polonium
+    state: absent
+  tags: [desktop, tiling]
+
 - name: Clone Polonium tiling extension
   ansible.builtin.git:
     repo: https://github.com/zeroxoneafour/polonium.git

@@ -50,10 +50,9 @@
 
     - name: Ensure backup directory exists
       ansible.builtin.file:
-        path: "{{ vps_backup_dir }}"
+        path: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}"
         state: directory
         mode: '0750'
-      when: vps_backup_dir is defined
       tags: always
 
     - name: Initialize progress tracking

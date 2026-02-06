@@ -626,26 +626,18 @@ install_ansible() {
     fi
 
     # Install ARA for run analysis and reporting (via pipx)
+    # Note: ARA callback plugin won't auto-record when installed via pipx
+    # because the ara module is isolated in pipx's venv. Use 'ara-manage' CLI
+    # to view reports after running playbooks with ARA's callback manually.
     if ! command -v ara &>/dev/null; then
         log_info "Installing ARA for run analysis..."
         pipx install --quiet "ara[server]" 2>/dev/null || pipx install "ara[server]" || true
-        log_success "ARA installed"
+        log_success "ARA installed (use 'ara-manage' for reports)"
     else
         log_debug "ARA already installed"
     fi
-
-    # Configure ARA callback plugin
-    local ara_location
-    ara_location=$(pipx runpip ara show ara 2>/dev/null | grep "Location:" | cut -d' ' -f2 || true)
-
-    if [[ -n "$ara_location" ]] && [[ -d "${ara_location}/ara/plugins/callback" ]]; then
-        export ANSIBLE_CALLBACK_PLUGINS="${ara_location}/ara/plugins/callback${ANSIBLE_CALLBACK_PLUGINS:+:$ANSIBLE_CALLBACK_PLUGINS}"
-        export ARA_DATABASE_NAME="/var/log/ara-database.sqlite"
-        export ARA_API_CLIENT="offline"
-        log_success "ARA enabled: reports at ${ARA_DATABASE_NAME}"
-    else
-        log_warn "ARA callback path not found, run recording disabled"
-    fi
+    # ARA callback is not configured - pipx isolation prevents it from working
+    # To use ARA callback, install via pip: pip install ara[server]
 
     # Install ansible-playbook-grapher for visual documentation (via pipx)
     if ! command -v ansible-playbook-grapher &>/dev/null; then

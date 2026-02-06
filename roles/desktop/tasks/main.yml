@@ -134,11 +134,13 @@
   ignore_errors: true
   tags: [desktop, theme]
 
-- name: Install KWin tiling script (Polonium)
+- name: Clone Polonium tiling extension
   ansible.builtin.git:
     repo: https://github.com/zeroxoneafour/polonium.git
     dest: /tmp/polonium
     depth: 1
+  become: true
+  become_user: "{{ vps_username }}"
   tags: [desktop, tiling]
 
 - name: Build and install Polonium tiling extension

@@ -8,27 +8,27 @@ skip_list:
   # Variable naming - we use project-wide 'vps_' prefix instead of role-specific prefixes
   - var-naming
   - var-naming[no-role-prefix]
-  
+
   # Error handling - ignore_errors is correctly used in rollback scenarios
   - ignore-errors
-  
+
   # Command module usage -> we use shell/command for specific installers
   - command-instead-of-module
-  
+
   # Line length - handled by yamllint
   - yaml[line-length]
-  
+
   # Syntax - handled by yamllint
   - yaml[octal-values]
   - yaml[comments-indentation]
-  
+
   # Role names allow hyphens (project convention)
   - role-name
-  
+
   # Allow shell pipes and file perms (handled manually)
   - risky-shell-pipe
   - risky-file-permissions
-  
+
   # Allow latest git versions and shell usage
   - latest
   - command-instead-of-shell

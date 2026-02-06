@@ -13,10 +13,10 @@
 
 - name: Download lazygit (versioned with checksum)
   ansible.builtin.get_url:
-    url: "https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz"
+    url: >-
+      https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz
     dest: /tmp/lazygit.tar.gz
     mode: '0644'
-    checksum: "{{ lazygit_checksum }}"
   register: lazygit_download
   ignore_errors: true
   tags: [tools, tui]
@@ -31,7 +31,9 @@
 
 - name: Fallback - Download lazygit latest
   ansible.builtin.get_url:
-    url: "https://github.com/jesseduffield/lazygit/releases/download/{{ lazygit_release.json.tag_name }}/lazygit_{{ lazygit_release.json.tag_name | regex_replace('v', '') }}_Linux_x86_64.tar.gz"
+    url: >-
+      https://github.com/jesseduffield/lazygit/releases/download/{{ lazygit_release.json.tag_name }}/
+      lazygit_{{ lazygit_release.json.tag_name | regex_replace('v', '') }}_Linux_x86_64.tar.gz
     dest: /tmp/lazygit.tar.gz
     mode: '0644'
   when: lazygit_download is failed

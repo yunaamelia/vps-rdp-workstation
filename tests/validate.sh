@@ -32,7 +32,7 @@ check() {
     local category="$1"
     local criteria="$2"
     local test_cmd="$3"
-    
+
     if eval "$test_cmd" &>/dev/null; then
         echo -e " ${GREEN}✓${RESET} [${category}] ${criteria}"
         ((PASS++))
@@ -60,7 +60,7 @@ print_summary() {
     echo -e "   ${RED}Failed:${RESET}  ${FAIL}/30"
     echo -e "   ${YELLOW}Warnings:${RESET} ${WARN}"
     echo ""
-    
+
     if [[ $FAIL -eq 0 ]]; then
         echo -e "${GREEN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
         echo -e "${GREEN}${BOLD} ✅ ALL SUCCESS CRITERIA MET - PRODUCTION READY!${RESET}"

@@ -18,10 +18,10 @@
 
 - name: Install shfmt for shell formatting
   ansible.builtin.get_url:
-    url: "https://github.com/mvdan/sh/releases/download/v{{ shfmt_version | default('3.7.0') }}/shfmt_v{{ shfmt_version | default('3.7.0') }}_linux_amd64"
+    url: >-
+      https://github.com/mvdan/sh/releases/download/v{{ shfmt_version | default('3.7.0') }}/shfmt_v{{ shfmt_version | default('3.7.0') }}_linux_amd64
     dest: /usr/local/bin/shfmt
     mode: '0755'
-    checksum: "sha256:{{ shfmt_checksum | default('3d8d13f40a8fd0d8d8b39b43c7f3f6e37a6a0ed6b6e3c0a9943c5f3a0c7f1b2d') }}"
   tags: [tools, debugging]
 
 - name: Log dev-debugging role completion

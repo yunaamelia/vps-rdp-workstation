@@ -1,11 +1,13 @@
 # AI DevTools Role
 ---
-- name: Install aider AI coding assistant
-  community.general.pipx:
-    name: aider-chat
-    state: present
+- name: Install aider AI coding assistant (Official Installer)
+  ansible.builtin.shell: |
+    export AIDER_INSTALL_DIR="/usr/local/bin"
+    curl -LsSf https://aider.chat/install.sh | sh
+  args:
+    creates: /usr/local/bin/aider
   become: true
-  become_user: "{{ vps_username }}"
+  changed_when: false
   ignore_errors: true
   tags: [tools, ai]
 

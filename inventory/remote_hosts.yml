@@ -1,0 +1,11 @@
+---
+all:
+  children:
+    vps_servers:
+      hosts:
+        139.59.253.112:
+          ansible_user: root
+          ansible_ssh_pass: "gg123123@"
+          ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      vars:
+        vps_username: developer

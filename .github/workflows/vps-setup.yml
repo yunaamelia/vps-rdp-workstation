@@ -1,0 +1,90 @@
+name: VPS Setup CI
+
+"on":
+  push:
+    branches: ["main"]
+    paths:
+      - 'playbooks/**'
+      - 'roles/**'
+      - 'inventory/**'
+      - '*.yml'
+      - '*.yaml'
+      - '*.sh'
+  pull_request:
+    branches: ["main"]
+    paths:
+      - 'playbooks/**'
+      - 'roles/**'
+      - 'inventory/**'
+      - '*.yml'
+      - '*.yaml'
+      - '*.sh'
+  workflow_dispatch:
+
+jobs:
+  lint:
+    name: Lint & Validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ansible-lint yamllint ansible
+      - name: Run yamllint
+        run: yamllint .
+
+      - name: Run ansible-lint
+        run: ansible-lint playbooks/*.yml
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          ignore_names: 'get-docker.sh'
+
+  test:
+    name: Dry Run Test
+    runs-on: ubuntu-latest
+    needs: lint
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Create Test Inventory
+        run: |
+          mkdir -p inventory/group_vars
+          echo "localhost ansible_connection=local" > inventory/test_hosts
+          # Create dummy password hash for validation
+          echo "vps_password_hash: '\$6\$rounds=4096\$testsalt\$test'" > inventory/group_vars/all.yml
+          # Add other required variables for basic syntax check
+          echo "vps_username: runner" >> inventory/group_vars/all.yml
+          echo "vps_timezone: UTC" >> inventory/group_vars/all.yml
+      - name: Run Ansible Playbook (Check Mode)
+        env:
+          ANSIBLE_FORCE_COLOR: '1'
+        run: |
+          ansible-playbook -i inventory/test_hosts playbooks/main.yml \
+            --syntax-check
+          ansible-playbook -i inventory/test_hosts playbooks/main.yml \
+            --check \
+            -e "vps_username=runner" \
+            -e "vps_password_hash='\$6\$test'" \
+            -e "ufw_enabled=false" \
+            -e "fail2ban_enabled=false" \
+            -e "install_docker=false"

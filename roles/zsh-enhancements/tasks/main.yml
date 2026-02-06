@@ -15,7 +15,6 @@
     repo: "{{ item.repo }}"
     dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
     depth: 1
-    version: master
   become: true
   become_user: "{{ vps_username }}"
   loop: "{{ vps_omz_external_plugins }}"

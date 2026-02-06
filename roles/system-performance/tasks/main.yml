@@ -29,11 +29,13 @@
 
 - name: Install duf (du alternative)
   ansible.builtin.shell: |
-    curl -LO https://github.com/muesli/duf/releases/latest/download/duf_0.8.1_linux_amd64.deb
-    dpkg -i duf_0.8.1_linux_amd64.deb
+    DUF_VERSION=$(curl -s https://api.github.com/repos/muesli/duf/releases/latest | grep -oP '"tag_name": "v\K[^"]+')
+    curl -LO https://github.com/muesli/duf/releases/download/v${DUF_VERSION}/duf_${DUF_VERSION}_linux_amd64.deb
+    dpkg -i duf_${DUF_VERSION}_linux_amd64.deb
   args:
     chdir: /tmp
     creates: /usr/bin/duf
+  changed_when: false
   ignore_errors: true
   tags: [tools, performance]
 

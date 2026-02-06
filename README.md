@@ -132,6 +132,23 @@ vps-rdp-workstation/
     └── README.md
 ```
 
+## 🛠️ Development Setup
+
+1.  **Install Python Dependencies:**
+    ```bash
+    pip install pre-commit ansible-core
+    ```
+
+2.  **Install Ansible Collections:**
+    ```bash
+    ansible-galaxy collection install -r requirements.yml
+    ```
+
+3.  **Setup Pre-commit Hooks:**
+    ```bash
+    pre-commit install
+    ```
+
 ## 🎯 Usage Examples
 
 ```bash

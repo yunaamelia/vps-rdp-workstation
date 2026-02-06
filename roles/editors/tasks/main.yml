@@ -22,9 +22,20 @@
   when: install_vscode
   tags: [editors, vscode]
 
+- name: Remove conflicting VS Code repository config
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/vscode.list
+    - /etc/apt/sources.list.d/vscode.sources
+  when: install_vscode
+  tags: [editors, vscode]
+
 - name: Add VS Code repository
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.asc] https://packages.microsoft.com/repos/code stable main"
+    repo: >-
+      deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.asc] https://packages.microsoft.com/repos/code stable main
     state: present
     filename: vscode
   when: install_vscode
@@ -53,7 +64,7 @@
 
 - name: Install OpenCode via npm
   community.general.npm:
-    name: "@anthropics/opencode"
+    name: "opencode-ai"
     global: true
     state: present
   when: install_opencode

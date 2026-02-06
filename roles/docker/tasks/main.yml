@@ -29,7 +29,8 @@
 
 - name: Add Docker repository
   ansible.builtin.apt_repository:
-    repo: "deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+    repo: >-
+      deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
     state: present
     filename: docker
   when: install_docker
@@ -88,6 +89,7 @@
   args:
     creates: /usr/local/bin/lazydocker
   when: install_docker
+  changed_when: false
   tags: [docker, tui]
 
 - name: Log docker role completion

@@ -76,11 +76,18 @@
       tags: [security]
 
     # =========================================================================
-    #  PHASE 3: Visual Foundation
+    #  PHASE 3: Visual Foundation & Terminal
     # =========================================================================
 
     - role: fonts
       tags: [fonts, visual]
+
+    - role: terminal
+      tags: [terminal, zsh]
+
+    - role: zsh-enhancements
+      tags: [terminal, zsh-plugins]
+      when: vps_install_zsh_external_plugins | default(true)
 
     # =========================================================================
     #  PHASE 4: Desktop Environment
@@ -106,26 +113,14 @@
       when: install_docker | default(true)
 
     # =========================================================================
-    #  PHASE 7: Terminal Environment
-    # =========================================================================
-
-    - role: terminal
-      tags: [terminal, zsh]
-
-    - role: zsh-enhancements
-      tags: [terminal, zsh-plugins]
-      when: vps_install_zsh_external_plugins | default(true)
-
-    # =========================================================================
-    #  PHASE 8: Code Editors
+    #  PHASE 7: Code Editors (Moved up from Phase 8)
     # =========================================================================
 
     - role: editors
       tags: [editors, vscode, opencode]
 
     # =========================================================================
-    #  PHASE 9: Development Tools
-    # =========================================================================
+    #  PHASE 8: Development Tools (Renumbered)
 
     - role: tui-tools
       tags: [tools, tui]

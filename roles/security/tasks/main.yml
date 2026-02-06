@@ -54,6 +54,13 @@
 #  SSH Hardening
 # =============================================================================
 
+- name: Ensure backup directory exists
+  ansible.builtin.file:
+    path: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}"
+    state: directory
+    mode: '0750'
+  tags: [security, ssh]
+
 - name: Backup SSH configuration
   ansible.builtin.copy:
     src: /etc/ssh/sshd_config

@@ -658,10 +658,15 @@ install_ansible() {
         log_debug "Rich already installed"
     fi
 
-    # Configure Rich TUI callback plugin
+    # Configure callback plugin (use default for verbose/debug modes to show full output)
     export ANSIBLE_CALLBACK_PLUGINS="${SCRIPT_DIR}/plugins/callback${ANSIBLE_CALLBACK_PLUGINS:+:$ANSIBLE_CALLBACK_PLUGINS}"
-    export ANSIBLE_STDOUT_CALLBACK="rich_tui"
-    log_success "Rich TUI callback enabled"
+    if [[ "$VERBOSE" == "true" ]] || [[ "$DEBUG" == "true" ]]; then
+        export ANSIBLE_STDOUT_CALLBACK="default"
+        log_info "Using default callback for verbose output"
+    else
+        export ANSIBLE_STDOUT_CALLBACK="rich_tui"
+        log_success "Rich TUI callback enabled"
+    fi
 
     # Install Molecule for role testing (via pipx, optional - skip if no Docker)
     if command -v docker &>/dev/null; then

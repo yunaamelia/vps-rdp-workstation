@@ -94,11 +94,11 @@
     - role: fonts
       tags: [fonts, visual]
 
-    - role: shell-styling
-      tags: [shell, visual, fastfetch, starship]
-
     - role: terminal
       tags: [terminal, zsh]
+
+    - role: shell-styling
+      tags: [shell, visual, fastfetch, starship]
 
     - role: zsh-enhancements
       tags: [terminal, zsh-plugins]

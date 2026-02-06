@@ -156,17 +156,24 @@
     dest: /tmp/polonium
     depth: 1
   become: true
-  become_user: "{{ vps_username }}"
+  tags: [desktop, tiling]
+
+- name: Fix Polonium clone ownership
+  ansible.builtin.file:
+    path: /tmp/polonium
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    recurse: true
+  become: true
   tags: [desktop, tiling]
 
 - name: Build and install Polonium tiling extension
   ansible.builtin.shell:
     cmd: |
       cd /tmp/polonium
-      rm -rf ~/.local/share/kwin/scripts/polonium
-      make
+      rm -rf /home/{{ vps_username }}/.local/share/kwin/scripts/polonium
+      sudo -u {{ vps_username }} make
   become: true
-  become_user: "{{ vps_username }}"
   ignore_errors: true
   tags: [desktop, tiling]
 

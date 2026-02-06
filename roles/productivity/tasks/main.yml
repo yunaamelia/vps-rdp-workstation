@@ -1,19 +1,19 @@
 # Productivity Role
 ---
-- name: Install thefuck
-  community.general.pipx:
-    name: thefuck
-    state: present
+- name: Install thefuck via pipx
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} pipx install thefuck
+  args:
+    creates: "/home/{{ vps_username }}/.local/bin/thefuck"
   become: true
-  become_user: "{{ vps_username }}"
   tags: [tools, productivity]
 
-- name: Install tldr
-  community.general.pipx:
-    name: tldr
-    state: present
+- name: Install tldr via pipx
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} pipx install tldr
+  args:
+    creates: "/home/{{ vps_username }}/.local/bin/tldr"
   become: true
-  become_user: "{{ vps_username }}"
   tags: [tools, productivity]
 
 - name: Add thefuck to zshrc

@@ -16,7 +16,16 @@
     dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
     depth: 1
   become: true
-  become_user: "{{ vps_username }}"
+  loop: "{{ vps_omz_external_plugins }}"
+  tags: [zsh-plugins]
+
+- name: Fix external Zsh plugins ownership
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    recurse: true
+  become: true
   loop: "{{ vps_omz_external_plugins }}"
   tags: [zsh-plugins]
 

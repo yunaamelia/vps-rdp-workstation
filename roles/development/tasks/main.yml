@@ -57,13 +57,12 @@
   tags: [development, nodejs]
 
 - name: Install global npm packages
-  community.general.npm:
-    name: "{{ item }}"
-    global: true
-    state: present
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} npm install -g {{ item }}
+  args:
+    creates: "/home/{{ vps_username }}/.npm-global/bin/{{ item.split('@')[0] }}"
   loop: "{{ npm_global_packages }}"
   become: true
-  become_user: "{{ vps_username }}"
   when: install_nodejs
   tags: [development, nodejs]
 
@@ -99,12 +98,12 @@
   tags: [development, python]
 
 - name: Install Python tools via pipx
-  community.general.pipx:
-    name: "{{ item }}"
-    state: present
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} pipx install {{ item }}
+  args:
+    creates: "/home/{{ vps_username }}/.local/bin/{{ item.split('[')[0] }}"
   loop: "{{ python_pipx_packages }}"
   become: true
-  become_user: "{{ vps_username }}"
   when: install_python
   tags: [development, python]
 

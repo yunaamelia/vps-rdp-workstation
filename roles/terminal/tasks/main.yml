@@ -25,7 +25,16 @@
     dest: "/home/{{ vps_username }}/.oh-my-zsh"
     depth: 1
   become: true
-  become_user: "{{ vps_username }}"
+  when: vps_install_omz
+  tags: [terminal, zsh]
+
+- name: Fix Oh My Zsh ownership
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.oh-my-zsh"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    recurse: true
+  become: true
   when: vps_install_omz
   tags: [terminal, zsh]
 

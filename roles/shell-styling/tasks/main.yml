@@ -30,11 +30,11 @@
   tags: [shell, visual, fastfetch]
 
 - name: Generate default fastfetch config
-  ansible.builtin.command:
-    cmd: fastfetch --gen-config
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} fastfetch --gen-config
+  args:
     creates: "/home/{{ vps_username }}/.config/fastfetch/config.jsonc"
   become: true
-  become_user: "{{ vps_username }}"
   tags: [shell, visual, fastfetch]
 
 - name: Ensure .zshrc exists

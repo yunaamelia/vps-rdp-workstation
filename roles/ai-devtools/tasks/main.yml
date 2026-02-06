@@ -11,12 +11,12 @@
   ignore_errors: true
   tags: [tools, ai]
 
-- name: Install shell-gpt
-  community.general.pipx:
-    name: shell-gpt
-    state: present
+- name: Install shell-gpt via pipx
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} pipx install shell-gpt
+  args:
+    creates: "/home/{{ vps_username }}/.local/bin/sgpt"
   become: true
-  become_user: "{{ vps_username }}"
   ignore_errors: true
   tags: [tools, ai]
 

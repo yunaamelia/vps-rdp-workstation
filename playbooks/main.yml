@@ -37,6 +37,15 @@
         path: /var/lib/vps-setup
         state: directory
         mode: '0755'
+      when: vps_progress_state_file | default('') | dirname == '/var/lib/vps-setup'
+      tags: always
+
+    - name: Ensure progress file directory exists (if custom)
+      ansible.builtin.file:
+        path: "{{ vps_progress_state_file | dirname }}"
+        state: directory
+        mode: '0755'
+      when: vps_progress_state_file is defined
       tags: always
 
     - name: Create backup directory

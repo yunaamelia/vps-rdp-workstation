@@ -37,6 +37,16 @@
   become_user: "{{ vps_username }}"
   tags: [shell, visual, fastfetch]
 
+- name: Create .zshrc if missing (Check Mode workaround)
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.zshrc"
+    state: touch
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: ansible_check_mode
+  tags: [shell, visual, fastfetch]
+
 - name: Configure Fastfetch to run on shell init
   ansible.builtin.lineinfile:
     path: "/home/{{ vps_username }}/.zshrc"

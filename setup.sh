@@ -572,15 +572,57 @@ install_ansible() {
     fi
 
     # Set Mitogen strategy plugin path for Ansible
-    local mitogen_path
-    mitogen_path=$(python3 -c "import os, mitogen; print(os.path.dirname(mitogen.__file__))" 2>/dev/null || true)
+    # Note: ansible_mitogen is a sibling package to mitogen, not a child
+    local mitogen_strategy_path=""
 
-    if [[ -n "$mitogen_path" ]] && [[ -d "${mitogen_path}/ansible_mitogen/plugins/strategy" ]]; then
-        export ANSIBLE_STRATEGY_PLUGINS="${mitogen_path}/ansible_mitogen/plugins/strategy"
+    # Method 1: Try to find via pip show location
+    local site_packages
+    site_packages=$(python3 -c "import site; print(site.getsitepackages()[0] if site.getsitepackages() else '')" 2>/dev/null || true)
+    if [[ -n "$site_packages" ]] && [[ -d "${site_packages}/ansible_mitogen/plugins/strategy" ]]; then
+        mitogen_strategy_path="${site_packages}/ansible_mitogen/plugins/strategy"
+    fi
+
+    # Method 2: Try user site-packages
+    if [[ -z "$mitogen_strategy_path" ]]; then
+        local user_site
+        user_site=$(python3 -c "import site; print(site.getusersitepackages())" 2>/dev/null || true)
+        if [[ -n "$user_site" ]] && [[ -d "${user_site}/ansible_mitogen/plugins/strategy" ]]; then
+            mitogen_strategy_path="${user_site}/ansible_mitogen/plugins/strategy"
+        fi
+    fi
+
+    # Method 3: Find via mitogen package location (parent dir)
+    if [[ -z "$mitogen_strategy_path" ]]; then
+        local mitogen_location
+        mitogen_location=$(python3 -c "import mitogen; import os; print(os.path.dirname(os.path.dirname(mitogen.__file__)))" 2>/dev/null || true)
+        if [[ -n "$mitogen_location" ]] && [[ -d "${mitogen_location}/ansible_mitogen/plugins/strategy" ]]; then
+            mitogen_strategy_path="${mitogen_location}/ansible_mitogen/plugins/strategy"
+        fi
+    fi
+
+    # Method 4: Search common locations
+    if [[ -z "$mitogen_strategy_path" ]]; then
+        for search_path in \
+            "/usr/lib/python3/dist-packages/ansible_mitogen/plugins/strategy" \
+            "/usr/local/lib/python3.*/dist-packages/ansible_mitogen/plugins/strategy" \
+            "$HOME/.local/lib/python3.*/site-packages/ansible_mitogen/plugins/strategy"; do
+            # Use glob expansion
+            for found_path in $search_path; do
+                if [[ -d "$found_path" ]]; then
+                    mitogen_strategy_path="$found_path"
+                    break 2
+                fi
+            done
+        done
+    fi
+
+    if [[ -n "$mitogen_strategy_path" ]] && [[ -d "$mitogen_strategy_path" ]]; then
+        export ANSIBLE_STRATEGY_PLUGINS="$mitogen_strategy_path"
         export ANSIBLE_STRATEGY="mitogen_linear"
-        log_success "Mitogen enabled: ${mitogen_path}"
+        log_success "Mitogen enabled: ${mitogen_strategy_path}"
     else
         log_warn "Mitogen path not found, using standard Ansible strategy"
+        log_debug "Searched: site-packages, user-packages, common paths"
     fi
 
     # Install ARA for run analysis and reporting (via pipx)

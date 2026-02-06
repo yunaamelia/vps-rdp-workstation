@@ -2,7 +2,6 @@
 ---
 dependencies:
   - common
-  - fonts
   - security
 
 galaxy_info:

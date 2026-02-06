@@ -15,6 +15,13 @@
   when: install_nodejs
   tags: [development, nodejs]
 
+- name: Remove old NodeSource keyring if exists
+  ansible.builtin.file:
+    path: /usr/share/keyrings/nodesource.gpg
+    state: absent
+  when: install_nodejs
+  tags: [development, nodejs]
+
 - name: Add NodeSource GPG key
   ansible.builtin.get_url:
     url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key

@@ -72,6 +72,22 @@
         force: false
       tags: always
 
+    - name: Clean up conflicting NodeSource keyring (old .gpg file)
+      ansible.builtin.file:
+        path: /usr/share/keyrings/nodesource.gpg
+        state: absent
+      tags: always
+
+    - name: Fix NodeSource sources.list if conflicting entries exist
+      ansible.builtin.copy:
+        dest: /etc/apt/sources.list.d/nodesource.list
+        content: |
+          deb [signed-by=/usr/share/keyrings/nodesource.asc] https://deb.nodesource.com/node_20.x nodistro main
+        mode: '0644'
+      when: ansible_facts['os_family'] == 'Debian'
+      failed_when: false
+      tags: always
+
   roles:
     # =========================================================================
     #  PHASE 1: System Foundation

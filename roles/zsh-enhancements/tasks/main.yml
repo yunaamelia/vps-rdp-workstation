@@ -10,11 +10,19 @@
     mode: '0755'
   tags: [zsh-plugins]
 
+- name: Add safe.directory for external Zsh plugins
+  ansible.builtin.command:
+    cmd: git config --global --add safe.directory "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
+  loop: "{{ vps_omz_external_plugins }}"
+  changed_when: false
+  tags: [zsh-plugins]
+
 - name: Clone external Zsh plugins
   ansible.builtin.git:
     repo: "{{ item.repo }}"
     dest: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/{{ item.name }}"
     depth: 1
+    update: true
   become: true
   loop: "{{ vps_omz_external_plugins }}"
   tags: [zsh-plugins]

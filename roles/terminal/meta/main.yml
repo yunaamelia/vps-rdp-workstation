@@ -2,7 +2,6 @@
 ---
 dependencies:
   - common
-  - fonts
 
 galaxy_info:
   author: VPS RDP Workstation

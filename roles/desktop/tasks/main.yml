@@ -167,6 +167,16 @@
   become: true
   tags: [desktop, tiling]
 
+- name: Fix npm cache ownership for user
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.npm"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    recurse: true
+    state: directory
+  become: true
+  tags: [desktop, tiling]
+
 - name: Build and install Polonium tiling extension
   ansible.builtin.shell:
     cmd: |

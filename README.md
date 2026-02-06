@@ -64,6 +64,7 @@ chmod 600 ~/.secrets
 
 ### Desktop Environment
 - KDE Plasma Desktop with Nordic theme
+- Polonium tiling extension for KWin *(archived upstream, final stable version)*
 - XRDP for Windows Remote Desktop access
 - SDDM display manager
 - Papirus icon theme

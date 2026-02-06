@@ -20,6 +20,7 @@
     url: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
     dest: /tmp/JetBrainsMono.tar.xz
     mode: '0644'
+  when: not ansible_check_mode
   tags: [fonts]
 
 - name: Extract JetBrains Mono Nerd Font
@@ -27,6 +28,7 @@
     src: /tmp/JetBrainsMono.tar.xz
     dest: /usr/share/fonts/truetype/jetbrains-mono-nerd
     remote_src: true
+  when: not ansible_check_mode
   tags: [fonts]
 
 - name: Clone Powerline fonts repository
@@ -34,6 +36,7 @@
     repo: https://github.com/powerline/fonts.git
     dest: /tmp/powerline-fonts
     depth: 1
+  when: not ansible_check_mode
   tags: [fonts]
 
 - name: Install Powerline fonts
@@ -42,11 +45,13 @@
     ./install.sh
   args:
     creates: /usr/share/fonts/truetype/powerline/DejaVu*
+  when: not ansible_check_mode
   tags: [fonts]
 
 - name: Update font cache
   ansible.builtin.command: fc-cache -fv
   changed_when: false
+  when: not ansible_check_mode
   tags: [fonts]
 
 - name: Clean up downloaded archives
@@ -56,6 +61,7 @@
   loop:
     - /tmp/JetBrainsMono.tar.xz
     - /tmp/powerline-fonts
+  when: not ansible_check_mode
   tags: [fonts]
 
 - name: Verify fonts installed
@@ -63,6 +69,7 @@
   register: font_check
   changed_when: false
   failed_when: false
+  when: not ansible_check_mode
   tags: [fonts]
 
 - name: Log fonts role completion

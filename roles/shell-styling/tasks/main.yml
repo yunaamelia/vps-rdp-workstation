@@ -44,6 +44,7 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0644'
+  check_mode: false
   when: ansible_check_mode
   tags: [shell, visual, fastfetch]
 

@@ -1,0 +1,21 @@
+---
+galaxy_info:
+  author: ApexDev
+  description: Role to configure shell styling (Fastfetch, Starship)
+  company: OpenCode
+  license: MIT
+  min_ansible_version: "2.12"
+
+  platforms:
+    - name: Debian
+      versions:
+        - bookworm
+        - bullseye
+
+  galaxy_tags:
+    - shell
+    - zsh
+    - visual
+    - theme
+
+dependencies: []

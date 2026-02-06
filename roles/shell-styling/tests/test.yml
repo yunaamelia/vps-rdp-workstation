@@ -1,0 +1,6 @@
+---
+# Test playbook for shell-styling role
+- hosts: localhost
+  remote_user: root
+  roles:
+    - roles/shell-styling

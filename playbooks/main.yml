@@ -82,6 +82,9 @@
     - role: fonts
       tags: [fonts, visual]
 
+    - role: shell-styling
+      tags: [shell, visual, fastfetch, starship]
+
     - role: terminal
       tags: [terminal, zsh]
 

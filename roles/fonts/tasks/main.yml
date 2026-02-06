@@ -25,9 +25,18 @@
 - name: Download JetBrains Mono Nerd Font
   ansible.builtin.get_url:
     url: >-
-      https://github.com/ryanoasis/nerd-fonts/releases/download/{{ (nerd_fonts_release.json.tag_name) }}/JetBrainsMono.zip
+      https://github.com/ryanoasis/nerd-fonts/releases/download/{{ nerd_fonts_release.json.tag_name }}/JetBrainsMono.zip
     dest: /tmp/JetBrainsMono.zip
     mode: '0644'
+  when: nerd_fonts_release.json is defined
+  tags: [fonts]
+
+- name: Fallback - Download JetBrains Mono Nerd Font (Static Version)
+  ansible.builtin.get_url:
+    url: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
+    dest: /tmp/JetBrainsMono.zip
+    mode: '0644'
+  when: nerd_fonts_release.json is not defined
   tags: [fonts]
 
 - name: Extract JetBrains Mono Nerd Font
@@ -35,6 +44,7 @@
     src: /tmp/JetBrainsMono.zip
     dest: /usr/share/fonts/truetype/jetbrains-mono-nerd
     remote_src: true
+  ignore_errors: true
   tags: [fonts]
 
 - name: Clone Powerline fonts repository

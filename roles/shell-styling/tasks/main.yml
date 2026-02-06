@@ -1,0 +1,70 @@
+# Shell Styling Role
+# Implements Fastfetch and Starship prompt
+---
+- name: Install Fastfetch (modern neofetch alternative)
+  ansible.builtin.get_url:
+    url: >-
+      https://github.com/fastfetch-cli/fastfetch/releases/latest/download/fastfetch-linux-amd64.deb
+    dest: /tmp/fastfetch.deb
+    mode: '0644'
+  register: fastfetch_download
+  ignore_errors: true
+  tags: [shell, visual, fastfetch]
+
+- name: Install Fastfetch package
+  ansible.builtin.apt:
+    deb: /tmp/fastfetch.deb
+    state: present
+  become: true
+  when: fastfetch_download is success
+  ignore_errors: true
+  tags: [shell, visual, fastfetch]
+
+- name: Create fastfetch config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/fastfetch"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [shell, visual, fastfetch]
+
+- name: Generate default fastfetch config
+  ansible.builtin.command:
+    cmd: fastfetch --gen-config
+    creates: "/home/{{ vps_username }}/.config/fastfetch/config.jsonc"
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [shell, visual, fastfetch]
+
+- name: Configure Fastfetch to run on shell init
+  ansible.builtin.lineinfile:
+    path: "/home/{{ vps_username }}/.zshrc"
+    line: "fastfetch"
+    insertbefore: BOF
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  when: vps_install_omz | default(true)
+  tags: [shell, visual, fastfetch]
+
+- name: Install Starship prompt
+  ansible.builtin.shell: |
+    curl -sS https://starship.rs/install.sh | sh -s -- -y
+  args:
+    creates: /usr/local/bin/starship
+  become: true
+  tags: [shell, visual, starship]
+
+- name: Configure Starship in .zshrc
+  ansible.builtin.lineinfile:
+    path: "/home/{{ vps_username }}/.zshrc"
+    line: 'eval "$(starship init zsh)"'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  when: vps_install_omz | default(true)
+  tags: [shell, visual, starship]
+
+- name: Log shell-styling role completion
+  ansible.builtin.debug:
+    msg: "✓ Shell Styling role completed"
+  tags: [shell, visual]

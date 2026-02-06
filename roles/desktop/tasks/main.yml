@@ -95,46 +95,77 @@
   tags: [desktop, xrdp]
 
 # =============================================================================
-#  Nordic Theme Installation
+#  Nordic Theme Installation (using EliverLara/Nordic-kde)
 # =============================================================================
 
-- name: Clone Nordic theme repository
+- name: Create themes directory for user
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/themes"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, theme]
+
+- name: Create Plasma look-and-feel directory for user
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/plasma/look-and-feel"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, theme]
+
+- name: Clone Nordic KDE theme
   ansible.builtin.git:
-    repo: https://github.com/EliverLara/Nordic.git
-    dest: /tmp/Nordic
+    repo: https://github.com/EliverLara/Nordic-kde.git
+    dest: /tmp/Nordic-kde
     depth: 1
   tags: [desktop, theme]
 
-- name: Create Plasma theme directory
-  ansible.builtin.file:
-    path: /usr/share/plasma/desktoptheme/Nordic
-    state: directory
-    mode: '0755'
-  tags: [desktop, theme]
-
-- name: Install Nordic Plasma theme
+- name: Install Nordic Plasma look-and-feel
   ansible.builtin.copy:
-    src: /tmp/Nordic/kde/plasma/look-and-feel/
-    dest: /usr/share/plasma/look-and-feel/
+    src: /tmp/Nordic-kde/Nordic/
+    dest: "/home/{{ vps_username }}/.local/share/plasma/look-and-feel/Nordic/"
     remote_src: true
-    mode: '0755'
-  tags: [desktop, theme]
-
-- name: Create GTK themes directory
-  ansible.builtin.file:
-    path: /usr/share/themes
-    state: directory
-    mode: '0755'
-  tags: [desktop, theme]
-
-- name: Install Nordic GTK theme
-  ansible.builtin.copy:
-    src: /tmp/Nordic/gtk-3.0/
-    dest: /usr/share/themes/Nordic/gtk-3.0/
-    remote_src: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
     mode: '0755'
   ignore_errors: true
   tags: [desktop, theme]
+
+- name: Install KWin tiling script (Polonium)
+  ansible.builtin.git:
+    repo: https://github.com/zeroxoneafour/polonium.git
+    dest: /tmp/polonium
+    depth: 1
+  tags: [desktop, tiling]
+
+- name: Build and install Polonium (requires kpackagetool6 & npm)
+  ansible.builtin.shell: |
+    cd /tmp/polonium
+    # Fallback to local install manually if make install fails system-wide
+    # Assuming kpackagetool6 is available, else try kpackagetool5
+    if command -v kpackagetool6 &> /dev/null; then
+        kpackagetool6 --type KWin/Script -i . || kpackagetool6 --type KWin/Script -u .
+    elif command -v kpackagetool5 &> /dev/null; then
+        kpackagetool5 --type KWin/Script -i . || kpackagetool5 --type KWin/Script -u .
+    fi
+  become: true
+  become_user: "{{ vps_username }}"
+  ignore_errors: true
+  tags: [desktop, tiling]
+
+- name: Enable Polonium in KWin
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kwinrc"
+    section: Plugins
+    option: poloniumEnabled
+    value: "true"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [desktop, tiling]
 
 # =============================================================================
 #  KDE Configuration for RDP Performance

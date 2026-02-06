@@ -196,7 +196,13 @@ validate_username() {
 
 validate_password() {
     local password="$1"
-    local min_length=12
+    local min_length=8
+
+    # Skip validation if requested
+    if [[ "$SKIP_VALIDATION" == "true" ]]; then
+        log_warn "Skipping password validation checks"
+        return 0
+    fi
 
     # Check length
     if [[ ${#password} -lt $min_length ]]; then
@@ -306,12 +312,17 @@ get_credentials() {
     fi
 
     # Validate username
-    if ! validate_username "$username"; then
-        return 1
+    if [[ "$SKIP_VALIDATION" != "true" ]]; then
+        if ! validate_username "$username"; then
+            return 1
+        fi
     fi
 
     # Get password
-    if [[ -n "${VPS_SECRETS_FILE:-}" ]] && [[ -f "${VPS_SECRETS_FILE}" ]]; then
+    if [[ -n "${VPS_PASSWORD:-}" ]]; then
+        password="$VPS_PASSWORD"
+        log_info "Using password from environment variable"
+    elif [[ -n "${VPS_SECRETS_FILE:-}" ]] && [[ -f "${VPS_SECRETS_FILE}" ]]; then
         # Read from secure file
         local file_perms
         file_perms=$(stat -c %a "${VPS_SECRETS_FILE}" 2>/dev/null || stat -f %Lp "${VPS_SECRETS_FILE}" 2>/dev/null)
@@ -659,6 +670,7 @@ OPTIONS:
 
 ENVIRONMENT VARIABLES:
     VPS_USERNAME        Primary workstation username (required in CI mode)
+    VPS_PASSWORD        User password (optional, creates risk if in shell history)
     VPS_SECRETS_FILE    Path to secure password file with 0600 permissions
     VPS_CONFIG_FILE     Custom configuration file path
 

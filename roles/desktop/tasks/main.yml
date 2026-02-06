@@ -144,13 +144,18 @@
 - name: Build and install Polonium (requires kpackagetool6 & npm)
   ansible.builtin.shell: |
     cd /tmp/polonium
-    # Fallback to local install manually if make install fails system-wide
-    # Assuming kpackagetool6 is available, else try kpackagetool5
+    # Determine which kpackagetool to use
     if command -v kpackagetool6 &> /dev/null; then
-        kpackagetool6 --type KWin/Script -i . || kpackagetool6 --type KWin/Script -u .
+        KPKG=kpackagetool6
     elif command -v kpackagetool5 &> /dev/null; then
-        kpackagetool5 --type KWin/Script -i . || kpackagetool5 --type KWin/Script -u .
+        KPKG=kpackagetool5
+    else
+        echo "No kpackagetool found"
+        exit 0
     fi
+    # Remove existing installation if present, then install fresh
+    $KPKG --type KWin/Script -r polonium 2>/dev/null || true
+    $KPKG --type KWin/Script -i .
   become: true
   become_user: "{{ vps_username }}"
   ignore_errors: true

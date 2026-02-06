@@ -340,7 +340,7 @@ get_credentials() {
         fi
 
         log_info "Using password from secure file"
-    else
+    elif [[ -z "${VPS_PASSWORD:-}" ]]; then
         # Interactive password input
         password=$(read_password_secure "Enter password")
         password_confirm=$(read_password_secure "Confirm password")

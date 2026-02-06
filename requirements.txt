@@ -1,0 +1,6 @@
+# Python dependencies for VPS RDP Workstation
+# Install: pip3 install -r requirements.txt
+
+# Mitogen - 2-7x Ansible performance improvement
+# https://mitogen.networkgenomics.com/ansible_detailed.html
+mitogen>=0.3.7

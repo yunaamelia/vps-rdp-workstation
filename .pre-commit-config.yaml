@@ -7,6 +7,9 @@
 #   2. Install hooks: pre-commit install
 #   3. Run manually: pre-commit run --all-files
 
+# Exclude vendored collections and roles tests from all hooks
+exclude: ^(collections/|roles/.*/tests/)
+
 repos:
   # Standard Hooks - Basic file hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -15,10 +18,12 @@ repos:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
+        args: [--unsafe]  # Allow custom YAML tags like !unsafe
       - id: check-added-large-files
       - id: check-merge-conflict
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
+        exclude: \.j2$  # Jinja2 templates are not meant to be executed directly
 
   # Shell Scripting - Statistical analysis for shell scripts
   - repo: https://github.com/shellcheck-py/shellcheck-py

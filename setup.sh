@@ -532,19 +532,45 @@ run_preflight_checks() {
 install_ansible() {
     print_section "Ansible Setup ${GEAR}"
 
+    # Ensure pip3 is installed for mitogen
+    if ! command -v pip3 &>/dev/null; then
+        log_info "Installing pip3..."
+        apt-get update -qq
+        apt-get install -y -qq python3-pip
+    fi
+
     if command -v ansible &>/dev/null; then
         local ansible_version
         ansible_version=$(ansible --version | head -1 | grep -oP '\d+\.\d+\.\d+')
         log_success "Ansible already installed: v$ansible_version"
-        return 0
+    else
+        log_info "Installing Ansible..."
+        apt-get update -qq
+        apt-get install -y -qq ansible
+        log_success "Ansible installed: $(ansible --version | head -1)"
     fi
 
-    log_info "Installing Ansible..."
+    # Install Mitogen for 2-7x performance improvement
+    if ! python3 -c "import mitogen" &>/dev/null; then
+        log_info "Installing Mitogen for performance optimization..."
+        pip3 install --quiet mitogen>=0.3.7
+        log_success "Mitogen installed"
+    else
+        log_debug "Mitogen already installed"
+    fi
 
-    apt-get update -qq
-    apt-get install -y -qq ansible
+    # Set Mitogen strategy plugin path for Ansible
+    local mitogen_path
+    mitogen_path=$(python3 -c "import os, mitogen; print(os.path.dirname(mitogen.__file__))" 2>/dev/null || true)
 
-    log_success "Ansible installed: $(ansible --version | head -1)"
+    if [[ -n "$mitogen_path" ]] && [[ -d "${mitogen_path}/ansible_mitogen/plugins/strategy" ]]; then
+        export ANSIBLE_STRATEGY_PLUGINS="${mitogen_path}/ansible_mitogen/plugins/strategy"
+        export ANSIBLE_STRATEGY="mitogen_linear"
+        log_success "Mitogen enabled: ${mitogen_path}"
+    else
+        log_warn "Mitogen path not found, using standard Ansible strategy"
+    fi
+
     return 0
 }
 

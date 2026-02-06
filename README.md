@@ -12,6 +12,7 @@
 - **🖥️ KDE Plasma Desktop** with Nordic theme optimized for RDP
 - **🔐 Security Hardened** - UFW firewall, fail2ban, SSH hardening
 - **⚡ One Command Setup** - Complete automation from fresh VPS
+- **⚡ Mitogen Acceleration** - 2-7x faster Ansible execution
 - **🛠️ Full Dev Stack** - Node.js, Python, PHP, Docker
 - **🎨 Beautiful Terminal** - Zsh + Oh My Zsh + Agnoster + 7 plugins
 - **📦 50+ Dev Tools** - lazygit, ripgrep, fzf, btop, and more

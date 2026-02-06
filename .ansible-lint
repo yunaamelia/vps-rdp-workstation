@@ -1,7 +1,14 @@
+---
 # Ansible Lint Configuration
 # Version: 3.0.0
 
 profile: production
+
+# Exclude vendored collections from linting
+exclude_paths:
+  - collections/
+  - .git/
+  - .ansible/
 
 # Guidelines to skip
 skip_list:
@@ -24,6 +31,12 @@ skip_list:
 
   # Role names allow hyphens (project convention)
   - role-name
+
+  # Role dependencies use shorthand string format (project convention)
+  - schema[meta]
+
+  # Test playbooks don't need names
+  - name[play]
 
   # Allow shell pipes and file perms (handled manually)
   - risky-shell-pipe

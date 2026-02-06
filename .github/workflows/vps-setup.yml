@@ -69,7 +69,7 @@ jobs:
 
       - name: Create Test Inventory
         run: |
-          mkdir -p inventory/group_vars 
+          mkdir -p inventory/group_vars
           mkdir -p /tmp/vps-backups
           echo "localhost ansible_connection=local" > inventory/test_hosts
           # Create dummy password hash for validation

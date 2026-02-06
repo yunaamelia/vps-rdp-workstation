@@ -19,6 +19,13 @@
   register: omz_check
   tags: [terminal, zsh]
 
+- name: Configure git safe.directory for Oh My Zsh
+  ansible.builtin.command:
+    cmd: git config --global --add safe.directory "/home/{{ vps_username }}/.oh-my-zsh"
+  become: true
+  changed_when: false
+  tags: [terminal, zsh]
+
 - name: Install Oh My Zsh (Git Clone)
   ansible.builtin.git:
     repo: https://github.com/ohmyzsh/ohmyzsh.git

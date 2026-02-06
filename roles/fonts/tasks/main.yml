@@ -15,36 +15,18 @@
     mode: '0755'
   tags: [fonts]
 
-- name: Get latest JetBrains Mono Nerd Font release
-  ansible.builtin.uri:
-    url: https://api.github.com/repos/ryanoasis/nerd-fonts/releases/latest
-    return_content: true
-  register: nerd_fonts_release
-  tags: [fonts]
-
 - name: Download JetBrains Mono Nerd Font
   ansible.builtin.get_url:
-    url: >-
-      https://github.com/ryanoasis/nerd-fonts/releases/download/{{ nerd_fonts_release.json.tag_name }}/JetBrainsMono.zip
-    dest: /tmp/JetBrainsMono.zip
+    url: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/JetBrainsMono.tar.xz
+    dest: /tmp/JetBrainsMono.tar.xz
     mode: '0644'
-  when: nerd_fonts_release.json is defined
-  tags: [fonts]
-
-- name: Fallback - Download JetBrains Mono Nerd Font (Static Version)
-  ansible.builtin.get_url:
-    url: https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/JetBrainsMono.zip
-    dest: /tmp/JetBrainsMono.zip
-    mode: '0644'
-  when: nerd_fonts_release.json is not defined
   tags: [fonts]
 
 - name: Extract JetBrains Mono Nerd Font
   ansible.builtin.unarchive:
-    src: /tmp/JetBrainsMono.zip
+    src: /tmp/JetBrainsMono.tar.xz
     dest: /usr/share/fonts/truetype/jetbrains-mono-nerd
     remote_src: true
-  ignore_errors: true
   tags: [fonts]
 
 - name: Clone Powerline fonts repository
@@ -72,7 +54,7 @@
     path: "{{ item }}"
     state: absent
   loop:
-    - /tmp/JetBrainsMono.zip
+    - /tmp/JetBrainsMono.tar.xz
     - /tmp/powerline-fonts
   tags: [fonts]
 

@@ -48,7 +48,7 @@
       when: vps_progress_state_file is defined
       tags: always
 
-    - name: Create backup directory
+    - name: Ensure backup directory exists
       ansible.builtin.file:
         path: "{{ vps_backup_dir }}"
         state: directory

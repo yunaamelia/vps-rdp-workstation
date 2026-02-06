@@ -4,3 +4,13 @@
 # Mitogen - 2-7x Ansible performance improvement
 # https://mitogen.networkgenomics.com/ansible_detailed.html
 mitogen>=0.3.7
+
+# ARA - Ansible Run Analysis (recording/reporting)
+# Provides web UI, CLI, and API for playbook run analysis
+# https://github.com/ansible-community/ara
+ara>=1.7.0
+
+# ansible-playbook-grapher - Visual playbook documentation
+# Generates SVG graphs of playbook structure
+# https://github.com/haidaraM/ansible-playbook-grapher
+ansible-playbook-grapher>=2.2.0

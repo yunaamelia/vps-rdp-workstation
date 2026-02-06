@@ -13,6 +13,8 @@
 - **🔐 Security Hardened** - UFW firewall, fail2ban, SSH hardening
 - **⚡ One Command Setup** - Complete automation from fresh VPS
 - **⚡ Mitogen Acceleration** - 2-7x faster Ansible execution
+- **📊 ARA Reports** - Beautiful HTML reports of every Ansible run
+- **📈 Playbook Grapher** - Visual SVG diagrams of playbook structure
 - **🛠️ Full Dev Stack** - Node.js, Python, PHP, Docker
 - **🎨 Beautiful Terminal** - Zsh + Oh My Zsh + Agnoster + 7 plugins
 - **📦 50+ Dev Tools** - lazygit, ripgrep, fzf, btop, and more
@@ -184,6 +186,39 @@ VPS_USERNAME=developer VPS_SECRETS_FILE=/root/.secrets ./setup.sh --ci
 | `/var/log/vps-setup.log` | Full detailed installation log |
 | `/var/log/vps-setup-error.log` | Errors and warnings only |
 | `/var/log/vps-setup-summary.log` | Beautiful summary report |
+| `/var/log/ara-database.sqlite` | ARA run history database |
+
+## 📊 Analysis & Visualization
+
+### ARA - Ansible Run Analysis
+
+Every playbook run is automatically recorded. View your run history:
+
+```bash
+# List all recorded playbook runs
+ara playbook list
+
+# Show details of a specific run
+ara playbook show <playbook-id>
+
+# Generate static HTML reports
+ara-manage generate /var/www/html/ara-reports
+
+# Start the ARA web UI (development)
+ara-manage runserver
+```
+
+### Playbook Grapher - Visual Documentation
+
+Generate SVG diagrams showing playbook structure and task flow:
+
+```bash
+# Generate playbook diagram
+ansible-playbook-grapher playbooks/main.yml -o docs/playbook-graph
+
+# Include role tasks in the graph
+ansible-playbook-grapher playbooks/main.yml --include-role-tasks -o docs/playbook-detailed
+```
 
 ## 🤝 Contributing
 

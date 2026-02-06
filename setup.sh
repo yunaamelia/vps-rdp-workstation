@@ -571,6 +571,40 @@ install_ansible() {
         log_warn "Mitogen path not found, using standard Ansible strategy"
     fi
 
+    # Install ARA for run analysis and reporting
+    if ! python3 -c "import ara" &>/dev/null; then
+        log_info "Installing ARA for run analysis..."
+        pip3 install --quiet "ara>=1.7.0"
+        log_success "ARA installed"
+    else
+        log_debug "ARA already installed"
+    fi
+
+    # Configure ARA callback plugin
+    local ara_callback_path
+    ara_callback_path=$(python3 -c "import os, ara.plugins.callback; print(os.path.dirname(ara.plugins.callback.__file__))" 2>/dev/null || true)
+
+    if [[ -n "$ara_callback_path" ]]; then
+        # Add ARA to callback plugins
+        export ANSIBLE_CALLBACK_PLUGINS="${ara_callback_path}${ANSIBLE_CALLBACK_PLUGINS:+:$ANSIBLE_CALLBACK_PLUGINS}"
+        # Set ARA database location
+        export ARA_DATABASE_NAME="/var/log/ara-database.sqlite"
+        # Enable ARA callback
+        export ARA_API_CLIENT="offline"
+        log_success "ARA enabled: reports at ${ARA_DATABASE_NAME}"
+    else
+        log_warn "ARA callback path not found, run recording disabled"
+    fi
+
+    # Install ansible-playbook-grapher for visual documentation
+    if ! command -v ansible-playbook-grapher &>/dev/null; then
+        log_info "Installing ansible-playbook-grapher..."
+        pip3 install --quiet "ansible-playbook-grapher>=2.2.0"
+        log_success "ansible-playbook-grapher installed"
+    else
+        log_debug "ansible-playbook-grapher already installed"
+    fi
+
     return 0
 }
 

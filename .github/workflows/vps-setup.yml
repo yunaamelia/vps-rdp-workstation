@@ -72,7 +72,7 @@ jobs:
           mkdir -p inventory/group_vars
           echo "localhost ansible_connection=local" > inventory/test_hosts
           # Create dummy password hash for validation
-          echo "vps_password_hash: '\$6\$rounds=4096\$testsalt\$test'" > inventory/group_vars/all.yml
+          echo "vps_user_password_hash: '\$6\$rounds=4096\$testsalt\$test'" > inventory/group_vars/all.yml
           # Add other required variables for basic syntax check
           echo "vps_username: runner" >> inventory/group_vars/all.yml
           echo "vps_timezone: UTC" >> inventory/group_vars/all.yml
@@ -85,7 +85,7 @@ jobs:
           ansible-playbook -i inventory/test_hosts playbooks/main.yml \
             --check \
             -e "vps_username=runner" \
-            -e "vps_password_hash='\$6\$test'" \
+            -e "vps_user_password_hash='\$6\$test'" \
             -e "ufw_enabled=false" \
             -e "fail2ban_enabled=false" \
             -e "install_docker=false"

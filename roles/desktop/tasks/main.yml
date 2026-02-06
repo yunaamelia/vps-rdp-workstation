@@ -70,6 +70,16 @@
   notify: Restart XRDP
   tags: [desktop, xrdp]
 
+- name: Configure XRDP session manager
+  ansible.builtin.template:
+    src: sesman.ini.j2
+    dest: /etc/xrdp/sesman.ini
+    mode: '0644'
+    backup: true
+  when: vps_install_xrdp
+  notify: Restart XRDP
+  tags: [desktop, xrdp]
+
 - name: Configure XRDP session startup
   ansible.builtin.template:
     src: startwm.sh.j2

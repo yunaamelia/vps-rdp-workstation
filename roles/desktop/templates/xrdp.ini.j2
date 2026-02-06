@@ -1,40 +1,95 @@
-# XRDP Configuration Template
-# Managed by Ansible
+# XRDP Configuration - Managed by Ansible
+# Comprehensive template based on XRDP best practices
+# Debian 13 + KDE Plasma optimized
+
+# =============================================================================
+#  Global Settings
+# =============================================================================
 [Globals]
-; Port to listen on
-port={{ vps_xrdp_port }}
-; TCP receive/send buffer size
-tcp_recv_buffer_bytes=32768
+; Addresses to listen on (blank = all interfaces)
+address=
+; Port for RDP connections
+port={{ vps_xrdp_port | default(3389) }}
+
+; Fork a new process for each connection
+fork=true
+; TCP performance settings
+tcp_nodelay=true
+tcp_keepalive=true
 tcp_send_buffer_bytes=32768
+tcp_recv_buffer_bytes=32768
 
-[Logging]
-LogFile=xrdp.log
-LogLevel=WARNING
+; Bitmap settings for better performance
+bitmap_cache=true
+bitmap_compression=true
+bulk_compression=true
 
-[Channels]
-; Channel handling
-rdpdr=true
-rdpsnd=true
-drdynvc=true
-cliprdr=true
-rail=true
+; Display settings
+max_bpp={{ vps_xrdp_color_depth | default(24) }}
+new_cursors=true
+use_fastpath=both
 
-[Security]
+; Multi-monitor support
+allow_multimon=true
+
+; Clipboard and channels
+allow_channels=true
+
+; Session settings
+autorun=
+hidelogwindow=true
+
 ; Security settings
+crypt_level={{ vps_xrdp_encryption | default('high') }}
+; Security layer: tls, rdp, negotiate
+security_layer={{ vps_xrdp_security_layer | default('negotiate') }}
+; SSL/TLS protocols (TLS 1.2 and 1.3 only for security)
+ssl_protocols={{ vps_xrdp_ssl_protocols | default('TLSv1.2, TLSv1.3') }}
+; Certificate files (blank = use built-in)
 certificate=
 key_file=
-security_layer=negotiate
-crypt_level={{ vps_xrdp_encryption }}
-allow_channels=true
-max_bpp={{ vps_xrdp_color_depth }}
 
-[Session types]
-; Session settings
-bash_path=/bin/bash
-username=ask
-password=ask
-greyscale=false
+; Connection settings
+require_credentials=true
+blue_color=0x1d2021
 
+# =============================================================================
+#  Logging Configuration
+# =============================================================================
+[Logging]
+; Log file location (relative to /var/log/xrdp/)
+LogFile=xrdp.log
+; Log levels: LOG_LEVEL_TRACE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
+LogLevel={{ vps_xrdp_log_level | default('INFO') }}
+; Enable syslog integration
+EnableSyslog=true
+SyslogLevel=INFO
+; Enable console output (useful for debugging)
+EnableConsole=false
+; Enable processor ID in log (for multi-core debugging)
+EnableProcessId=true
+
+# =============================================================================
+#  Channel Configuration
+# =============================================================================
+[Channels]
+; Drive redirection (allows file transfer)
+rdpdr={{ vps_xrdp_drive_redirect | default('true') }}
+; Sound redirection
+rdpsnd={{ vps_xrdp_audio | default('true') }}
+; Dynamic virtual channel (required for many features)
+drdynvc=true
+; Clipboard redirection
+cliprdr={{ vps_xrdp_clipboard | default('true') }}
+; RemoteApp support
+rail=false
+; Video redirection
+xrdpvr=true
+
+# =============================================================================
+#  Session Types
+# =============================================================================
+; Xorg session (primary - best for KDE Plasma)
 [Xorg]
 name=Xorg
 lib=libxup.so
@@ -44,6 +99,7 @@ ip=127.0.0.1
 port=-1
 code=20
 
+; Xvnc session (alternative backend)
 [Xvnc]
 name=Xvnc
 lib=libvnc.so
@@ -51,3 +107,48 @@ username=ask
 password=ask
 ip=127.0.0.1
 port=-1
+#xserverbpp=24
+#delay_ms=2000
+
+; Console session (for session reconnection)
+[console]
+name=console
+lib=libvnc.so
+ip=127.0.0.1
+port=5900
+username=na
+password=ask
+#delay_ms=2000
+
+; Custom session using sesman
+[sesman-Xorg]
+name=Sesman-Xorg
+lib=libxup.so
+username=ask
+password=ask
+ip=127.0.0.1
+port=-1
+xserverbpp={{ vps_xrdp_color_depth | default(24) }}
+code=20
+
+; VNC any (connect to existing VNC)
+[vnc-any]
+name=vnc-any
+lib=libvnc.so
+ip=ask
+port=ask5900
+username=na
+password=ask
+#pamusername=asksame
+#pampassword=asksame
+#pamsessionmng=127.0.0.1
+#delay_ms=2000
+
+; Neutrinordp any (RDP proxy)
+[neutrinordp-any]
+name=neutrinordp-any
+lib=libxrdpneutrinordp.so
+ip=ask
+port=ask3389
+username=ask
+password=ask

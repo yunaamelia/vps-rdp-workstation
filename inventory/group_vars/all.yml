@@ -76,8 +76,24 @@ vps_sddm_autologin: false                 # Auto-login (security risk)
 vps_install_xrdp: true
 vps_xrdp_port: 3389                       # RDP port
 vps_xrdp_color_depth: 24                  # Color depth (16, 24, 32)
-vps_xrdp_encryption: "high"               # Encryption level
+vps_xrdp_encryption: "high"               # Encryption level: low, medium, high
+vps_xrdp_security_layer: "negotiate"      # Security layer: tls, rdp, negotiate
+vps_xrdp_ssl_protocols: "TLSv1.2, TLSv1.3"  # TLS versions (security)
+vps_xrdp_log_level: "INFO"                # Log level: TRACE, DEBUG, INFO, WARNING, ERROR
+
+# XRDP Features
 vps_xrdp_audio: true                      # Enable audio redirection
+vps_xrdp_clipboard: true                  # Enable clipboard sharing
+vps_xrdp_drive_redirect: true             # Enable drive/file redirection
+
+# XRDP Session Manager (sesman) Settings
+vps_xrdp_max_sessions: 50                 # Max concurrent sessions (0 = unlimited)
+vps_xrdp_max_login_retry: 4               # Max login attempts
+vps_xrdp_allow_root: false                # Allow root login via RDP
+vps_xrdp_kill_disconnected: false         # Kill sessions on disconnect
+vps_xrdp_disconnected_timeout: 0          # Disconnected timeout (0 = never)
+vps_xrdp_idle_timeout: 0                  # Idle timeout (0 = never)
+vps_xrdp_restrict_clipboard: "none"       # Clipboard restriction: none, text, file, image, all
 
 # =============================================================================
 #  TERMINAL CONFIGURATION

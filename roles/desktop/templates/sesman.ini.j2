@@ -1,0 +1,106 @@
+# XRDP Session Manager (sesman) Configuration - Managed by Ansible
+# Comprehensive template for Debian 13 + KDE Plasma
+# Controls session lifecycle, security, and Xorg parameters
+
+# =============================================================================
+#  Global Settings
+# =============================================================================
+[Globals]
+; Address to listen on (blank = localhost only for security)
+ListenAddress=127.0.0.1
+; Port for sesman (internal)
+ListenPort=3350
+
+; Enable user's custom window manager script
+EnableUserWindowManager=true
+; User's window manager script (relative to home)
+UserWindowManager=startwm.sh
+; Default window manager fallback
+DefaultWindowManager=/etc/xrdp/startwm.sh
+; Script to run on reconnection
+ReconnectScript=/etc/xrdp/reconnectwm.sh
+
+# =============================================================================
+#  Security Configuration
+# =============================================================================
+[Security]
+; Allow root login via RDP
+AllowRootLogin={{ vps_xrdp_allow_root | default('false') }}
+; Maximum login retry attempts
+MaxLoginRetry={{ vps_xrdp_max_login_retry | default(4) }}
+; Terminal server users group (blank = any user)
+TerminalServerUsers=
+; Terminal server admins group
+TerminalServerAdmins=
+; Always check group membership
+AlwaysGroupCheck=false
+
+; Clipboard restrictions (none, text, file, image, all)
+RestrictOutboundClipboard={{ vps_xrdp_restrict_clipboard | default('none') }}
+RestrictInboundClipboard={{ vps_xrdp_restrict_clipboard | default('none') }}
+
+# =============================================================================
+#  Session Management
+# =============================================================================
+[Sessions]
+; X11 display offset (first display will be :10)
+X11DisplayOffset=10
+; Maximum concurrent sessions (0 = unlimited)
+MaxSessions={{ vps_xrdp_max_sessions | default(50) }}
+; Kill disconnected sessions
+KillDisconnected={{ vps_xrdp_kill_disconnected | default('false') }}
+; Disconnected session timeout (0 = never)
+DisconnectedTimeLimit={{ vps_xrdp_disconnected_timeout | default(0) }}
+; Idle session timeout (0 = never)
+IdleTimeLimit={{ vps_xrdp_idle_timeout | default(0) }}
+
+; Session allocation policy
+; Default = first available, UBD = username/bpp/display
+Policy=Default
+
+# =============================================================================
+#  Xorg Session Configuration
+# =============================================================================
+[Xorg]
+; Xorg binary path
+param=/usr/lib/xorg/Xorg
+; Configuration file
+param=-config
+param=xrdp/xorg.conf
+; Don't reset server on last client disconnect
+param=-noreset
+; Don't listen on TCP (security)
+param=-nolisten
+param=tcp
+; Log file pattern (%s = display number)
+param=-logfile
+param=.xorgxrdp.%s.log
+
+# =============================================================================
+#  Xvnc Session Configuration (alternative)
+# =============================================================================
+[Xvnc]
+; Xvnc binary parameters
+param=Xvnc
+param=-bs
+param=-nolisten
+param=tcp
+param=-localhost
+param=-dpi
+param=96
+
+# =============================================================================
+#  Channel Service (chansrv)
+# =============================================================================
+[Chansrv]
+; FUSE mount name for drive redirection
+FuseMountName=thinclient_drives
+; File permission mask for redirected files
+FileUmask=077
+
+# =============================================================================
+#  Session Variables
+# =============================================================================
+[SessionVariables]
+; PulseAudio configuration for audio redirection
+PULSE_SCRIPT=/etc/xrdp/pulse/default.pa

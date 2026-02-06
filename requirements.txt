@@ -14,3 +14,25 @@ ara>=1.7.0
 # Generates SVG graphs of playbook structure
 # https://github.com/haidaraM/ansible-playbook-grapher
 ansible-playbook-grapher>=2.2.0
+
+# Rich - Beautiful TUI for terminal output
+# Progress bars, tables, trees, panels
+# https://github.com/Textualize/rich
+rich>=13.0.0
+
+# Molecule - Ansible role testing framework
+# https://molecule.readthedocs.io/
+molecule>=6.0.0
+molecule-plugins[docker]>=23.0.0
+
+# Ansible Doctor - Auto-generate role documentation
+# https://github.com/thegeeklab/ansible-doctor
+ansible-doctor>=4.0.0
+
+# Ansible CMDB - Inventory to HTML dashboard
+# https://github.com/fboender/ansible-cmdb
+ansible-cmdb>=1.31
+
+# Ansible Navigator - Enhanced TUI for playbooks
+# https://github.com/ansible/ansible-navigator
+ansible-navigator>=24.0.0

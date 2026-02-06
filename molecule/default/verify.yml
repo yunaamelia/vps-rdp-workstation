@@ -1,0 +1,40 @@
+---
+# Molecule verify playbook
+# Validates that the role was applied correctly
+
+- name: Verify
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    - name: Check if timezone is configured
+      ansible.builtin.command: timedatectl show --value --property=Timezone
+      register: timezone_result
+      changed_when: false
+      failed_when: timezone_result.stdout == ""
+
+    - name: Check if essential packages are installed
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+      check_mode: true
+      register: package_check
+      failed_when: package_check.changed
+      loop:
+        - curl
+        - wget
+        - git
+
+    - name: Verify system locale
+      ansible.builtin.command: locale
+      register: locale_result
+      changed_when: false
+      failed_when: "'LANG=' not in locale_result.stdout"
+
+    - name: Print verification summary
+      ansible.builtin.debug:
+        msg: |
+          ✓ Timezone: {{ timezone_result.stdout }}
+          ✓ Essential packages installed
+          ✓ Locale configured

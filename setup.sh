@@ -553,7 +553,7 @@ install_ansible() {
     # Install Mitogen for 2-7x performance improvement
     if ! python3 -c "import mitogen" &>/dev/null; then
         log_info "Installing Mitogen for performance optimization..."
-        pip3 install --quiet mitogen>=0.3.7
+        pip3 install --quiet --break-system-packages mitogen>=0.3.7
         log_success "Mitogen installed"
     else
         log_debug "Mitogen already installed"
@@ -574,7 +574,7 @@ install_ansible() {
     # Install ARA for run analysis and reporting
     if ! python3 -c "import ara" &>/dev/null; then
         log_info "Installing ARA for run analysis..."
-        pip3 install --quiet "ara>=1.7.0"
+        pip3 install --quiet --break-system-packages "ara>=1.7.0"
         log_success "ARA installed"
     else
         log_debug "ARA already installed"
@@ -599,10 +599,64 @@ install_ansible() {
     # Install ansible-playbook-grapher for visual documentation
     if ! command -v ansible-playbook-grapher &>/dev/null; then
         log_info "Installing ansible-playbook-grapher..."
-        pip3 install --quiet "ansible-playbook-grapher>=2.2.0"
+        pip3 install --quiet --break-system-packages "ansible-playbook-grapher>=2.2.0"
         log_success "ansible-playbook-grapher installed"
     else
         log_debug "ansible-playbook-grapher already installed"
+    fi
+
+    # Install Rich for beautiful TUI output
+    if ! python3 -c "import rich" &>/dev/null; then
+        log_info "Installing Rich for TUI output..."
+        pip3 install --quiet --break-system-packages "rich>=13.0.0"
+        log_success "Rich installed"
+    else
+        log_debug "Rich already installed"
+    fi
+
+    # Configure Rich TUI callback plugin
+    export ANSIBLE_CALLBACK_PLUGINS="${SCRIPT_DIR}/plugins/callback${ANSIBLE_CALLBACK_PLUGINS:+:$ANSIBLE_CALLBACK_PLUGINS}"
+    export ANSIBLE_STDOUT_CALLBACK="rich_tui"
+    log_success "Rich TUI callback enabled"
+
+    # Install Molecule for role testing (optional, skip if no Docker)
+    if command -v docker &>/dev/null; then
+        if ! command -v molecule &>/dev/null; then
+            log_info "Installing Molecule for role testing..."
+            pip3 install --quiet --break-system-packages "molecule>=6.0.0" "molecule-plugins[docker]>=23.0.0"
+            log_success "Molecule installed"
+        else
+            log_debug "Molecule already installed"
+        fi
+    else
+        log_debug "Docker not found, skipping Molecule installation"
+    fi
+
+    # Install ansible-doctor for auto-documentation
+    if ! command -v ansible-doctor &>/dev/null; then
+        log_info "Installing ansible-doctor..."
+        pip3 install --quiet --break-system-packages "ansible-doctor>=4.0.0"
+        log_success "ansible-doctor installed"
+    else
+        log_debug "ansible-doctor already installed"
+    fi
+
+    # Install ansible-cmdb for inventory dashboard
+    if ! command -v ansible-cmdb &>/dev/null; then
+        log_info "Installing ansible-cmdb..."
+        pip3 install --quiet --break-system-packages "ansible-cmdb>=1.31"
+        log_success "ansible-cmdb installed"
+    else
+        log_debug "ansible-cmdb already installed"
+    fi
+
+    # Install ansible-navigator for enhanced TUI
+    if ! command -v ansible-navigator &>/dev/null; then
+        log_info "Installing ansible-navigator..."
+        pip3 install --quiet --break-system-packages "ansible-navigator>=24.0.0"
+        log_success "ansible-navigator installed"
+    else
+        log_debug "ansible-navigator already installed"
     fi
 
     return 0

@@ -1,0 +1,11 @@
+---
+# Molecule converge playbook
+# Tests the common role
+
+- name: Converge
+  hosts: all
+  become: true
+  gather_facts: true
+
+  roles:
+    - role: common

@@ -1,0 +1,44 @@
+# Ansible Doctor Configuration
+# https://ansible-doctor.geekdocs.de/configuration/
+
+---
+# Output directory for generated documentation
+output_dir: docs/roles
+
+# Template to use (built-in: readme, markdown)
+template: readme
+
+# Force overwrite existing files
+force_overwrite: true
+
+# Recursively find roles
+recursive: true
+
+# Role path to scan
+role_name_match: "*"
+
+# Exclude patterns
+exclude_paths:
+  - "*/molecule/*"
+  - "*/.git/*"
+  - "*/tests/*"
+
+# Documentation format
+doc_version: "1.0"
+
+# Annotations to extract
+annotations:
+  - var
+  - default
+  - example
+  - todo
+  - deprecated
+
+# Include role meta information
+include_meta: true
+
+# Generate index file
+generate_index: true
+
+# Logging
+log_level: warning

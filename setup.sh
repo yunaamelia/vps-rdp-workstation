@@ -765,7 +765,7 @@ main() {
 }
 
 # Trap for cleanup
-# shellcheck disable=SC2317
+# shellcheck disable=SC2317,SC2329
 cleanup() {
     # Ensure sensitive variables are cleared
     unset VPS_USER_PASSWORD_HASH

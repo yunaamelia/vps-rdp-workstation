@@ -8,6 +8,13 @@
   become: true
   tags: [tools, productivity]
 
+- name: Inject setuptools into thefuck (Fix Python 3.12+ distutils)
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} pipx inject thefuck setuptools
+  become: true
+  changed_when: false
+  tags: [tools, productivity]
+
 - name: Install tldr via pipx
   ansible.builtin.shell: |
     sudo -u {{ vps_username }} pipx install tldr

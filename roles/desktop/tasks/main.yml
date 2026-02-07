@@ -286,6 +286,119 @@
   tags: [desktop, kde]
 
 # =============================================================================
+#  Power User Tools & Enhancements
+# =============================================================================
+
+- name: Install essential KDE tools
+  ansible.builtin.apt:
+    name:
+      - yakuake
+      - qt5-style-kvantum
+      - qt6-style-kvantum
+      - qt5-style-kvantum-themes
+      - kompare
+      - filelight
+      - krdc
+      - smb4k
+      - sweeper
+      - kwalletmanager
+      - kpackagetool5
+    state: present
+  tags: [desktop, tools]
+
+- name: Create KWin scripts directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, tiling]
+
+- name: Clone Karousel tiling script
+  ansible.builtin.git:
+    repo: https://github.com/peterfajdiga/karousel.git
+    dest: /tmp/karousel
+    depth: 1
+  tags: [desktop, tiling]
+
+- name: Install Karousel
+  ansible.builtin.shell:
+    cmd: kpackagetool5 -t KWin/Script -i .
+    chdir: /tmp/karousel
+  become: true
+  become_user: "{{ vps_username }}"
+  ignore_errors: true
+  tags: [desktop, tiling]
+
+- name: Clone Window Title Applet
+  ansible.builtin.git:
+    repo: https://github.com/psifidotos/applet-window-title.git
+    dest: /tmp/window-title
+    depth: 1
+  tags: [desktop, panel]
+
+- name: Install Window Title Applet
+  ansible.builtin.shell:
+    cmd: kpackagetool5 -t Plasma/Applet -i .
+    chdir: /tmp/window-title
+  become: true
+  become_user: "{{ vps_username }}"
+  ignore_errors: true
+  tags: [desktop, panel]
+
+# =============================================================================
+#  Performance & Optimization
+# =============================================================================
+
+- name: Disable Baloo file indexing
+  ansible.builtin.command: balooctl disable
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: false
+  ignore_errors: true
+  tags: [desktop, performance]
+
+- name: Create fontconfig directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/fontconfig/conf.d"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, fonts]
+
+- name: Configure font rendering for RDP
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.config/fontconfig/conf.d/10-rdp-rendering.conf"
+    content: |
+      <?xml version='1.0'?>
+      <!DOCTYPE fontconfig SYSTEM 'fonts.dtd'>
+      <fontconfig>
+        <match target="font">
+          <edit mode="assign" name="rgba"><const>none</const></edit>
+          <edit mode="assign" name="hinting"><bool>true</bool></edit>
+          <edit mode="assign" name="hintstyle"><const>hintfull</const></edit>
+          <edit mode="assign" name="antialias"><bool>true</bool></edit>
+        </match>
+      </fontconfig>
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [desktop, fonts]
+
+- name: Set animation duration to zero
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kdeglobals"
+    section: "KDE"
+    option: "AnimationDurationFactor"
+    value: "0"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [desktop, performance]
+
+# =============================================================================
 #  Service Management
 # =============================================================================
 

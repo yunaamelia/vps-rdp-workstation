@@ -1,5 +1,5 @@
 # Shell Styling Role
-# Implements Fastfetch and Starship prompt
+# Implements Fastfetch and deploys optimized .zshrc template
 ---
 - name: Install Fastfetch (modern neofetch alternative)
   ansible.builtin.get_url:
@@ -37,41 +37,14 @@
   become: true
   tags: [shell, visual, fastfetch]
 
-- name: Ensure .zshrc exists
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.zshrc"
-    state: touch
+- name: Deploy optimized zshrc configuration
+  ansible.builtin.template:
+    src: zshrc.j2
+    dest: "/home/{{ vps_username }}/.zshrc"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0644'
-  tags: [shell, visual, fastfetch]
-
-- name: Configure Fastfetch to run on shell init
-  ansible.builtin.lineinfile:
-    path: "/home/{{ vps_username }}/.zshrc"
-    line: "fastfetch"
-    insertbefore: BOF
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-  when: vps_install_omz | default(true)
-  tags: [shell, visual, fastfetch]
-
-- name: Install Starship prompt
-  ansible.builtin.shell: |
-    curl -sS https://starship.rs/install.sh | sh -s -- -y
-  args:
-    creates: /usr/local/bin/starship
-  become: true
-  tags: [shell, visual, starship]
-
-- name: Configure Starship in .zshrc
-  ansible.builtin.lineinfile:
-    path: "/home/{{ vps_username }}/.zshrc"
-    line: 'eval "$(starship init zsh)"'
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-  when: vps_install_omz | default(true)
-  tags: [shell, visual, starship]
+  tags: [shell, zsh]
 
 - name: Log shell-styling role completion
   ansible.builtin.debug:

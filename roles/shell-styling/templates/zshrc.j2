@@ -1,0 +1,229 @@
+# Optimized Zsh Configuration
+# Managed by Ansible - shell-styling role
+# Template: zshrc.j2
+
+#===============================================================================
+# 1. Environment Variables (instant - no external calls)
+#===============================================================================
+
+export LANG="en_US.UTF-8"
+export LC_ALL="en_US.UTF-8"
+export EDITOR="{{ vps_default_editor | default('nano') }}"
+export VISUAL="{{ vps_default_editor | default('nano') }}"
+
+#===============================================================================
+# 2. Path Configuration (single consolidated block)
+#===============================================================================
+
+export DOTNET_ROOT="/home/{{ vps_username }}/.dotnet"
+
+typeset -U path
+path=(
+  "/home/{{ vps_username }}/.local/bin"
+  "/home/{{ vps_username }}/bin"
+  "/usr/local/bin"
+  "/home/{{ vps_username }}/.npm-global/bin"
+  "/home/{{ vps_username }}/go/bin"
+  "$DOTNET_ROOT"
+  "$DOTNET_ROOT/tools"
+  $path
+)
+export PATH
+
+[[ -f "/home/{{ vps_username }}/.cargo/env" ]] && source "/home/{{ vps_username }}/.cargo/env"
+[[ -f "/home/{{ vps_username }}/.local/bin/env" ]] && source "/home/{{ vps_username }}/.local/bin/env"
+
+#===============================================================================
+# 3. History Configuration
+#===============================================================================
+
+export HISTFILE="/home/{{ vps_username }}/.zsh_history"
+export HISTSIZE=50000
+export SAVEHIST=10000
+
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY
+setopt PROMPT_SUBST
+
+#===============================================================================
+# 4. Completion System (with 24h cache)
+#===============================================================================
+
+export ZSH_CACHE_DIR="/home/{{ vps_username }}/.cache/zsh"
+[[ ! -d "$ZSH_CACHE_DIR" ]] && mkdir -p "$ZSH_CACHE_DIR/completions"
+
+autoload -Uz compinit
+if [[ -n /home/{{ vps_username }}/.zcompdump(#qN.mh+24) ]]; then
+  compinit
+else
+  compinit -C
+fi
+
+zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
+zstyle ':completion:*' rehash true
+zstyle ':completion:*' menu select
+
+#===============================================================================
+# 5. Plugin Loading (direct source - no plugin manager overhead)
+#===============================================================================
+
+_source_plugin() { [[ -f "$1" ]] && source "$1" }
+
+ZSH_AUTOSUGGEST_STRATEGY=(history completion)
+ZSH_AUTOSUGGEST_BUFFER_MAX_SIZE=20
+ZSH_AUTOSUGGEST_USE_ASYNC=1
+
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-completions/zsh-completions.plugin.zsh
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/custom/plugins/fzf-tab/fzf-tab.plugin.zsh
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/custom/plugins/you-should-use/you-should-use.plugin.zsh
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/custom/plugins/forgit/forgit.plugin.zsh
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-z/zsh-z.plugin.zsh
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/custom/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+
+#===============================================================================
+# 6. Theme & Tool Initialization
+#===============================================================================
+
+# Oh-My-Zsh libraries required for Agnoster theme
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/lib/git.zsh
+_source_plugin /home/{{ vps_username }}/.oh-my-zsh/lib/theme-and-appearance.zsh
+
+# Stub for terraform prompt (not used, prevents error)
+tf_prompt_info() { : }
+
+# Agnoster theme (requires Powerline font)
+[[ -f /home/{{ vps_username }}/.oh-my-zsh/themes/agnoster.zsh-theme ]] && source /home/{{ vps_username }}/.oh-my-zsh/themes/agnoster.zsh-theme
+
+# Override prompt_context to show only username (no host)
+prompt_context() {
+  prompt_segment black default "%n"
+}
+
+{% if vps_install_zoxide | default(true) %}
+if (( $+commands[zoxide] )); then
+  eval "$(zoxide init zsh)"
+  alias cd='z'
+  alias cdi='zi'
+fi
+{% endif %}
+
+if (( $+commands[fzf] )); then
+  source <(fzf --zsh) 2>/dev/null || true
+  export FZF_DEFAULT_OPTS="
+    --height 40%
+    --layout=reverse
+    --border=rounded
+    --info=inline
+    --color=bg+:#313244,bg:#1e1e2e,spinner:#f5e0dc,hl:#f38ba8
+    --color=fg:#cdd6f4,header:#f38ba8,info:#cba6f7,pointer:#f5e0dc
+    --color=marker:#f5e0dc,fg+:#cdd6f4,prompt:#cba6f7,hl+:#f38ba8
+  "
+  if (( $+commands[fd] )) || (( $+commands[fdfind] )); then
+    local fd_cmd=${commands[fd]:-fdfind}
+    export FZF_DEFAULT_COMMAND="$fd_cmd --type f --hidden --strip-cwd-prefix --exclude .git"
+    export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+    export FZF_ALT_C_COMMAND="$fd_cmd --type d --hidden --strip-cwd-prefix --exclude .git"
+    export FZF_CTRL_T_OPTS="--preview 'bat --style=numbers --color=always {} 2>/dev/null || eza --tree --level=2 --icons {}'"
+    export FZF_ALT_C_OPTS="--preview 'eza --tree --level=2 --icons --color=always {}'"
+  fi
+fi
+
+(( $+commands[atuin] )) && eval "$(atuin init zsh --disable-up-arrow)"
+
+if (( $+commands[thefuck] )); then
+  fuck() {
+    unset -f fuck
+    eval "$(thefuck --alias)"
+    fuck "$@"
+  }
+fi
+
+#===============================================================================
+# 7. Aliases
+#===============================================================================
+
+if (( $+commands[eza] )); then
+  alias ls='eza --icons --group-directories-first'
+  alias ll='eza -alFh --icons --group-directories-first --git'
+  alias la='eza -a --icons --group-directories-first'
+  alias l='eza -F --icons'
+  alias tree='eza --tree --icons --level=3'
+else
+  alias ls='ls --color=auto'
+  alias ll='ls -alFh'
+  alias la='ls -A'
+  alias l='ls -CF'
+fi
+
+(( $+commands[batcat] )) && ! (( $+commands[bat] )) && alias bat='batcat'
+(( $+commands[fdfind] )) && ! (( $+commands[fd] )) && alias fd='fdfind'
+
+if (( $+commands[bat] )) || (( $+commands[batcat] )); then
+  alias cat='bat --style=auto'
+  alias catp='bat --style=plain'
+  export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+  export MANROFFOPT="-c"
+fi
+
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias -- -='cd -'
+alias ~='cd ~'
+
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+alias mkdir='mkdir -p'
+
+alias g='git'
+alias gst='git status'
+alias gaa='git add --all'
+alias gcm='git commit -m'
+alias gp='git push'
+alias gl='git pull'
+alias gd='git diff'
+alias gco='git checkout'
+alias lg='lazygit'
+
+alias d='docker'
+alias dps='docker ps'
+alias dc='docker compose'
+
+alias update='sudo apt update && sudo apt upgrade -y'
+alias zshrc='$EDITOR /home/{{ vps_username }}/.zshrc'
+alias reload='source /home/{{ vps_username }}/.zshrc'
+
+#===============================================================================
+# 8. Functions
+#===============================================================================
+
+mkcd() { mkdir -p "$1" && cd "$1"; }
+serve() { python3 -m http.server "${1:-8000}"; }
+
+#===============================================================================
+# 9. Local Overrides
+#===============================================================================
+
+[[ -f /home/{{ vps_username }}/.zshrc.local ]] && source /home/{{ vps_username }}/.zshrc.local
+
+#===============================================================================
+# 10. Interactive Display (LAST - only in interactive terminals)
+#===============================================================================
+
+if [[ -o interactive ]] && [[ -t 0 ]] && (( $+commands[fastfetch] )); then
+  fastfetch
+fi

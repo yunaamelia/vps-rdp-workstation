@@ -110,6 +110,19 @@ Scenario: Verify playbook syntax
   
   **Reason**: Recommended in kde.md to save RAM.
 
+- [x] 4. Configure Yakuake Autostart
+  **What to do**:
+  - Create `~/.config/autostart` directory
+  - Symlink or copy `/usr/share/applications/org.kde.yakuake.desktop` to `~/.config/autostart/`
+  
+  **Reason**: "Eliminate startup latency" requires it to run on login.
+
+- [x] 5. Cleanup Build Artifacts
+  **What to do**:
+  - Add tasks to remove `/tmp/karousel` and `/tmp/window-title`
+  
+  **Reason**: Keep the system clean after installation.
+
 ---
 
 ## Success Criteria

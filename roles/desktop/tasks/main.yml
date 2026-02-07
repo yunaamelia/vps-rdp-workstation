@@ -348,6 +348,26 @@
   ignore_errors: true
   tags: [desktop, panel]
 
+- name: Create autostart directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/autostart"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [desktop, tools]
+
+- name: Link Yakuake desktop file to autostart
+  ansible.builtin.file:
+    src: /usr/share/applications/org.kde.yakuake.desktop
+    dest: "/home/{{ vps_username }}/.config/autostart/org.kde.yakuake.desktop"
+    state: link
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [desktop, tools]
+
 # =============================================================================
 #  Performance & Optimization
 # =============================================================================
@@ -448,6 +468,18 @@
 - name: Clean up Catppuccin temporary files
   ansible.builtin.file:
     path: /tmp/catppuccin-kde
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Clean up Karousel temporary files
+  ansible.builtin.file:
+    path: /tmp/karousel
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Clean up Window Title temporary files
+  ansible.builtin.file:
+    path: /tmp/window-title
     state: absent
   tags: [desktop, cleanup]
 

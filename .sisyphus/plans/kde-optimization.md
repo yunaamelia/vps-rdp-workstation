@@ -91,10 +91,24 @@ Scenario: Verify playbook syntax
   - **Skills**: [`ansible-expert`]
 
   **Acceptance Criteria**:
-  - [ ] File `roles/desktop/tasks/main.yml` contains `Install essential KDE tools`
-  - [ ] File `roles/desktop/tasks/main.yml` contains `Disable Baloo file indexing`
-  - [ ] File `roles/desktop/tasks/main.yml` contains `Configure font rendering for RDP`
-  - [ ] `ansible-playbook playbooks/main.yml --syntax-check` passes
+  - [x] File `roles/desktop/tasks/main.yml` contains `Install essential KDE tools`
+  - [x] File `roles/desktop/tasks/main.yml` contains `Disable Baloo file indexing`
+  - [x] File `roles/desktop/tasks/main.yml` contains `Configure font rendering for RDP`
+  - [x] `ansible-playbook playbooks/main.yml --syntax-check` passes
+
+- [x] 2. Activate Kvantum Style
+  **What to do**:
+  - Update `.xsession` creation task in `roles/desktop/tasks/main.yml`
+  - Add `export QT_STYLE_OVERRIDE=kvantum` before `startplasma-x11`
+  
+  **Reason**: Installing Kvantum is useless if not active.
+
+- [x] 3. Disable Akonadi Server
+  **What to do**:
+  - Add task to configure `~/.config/akonadi/akonadiserverrc`
+  - Set `StartServer=false` in `[QMF]` section (or general)
+  
+  **Reason**: Recommended in kde.md to save RAM.
 
 ---
 
@@ -106,6 +120,6 @@ ansible-playbook playbooks/main.yml --syntax-check
 ```
 
 ### Final Checklist
-- [ ] All requested tools added to package list
-- [ ] Performance tweaks implemented
-- [ ] Playbook structure remains valid
+- [x] All requested tools added to package list
+- [x] Performance tweaks implemented
+- [x] Playbook structure remains valid

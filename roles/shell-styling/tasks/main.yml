@@ -37,6 +37,32 @@
   become: true
   tags: [shell, visual, fastfetch]
 
+- name: Download Starship install script
+  ansible.builtin.get_url:
+    url: https://starship.rs/install.sh
+    dest: /tmp/starship_install.sh
+    mode: '0755'
+  tags: [shell, visual, starship]
+  when: vps_install_starship | default(true)
+
+- name: Install Starship
+  ansible.builtin.shell: /tmp/starship_install.sh -y -b /usr/local/bin
+  args:
+    creates: /usr/local/bin/starship
+  become: true
+  tags: [shell, visual, starship]
+  when: vps_install_starship | default(true)
+
+- name: Deploy Starship configuration
+  ansible.builtin.template:
+    src: starship.toml.j2
+    dest: "/home/{{ vps_username }}/.config/starship.toml"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [shell, visual, starship]
+  when: vps_install_starship | default(true)
+
 - name: Deploy optimized zshrc configuration
   ansible.builtin.template:
     src: zshrc.j2

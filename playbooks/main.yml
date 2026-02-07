@@ -110,6 +110,9 @@
     - role: fonts
       tags: [fonts, visual]
 
+    - role: catppuccin-theme
+      tags: [catppuccin, theme, visual]
+
     - role: terminal
       tags: [terminal, zsh]
 

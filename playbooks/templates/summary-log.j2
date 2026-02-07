@@ -18,7 +18,8 @@
 🖥️ Desktop Environment
 ━━━━━━━━━━━━━━━━━━━━━━━━
   Desktop:   KDE Plasma
-  Theme:     {{ vps_kde_theme | capitalize }}
+  Theme:     {{ vps_theme_variant | default('nordic') | capitalize }}
+  Accent:    {{ vps_theme_accent | default('blue') | capitalize }}
   Icons:     {{ vps_icon_theme }}
   Display:   SDDM
 

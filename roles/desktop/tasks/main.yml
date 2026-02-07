@@ -131,6 +131,7 @@
     repo: https://github.com/EliverLara/Nordic-kde.git
     dest: /tmp/Nordic-kde
     depth: 1
+  when: vps_theme_variant == 'nordic'
   tags: [desktop, theme]
 
 - name: Install Nordic Plasma look-and-feel
@@ -142,6 +143,30 @@
     group: "{{ vps_username }}"
     mode: '0755'
   ignore_errors: true
+  when: vps_theme_variant == 'nordic'
+  tags: [desktop, theme]
+
+- name: Remove stale Catppuccin clone
+  ansible.builtin.file:
+    path: /tmp/catppuccin-kde
+    state: absent
+  tags: [desktop, theme]
+
+- name: Clone Catppuccin KDE theme
+  ansible.builtin.git:
+    repo: https://github.com/catppuccin/kde.git
+    dest: /tmp/catppuccin-kde
+    depth: 1
+  when: vps_theme_variant == 'catppuccin-mocha'
+  tags: [desktop, theme]
+
+- name: Install Catppuccin KDE theme
+  ansible.builtin.shell:
+    cmd: echo "y\nn" | ./install.sh 1 13 1
+    chdir: /tmp/catppuccin-kde
+  become: true
+  become_user: "{{ vps_username }}"
+  when: vps_theme_variant == 'catppuccin-mocha'
   tags: [desktop, theme]
 
 - name: Remove stale Polonium clone (ownership fix)
@@ -227,7 +252,7 @@
   when: not (vps_kde_compositor_enabled | default(false))
   tags: [desktop, kde]
 
-- name: Configure KDE global settings
+- name: Configure KDE global settings (Nordic)
   ansible.builtin.copy:
     dest: "/home/{{ vps_username }}/.config/kdeglobals"
     content: |
@@ -243,6 +268,21 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0644'
+  when: vps_theme_variant == 'nordic'
+  tags: [desktop, kde]
+
+- name: Configure KDE global settings (Catppuccin)
+  ansible.builtin.template:
+    src: ../roles/catppuccin-theme/templates/kdeglobals.j2
+    dest: "/home/{{ vps_username }}/.config/kdeglobals"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  vars:
+    vps_system_font: "JetBrainsMono Nerd Font"
+    vps_icon_theme: "Papirus-Dark"
+    vps_kde_lookandfeel: "Catppuccin-Mocha-Blue"
+  when: vps_theme_variant == 'catppuccin-mocha'
   tags: [desktop, kde]
 
 # =============================================================================
@@ -267,6 +307,12 @@
 - name: Clean up temporary files
   ansible.builtin.file:
     path: /tmp/Nordic
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Clean up Catppuccin temporary files
+  ansible.builtin.file:
+    path: /tmp/catppuccin-kde
     state: absent
   tags: [desktop, cleanup]
 

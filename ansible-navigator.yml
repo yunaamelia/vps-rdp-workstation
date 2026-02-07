@@ -1,40 +1,8 @@
 ---
 ansible-navigator:
-  # Use stdout mode for better TUI integration
-  mode: stdout
-
-  # Playbook artifact settings
-  playbook-artifact:
-    enable: true
-    save-as: "{playbook_dir}/artifacts/{playbook_name}-{ts_utc}.json"
-
-  # Logging configuration
-  logging:
-    level: warning
-    append: false
-    file: /var/log/ansible-navigator.log
-
-  # Execution environment settings (optional, for container-based runs)
+  ansible:
+    config:
+      path: ansible.cfg
   execution-environment:
     enabled: false
-    image: quay.io/ansible/community-ee:latest
-    pull:
-      policy: missing
-
-  # Ansible configuration
-  ansible:
-    config: ansible.cfg
-    cmdline: --forks 10
-
-  # Editor settings for :edit commands
-  editor:
-    command: ${EDITOR:-vi}
-    console: true
-
-  # Color settings
-  color:
-    enable: true
-    osc4: true
-
-  # Time zone for display
-  time-zone: local
+  mode: stdout

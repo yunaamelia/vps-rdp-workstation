@@ -1,0 +1,63 @@
+---
+- name: Ensure theme directories exist
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  loop:
+    - "{{ catppuccin_themes_dir }}"
+    - "{{ catppuccin_icons_dir }}"
+  tags: [catppuccin-theme, directories]
+
+- name: Download Catppuccin GTK theme
+  ansible.builtin.get_url:
+    url: "{{ catppuccin_gtk_url }}"
+    dest: "/tmp/catppuccin-gtk.zip"
+    mode: '0644'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  register: gtk_download
+  tags: [catppuccin-theme, gtk]
+
+- name: Extract Catppuccin GTK theme
+  ansible.builtin.unarchive:
+    src: "/tmp/catppuccin-gtk.zip"
+    dest: "{{ catppuccin_themes_dir }}"
+    remote_src: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    creates: "{{ catppuccin_themes_dir }}/Catppuccin-Mocha-Standard-Blue-Dark"
+  when: not ansible_check_mode
+  tags: [catppuccin-theme, gtk]
+
+- name: Download Catppuccin Cursor theme
+  ansible.builtin.get_url:
+    url: "{{ catppuccin_cursors_url }}"
+    dest: "/tmp/catppuccin-cursors.zip"
+    mode: '0644'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  register: cursor_download
+  tags: [catppuccin-theme, cursors]
+
+- name: Extract Catppuccin Cursor theme
+  ansible.builtin.unarchive:
+    src: "/tmp/catppuccin-cursors.zip"
+    dest: "{{ catppuccin_icons_dir }}"
+    remote_src: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    creates: "{{ catppuccin_icons_dir }}/Catppuccin-Mocha-Blue-Cursors"
+  when: not ansible_check_mode
+  tags: [catppuccin-theme, cursors]
+
+- name: Cleanup temporary files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/tmp/catppuccin-gtk.zip"
+    - "/tmp/catppuccin-cursors.zip"
+  tags: [catppuccin-theme, cleanup]

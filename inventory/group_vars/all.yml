@@ -63,10 +63,17 @@ vps_install_desktop: true
 vps_desktop_environment: "kde-plasma"     # Desktop environment
 
 # Theme Configuration
-vps_kde_theme: "nordic"                   # KDE theme: nordic
+vps_kde_theme: "catppuccin-mocha"         # KDE theme: catppuccin-mocha
 vps_icon_theme: "papirus-dark"            # Icon theme
 vps_kde_compositor_enabled: false         # Disable for RDP performance
 vps_kde_effects_enabled: false            # Disable heavy effects
+
+# Catppuccin Theme Configuration
+vps_theme_variant: "catppuccin-mocha"
+vps_theme_accent: "blue"
+vps_install_starship: true
+vps_terminal_font: "Hack Nerd Font Mono"
+vps_cursor_theme: "catppuccin-mocha-blue-cursors"
 
 # Display Manager
 vps_display_manager: "sddm"

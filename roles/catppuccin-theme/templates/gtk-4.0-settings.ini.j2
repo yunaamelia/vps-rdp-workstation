@@ -1,0 +1,13 @@
+[Settings]
+gtk-application-prefer-dark-theme=true
+gtk-cursor-theme-name={{ vps_cursor_theme | default('catppuccin-mocha-blue-cursors') }}
+gtk-cursor-theme-size=24
+gtk-decoration-layout=icon:minimize,maximize,close
+gtk-enable-animations=false
+gtk-font-name={{ vps_system_font | default('JetBrainsMono Nerd Font') }}, {{ default_font_size | default(10) }}
+gtk-icon-theme-name={{ vps_icon_theme | default('Papirus-Dark') }}
+gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
+gtk-primary-button-warps-slider=true
+gtk-sound-theme-name=ocean
+gtk-theme-name={{ vps_gtk_theme | default('catppuccin-mocha-blue-standard+default') }}
+gtk-xft-dpi=98304

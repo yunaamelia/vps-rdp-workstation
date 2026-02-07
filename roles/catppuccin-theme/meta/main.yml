@@ -1,0 +1,14 @@
+galaxy_info:
+  author: VPS Setup
+  description: Catppuccin theme for GTK and Cursors
+  company: VPS Setup
+  license: MIT
+  min_ansible_version: 2.1
+  platforms:
+    - name: Debian
+      versions:
+        - all
+  galaxy_tags:
+    - system
+    - theme
+dependencies: []

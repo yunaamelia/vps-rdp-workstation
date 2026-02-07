@@ -36,24 +36,24 @@ VPS_USERNAME=developer VPS_SECRETS_FILE=/root/.secrets ./setup.sh --ci
 
 ## 📋 Prerequisites
 
-| Requirement | Specification |
-|-------------|---------------|
-| **OS** | Debian 13 (Trixie) |
-| **Architecture** | x86_64 (amd64) |
-| **RAM** | 4GB minimum, 8GB recommended |
-| **Storage** | 40GB minimum, 60GB recommended |
-| **Access** | Root or sudo privileges |
+| Requirement      | Specification                  |
+| ---------------- | ------------------------------ |
+| **OS**           | Debian 13 (Trixie)             |
+| **Architecture** | x86_64 (amd64)                 |
+| **RAM**          | 4GB minimum, 8GB recommended   |
+| **Storage**      | 40GB minimum, 60GB recommended |
+| **Access**       | Root or sudo privileges        |
 
 ## 🔧 Configuration
 
 ### Environment Variables
 
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `VPS_USERNAME` | ✅ | - | Primary workstation username |
-| `VPS_SECRETS_FILE` | ⚪ | - | Path to password file (0600) |
-| `VPS_TIMEZONE` | ⚪ | UTC | System timezone |
-| `VPS_HOSTNAME` | ⚪ | dev-workstation | System hostname |
+| Variable           | Required | Default         | Description                  |
+| ------------------ | -------- | --------------- | ---------------------------- |
+| `VPS_USERNAME`     | ✅       | -               | Primary workstation username |
+| `VPS_SECRETS_FILE` | ⚪       | -               | Path to password file (0600) |
+| `VPS_TIMEZONE`     | ⚪       | UTC             | System timezone              |
+| `VPS_HOSTNAME`     | ⚪       | dev-workstation | System hostname              |
 
 ### Secrets File Format
 
@@ -66,38 +66,44 @@ chmod 600 ~/.secrets
 ## 🏗️ What Gets Installed
 
 ### Desktop Environment
+
 - KDE Plasma Desktop with Nordic theme
-- Polonium tiling extension for KWin *(archived upstream, final stable version)*
+- Polonium tiling extension for KWin _(archived upstream, final stable version)_
 - XRDP for Windows Remote Desktop access
 - SDDM display manager
 - Papirus icon theme
 - Firefox ESR
 
 ### Development Stack
+
 - **Node.js 20 LTS** with npm, yarn, pnpm, TypeScript
 - **Python 3.12** with pipx, black, pytest, poetry
 - **PHP** with Composer and common extensions
 - **Docker** with Compose V2 and BuildKit
 
 ### Code Editors
+
 - Visual Studio Code with 10+ extensions
 - OpenCode AI agent
 
 ### Terminal Environment
+
 - Zsh with Oh My Zsh
 - Agnoster theme with JetBrains Mono Nerd Font
 - 7 external plugins: autosuggestions, syntax-highlighting, fzf-tab, forgit
 - Zoxide for smart directory jumping
+- **Starship Prompt** with AI-assisted optimization ([guide](docs/STARSHIP_OPTIMIZATION.md))
 
 ### Developer Tools
-| Category | Tools |
-|----------|-------|
-| **TUI** | lazygit, tig, ranger, mc |
-| **Network** | nmap, mtr, iftop, httpie |
-| **Performance** | btop, dstat, ncdu, inxi |
-| **Text** | ripgrep, fd, jq, yq, pandoc |
-| **Quality** | shellcheck, hadolint, yamllint |
-| **AI** | aider, shell-gpt |
+
+| Category        | Tools                          |
+| --------------- | ------------------------------ |
+| **TUI**         | lazygit, tig, ranger, mc       |
+| **Network**     | nmap, mtr, iftop, httpie       |
+| **Performance** | btop, dstat, ncdu, inxi        |
+| **Text**        | ripgrep, fd, jq, yq, pandoc    |
+| **Quality**     | shellcheck, hadolint, yamllint |
+| **AI**          | aider, shell-gpt               |
 
 ## 🔐 Security Features
 
@@ -139,11 +145,13 @@ vps-rdp-workstation/
 ## 🛠️ Development Setup
 
 1.  **Install Python Dependencies:**
+
     ```bash
     pip install pre-commit ansible-core
     ```
 
 2.  **Install Ansible Collections:**
+
     ```bash
     ansible-galaxy collection install -r requirements.yml
     ```
@@ -181,12 +189,12 @@ VPS_USERNAME=developer VPS_SECRETS_FILE=/root/.secrets ./setup.sh --ci
 
 ## 📝 Logs
 
-| Log File | Purpose |
-|----------|---------|
-| `/var/log/vps-setup.log` | Full detailed installation log |
-| `/var/log/vps-setup-error.log` | Errors and warnings only |
-| `/var/log/vps-setup-summary.log` | Beautiful summary report |
-| `/var/log/ara-database.sqlite` | ARA run history database |
+| Log File                         | Purpose                        |
+| -------------------------------- | ------------------------------ |
+| `/var/log/vps-setup.log`         | Full detailed installation log |
+| `/var/log/vps-setup-error.log`   | Errors and warnings only       |
+| `/var/log/vps-setup-summary.log` | Beautiful summary report       |
+| `/var/log/ara-database.sqlite`   | ARA run history database       |
 
 ## 📊 Analysis & Visualization
 

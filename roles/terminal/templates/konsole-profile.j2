@@ -1,6 +1,6 @@
 [Appearance]
-ColorScheme=Nordic
-Font=JetBrainsMono Nerd Font,{{ default_font_size }},-1,5,50,0,0,0,0,0
+ColorScheme={{ vps_konsole_colorscheme | default('catppuccin-mocha') }}
+Font={{ vps_terminal_font | default('Hack Nerd Font Mono') }},{{ default_font_size }},-1,5,50,0,0,0,0,0
 
 [General]
 Name=Nordic

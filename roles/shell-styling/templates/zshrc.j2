@@ -143,6 +143,12 @@ fi
 
 (( $+commands[atuin] )) && eval "$(atuin init zsh --disable-up-arrow)"
 
+{% if vps_install_starship | default(true) %}
+if (( $+commands[starship] )); then
+  eval "$(starship init zsh)"
+fi
+{% endif %}
+
 if (( $+commands[thefuck] )); then
   fuck() {
     unset -f fuck

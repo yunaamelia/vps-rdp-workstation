@@ -238,7 +238,7 @@
           ╠══════════════════════════════════════════════════════════╣
           ║  RDP Server: {{ ansible_default_ipv4.address | default('localhost') }}:3389
           ║  Username:   {{ vps_username }}
-          ║  Theme:      Nordic Dark
+          ║  Theme:      {{ vps_theme_variant | default('nordic') | capitalize }}
           ╠══════════════════════════════════════════════════════════╣
           ║  Connect using Windows Remote Desktop (mstsc.exe)        ║
           ╚══════════════════════════════════════════════════════════╝

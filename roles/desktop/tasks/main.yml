@@ -166,7 +166,7 @@
     chdir: /tmp/catppuccin-kde
   become: true
   become_user: "{{ vps_username }}"
-  when: vps_theme_variant == 'catppuccin-mocha'
+  when: vps_theme_variant == 'catppuccin-mocha' and not ansible_check_mode
   tags: [desktop, theme]
 
 - name: Remove stale Polonium clone (ownership fix)

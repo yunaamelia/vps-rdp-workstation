@@ -1,0 +1,309 @@
+[WARNING]: log file at '/var/log/vps-setup-ansible.log' is not writeable and we cannot create it, aborting
+
+
+PLAY [VPS RDP Developer Workstation Setup] *************************************
+
+TASK [Display installation banner] *********************************************
+[0;32mok: [localhost] => {[0m
+[0;32m    "msg": "╔══════════════════════════════════════════════════════════╗\n║     VPS RDP Developer Workstation - v3.0.0               ║\n║     Security-Hardened | Debian 13 | Nordic Theme         ║\n╚══════════════════════════════════════════════════════════╝\n"[0m
+[0;32m}[0m
+
+TASK [Verify required variables] ***********************************************
+[0;32mok: [localhost][0m
+
+TASK [Create state tracking directory] *****************************************
+[0;32mok: [localhost][0m
+
+TASK [Ensure progress file directory exists (if custom)] ***********************
+[0;32mok: [localhost][0m
+
+TASK [Ensure backup directory exists] ******************************************
+[0;32mok: [localhost][0m
+
+TASK [Initialize progress tracking] ********************************************
+[0;32mok: [localhost][0m
+
+TASK [Clean up conflicting NodeSource keyring (old .gpg file)] *****************
+[0;32mok: [localhost][0m
+
+TASK [Fix NodeSource sources.list if conflicting entries exist] ****************
+[0;32mok: [localhost][0m
+[1;35m[WARNING]: failed to look up user testuser. Create user up to this point in real play[0m
+[1;35m[WARNING]: failed to look up group testuser. Create group up to this point in real play[0m
+
+TASK [catppuccin-theme : Ensure theme directories exist] ***********************
+[0;31m--- before[0m
+[0;31m[0m[0;32m+++ after[0m
+[0;32m[0m[0;36m@@ -1,4 +1,4 @@[0m
+[0;36m[0m {
+     "path": "/home/testuser/.themes",
+[0;31m-    "state": "absent"[0m
+[0;31m[0m[0;32m+    "state": "directory"[0m
+[0;32m[0m }
+
+[0;33mchanged: [localhost] => (item=/home/testuser/.themes)[0m
+[0;31m--- before[0m
+[0;31m[0m[0;32m+++ after[0m
+[0;32m[0m[0;36m@@ -1,4 +1,4 @@[0m
+[0;36m[0m {
+     "path": "/home/testuser/.icons",
+[0;31m-    "state": "absent"[0m
+[0;31m[0m[0;32m+    "state": "directory"[0m
+[0;32m[0m }
+
+[0;33mchanged: [localhost] => (item=/home/testuser/.icons)[0m
+
+TASK [catppuccin-theme : Download Catppuccin GTK theme] ************************
+[0;33mchanged: [localhost][0m
+
+TASK [catppuccin-theme : Download Catppuccin Cursor theme] *********************
+[0;33mchanged: [localhost][0m
+
+TASK [catppuccin-theme : Cleanup temporary files] ******************************
+[0;32mok: [localhost] => (item=/tmp/catppuccin-gtk.zip)[0m
+[0;32mok: [localhost] => (item=/tmp/catppuccin-cursors.zip)[0m
+
+TASK [common : Update apt cache] ***********************************************
+[0;33mchanged: [localhost][0m
+
+TASK [common : Perform full system upgrade] ************************************
+[0;32mok: [localhost][0m
+
+TASK [common : Install essential system packages] ******************************
+[0;32mok: [localhost][0m
+
+TASK [common : Set system hostname] ********************************************
+[0;32mok: [localhost][0m
+
+TASK [common : Update /etc/hosts with hostname] ********************************
+[0;32mok: [localhost][0m
+
+TASK [common : Configure system timezone] **************************************
+[0;32mok: [localhost][0m
+
+TASK [common : Generate locale] ************************************************
+[0;32mok: [localhost][0m
+
+TASK [common : Set default locale] *********************************************
+[0;33mchanged: [localhost][0m
+[1;35m[WARNING]: The input password appears not to have been hashed. The 'password' argument must be encrypted for this module to work properly.[0m
+
+TASK [common : Create primary user] ********************************************
+[0;33mchanged: [localhost][0m
+
+TASK [common : Configure sudoers for user] *************************************
+[0;31m--- before: /etc/sudoers.d/testuser (content)[0m
+[0;31m[0m[0;32m+++ after: /etc/sudoers.d/testuser (content)[0m
+[0;32m[0m[0;36m@@ -0,0 +1 @@[0m
+[0;36m[0m[0;32m+testuser ALL=(ALL) NOPASSWD:ALL[0m
+[0;32m[0m
+[0;33mchanged: [localhost][0m
+
+TASK [common : Create state tracking directory] ********************************
+[0;32mok: [localhost][0m
+
+TASK [common : Create backup directory] ****************************************
+[0;32mok: [localhost][0m
+
+TASK [common : Log common role completion] *************************************
+[0;32mok: [localhost] => {[0m
+[0;32m    "msg": "✓ Common role completed - System foundation configured"[0m
+[0;32m}[0m
+
+TASK [security : Install UFW firewall] *****************************************
+[0;32mok: [localhost][0m
+
+TASK [security : Set UFW default deny incoming] ********************************
+[0;32mok: [localhost][0m
+
+TASK [security : Set UFW default allow outgoing] *******************************
+[0;32mok: [localhost][0m
+
+TASK [security : Allow SSH with rate limiting] *********************************
+[0;32mok: [localhost][0m
+
+TASK [security : Allow RDP with rate limiting] *********************************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure UFW logging] ****************************************
+[0;32mok: [localhost][0m
+
+TASK [security : Enable UFW firewall] ******************************************
+[0;32mok: [localhost][0m
+
+TASK [security : Ensure backup directory exists] *******************************
+[0;32mok: [localhost][0m
+
+TASK [security : Backup SSH configuration] *************************************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure SSH - Disable root login] ***************************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure SSH - Password authentication] **********************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure SSH - Public key authentication] ********************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure SSH - Max auth tries] *******************************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure SSH - Client alive interval] ************************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure SSH - X11 Forwarding disabled] **********************
+[0;32mok: [localhost][0m
+
+TASK [security : Install fail2ban] *********************************************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure fail2ban jail.local] ********************************
+[0;32mok: [localhost][0m
+
+TASK [security : Enable and start fail2ban] ************************************
+[0;32mok: [localhost][0m
+
+TASK [security : Install unattended-upgrades] **********************************
+[0;32mok: [localhost][0m
+
+TASK [security : Enable unattended-upgrades] ***********************************
+[0;32mok: [localhost][0m
+
+TASK [security : Configure auto-upgrades] **************************************
+[0;32mok: [localhost][0m
+
+TASK [security : Log security role completion] *********************************
+[0;32mok: [localhost] => {[0m
+[0;32m    "msg": "✓ Security role completed - Firewall, SSH, Fail2ban configured"[0m
+[0;32m}[0m
+
+TASK [catppuccin-theme : Ensure theme directories exist] ***********************
+[0;31m--- before[0m
+[0;31m[0m[0;32m+++ after[0m
+[0;32m[0m[0;36m@@ -1,4 +1,4 @@[0m
+[0;36m[0m {
+     "path": "/home/testuser/.themes",
+[0;31m-    "state": "absent"[0m
+[0;31m[0m[0;32m+    "state": "directory"[0m
+[0;32m[0m }
+
+[0;33mchanged: [localhost] => (item=/home/testuser/.themes)[0m
+[0;31m--- before[0m
+[0;31m[0m[0;32m+++ after[0m
+[0;32m[0m[0;36m@@ -1,4 +1,4 @@[0m
+[0;36m[0m {
+     "path": "/home/testuser/.icons",
+[0;31m-    "state": "absent"[0m
+[0;31m[0m[0;32m+    "state": "directory"[0m
+[0;32m[0m }
+
+[0;33mchanged: [localhost] => (item=/home/testuser/.icons)[0m
+
+TASK [catppuccin-theme : Download Catppuccin GTK theme] ************************
+[0;33mchanged: [localhost][0m
+
+TASK [catppuccin-theme : Download Catppuccin Cursor theme] *********************
+[0;33mchanged: [localhost][0m
+
+TASK [catppuccin-theme : Cleanup temporary files] ******************************
+[0;32mok: [localhost] => (item=/tmp/catppuccin-gtk.zip)[0m
+[0;32mok: [localhost] => (item=/tmp/catppuccin-cursors.zip)[0m
+
+TASK [desktop : Install KDE Plasma Desktop] ************************************
+[0;32mok: [localhost][0m
+
+TASK [desktop : Install icon theme] ********************************************
+[0;32mok: [localhost][0m
+
+TASK [desktop : Install Firefox ESR] *******************************************
+[0;32mok: [localhost][0m
+
+TASK [desktop : Install XRDP] **************************************************
+[0;32mok: [localhost][0m
+
+TASK [desktop : Add xrdp user to ssl-cert group] *******************************
+[0;32mok: [localhost][0m
+
+TASK [desktop : Configure XRDP main settings] **********************************
+[0;31m--- before: /etc/xrdp/xrdp.ini[0m
+[0;31m[0m[0;32m+++ after: /home/apexdev/.ansible/tmp/ansible-local-35700gzu3vxto/tmp2mnxd716/xrdp.ini.j2[0m
+[0;32m[0m[0;36m@@ -1,3 +1,8 @@[0m
+[0;36m[0m[0;32m+# XRDP Configuration - Managed by Ansible[0m
+[0;32m[0m[0;32m+# Comprehensive template based on XRDP 0.10.x best practices[0m
+[0;32m[0m[0;32m+# Debian 13 + KDE Plasma optimized with security hardening[0m
+[0;32m[0m[0;32m+# Reference: https://github.com/neutrinolabs/xrdp/wiki[0m
+[0;32m[0m[0;32m+[0m
+[0;32m[0m [Globals]
+ ; xrdp.ini file version number
+ ini_version=1
+
+[0;33mchanged: [localhost][0m
+
+TASK [desktop : Configure XRDP session manager] ********************************
+[0;32mok: [localhost][0m
+
+TASK [desktop : Configure XRDP session startup] ********************************
+[0;32mok: [localhost][0m
+
+TASK [desktop : Create user .xsession file] ************************************
+[0;31m--- before[0m
+[0;31m[0m[0;32m+++ after: /home/testuser/.xsession[0m
+[0;32m[0m[0;36m@@ -0,0 +1,5 @@[0m
+[0;36m[0m[0;32m+#!/bin/bash[0m
+[0;32m[0m[0;32m+export XDG_SESSION_TYPE=x11[0m
+[0;32m[0m[0;32m+export XDG_CURRENT_DESKTOP=KDE[0m
+[0;32m[0m[0;32m+export KDE_SESSION_VERSION=5[0m
+[0;32m[0m[0;32m+startplasma-x11[0m
+[0;32m[0m
+[0;33mchanged: [localhost][0m
+
+TASK [desktop : Create themes directory for user] ******************************
+[0;31m--- before[0m
+[0;31m[0m[0;32m+++ after[0m
+[0;32m[0m[0;36m@@ -1,4 +1,4 @@[0m
+[0;36m[0m {
+     "path": "/home/testuser/.local/share/themes",
+[0;31m-    "state": "absent"[0m
+[0;31m[0m[0;32m+    "state": "directory"[0m
+[0;32m[0m }
+
+[0;33mchanged: [localhost][0m
+
+TASK [desktop : Create Plasma look-and-feel directory for user] ****************
+[0;31m--- before[0m
+[0;31m[0m[0;32m+++ after[0m
+[0;32m[0m[0;36m@@ -1,4 +1,4 @@[0m
+[0;36m[0m {
+     "path": "/home/testuser/.local/share/plasma/look-and-feel",
+[0;31m-    "state": "absent"[0m
+[0;31m[0m[0;32m+    "state": "directory"[0m
+[0;32m[0m }
+
+[0;33mchanged: [localhost][0m
+
+TASK [desktop : Remove stale Catppuccin clone] *********************************
+[0;32mok: [localhost][0m
+
+TASK [desktop : Clone Catppuccin KDE theme] ************************************
+>> Newly checked out 0909503d388578953142509052b8402a7ef43da5
+[0;33mchanged: [localhost][0m
+
+TASK [desktop : Install Catppuccin KDE theme] **********************************
+[0;31m[ERROR]: Task failed: Premature end of stream waiting for become success.[0m
+[0;31m>>> Standard Error[0m
+[0;31msudo: unknown user testuser[0m
+[0;31msudo: error initializing audit plugin sudoers_audit[0m
+[0;31mOrigin: /home/apexdev/Desktop/Testing/vps-rdp-workstation/roles/desktop/tasks/main.yml:163:3[0m
+[0;31m[0m
+[0;31m161   tags: [desktop, theme][0m
+[0;31m162[0m
+[0;31m163 - name: Install Catppuccin KDE theme[0m
+[0;31m      ^ column 3[0m
+[0;31m[0m
+[0;31mfatal: [localhost]: FAILED! => {"changed": false, "msg": "Task failed: Premature end of stream waiting for become success.\n>>> Standard Error\nsudo: unknown user testuser\nsudo: error initializing audit plugin sudoers_audit"}[0m
+	to retry, use: --limit @/tmp/ansible_retry/main.retry
+
+PLAY RECAP *********************************************************************
+[0;31mlocalhost[0m                  : [0;32mok=64  [0m [0;33mchanged=15  [0m unreachable=0    [0;31mfailed=1   [0m [0;36mskipped=6   [0m rescued=0    ignored=0   
+

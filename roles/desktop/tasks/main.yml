@@ -307,6 +307,31 @@
     state: present
   tags: [desktop, tools]
 
+- name: Create Kvantum config directory
+  ansible.builtin.file:
+    path: '/home/{{ vps_username }}/.config/Kvantum'
+    state: directory
+    owner: '{{ vps_username }}'
+    group: '{{ vps_username }}'
+    mode: '0755'
+    recursive: true
+  tags: [desktop, theme]
+
+- name: Set Kvantum theme
+  community.general.ini_file:
+    path: '/home/{{ vps_username }}/.config/Kvantum/kvantum.kvconfig'
+    section: General
+    option: theme
+    value: "{{ 'Nordic' if vps_theme_variant == 'nordic' else 'Catppuccin-Mocha-Blue' }}"
+    create: true
+    owner: '{{ vps_username }}'
+    group: '{{ vps_username }}'
+    mode: '0644'
+  when: vps_theme_variant in ['nordic', 'catppuccin-mocha']
+  tags: [desktop, theme]
+
+# Plasma containment IDs vary per user/session; avoid pre-seeding wallpaper config here.
+
 - name: Create KWin scripts directory
   ansible.builtin.file:
     path: "/home/{{ vps_username }}/.local/share/kwin/scripts"

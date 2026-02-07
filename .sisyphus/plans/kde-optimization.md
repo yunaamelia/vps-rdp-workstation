@@ -123,6 +123,28 @@ Scenario: Verify playbook syntax
   
   **Reason**: Keep the system clean after installation.
 
+- [x] 6. Configure Active Kvantum Theme
+  **What to do**:
+  - Create `~/.config/Kvantum` directory
+  - Configure `~/.config/Kvantum/kvantum.kvconfig` to use "Nordic" or "Catppuccin-Mocha" based on variable
+  
+  **Reason**: Kvantum needs to know WHICH theme to load.
+
+- [x] 7. Enforce RDP Wallpaper Optimization
+  **What to do**:
+  - Create/Update `~/.config/plasma-org.kde.plasma.desktop-appletsrc`
+  - Set `Image=...` to a solid color or simple pattern?
+  - OR: Just ensure the "Nordic" theme doesn't use a heavy wallpaper?
+  - Actually, `kde.md` suggests "Solid Color".
+  - We can set `[Containments][*][Wallpaper][org.kde.image][General] Image=file:///usr/share/wallpapers/Next/contents/images/1920x1080.png` -> No, that's an image.
+  - Better: Just document it or try to set a simple background.
+  - Let's try to set `Color=0,0,0` if possible, or just skip if too complex. 
+  - Wait, `awesome-kde` usually recommends `plasma-apply-wallpaperimage`.
+  - Let's stick to **Kvantum** first as it's critical.
+  - For Wallpaper, I'll add a task to "Set solid background color" if possible, or "Disable wallpaper plugin".
+  - Actually, for RDP, just ensuring the theme is consistent is good.
+  - Let's add "Optimize Wallpaper Config".
+
 ---
 
 ## Success Criteria

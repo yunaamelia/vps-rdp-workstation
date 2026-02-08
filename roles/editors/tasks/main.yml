@@ -71,6 +71,39 @@
   ignore_errors: true
   tags: [editors, opencode]
 
+- name: Get OpenCode binary path
+  ansible.builtin.command: which opencode-ai
+  register: opencode_bin
+  changed_when: false
+  failed_when: false
+  when: install_opencode
+  tags: [editors, opencode]
+
+- name: Ensure VS Code User directory exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/Code/User"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  when: install_vscode
+  tags: [editors, vscode]
+
+- name: Configure VS Code settings
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.config/Code/User/settings.json"
+    content: |
+      {
+          "opencode.serverPath": "{{ opencode_bin.stdout | default('/usr/local/bin/opencode-ai') }}",
+          "workbench.colorTheme": "Material Theme",
+          "workbench.iconTheme": "material-icon-theme"
+      }
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: install_vscode
+  tags: [editors, vscode, opencode]
+
 # =============================================================================
 #  Antigravity (Placeholder - user provides binary)
 # =============================================================================

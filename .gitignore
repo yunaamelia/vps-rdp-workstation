@@ -69,3 +69,7 @@ build/
 *.tmp
 *.temp
 .cache/
+
+# Local tool state
+.opencode/
+.sisyphus/drafts/

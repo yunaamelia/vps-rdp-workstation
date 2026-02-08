@@ -13,6 +13,8 @@
       - pkg-config
       - ltrace
       - binutils
+      - kcachegrind
+      - heaptrack
     state: present
   tags: [tools, debugging]
 

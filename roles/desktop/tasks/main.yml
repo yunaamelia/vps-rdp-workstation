@@ -1,6 +1,9 @@
 # Desktop Role - KDE Plasma + XRDP + Nordic Theme
 # Full desktop environment for RDP access
 ---
+- name: Detect Plasma tooling
+  ansible.builtin.import_tasks: 'detect_plasma.yml'
+
 # =============================================================================
 #  KDE Plasma Desktop Installation
 # =============================================================================
@@ -9,6 +12,7 @@
   ansible.builtin.apt:
     name:
       - kde-plasma-desktop
+      - kde-spectacle
       - sddm
       - plasma-workspace
       - konsole
@@ -170,59 +174,7 @@
   when: vps_theme_variant == 'catppuccin-mocha' and not ansible_check_mode
   tags: [desktop, theme]
 
-- name: Remove stale Polonium clone (ownership fix)
-  ansible.builtin.file:
-    path: /tmp/polonium
-    state: absent
-  tags: [desktop, tiling]
-
-- name: Clone Polonium tiling extension
-  ansible.builtin.git:
-    repo: https://github.com/zeroxoneafour/polonium.git
-    dest: /tmp/polonium
-    depth: 1
-  become: true
-  tags: [desktop, tiling]
-
-- name: Fix Polonium clone ownership
-  ansible.builtin.file:
-    path: /tmp/polonium
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    recurse: true
-  become: true
-  tags: [desktop, tiling]
-
-- name: Fix npm cache ownership for user
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.npm"
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    recurse: true
-    state: directory
-  become: true
-  tags: [desktop, tiling]
-
-- name: Build and install Polonium tiling extension
-  ansible.builtin.shell:
-    cmd: |
-      cd /tmp/polonium
-      rm -rf /home/{{ vps_username }}/.local/share/kwin/scripts/polonium
-      sudo -u {{ vps_username }} make
-  become: true
-  ignore_errors: true
-  tags: [desktop, tiling]
-
-- name: Enable Polonium in KWin
-  community.general.ini_file:
-    path: "/home/{{ vps_username }}/.config/kwinrc"
-    section: Plugins
-    option: poloniumEnabled
-    value: "true"
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  tags: [desktop, tiling]
+# (Polonium removed in favor of Karousel)
 
 # =============================================================================
 #  KDE Configuration for RDP Performance
@@ -293,6 +245,9 @@
 - name: Install essential KDE tools
   ansible.builtin.apt:
     name:
+      - python3-pip
+      - pipx
+      - python3-venv
       - yakuake
       - qt5-style-kvantum
       - qt6-style-kvantum
@@ -303,7 +258,14 @@
       - smb4k
       - sweeper
       - kwalletmanager
-      - kpackagetool5
+      - dolphin-plugins
+      - kcalc
+      - kdeconnect
+      - ffmpegthumbs
+      - kdegraphics-thumbnailers
+      - svgpart
+      - markdownpart
+      # kpackagetool5 is replaced by dynamic detection variable
     state: present
   tags: [desktop, tools]
 
@@ -350,7 +312,7 @@
 
 - name: Install Karousel
   ansible.builtin.shell:
-    cmd: kpackagetool5 -t KWin/Script -i .
+    cmd: "{{ plasma_tool_cmd }} -t KWin/Script -i ."
     chdir: /tmp/karousel
   become: true
   become_user: "{{ vps_username }}"
@@ -366,7 +328,7 @@
 
 - name: Install Window Title Applet
   ansible.builtin.shell:
-    cmd: kpackagetool5 -t Plasma/Applet -i .
+    cmd: "{{ plasma_tool_cmd }} -t Plasma/Applet -i ."
     chdir: /tmp/window-title
   become: true
   become_user: "{{ vps_username }}"
@@ -507,6 +469,10 @@
     path: /tmp/window-title
     state: absent
   tags: [desktop, cleanup]
+
+- name: Run desktop optimizations
+  ansible.builtin.include_tasks: optimizations.yml
+  tags: [desktop, optimization]
 
 - name: Log desktop role completion
   ansible.builtin.debug:

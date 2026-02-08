@@ -1,149 +1,168 @@
-# KDE Optimization Plan
+# KDE Desktop Optimization Plan
 
 ## TL;DR
 
-> **Quick Summary**: Implement high-impact tools and performance optimizations for KDE Plasma over RDP, including Kvantum, Yakuake, Karousel, and font rendering fixes.
-> 
+> **Quick Summary**: Enhance the KDE Plasma desktop experience on Debian 13 with expert UI/UX optimizations, performance tuning, and workflow tools.
+>
 > **Deliverables**:
-> - Updated `roles/desktop/tasks/main.yml` with new tasks
-> - Installed tools: Yakuake, Kvantum, Kompare, Filelight, KRDC, Smb4K
-> - Installed KWin scripts: Karousel, Window Title Applet
-> - Configured performance: Disabled Baloo, optimized fonts, zero animations
-> 
-> **Estimated Effort**: Short
-> **Parallel Execution**: NO - sequential Ansible task editing
-> **Critical Path**: Edit playbook -> Run playbook
+> - Optimized `roles/desktop` with new packages (`yakuake`, `dolphin-plugins`, `kcalc`, etc.)
+> - New `optimizations.yml` task file for advanced configurations
+> - Polonium Tiling Window Manager installation
+> - Konsave configuration manager installation via pipx
+> - Performance tuning (Baloo disabled, Dolphin previews enabled)
+>
+> **Estimated Effort**: Medium
+> **Parallel Execution**: YES (Wave 1: Packages & Pipx setup; Wave 2: Polonium & Konsave; Wave 3: Configs)
+> **Critical Path**: Install Pipx → Install Konsave
 
 ---
 
 ## Context
 
 ### Original Request
-Analyze `awesome-kde` and implement recommendations for a VPS RDP workstation.
+Implement expert-level KDE optimizations including visual refinements, performance tuning, and workflow enhancements based on the "awesome-kde" list.
 
-### Research Findings
-- **UI/UX**: Kvantum needed for uniform styling. Yakuake for quick terminal.
-- **RDP Performance**: Disable Baloo (IO bottleneck), force grayscale fonts (compression artifacts), zero animations (bandwidth).
-- **Productivity**: Karousel for tiling, Window Title for panel context.
+### Metis Review & Analysis
+**Key Constraints Identified**:
+- **Execution Order**: `desktop` role runs *before* `development`. Installing `konsave` via pip requires `python3-pip` and `pipx` to be installed *within* the `desktop` role first.
+- **PEP 668**: Debian 13 restricts system-wide pip. `pipx` is the compliant solution.
+- **Polonium**: Not in Debian repos. Must install via `get_url` (GitHub Releases) + `kpackagetool6`.
+- **Config**: Use `community.general.ini_file` for robust config management (`baloofilerc`, `dolphinrc`).
 
 ---
 
 ## Work Objectives
 
 ### Core Objective
-Enhance the KDE Plasma experience on RDP by adding missing power-user tools and applying protocol-specific performance tunings.
+Transform the basic KDE setup into a power-user workstation with tiling, instant terminal access, and optimized file management.
 
 ### Concrete Deliverables
-- Modified `roles/desktop/tasks/main.yml`
+- Modified `roles/desktop/tasks/main.yml`: Added packages and include for optimizations.
+- New `roles/desktop/tasks/optimizations.yml`: Tasks for Polonium, Konsave, and Configs.
+- Configured `~/.config/baloofilerc`: File search disabled.
+- Configured `~/.config/dolphinrc`: Previews enabled.
 
 ### Definition of Done
-- [ ] Ansible playbook syntax check passes
-- [ ] Role contains all new tasks (tools, tiling, performance)
+- [x] `konsave --version` returns version number
+- [x] `kpackagetool6 --list-packages` shows Polonium
+- [x] `yakuake`, `kcalc`, `spectacle` are present in `dpkg -l`
+- [x] `baloofilerc` contains `Indexing-Enabled=false`
 
 ### Must Have
-- Idempotent tasks (use `creates` or `changed_when` where appropriate)
-- Correct user permissions (`become_user: {{ vps_username }}`)
-- Error handling for KPackage installation
+- **Idempotency**: All tasks must be safe to run multiple times.
+- **User Context**: All user-level changes (pipx, kpackagetool) must run as `{{ vps_username }}`.
+- **Dependency Safety**: Ensure `pipx` is installed before using it.
 
 ### Must NOT Have
-- Broken indentation in YAML
-- Hardcoded usernames
+- **System Pip**: Do not use `pip install` with sudo or `--break-system-packages`.
+- **Manual Steps**: No requirement for user to manually configure settings.
 
 ---
 
 ## Verification Strategy
 
-### Automated Tests
-- **Syntax Check**: `ansible-playbook playbooks/main.yml --syntax-check`
-- **Lint**: `ansible-lint roles/desktop/tasks/main.yml`
+### Test Decision
+- **Infrastructure exists**: NO (Ansible project, not app code)
+- **Automated tests**: Agent-Executed QA Scenarios ONLY.
+- **Framework**: N/A
 
-### Agent-Executed QA Scenarios
+### Agent-Executed QA Scenarios (MANDATORY)
 
-```
-Scenario: Verify playbook syntax
-  Tool: interactive_bash (tmux)
-  Preconditions: Repo checked out
-  Steps:
-    1. Run: ansible-playbook playbooks/main.yml --syntax-check
-    2. Assert: Output contains "No errors found" or exit code 0
-  Expected Result: Valid YAML syntax
-  Evidence: Terminal output
-```
+#### Scenario 1: Verify Package Installation
+- **Tool**: Bash
+- **Steps**:
+  1. Run `dpkg -l | grep -E "yakuake|dolphin-plugins|ffmpegthumbs|kcalc|spectacle"`
+  2. Assert output contains all package names
+  3. Run `dpkg -l | grep python3-pipx`
+  4. Assert output contains `python3-pipx`
+- **Evidence**: `dpkg_check.txt`
+
+#### Scenario 2: Verify Konsave Installation
+- **Tool**: interactive_bash (tmux)
+- **Steps**:
+  1. `tmux new-session: su - {{ vps_username }}`
+  2. Send keys: `pipx list`
+  3. Assert output contains `package konsave`
+  4. Send keys: `konsave --version`
+  5. Assert output matches version pattern
+- **Evidence**: `konsave_check.txt`
+
+#### Scenario 3: Verify Polonium Installation
+- **Tool**: interactive_bash (tmux)
+- **Steps**:
+  1. `tmux new-session: su - {{ vps_username }}`
+  2. Send keys: `kpackagetool6 --list-packages --type KWin/Script`
+  3. Assert output contains `polonium`
+- **Evidence**: `polonium_check.txt`
+
+#### Scenario 4: Verify Configuration (Baloo & Dolphin)
+- **Tool**: Bash
+- **Steps**:
+  1. `cat /home/{{ vps_username }}/.config/baloofilerc`
+  2. Assert file contains `Indexing-Enabled=false`
+  3. `cat /home/{{ vps_username }}/.config/dolphinrc`
+  4. Assert file contains `[PreviewSettings]` section (or specific keys enabled)
+- **Evidence**: `config_check.txt`
+
+---
+
+## Execution Strategy
+
+### Parallel Execution Waves
+**Wave 1**:
+- Task 1: Update main package list (adds deps for Wave 2)
+
+**Wave 2**:
+- Task 2: Create optimizations.yml (logic)
+- Task 3: Include optimizations in main.yml
+
+**Wave 3**:
+- Task 4: Run Playbook & Verify
+
+### Agent Dispatch Summary
+- **Tasks 1-3**: `task(category="quick", load_skills=["ansible-expert", "bash-pro"])`
+- **Task 4**: `task(category="quick", load_skills=["ansible-expert"])`
 
 ---
 
 ## TODOs
 
-- [x] 1. Update Desktop Role with Tools and Optimizations
-
+- [x] 1. Update `roles/desktop/tasks/main.yml` Package List
   **What to do**:
-  - Edit `roles/desktop/tasks/main.yml`
-  - Insert "Power User Tools" block (apt install)
-  - Insert "KWin Scripts" block (Karousel, Window Title)
-  - Insert "Performance" block (Baloo, Fonts, Animation)
-  
-  **References**:
-  - `kde.md`: Source of recommended configurations
-  - `roles/desktop/tasks/main.yml`: Target file
+  - Add `python3-pip`, `pipx`, `python3-venv` (vital for pipx) to the `apt` task.
+  - Add GUI tools: `yakuake`, `dolphin-plugins`, `sweeper`, `filelight`, `kcalc`, `spectacle`, `kdeconnect`.
+  - Add visual tools: `ffmpegthumbs`, `kdegraphics-thumbnailers`, `svgpart`, `markdownpart`.
+  - **Dependencies**: None.
+  - **Parallel**: Wave 1.
 
-  **Recommended Agent Profile**:
-  - **Category**: `quick`
-  - **Skills**: [`ansible-expert`]
-
-  **Acceptance Criteria**:
-  - [x] File `roles/desktop/tasks/main.yml` contains `Install essential KDE tools`
-  - [x] File `roles/desktop/tasks/main.yml` contains `Disable Baloo file indexing`
-  - [x] File `roles/desktop/tasks/main.yml` contains `Configure font rendering for RDP`
-  - [x] `ansible-playbook playbooks/main.yml --syntax-check` passes
-
-- [x] 2. Activate Kvantum Style
+- [x] 2. Create `roles/desktop/tasks/optimizations.yml`
   **What to do**:
-  - Update `.xsession` creation task in `roles/desktop/tasks/main.yml`
-  - Add `export QT_STYLE_OVERRIDE=kvantum` before `startplasma-x11`
-  
-  **Reason**: Installing Kvantum is useless if not active.
+  - Create file with `block` running as `become: true` and `become_user: "{{ vps_username }}"`.
+  - **Sub-task A: Konsave**:
+    - `community.general.pipx`: name=konsave state=present.
+  - **Sub-task B: Polonium**:
+    - Check if installed: `shell: kpackagetool6 --list-packages ...`
+    - Download: `get_url` to `/tmp/polonium.kwinscript` (from GitHub releases).
+    - Install: `shell: kpackagetool6 --install /tmp/polonium.kwinscript`.
+  - **Sub-task C: Configs**:
+    - `community.general.ini_file`: Disable Baloo (`[Basic Settings] Indexing-Enabled=false`).
+    - `community.general.ini_file`: Enable Dolphin previews (`[PreviewSettings] Plugins=...`).
+  - **References**:
+    - Ansible `ini_file` docs.
+    - `kpackagetool6` usage.
+  - **Parallel**: Wave 2.
 
-- [x] 3. Disable Akonadi Server
+- [x] 3. Include Optimizations in `roles/desktop/tasks/main.yml`
   **What to do**:
-  - Add task to configure `~/.config/akonadi/akonadiserverrc`
-  - Set `StartServer=false` in `[QMF]` section (or general)
-  
-  **Reason**: Recommended in kde.md to save RAM.
+  - Add `include_tasks: optimizations.yml` at the end of `main.yml`.
+  - Ensure it runs *after* package installation.
+  - **Parallel**: Wave 2 (after Task 1).
 
-- [x] 4. Configure Yakuake Autostart
+- [x] 4. Run Playbook and Verification
   **What to do**:
-  - Create `~/.config/autostart` directory
-  - Symlink or copy `/usr/share/applications/org.kde.yakuake.desktop` to `~/.config/autostart/`
-  
-  **Reason**: "Eliminate startup latency" requires it to run on login.
-
-- [x] 5. Cleanup Build Artifacts
-  **What to do**:
-  - Add tasks to remove `/tmp/karousel` and `/tmp/window-title`
-  
-  **Reason**: Keep the system clean after installation.
-
-- [x] 6. Configure Active Kvantum Theme
-  **What to do**:
-  - Create `~/.config/Kvantum` directory
-  - Configure `~/.config/Kvantum/kvantum.kvconfig` to use "Nordic" or "Catppuccin-Mocha" based on variable
-  
-  **Reason**: Kvantum needs to know WHICH theme to load.
-
-- [x] 7. Enforce RDP Wallpaper Optimization
-  **What to do**:
-  - Create/Update `~/.config/plasma-org.kde.plasma.desktop-appletsrc`
-  - Set `Image=...` to a solid color or simple pattern?
-  - OR: Just ensure the "Nordic" theme doesn't use a heavy wallpaper?
-  - Actually, `kde.md` suggests "Solid Color".
-  - We can set `[Containments][*][Wallpaper][org.kde.image][General] Image=file:///usr/share/wallpapers/Next/contents/images/1920x1080.png` -> No, that's an image.
-  - Better: Just document it or try to set a simple background.
-  - Let's try to set `Color=0,0,0` if possible, or just skip if too complex. 
-  - Wait, `awesome-kde` usually recommends `plasma-apply-wallpaperimage`.
-  - Let's stick to **Kvantum** first as it's critical.
-  - For Wallpaper, I'll add a task to "Set solid background color" if possible, or "Disable wallpaper plugin".
-  - Actually, for RDP, just ensuring the theme is consistent is good.
-  - Let's add "Optimize Wallpaper Config".
+  - Run `./setup.sh` (or specific ansible-playbook command).
+  - Execute all verification scenarios defined above.
+  - **Parallel**: Wave 3.
 
 ---
 
@@ -151,10 +170,13 @@ Scenario: Verify playbook syntax
 
 ### Verification Commands
 ```bash
-ansible-playbook playbooks/main.yml --syntax-check
+# Quick check script
+ansible-playbook playbooks/main.yml --tags desktop --check
 ```
 
 ### Final Checklist
-- [x] All requested tools added to package list
-- [x] Performance tweaks implemented
-- [x] Playbook structure remains valid
+- [x] All 15+ new packages installed
+- [x] Pipx installed and functional
+- [x] Konsave installed via pipx
+- [x] Polonium installed as KWin script
+- [x] Baloo disabled in config

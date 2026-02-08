@@ -251,7 +251,6 @@
       - yakuake
       - qt5-style-kvantum
       - qt6-style-kvantum
-      - qt5-style-kvantum-themes
       - kompare
       - filelight
       - krdc
@@ -276,7 +275,7 @@
     owner: '{{ vps_username }}'
     group: '{{ vps_username }}'
     mode: '0755'
-    recursive: true
+    recurse: true
   tags: [desktop, theme]
 
 - name: Set Kvantum theme

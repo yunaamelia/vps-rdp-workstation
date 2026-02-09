@@ -1,182 +1,196 @@
-# KDE Desktop Optimization Plan
+# KDE Optimization Plan
 
 ## TL;DR
 
-> **Quick Summary**: Enhance the KDE Plasma desktop experience on Debian 13 with expert UI/UX optimizations, performance tuning, and workflow tools.
->
+> **Quick Summary**: Implement a new Ansible role `kde-optimization` to install power tools (Yakuake, Filelight), disable resource-heavy indexing (Baloo), and tune KWin compositor for low-latency RDP performance.
+> 
 > **Deliverables**:
-> - Optimized `roles/desktop` with new packages (`yakuake`, `dolphin-plugins`, `kcalc`, etc.)
-> - New `optimizations.yml` task file for advanced configurations
-> - Polonium Tiling Window Manager installation
-> - Konsave configuration manager installation via pipx
-> - Performance tuning (Baloo disabled, Dolphin previews enabled)
->
-> **Estimated Effort**: Medium
-> **Parallel Execution**: YES (Wave 1: Packages & Pipx setup; Wave 2: Polonium & Konsave; Wave 3: Configs)
-> **Critical Path**: Install Pipx → Install Konsave
+> - New Ansible role: `roles/kde-optimization/`
+> - Updated playbook: `playbooks/main.yml`
+> - Configured Tools: Yakuake, Filelight, KSystemLog, KCalc
+> - Optimized Configs: `baloofilerc`, `kwinrc`, `dolphinrc`
+> 
+> **Estimated Effort**: Short (1-2 hours)
+> **Parallel Execution**: Sequential (runs after `desktop` role)
 
 ---
 
 ## Context
 
 ### Original Request
-Implement expert-level KDE optimizations including visual refinements, performance tuning, and workflow enhancements based on the "awesome-kde" list.
+Research and implement KDE best practices for UI/UX, performance, and tools on a VPS/RDP workstation.
 
-### Metis Review & Analysis
-**Key Constraints Identified**:
-- **Execution Order**: `desktop` role runs *before* `development`. Installing `konsave` via pip requires `python3-pip` and `pipx` to be installed *within* the `desktop` role first.
-- **PEP 668**: Debian 13 restricts system-wide pip. `pipx` is the compliant solution.
-- **Polonium**: Not in Debian repos. Must install via `get_url` (GitHub Releases) + `kpackagetool6`.
-- **Config**: Use `community.general.ini_file` for robust config management (`baloofilerc`, `dolphinrc`).
+### Interview Summary
+**Key Decisions**:
+- **Disable Baloo**: Yes (Critical for VPS IOPS).
+- **Optimize Compositor**: Yes (Disable blur/animations for RDP smoothness).
+- **Install Power Tools**: Yes (Yakuake, Filelight, etc.).
+- **Developer UX**: Yes (Dolphin terminal panel, full paths).
+
+### Metis Review
+**Guardrails**:
+- Do not modify existing `roles/desktop` logic; extend via new role.
+- Ensure configs target the correct user (`{{ vps_username }}`), not root.
+- Handle idempotency for config edits using `ini_file` module.
 
 ---
 
 ## Work Objectives
 
 ### Core Objective
-Transform the basic KDE setup into a power-user workstation with tiling, instant terminal access, and optimized file management.
+Transform the default KDE installation into a high-performance, developer-focused environment optimized for remote access.
 
 ### Concrete Deliverables
-- Modified `roles/desktop/tasks/main.yml`: Added packages and include for optimizations.
-- New `roles/desktop/tasks/optimizations.yml`: Tasks for Polonium, Konsave, and Configs.
-- Configured `~/.config/baloofilerc`: File search disabled.
-- Configured `~/.config/dolphinrc`: Previews enabled.
-
-### Definition of Done
-- [x] `konsave --version` returns version number
-- [x] `kpackagetool6 --list-packages` shows Polonium
-- [x] `yakuake`, `kcalc`, `spectacle` are present in `dpkg -l`
-- [x] `baloofilerc` contains `Indexing-Enabled=false`
+- `roles/kde-optimization/tasks/main.yml`
+- `roles/kde-optimization/handlers/main.yml`
+- `roles/kde-optimization/defaults/main.yml`
+- `playbooks/main.yml` (updated)
 
 ### Must Have
-- **Idempotency**: All tasks must be safe to run multiple times.
-- **User Context**: All user-level changes (pipx, kpackagetool) must run as `{{ vps_username }}`.
-- **Dependency Safety**: Ensure `pipx` is installed before using it.
+- `yakuake` installed and working.
+- Baloo service disabled and config set to `Indexing-Enabled=false`.
+- KWin `AnimationSpeed` set to instant/fast.
+- Dolphin showing full paths.
 
 ### Must NOT Have
-- **System Pip**: Do not use `pip install` with sudo or `--break-system-packages`.
-- **Manual Steps**: No requirement for user to manually configure settings.
+- Broken RDP session (changes must be safe).
+- High CPU usage from indexing.
 
 ---
 
 ## Verification Strategy
 
+> **UNIVERSAL RULE: ZERO HUMAN INTERVENTION**
+> All tasks verifiable by agent automation.
+
 ### Test Decision
-- **Infrastructure exists**: NO (Ansible project, not app code)
-- **Automated tests**: Agent-Executed QA Scenarios ONLY.
-- **Framework**: N/A
+- **Infrastructure exists**: Yes (validate.sh).
+- **Automated tests**: No unit tests for Ansible YAML, but **Agent-Executed QA** is mandatory.
 
-### Agent-Executed QA Scenarios (MANDATORY)
+### Agent-Executed QA Scenarios
 
-#### Scenario 1: Verify Package Installation
-- **Tool**: Bash
-- **Steps**:
-  1. Run `dpkg -l | grep -E "yakuake|dolphin-plugins|ffmpegthumbs|kcalc|spectacle"`
-  2. Assert output contains all package names
-  3. Run `dpkg -l | grep python3-pipx`
-  4. Assert output contains `python3-pipx`
-- **Evidence**: `dpkg_check.txt`
+```
+Scenario: Verify Power Tools Installation
+  Tool: Bash (dpkg)
+  Preconditions: Playbook run completed
+  Steps:
+    1. Run `dpkg -l | grep yakuake`
+    2. Assert output contains "yakuake"
+    3. Run `dpkg -l | grep filelight`
+    4. Assert output contains "filelight"
+  Expected Result: Packages are installed
+  Evidence: Terminal output
 
-#### Scenario 2: Verify Konsave Installation
-- **Tool**: interactive_bash (tmux)
-- **Steps**:
-  1. `tmux new-session: su - {{ vps_username }}`
-  2. Send keys: `pipx list`
-  3. Assert output contains `package konsave`
-  4. Send keys: `konsave --version`
-  5. Assert output matches version pattern
-- **Evidence**: `konsave_check.txt`
+Scenario: Verify Baloo Disabled
+  Tool: Bash
+  Preconditions: Playbook run completed
+  Steps:
+    1. Run `balooctl status` (as user)
+    2. Assert output contains "Baloo is currently disabled"
+    3. Check `~/.config/baloofilerc`
+    4. Assert `Indexing-Enabled=false`
+  Expected Result: Indexing is off
+  Evidence: Command output
 
-#### Scenario 3: Verify Polonium Installation
-- **Tool**: interactive_bash (tmux)
-- **Steps**:
-  1. `tmux new-session: su - {{ vps_username }}`
-  2. Send keys: `kpackagetool6 --list-packages --type KWin/Script`
-  3. Assert output contains `polonium`
-- **Evidence**: `polonium_check.txt`
-
-#### Scenario 4: Verify Configuration (Baloo & Dolphin)
-- **Tool**: Bash
-- **Steps**:
-  1. `cat /home/{{ vps_username }}/.config/baloofilerc`
-  2. Assert file contains `Indexing-Enabled=false`
-  3. `cat /home/{{ vps_username }}/.config/dolphinrc`
-  4. Assert file contains `[PreviewSettings]` section (or specific keys enabled)
-- **Evidence**: `config_check.txt`
-
----
-
-## Execution Strategy
-
-### Parallel Execution Waves
-**Wave 1**:
-- Task 1: Update main package list (adds deps for Wave 2)
-
-**Wave 2**:
-- Task 2: Create optimizations.yml (logic)
-- Task 3: Include optimizations in main.yml
-
-**Wave 3**:
-- Task 4: Run Playbook & Verify
-
-### Agent Dispatch Summary
-- **Tasks 1-3**: `task(category="quick", load_skills=["ansible-expert", "bash-pro"])`
-- **Task 4**: `task(category="quick", load_skills=["ansible-expert"])`
+Scenario: Verify Compositor Tuning
+  Tool: Bash
+  Preconditions: Playbook run completed
+  Steps:
+    1. Read `~/.config/kwinrc`
+    2. Assert `[Compositing] AnimationSpeed` is present
+    3. Assert `[Compositing] LatencyPolicy` is present
+  Expected Result: Configs applied
+  Evidence: File content
+```
 
 ---
 
 ## TODOs
 
-- [x] 1. Update `roles/desktop/tasks/main.yml` Package List
+- [x] 1. Create `kde-optimization` Role Structure
   **What to do**:
-  - Add `python3-pip`, `pipx`, `python3-venv` (vital for pipx) to the `apt` task.
-  - Add GUI tools: `yakuake`, `dolphin-plugins`, `sweeper`, `filelight`, `kcalc`, `spectacle`, `kdeconnect`.
-  - Add visual tools: `ffmpegthumbs`, `kdegraphics-thumbnailers`, `svgpart`, `markdownpart`.
-  - **Dependencies**: None.
-  - **Parallel**: Wave 1.
+  - Create directories: `roles/kde-optimization/{tasks,handlers,defaults,meta}`
+  - Create empty `main.yml` files.
+  - Define role dependencies in `meta/main.yml` (depends on `desktop`).
 
-- [x] 2. Create `roles/desktop/tasks/optimizations.yml`
+  **Recommended Agent Profile**:
+  - **Category**: `quick`
+  - **Skills**: `bash-linux`
+
+  **Acceptance Criteria**:
+  - [x] Directory structure exists.
+  - [x] `meta/main.yml` defines dependency.
+
+- [x] 2. Implement Package Installation Task
   **What to do**:
-  - Create file with `block` running as `become: true` and `become_user: "{{ vps_username }}"`.
-  - **Sub-task A: Konsave**:
-    - `community.general.pipx`: name=konsave state=present.
-  - **Sub-task B: Polonium**:
-    - Check if installed: `shell: kpackagetool6 --list-packages ...`
-    - Download: `get_url` to `/tmp/polonium.kwinscript` (from GitHub releases).
-    - Install: `shell: kpackagetool6 --install /tmp/polonium.kwinscript`.
-  - **Sub-task C: Configs**:
-    - `community.general.ini_file`: Disable Baloo (`[Basic Settings] Indexing-Enabled=false`).
-    - `community.general.ini_file`: Enable Dolphin previews (`[PreviewSettings] Plugins=...`).
-  - **References**:
-    - Ansible `ini_file` docs.
-    - `kpackagetool6` usage.
-  - **Parallel**: Wave 2.
+  - Edit `roles/kde-optimization/tasks/main.yml`.
+  - Add `ansible.builtin.apt` task for: `yakuake`, `filelight`, `ksystemlog`, `kcalc`, `partitionmanager`.
+  - Add tag `kde-opt`.
 
-- [x] 3. Include Optimizations in `roles/desktop/tasks/main.yml`
+  **Recommended Agent Profile**:
+  - **Category**: `quick`
+  - **Skills**: `ansible-instructions`
+
+  **Acceptance Criteria**:
+  - [ ] Task installs all requested packages.
+  - [ ] Idempotent (state=present).
+
+- [x] 3. Implement Baloo Disabling Task
   **What to do**:
-  - Add `include_tasks: optimizations.yml` at the end of `main.yml`.
-  - Ensure it runs *after* package installation.
-  - **Parallel**: Wave 2 (after Task 1).
+  - Add task to stop/disable `baloo_file` service (user level).
+  - Add task to configure `~/.config/baloofilerc` using `community.general.ini_file`.
+  - Section `[Basic Settings]`, Key `Indexing-Enabled`, Value `false`.
+  - **Crucial**: Run as `{{ vps_username }}`.
 
-- [x] 4. Run Playbook and Verification
+  **Recommended Agent Profile**:
+  - **Category**: `unspecified-high` (Ansible logic)
+  - **Skills**: `ansible-instructions`
+
+  **Acceptance Criteria**:
+  - [ ] Baloo service stopped.
+  - [ ] Config file updated correctly.
+
+- [x] 4. Implement Compositor & Dolphin Tuning
   **What to do**:
-  - Run `./setup.sh` (or specific ansible-playbook command).
-  - Execute all verification scenarios defined above.
-  - **Parallel**: Wave 3.
+  - Edit `roles/kde-optimization/tasks/main.yml`.
+  - **KWin**: Edit `~/.config/kwinrc`.
+    - `[Compositing] AnimationSpeed=0`
+    - `[Compositing] LatencyPolicy=ForceLowestLatency`
+    - `[Plugins] blurEnabled=false`
+  - **Dolphin**: Edit `~/.config/dolphinrc`.
+    - `[General] ShowFullPath=true`
+    - `[General] FilterBar=true`
+  - Use `notify: Restart KWin` handler (optional, complex to do live, maybe just log message).
 
----
+  **Recommended Agent Profile**:
+  - **Category**: `unspecified-high`
+  - **Skills**: `ansible-instructions`
 
-## Success Criteria
+  **Acceptance Criteria**:
+  - [ ] `kwinrc` modified.
+  - [ ] `dolphinrc` modified.
+  - [ ] Correct owner/permissions.
 
-### Verification Commands
-```bash
-# Quick check script
-ansible-playbook playbooks/main.yml --tags desktop --check
-```
+- [x] 5. Integrate into Main Playbook
+  **What to do**:
+  - Edit `playbooks/main.yml`.
+  - Add `kde-optimization` role AFTER `desktop` and BEFORE `editors`.
+  - Use tags `[desktop, kde, optimization]`.
 
-### Final Checklist
-- [x] All 15+ new packages installed
-- [x] Pipx installed and functional
-- [x] Konsave installed via pipx
-- [x] Polonium installed as KWin script
-- [x] Baloo disabled in config
+  **Recommended Agent Profile**:
+  - **Category**: `quick`
+
+  **Acceptance Criteria**:
+  - [ ] Role added to playbook.
+  - [ ] Syntax check passes.
+
+- [x] 6. Run Validation
+  **What to do**:
+  - Run `ansible-playbook playbooks/main.yml --tags kde-optimization --check`.
+  - Verify no syntax errors.
+
+  **Recommended Agent Profile**:
+  - **Category**: `quick`
+
+  **Acceptance Criteria**:
+  - [x] Playbook runs without error.

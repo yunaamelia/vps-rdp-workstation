@@ -1,0 +1,73 @@
+---
+- name: Install KDE power tools
+  ansible.builtin.apt:
+    name:
+      - yakuake
+      - filelight
+      - ksystemlog
+      - kcalc
+      - partitionmanager
+    state: present
+  tags: [kde-opt]
+
+- name: Disable Baloo file indexing (service)
+  ansible.builtin.command: balooctl disable
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: false
+  ignore_errors: true
+  tags: [kde-opt, performance]
+
+- name: Configure Baloo config file
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/baloofilerc"
+    section: "Basic Settings"
+    option: "Indexing-Enabled"
+    value: "false"
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [kde-opt, performance]
+
+- name: Configure KWin Compositor (Speed)
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kwinrc"
+    section: "Compositing"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  loop:
+    - { option: "AnimationSpeed", value: "0" }
+    - { option: "LatencyPolicy", value: "ForceLowestLatency" }
+  tags: [kde-opt, performance]
+
+- name: Configure KWin Compositor (Blur)
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kwinrc"
+    section: "Plugins"
+    option: "blurEnabled"
+    value: "false"
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [kde-opt, performance]
+
+- name: Configure Dolphin (General)
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/dolphinrc"
+    section: "General"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  loop:
+    - { option: "ShowFullPath", value: "true" }
+    - { option: "FilterBar", value: "true" }
+  tags: [kde-opt, ux]

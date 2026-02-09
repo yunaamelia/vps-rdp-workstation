@@ -131,6 +131,10 @@
       tags: [desktop, kde, xrdp]
       when: vps_install_desktop | default(true)
 
+    - role: kde-optimization
+      tags: [desktop, kde, optimization]
+      when: vps_install_desktop | default(true)
+
     # =========================================================================
     #  PHASE 5: Development Languages
     # =========================================================================

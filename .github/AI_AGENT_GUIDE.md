@@ -1,8 +1,8 @@
 # AI Agent Guide - VPS RDP Workstation Automation
 
-**Project**: Ansible-based VPS RDP Developer Workstation Automation  
-**Version**: 3.0.0  
-**Target**: Debian 13 (Trixie)  
+**Project**: Ansible-based VPS RDP Developer Workstation Automation
+**Version**: 3.0.0
+**Target**: Debian 13 (Trixie)
 **Purpose**: Transform fresh VPS into fully-configured RDP workstation with KDE Plasma
 
 ---
@@ -1187,6 +1187,6 @@ ansible-galaxy collection install -r requirements.yml
 
 ---
 
-**Last Updated**: 2024-01 (v3.0.0)  
-**Maintained By**: Project maintainers  
+**Last Updated**: 2024-01 (v3.0.0)
+**Maintained By**: Project maintainers
 **For Questions**: See [SUPPORT.md](../SUPPORT.md) or open an issue

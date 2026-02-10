@@ -8,6 +8,8 @@
       - ranger
       - mc
       - vifm
+      - fzf
+      - eza
     state: present
   tags: [tools, tui]
 

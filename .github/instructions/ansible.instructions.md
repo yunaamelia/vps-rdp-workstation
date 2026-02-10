@@ -80,7 +80,7 @@ applyTo: '**/*.yaml, **/*.yml'
 - Use `ansible-playbook --syntax-check` to check for syntax errors
 - Use `ansible-playbook --check --diff` to perform a dry-run of playbook execution
 
-<!-- 
+<!--
 These guidelines were based on, or copied from, the following sources:
 
 - [Ansible Documentation - Tips and Tricks](https://docs.ansible.com/ansible/latest/tips_tricks/index.html)

@@ -296,7 +296,7 @@ After generating Terraform code, always:
 4. `get_provider_details` - Get comprehensive documentation and examples
 
 **Module Discovery Workflow:**
-1. `get_latest_module_version` - Resolve latest version if not specified  
+1. `get_latest_module_version` - Resolve latest version if not specified
 2. `search_modules` - Find relevant modules with compatibility info
 3. `get_module_details` - Get usage documentation, inputs, and outputs
 

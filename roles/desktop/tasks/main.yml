@@ -36,6 +36,13 @@
     state: present
   tags: [desktop, kde]
 
+- name: Clone La Capitaine icon theme
+  ansible.builtin.git:
+    repo: https://github.com/keeferrourke/la-capitaine-icon-theme.git
+    dest: "/home/{{ vps_username }}/.local/share/icons/La-Capitaine"
+    depth: 1
+  tags: [desktop, theme, icons]
+
 - name: Install Firefox ESR
   ansible.builtin.apt:
     name: firefox-esr
@@ -213,7 +220,7 @@
       ColorScheme=Nordic
 
       [Icons]
-      Theme=Papirus-Dark
+      Theme={{ vps_icon_theme }}
 
       [KDE]
       AnimationDurationFactor=0.5
@@ -233,7 +240,7 @@
     mode: '0644'
   vars:
     vps_system_font: "JetBrainsMono Nerd Font"
-    vps_icon_theme: "Papirus-Dark"
+    vps_icon_theme_var: "{{ vps_icon_theme }}"
     vps_kde_lookandfeel: "Catppuccin-Mocha-Blue"
   when: vps_theme_variant == 'catppuccin-mocha'
   tags: [desktop, kde]
@@ -267,6 +274,18 @@
       # kpackagetool5 is replaced by dynamic detection variable
     state: present
   tags: [desktop, tools]
+
+- name: Install Awesome KDE recommendations
+  ansible.builtin.apt:
+    name:
+      - krusader
+      - okteta
+      - ghostwriter
+      - ksystemlog
+      - kcolorchooser
+      - krename
+    state: present
+  tags: [desktop, tools, awesome-kde]
 
 - name: Create Kvantum config directory
   ansible.builtin.file:

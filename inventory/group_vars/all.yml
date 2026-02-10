@@ -35,20 +35,20 @@ vps_ssh_port: 22                          # SSH port (change for security)
 vps_ssh_password_auth: true               # Allow password authentication
 vps_ssh_pubkey_auth: true                 # Allow public key authentication
 vps_ssh_root_login: true                  # Allow root login (user requested)
-vps_ssh_max_auth_tries: 3                 # Max authentication attempts
+vps_ssh_max_auth_tries: 6                 # Max authentication attempts
 vps_ssh_client_alive_interval: 300        # Keepalive interval (seconds)
 
 # Firewall (UFW)
 vps_firewall_enabled: true
 vps_firewall_default_incoming: "deny"     # Default incoming policy
 vps_firewall_default_outgoing: "allow"    # Default outgoing policy
-vps_firewall_logging: "medium"            # low | medium | high
+vps_firewall_logging: "low"               # low | medium | high
 
 # Fail2ban Configuration
 vps_fail2ban_enabled: true
-vps_fail2ban_bantime: 3600                # Ban duration in seconds (1 hour)
+vps_fail2ban_bantime: 600                 # Ban duration in seconds (10 mins)
 vps_fail2ban_findtime: 600                # Time window for retries (10 min)
-vps_fail2ban_maxretry: 5                  # Max retries before ban
+vps_fail2ban_maxretry: 10                 # Max retries before ban
 
 # Automatic Security Updates
 vps_unattended_upgrades: true             # Enable unattended upgrades

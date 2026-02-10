@@ -206,7 +206,7 @@ Each phase feeds insights into the next, creating a continuous improvement cycle
 
 Monitor insights feed back into Plan:
 - **Incidents** → New requirements or technical debt
-- **Performance data** → Optimization opportunities  
+- **Performance data** → Optimization opportunities
 - **User behavior** → Feature refinement
 - **DORA metrics** → Process improvements
 

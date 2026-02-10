@@ -1,0 +1,27 @@
+---
+all:
+  children:
+    vps_servers:
+      hosts:
+        144.126.243.241:
+          ansible_user: root
+          ansible_ssh_pass: "gg123123@"
+          ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+      vars:
+        vps_username: developer
+        vps_user_password_hash: "$6$BRvaEIchod4zah0M$EWpHdjTCQBCz63pkovbKJmVO07BWmD8awOmaUNpGZWIENjuNQ3/cIJh7v1tygp0eUDIsKOuoRvzTXMgTZf/lu."
+        vps_progress_state_file: "/var/lib/vps-setup/progress.json"
+        vps_summary_log: "/var/log/vps-setup-summary.log"
+        # Enable all components for full install
+        install_docker: true
+        install_tui_tools: true
+        install_network_tools: true
+        install_performance_tools: true
+        install_text_processing: true
+        install_file_management: true
+        install_dev_debugging: true
+        install_code_quality: true
+        install_productivity: true
+        install_log_visualization: true
+        install_ai_devtools: true
+        install_cloud_native_tools: true

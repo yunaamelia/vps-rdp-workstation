@@ -3,13 +3,13 @@
 ## TL;DR
 
 > **Quick Summary**: Implement a new Ansible role `kde-optimization` to install power tools (Yakuake, Filelight), disable resource-heavy indexing (Baloo), and tune KWin compositor for low-latency RDP performance.
-> 
+>
 > **Deliverables**:
 > - New Ansible role: `roles/kde-optimization/`
 > - Updated playbook: `playbooks/main.yml`
 > - Configured Tools: Yakuake, Filelight, KSystemLog, KCalc
 > - Optimized Configs: `baloofilerc`, `kwinrc`, `dolphinrc`
-> 
+>
 > **Estimated Effort**: Short (1-2 hours)
 > **Parallel Execution**: Sequential (runs after `desktop` role)
 

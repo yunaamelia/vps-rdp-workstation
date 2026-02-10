@@ -5,6 +5,26 @@ All notable changes to VPS RDP Workstation will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [3.3.0] - 2026-02-09
+
+### Added
+- "Awesome KDE" toolset: Krusader, Okteta, GhostWriter, KSystemLog, KColorChooser, KRename
+
+## [3.2.0] - 2026-02-09
+
+### Changed
+- Loosened security defaults (10m ban time, 6 auth tries) for better usability
+- Replaced Polonium with Karousel for tiling (resolved conflict)
+- Enabled BBR congestion control and ZRAM (zstd) for performance
+
+### Added
+- Added eza (modern ls) and fzf (fuzzy finder) to TUI tools
+
+## [3.1.0] - 2026-02-09
+
+### Added
+- La Capitaine icon theme integration (default)
+
 ## [3.0.0] - 2026-02-05
 
 ### Added

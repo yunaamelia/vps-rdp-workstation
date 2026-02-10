@@ -27,6 +27,29 @@
     state: present
   tags: [tools, performance]
 
+- name: Install zram-tools for memory optimization
+  ansible.builtin.apt:
+    name: zram-tools
+    state: present
+  tags: [tools, performance]
+
+- name: Configure zram-tools
+  ansible.builtin.lineinfile:
+    path: /etc/default/zramswap
+    regexp: '^ALGO='
+    line: 'ALGO=zstd'
+    create: true
+  tags: [tools, performance]
+
+- name: Enable BBR congestion control
+  ansible.posix.sysctl:
+    name: net.ipv4.tcp_congestion_control
+    value: bbr
+    state: present
+    reload: true
+  ignore_errors: true
+  tags: [tools, performance]
+
 - name: Install duf (du alternative)
   ansible.builtin.shell: |
     DUF_VERSION=$(curl -s https://api.github.com/repos/muesli/duf/releases/latest | grep -oP '"tag_name": "v\K[^"]+')

@@ -13,7 +13,7 @@ This rule enforces the principles of Object Calisthenics to ensure clean, mainta
 ## Scope and Application
 - **Primary focus**: Business domain classes (aggregates, entities, value objects, domain services)
 - **Secondary focus**: Application layer services and use case handlers
-- **Exemptions**: 
+- **Exemptions**:
   - DTOs (Data Transfer Objects)
   - API models/contracts
   - Configuration classes
@@ -115,7 +115,7 @@ This rule enforces the principles of Object Calisthenics to ensure clean, mainta
            this.value = value;
        }
    }
-   ```   
+   ```
 
 4. **First Class Collections**:
    - Use collections to encapsulate data and behavior, rather than exposing raw data structures.
@@ -162,13 +162,13 @@ First Class Collections: a class that contains an array as an attribute should n
    // Good Example - One dot per line
    public class User {
      public NormalizedEmail GetEmail() {
-       return NormalizedEmail.Create(/*...*/);       
+       return NormalizedEmail.Create(/*...*/);
      }
    }
    public class Order {
      /*...*/
      public NormalizedEmail ConfirmationEmail() {
-       return User.GetEmail();         
+       return User.GetEmail();
      }
    }
    public void ProcessOrder(Order order) {
@@ -195,7 +195,7 @@ First Class Collections: a class that contains an array as an attribute should n
 7. **Keep entities small (Class, method, namespace or package)**:
    - Limit the size of classes and methods to improve code readability and maintainability.
    - Each class should have a single responsibility and be as small as possible.
-   
+
    Constraints:
    - Maximum 10 methods per class
    - Maximum 50 lines per class
@@ -269,14 +269,14 @@ First Class Collections: a class that contains an array as an attribute should n
    public class User {  // Domain class
        public string Name { get; set; } // Avoid this in domain classes
    }
-   
+
    // Good Example - Domain class with encapsulation
    public class User {  // Domain class
        private string name;
        private User(string name) { this.name = name; }
        public static User Create(string name) => new User(name);
    }
-   
+
    // Acceptable Example - DTO with public setters
    public class UserDto {  // DTO - exemption applies
        public string Name { get; set; } // Acceptable for DTOs

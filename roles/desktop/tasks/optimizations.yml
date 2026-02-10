@@ -9,25 +9,6 @@
         name: konsave
         state: present
 
-    - name: Check for Polonium KWin script
-      ansible.builtin.shell:
-        cmd: "{{ plasma_tool_cmd }} --list-packages --type KWin/Script | grep -q polonium"
-      register: polonium_check
-      changed_when: false
-      failed_when: false
-
-    - name: Download Polonium KWin script
-      ansible.builtin.get_url:
-        url: https://github.com/zeroxoneafour/polonium/releases/latest/download/polonium.kwinscript
-        dest: /tmp/polonium.kwinscript
-        mode: '0644'
-      when: polonium_check.rc != 0
-
-    - name: Install Polonium KWin script
-      ansible.builtin.shell:
-        cmd: "{{ plasma_tool_cmd }} -t KWin/Script -i /tmp/polonium.kwinscript"
-      when: polonium_check.rc != 0
-
     - name: Disable Baloo indexing
       community.general.ini_file:
         path: "/home/{{ vps_username }}/.config/baloofilerc"

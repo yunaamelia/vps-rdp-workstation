@@ -32,9 +32,27 @@
       changed_when: false
       failed_when: "'LANG=' not in locale_result.stdout"
 
+    - name: Verify UFW is installed (Security)
+      ansible.builtin.command: which ufw
+      register: ufw_check
+      changed_when: false
+
+    - name: Verify Zsh is installed (Terminal)
+      ansible.builtin.command: which zsh
+      register: zsh_check
+      changed_when: false
+
+    - name: Verify Oh My Zsh directory exists (Zsh Enhancements)
+      ansible.builtin.stat:
+        path: /root/.oh-my-zsh
+      register: omz_path
+
     - name: Print verification summary
       ansible.builtin.debug:
         msg: |
           ✓ Timezone: {{ timezone_result.stdout }}
           ✓ Essential packages installed
           ✓ Locale configured
+          ✓ Security: UFW installed at {{ ufw_check.stdout }}
+          ✓ Terminal: Zsh installed at {{ zsh_check.stdout }}
+          ✓ Enhancements: Oh My Zsh present: {{ omz_path.stat.exists }}

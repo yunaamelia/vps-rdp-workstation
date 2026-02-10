@@ -9,3 +9,6 @@
 
   roles:
     - role: common
+    - role: security
+    - role: terminal
+    - role: zsh-enhancements

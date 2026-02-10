@@ -1,8 +1,5 @@
 # Cloud Native Role - Metadata
 ---
-dependencies:
-  - common
-  - docker
 
 galaxy_info:
   author: VPS RDP Workstation

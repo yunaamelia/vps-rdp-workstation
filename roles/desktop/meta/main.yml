@@ -1,10 +1,6 @@
 # Desktop Role - Metadata
 ---
-dependencies:
-  - common
-  - security
-  - role: catppuccin-theme
-    when: vps_theme_variant == 'catppuccin-mocha'
+dependencies: []
 
 galaxy_info:
   author: VPS RDP Workstation

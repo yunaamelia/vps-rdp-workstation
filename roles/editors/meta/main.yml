@@ -1,8 +1,5 @@
 # Editors Role - Metadata
 ---
-dependencies:
-  - common
-  - development
 
 galaxy_info:
   author: VPS RDP Workstation

@@ -1,7 +1,6 @@
 # Dev Debugging Role - Metadata
 ---
-dependencies:
-  - common
+dependencies: []
 
 galaxy_info:
   author: VPS RDP Workstation

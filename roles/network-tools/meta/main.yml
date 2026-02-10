@@ -1,7 +1,6 @@
 # Network Tools Role - Metadata
 ---
-dependencies:
-  - common
+dependencies: []
 
 galaxy_info:
   author: VPS RDP Workstation

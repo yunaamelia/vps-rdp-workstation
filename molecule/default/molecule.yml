@@ -21,7 +21,8 @@ platforms:
     cgroupns_mode: host
     # Use standard init which is available in base image, or install systemd if needed
     # debian:trixie base image might not have systemd installed by default
-    command: /bin/bash -c "apt-get update && apt-get install -y python3 python3-pip && while true; do sleep 1000; done"
+    # Use raw image and install python manually in prepare step, or pre-install via shell
+    command: /bin/sh -c "if [ ! -x /usr/bin/python3 ]; then apt-get update && apt-get install -y python3 python3-pip; fi; while true; do sleep 1000; done"
     tmpfs:
       - /run
       - /tmp

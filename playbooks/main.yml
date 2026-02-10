@@ -78,14 +78,17 @@
         state: absent
       tags: always
 
-    - name: Fix NodeSource sources.list if conflicting entries exist
-      ansible.builtin.copy:
-        dest: /etc/apt/sources.list.d/nodesource.list
-        content: |
-          deb [signed-by=/usr/share/keyrings/nodesource.asc] https://deb.nodesource.com/node_20.x nodistro main
-        mode: '0644'
-      when: ansible_facts['os_family'] == 'Debian'
-      failed_when: false
+    - name: Check if NodeSource keyring exists
+      ansible.builtin.stat:
+        path: /usr/share/keyrings/nodesource.asc
+      register: nodesource_key
+      tags: always
+
+    - name: Remove NodeSource repo if keyring is missing (prevents apt update failure)
+      ansible.builtin.file:
+        path: /etc/apt/sources.list.d/nodesource.list
+        state: absent
+      when: not nodesource_key.stat.exists
       tags: always
 
   roles:

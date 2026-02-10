@@ -43,6 +43,7 @@ provisioner:
     host_vars:
       debian-trixie:
         ansible_user: root
+        ansible_become_password: "gg123123@"
 
 verifier:
   name: ansible

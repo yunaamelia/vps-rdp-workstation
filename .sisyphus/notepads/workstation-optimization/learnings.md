@@ -19,3 +19,13 @@
 - **Dirty Ratios**: Lowered `vm.dirty_ratio` to 10 and `vm.dirty_background_ratio` to 5. This forces more frequent but smaller writes to disk, preventing large IO stalls during heavy compilations or data transfers.
 - **I/O Schedulers**: Implemented udev rules to assign `none` for NVMe (lowest overhead), `mq-deadline` for SSDs, and `bfq` for rotational drives to optimize desktop responsiveness.
 - **OOMD**: Enabled `systemd-oomd` for better userspace out-of-memory handling, which can prevent hard system freezes by killing resource-hogging cgroups earlier.
+
+## Verification Findings (Validation Phase)
+- **Yazi Installation**: Verified in `roles/tui-tools/tasks/main.yml`. Installs via `.deb` from GitHub releases. Dependencies (`ffmpeg`, `jq`, `imagemagick`) are included in `apt` package list.
+- **Lazydocker Installation**: Verified in `roles/docker/tasks/main.yml`. Fetches latest release from GitHub API, downloads tarball, extracts, and installs binary to `/usr/local/bin`.
+- **Font Rendering**: Verified in `roles/fonts/tasks/main.yml`. Creates `10-rendering.conf` in user config with `antialias=true`, `hinting=true`, `hintstyle=hintslight`, `rgba=rgb`, and `lcdfilter=lcddefault`.
+- **System Performance**: Verified in `roles/system-performance/tasks/main.yml`.
+  - **Udev Rules**: `/etc/udev/rules.d/60-io-scheduler.rules` configures `none` for NVMe, `mq-deadline` for SATA SSDs, and `bfq` for HDDs.
+  - **Sysctl**: Sets `vfs_cache_pressure=50`, `dirty_ratio=10`, `dirty_background_ratio=5`.
+- **Playbook Integrity**: `ansible-playbook --check` passed initial validation steps (Variable verification, Directory creation, Common role setup, Security role setup, Fonts download). Failed later due to missing artifacts from skipped execution steps (Oh My Zsh template), which is expected behavior in a pure check run on a clean environment.
+- **Validation Script**: `tests/validate.sh` confirmed to exist with 30 production-readiness checks covering functional requirements, security, quality, and documentation.

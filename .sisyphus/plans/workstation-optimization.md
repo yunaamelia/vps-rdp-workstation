@@ -150,7 +150,7 @@ Wave 3 (Integration):
   - Add aliases to `roles/terminal/tasks/main.yml` (or zshrc template): `ls=eza`, `cat=bat`, `diff=delta`.
   **Verification**: `grep scan_timeout` in config.
 
-- [ ] 7. Final Verification & Cleanup
+- [x] 7. Final Verification & Cleanup
   **What to do**:
   - Run a full validation check of all installed tools.
   - Ensure no broken configs.

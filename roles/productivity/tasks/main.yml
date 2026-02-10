@@ -9,16 +9,20 @@
   tags: [tools, productivity]
 
 - name: Patch thefuck for Python 3.12+ (replace distutils with shutil)
+  vars:
+    thefuck_site_packages: "/home/{{ vps_username }}/.local/share/pipx/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages"
   ansible.builtin.replace:
-    path: "/home/{{ vps_username }}/.local/share/pipx/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages/thefuck/system/unix.py"
+    path: "{{ thefuck_site_packages }}/thefuck/system/unix.py"
     regexp: '^from distutils\.spawn import find_executable$'
     replace: 'import shutil'
   become: true
   tags: [tools, productivity]
 
 - name: Patch thefuck find_executable to shutil.which
+  vars:
+    thefuck_site_packages: "/home/{{ vps_username }}/.local/share/pipx/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages"
   ansible.builtin.replace:
-    path: "/home/{{ vps_username }}/.local/share/pipx/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages/thefuck/system/unix.py"
+    path: "{{ thefuck_site_packages }}/thefuck/system/unix.py"
     regexp: 'find_executable\('
     replace: 'shutil.which('
   become: true

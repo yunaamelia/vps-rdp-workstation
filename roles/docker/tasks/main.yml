@@ -92,8 +92,11 @@
   tags: [docker, tui]
 
 - name: Download lazydocker archive
+  vars:
+    ld_tag: "{{ lazydocker_release.json.tag_name }}"
+    ld_ver: "{{ lazydocker_release.json.tag_name | regex_replace('^v', '') }}"
   ansible.builtin.get_url:
-    url: "https://github.com/jesseduffield/lazydocker/releases/download/{{ lazydocker_release.json.tag_name }}/lazydocker_{{ lazydocker_release.json.tag_name | regex_replace('^v', '') }}_Linux_x86_64.tar.gz"
+    url: "https://github.com/jesseduffield/lazydocker/releases/download/{{ ld_tag }}/lazydocker_{{ ld_ver }}_Linux_x86_64.tar.gz"
     dest: /tmp/lazydocker.tar.gz
     mode: '0644'
   when: install_docker

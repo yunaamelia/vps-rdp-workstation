@@ -1,7 +1,6 @@
 # Zsh Enhancements Role - Metadata
 ---
-dependencies:
-  - terminal
+dependencies: []
 
 galaxy_info:
   author: VPS RDP Workstation

@@ -52,7 +52,7 @@
 
 - name: Install Tela-circle icon theme
   ansible.builtin.shell:
-    cmd: echo "y" | ./install.sh -d /home/{{ vps_username }}/.local/share/icons
+    cmd: chmod +x install.sh && echo "y" | ./install.sh -d /home/{{ vps_username }}/.local/share/icons
     chdir: /tmp/Tela-circle
     creates: /home/{{ vps_username }}/.local/share/icons/Tela-circle
   become: true
@@ -69,7 +69,7 @@
 
 - name: Install Qogir icon theme
   ansible.builtin.shell:
-    cmd: echo "y" | ./install.sh -d /home/{{ vps_username }}/.local/share/icons
+    cmd: chmod +x install.sh && echo "y" | ./install.sh -d /home/{{ vps_username }}/.local/share/icons
     chdir: /tmp/Qogir
     creates: /home/{{ vps_username }}/.local/share/icons/Qogir
   become: true

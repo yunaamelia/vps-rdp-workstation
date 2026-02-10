@@ -1,7 +1,6 @@
 # Terminal Role - Metadata
 ---
-dependencies:
-  - security
+dependencies: []
 
 galaxy_info:
   author: VPS RDP Workstation

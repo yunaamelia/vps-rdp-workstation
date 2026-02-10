@@ -19,7 +19,9 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
     cgroupns_mode: host
-    command: /lib/systemd/systemd
+    # Use standard init which is available in base image, or install systemd if needed
+    # debian:trixie base image might not have systemd installed by default
+    command: /bin/bash -c "while true; do sleep 1000; done"
     tmpfs:
       - /run
       - /tmp

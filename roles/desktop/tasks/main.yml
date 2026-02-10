@@ -43,23 +43,6 @@
     depth: 1
   tags: [desktop, theme, icons]
 
-- name: Clone Tela-circle icon theme
-  ansible.builtin.git:
-    repo: https://github.com/vinceliuice/Tela-circle-icon-theme.git
-    dest: /tmp/Tela-circle
-    depth: 1
-  tags: [desktop, theme, icons]
-
-- name: Install Tela-circle icon theme
-  ansible.builtin.shell:
-    cmd: chmod +x install.sh && echo "y" | ./install.sh -d /home/{{ vps_username }}/.local/share/icons
-    chdir: /tmp/Tela-circle
-    creates: /home/{{ vps_username }}/.local/share/icons/Tela-circle
-  become: true
-  become_user: "{{ vps_username }}"
-  when: not ansible_check_mode
-  tags: [desktop, theme, icons]
-
 - name: Clone Qogir icon theme
   ansible.builtin.git:
     repo: https://github.com/vinceliuice/Qogir-icon-theme.git
@@ -519,12 +502,6 @@
 - name: Clean up Window Title temporary files
   ansible.builtin.file:
     path: /tmp/window-title
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Clean up Tela-circle temporary files
-  ansible.builtin.file:
-    path: /tmp/Tela-circle
     state: absent
   tags: [desktop, cleanup]
 

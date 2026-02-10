@@ -1,16 +1,5 @@
-# Workstation Optimization Learnings
+## Learnings - Docker Role Update
 
-## System Architecture
-- Debian-based workstation (likely Debian 12/13)
-- Ansible-managed configuration
-- Roles split by function (desktop, terminal, performance, etc.)
-
-## Critical Conventions
-- **Idempotency**: All playbooks must be re-runnable without side effects.
-- **Variables**: Use `inventory/group_vars/all.yml` for globals.
-- **Tags**: Use specific tags for selective execution (e.g., `tags: [tools, performance]`).
-- **Security**: Don't downgrade security posture unless explicitly required.
-
-## Known Constraints
-- Terminal role structure should be patched, not rewritten.
-- Polonium conflicts with Karousel (Karousel is preferred).
+- **Lazydocker Installation**: Replaced shell script installation with `ansible.builtin.get_url` and `ansible.builtin.unarchive` for better idempotency and security.
+- **Dynamic Versioning**: Used `ansible.builtin.uri` to fetch the latest release tag from GitHub API, ensuring the latest version is always installed without manual updates.
+- **Clean Extraction**: Implemented a pattern of downloading to `/tmp`, extracting to a temporary directory, and then copying the binary to `/usr/local/bin` to keep the filesystem clean.

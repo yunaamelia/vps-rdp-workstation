@@ -106,20 +106,20 @@ Wave 3 (Integration):
 
 ## TODOs
 
-- [ ] 1. Install Modern CLI Tools (apt/cargo)
+- [x] 1. Install Modern CLI Tools (apt/cargo)
   **What to do**:
   - Update `roles/tui-tools/tasks/main.yml` to include: `git-delta`, `duf`, `bat` (ensure installed), `fd-find`.
   - NOTE: `yazi` might need cargo or separate binary install if not in repo. Check availability first, fallback to cargo/binary.
   **Verification**: `delta --version`, `duf --version`
 
-- [ ] 2. Install Lazydocker
+- [x] 2. Install Lazydocker
   **What to do**:
   - Add task to `roles/docker/tasks/main.yml` (or `productivity`).
   - Fetch latest release from GitHub releases.
   - Install to `/usr/local/bin`.
   **Verification**: `lazydocker --version`
 
-- [ ] 3. Install Modern Icon Themes
+- [x] 3. Install Modern Icon Themes
   **What to do**:
   - Update `roles/desktop/tasks/main.yml`.
   - Clone **Tela-circle** (vinceliuice/Tela-circle-icon-theme).

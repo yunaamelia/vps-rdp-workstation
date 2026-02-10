@@ -43,6 +43,40 @@
     depth: 1
   tags: [desktop, theme, icons]
 
+- name: Clone Tela-circle icon theme
+  ansible.builtin.git:
+    repo: https://github.com/vinceliuice/Tela-circle-icon-theme.git
+    dest: /tmp/Tela-circle
+    depth: 1
+  tags: [desktop, theme, icons]
+
+- name: Install Tela-circle icon theme
+  ansible.builtin.command:
+    cmd: ./install.sh -d /home/{{ vps_username }}/.local/share/icons
+    chdir: /tmp/Tela-circle
+    creates: /home/{{ vps_username }}/.local/share/icons/Tela-circle
+  become: true
+  become_user: "{{ vps_username }}"
+  when: not ansible_check_mode
+  tags: [desktop, theme, icons]
+
+- name: Clone Qogir icon theme
+  ansible.builtin.git:
+    repo: https://github.com/vinceliuice/Qogir-icon-theme.git
+    dest: /tmp/Qogir
+    depth: 1
+  tags: [desktop, theme, icons]
+
+- name: Install Qogir icon theme
+  ansible.builtin.command:
+    cmd: ./install.sh -d /home/{{ vps_username }}/.local/share/icons
+    chdir: /tmp/Qogir
+    creates: /home/{{ vps_username }}/.local/share/icons/Qogir
+  become: true
+  become_user: "{{ vps_username }}"
+  when: not ansible_check_mode
+  tags: [desktop, theme, icons]
+
 - name: Install Firefox ESR
   ansible.builtin.apt:
     name: firefox-esr
@@ -485,6 +519,18 @@
 - name: Clean up Window Title temporary files
   ansible.builtin.file:
     path: /tmp/window-title
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Clean up Tela-circle temporary files
+  ansible.builtin.file:
+    path: /tmp/Tela-circle
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Clean up Qogir temporary files
+  ansible.builtin.file:
+    path: /tmp/Qogir
     state: absent
   tags: [desktop, cleanup]
 

@@ -1,38 +1,36 @@
 ---
 - name: Detect Plasma packaging tool (kpackagetool6)
-  ansible.builtin.command:
-    cmd: 'command -v kpackagetool6'
+  ansible.builtin.shell:
+    cmd: "which kpackagetool6 || true"
   changed_when: false
-  failed_when: false
   register: plasma_kpackagetool6_check
   tags: [desktop, kde]
 
 - name: Detect Plasma packaging tool (kpackagetool5)
-  ansible.builtin.command:
-    cmd: 'command -v kpackagetool5'
+  ansible.builtin.shell:
+    cmd: "which kpackagetool5 || true"
   changed_when: false
-  failed_when: false
   register: plasma_kpackagetool5_check
   tags: [desktop, kde]
 
 - name: Set Plasma packaging tool command for Plasma 6
   ansible.builtin.set_fact:
-    plasma_tool_cmd: '{{ plasma_kpackagetool6_check.stdout | trim }}'
-  when: plasma_kpackagetool6_check.rc == 0
+    plasma_tool_cmd: 'kpackagetool6'
+  when: plasma_kpackagetool6_check.stdout | length > 0
   tags: [desktop, kde]
 
 - name: Set Plasma packaging tool command for Plasma 5
   ansible.builtin.set_fact:
-    plasma_tool_cmd: '{{ plasma_kpackagetool5_check.stdout | trim }}'
+    plasma_tool_cmd: 'kpackagetool5'
   when:
-    - plasma_kpackagetool6_check.rc != 0
-    - plasma_kpackagetool5_check.rc == 0
+    - plasma_kpackagetool6_check.stdout | length == 0
+    - plasma_kpackagetool5_check.stdout | length > 0
   tags: [desktop, kde]
 
 - name: Fail if no Plasma packaging tool found
   ansible.builtin.fail:
     msg: 'Neither kpackagetool6 nor kpackagetool5 found; Plasma tooling is required.'
   when:
-    - plasma_kpackagetool6_check.rc != 0
-    - plasma_kpackagetool5_check.rc != 0
+    - plasma_kpackagetool6_check.stdout | length == 0
+    - plasma_kpackagetool5_check.stdout | length == 0
   tags: [desktop, kde]

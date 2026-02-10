@@ -29,3 +29,6 @@
   - **Sysctl**: Sets `vfs_cache_pressure=50`, `dirty_ratio=10`, `dirty_background_ratio=5`.
 - **Playbook Integrity**: `ansible-playbook --check` passed initial validation steps (Variable verification, Directory creation, Common role setup, Security role setup, Fonts download). Failed later due to missing artifacts from skipped execution steps (Oh My Zsh template), which is expected behavior in a pure check run on a clean environment.
 - **Validation Script**: `tests/validate.sh` confirmed to exist with 30 production-readiness checks covering functional requirements, security, quality, and documentation.
+
+## Sysctl Configuration
+- **Compliance Fix**: Updated `roles/system-performance/tasks/main.yml` to store sysctl settings in `/etc/sysctl.d/99-workstation.conf` using the `sysctl_file` parameter. This prevents modifying the default `/etc/sysctl.conf` and ensures better separation of concerns for workstation-specific tuning.

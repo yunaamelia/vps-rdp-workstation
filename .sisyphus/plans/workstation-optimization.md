@@ -36,17 +36,17 @@
 Transform the standard Ansible setup into a "Power User" workstation with 2025-era tooling and optimizations.
 
 ### Concrete Deliverables
-- [ ] `/etc/sysctl.d/99-workstation.conf` with tuned parameters
-- [ ] `/etc/udev/rules.d/60-io-scheduler.rules` for I/O tuning
-- [ ] `/etc/fonts/conf.d/10-rendering.conf` for font quality
-- [ ] Installed packages: `git-delta`, `duf`, `yazi`, `lazydocker`
-- [ ] Icon themes in `~/.local/share/icons`
+- [x] `/etc/sysctl.d/99-workstation.conf` with tuned parameters
+- [x] `/etc/udev/rules.d/60-io-scheduler.rules` for I/O tuning
+- [x] `/etc/fonts/conf.d/10-rendering.conf` for font quality
+- [x] Installed packages: `git-delta`, `duf`, `yazi`, `lazydocker`
+- [x] Icon themes in `~/.local/share/icons`
 
 ### Definition of Done
-- [ ] All new tools (`delta`, `duf`, `yazi`) execute successfully
-- [ ] Sysctl settings persist after reload
-- [ ] Font rendering config is active
-- [ ] Starship prompt loads instantly (<50ms)
+- [x] All new tools (`delta`, `duf`, `yazi`) execute successfully
+- [x] Sysctl settings persist after reload
+- [x] Font rendering config is active
+- [x] Starship prompt loads instantly (<50ms)
 
 ---
 

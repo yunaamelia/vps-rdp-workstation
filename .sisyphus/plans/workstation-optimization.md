@@ -3,14 +3,14 @@
 ## TL;DR
 
 > **Quick Summary**: Comprehensive modernization of the workstation with best-in-class UI/UX (icons, fonts), deep performance tuning (kernel, I/O, ZRAM), and a suite of modern CLI/productivity tools.
-> 
+>
 > **Deliverables**:
 > - Modern Icon Themes (Tela-circle, Qogir)
 > - Optimized Font Rendering (LCD subpixel)
 > - Performance Tunings (ZRAM, BBR, I/O Scheduler, Cache Pressure)
 > - Modern CLI Toolset (eza, fzf, delta, lazydocker, yazi, duf)
 > - Optimized Starship Prompt
-> 
+>
 > **Estimated Effort**: Medium
 > **Parallel Execution**: YES - 3 Waves
 > **Critical Path**: Repo Updates → Package Installs → Config Application

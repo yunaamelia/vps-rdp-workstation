@@ -23,7 +23,7 @@ platforms:
     # debian:trixie base image might not have systemd installed by default
     # Use raw image and install python manually in prepare step, or pre-install via shell
     # NOTE: We force python3 install via command because raw image lacks it, causing ansible to fail gathering facts
-    command: /bin/bash -c "apt-get update && apt-get install -y python3 python3-pip && while true; do sleep 1000; done"
+    command: /bin/bash -c "apt-get update && apt-get install -y python3 python3-pip && if [ -x /lib/systemd/systemd ]; then /lib/systemd/systemd; else echo 'Systemd not found, sleeping' && while true; do sleep 1000; done; fi"
     tmpfs:
       - /run
       - /tmp

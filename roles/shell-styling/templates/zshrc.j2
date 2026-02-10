@@ -184,6 +184,10 @@ if (( $+commands[bat] )) || (( $+commands[batcat] )); then
   export MANROFFOPT="-c"
 fi
 
+if (( $+commands[delta] )); then
+  alias diff='delta'
+fi
+
 alias ..='cd ..'
 alias ...='cd ../..'
 alias ....='cd ../../..'

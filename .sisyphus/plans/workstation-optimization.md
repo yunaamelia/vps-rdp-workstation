@@ -127,7 +127,7 @@ Wave 3 (Integration):
   - Run their install scripts (usually `./install.sh -d ~/.local/share/icons`).
   **Verification**: `ls ~/.local/share/icons/Tela-circle`
 
-- [ ] 4. Apply Deep Performance Tunings
+- [x] 4. Apply Deep Performance Tunings
   **What to do**:
   - Update `roles/system-performance/tasks/main.yml`.
   - Sysctl: `vm.vfs_cache_pressure=50`, `vm.dirty_ratio=10`, `vm.dirty_background_ratio=5`.
@@ -135,14 +135,14 @@ Wave 3 (Integration):
   - Enable `systemd-oomd` if available (Debian 13 default).
   **Verification**: `sysctl -a | grep cache_pressure`
 
-- [ ] 5. Configure Font Rendering
+- [x] 5. Configure Font Rendering
   **What to do**:
   - Update `roles/fonts/tasks/main.yml`.
   - Create `/home/{{ vps_username }}/.config/fontconfig/conf.d/10-rendering.conf`.
   - Settings: `antialias=true`, `hinting=true`, `hintstyle=hintslight`, `rgba=rgb`, `lcdfilter=lcddefault`.
   **Verification**: File existence and content check.
 
-- [ ] 6. Patch Terminal Configuration
+- [x] 6. Patch Terminal Configuration
   **What to do**:
   - Edit `roles/shell-styling/templates/starship.toml.j2`.
   - Add `scan_timeout = 10` (ms) to root.

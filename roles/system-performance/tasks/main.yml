@@ -50,6 +50,60 @@
   ignore_errors: true
   tags: [tools, performance]
 
+- name: Optimize VFS cache pressure
+  ansible.posix.sysctl:
+    name: vm.vfs_cache_pressure
+    value: '50'
+    state: present
+    reload: true
+  tags: [performance, sysctl]
+
+- name: Optimize dirty ratio
+  ansible.posix.sysctl:
+    name: vm.dirty_ratio
+    value: '10'
+    state: present
+    reload: true
+  tags: [performance, sysctl]
+
+- name: Optimize dirty background ratio
+  ansible.posix.sysctl:
+    name: vm.dirty_background_ratio
+    value: '5'
+    state: present
+    reload: true
+  tags: [performance, sysctl]
+
+- name: Configure I/O schedulers via udev
+  ansible.builtin.copy:
+    dest: /etc/udev/rules.d/60-io-scheduler.rules
+    content: |
+      # NVMe SSDs - use 'none' scheduler (let device handle it)
+      ACTION=="add|change", KERNEL=="nvme[0-9]n[0-9]", ATTR{queue/scheduler}="none"
+
+      # SATA SSDs (non-rotational) - use 'mq-deadline'
+      ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="0", ATTR{queue/scheduler}="mq-deadline"
+
+      # Rotating HDDs - use 'bfq' for desktop responsiveness
+      ACTION=="add|change", KERNEL=="sd[a-z]", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
+    mode: '0644'
+  notify: Reload udev rules
+  tags: [performance, udev]
+
+- name: Install systemd-oomd
+  ansible.builtin.apt:
+    name: systemd-oomd
+    state: present
+  tags: [performance, oomd]
+
+- name: Enable systemd-oomd service
+  ansible.builtin.service:
+    name: systemd-oomd
+    state: started
+    enabled: true
+  ignore_errors: true
+  tags: [performance, oomd]
+
 - name: Install duf (du alternative)
   ansible.builtin.shell: |
     DUF_VERSION=$(curl -s https://api.github.com/repos/muesli/duf/releases/latest | grep -oP '"tag_name": "v\K[^"]+')

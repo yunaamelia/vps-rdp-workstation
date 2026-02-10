@@ -30,7 +30,7 @@ provisioner:
     defaults:
       callbacks_enabled: profile_tasks
       stdout_callback: yaml
-      roles_path: ../../roles
+      roles_path: /home/apexdev/Desktop/Testing/vps-rdp-workstation/roles
   playbooks:
     converge: converge.yml
     verify: verify.yml

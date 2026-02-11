@@ -335,7 +335,7 @@
     repo: https://github.com/peterfajdiga/karousel.git
     dest: /tmp/karousel
     depth: 1
-    version: main
+    version: master
   tags: [desktop, tiling]
 
 - name: Install Karousel

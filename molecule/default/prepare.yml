@@ -3,9 +3,7 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: Bootstrap Python
-      ansible.builtin.raw: |
-        while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1; do sleep 5; done
-        apt-get update && apt-get install -y python3 python3-pip sudo
-      changed_when: true
+    - name: Verify Python
+      ansible.builtin.raw: python3 --version
+      changed_when: false
       ignore_errors: true

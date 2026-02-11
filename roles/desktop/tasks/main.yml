@@ -358,15 +358,23 @@
     version: master
   tags: [desktop, panel]
 
-- name: Install Window Title Applet
-  ansible.builtin.command:
-    cmd: "{{ plasma_tool_cmd }} -t Plasma/Applet -i ."
-    chdir: /tmp/window-title
-  become: true
-  become_user: "{{ vps_username }}"
-  register: window_title_install
-  changed_when: window_title_install.rc == 0
-  failed_when: window_title_install.rc != 0 and 'already installed' not in window_title_install.stderr
+- name: Create Window Title Applet directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/plasma/plasmoids/org.kde.windowtitle"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, panel]
+
+- name: Install Window Title Applet (Manual Copy)
+  ansible.builtin.copy:
+    src: /tmp/window-title/
+    dest: "/home/{{ vps_username }}/.local/share/plasma/plasmoids/org.kde.windowtitle/"
+    remote_src: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
   when: vps_install_desktop | default(true)
   tags: [desktop, panel]
 

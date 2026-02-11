@@ -351,7 +351,7 @@
 
 - name: Clone Window Title Applet
   ansible.builtin.git:
-    repo: https://github.com/psifidotos/applet-window-title.git
+    repo: https://github.com/dhruv8sh/plasma6-window-title-applet.git
     dest: /tmp/window-title
     depth: 1
     version: master

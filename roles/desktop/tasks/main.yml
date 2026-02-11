@@ -28,7 +28,8 @@
       - breeze
       - breeze-gtk-theme
       - kde-config-gtk-style
-      - qml6-module-org-kde-notifications # Required by Karousel
+      - qml6-module-org-kde-notifications
+      - qml6-module-org-kde-kirigami
     state: present
   when: vps_install_desktop | default(true)
   tags: [desktop, kde]

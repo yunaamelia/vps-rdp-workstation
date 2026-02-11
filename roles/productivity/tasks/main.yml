@@ -1,11 +1,12 @@
 # Productivity Role
 ---
-- name: Install thefuck via pipx
-  ansible.builtin.shell: |
-    sudo -u {{ vps_username }} pipx install thefuck
-  args:
-    creates: "/home/{{ vps_username }}/.local/bin/thefuck"
-  become: true
+- name: Install thefuck via pipx (Python 3.12+ compatible fork)
+  community.general.pipx:
+    name: thefuck
+    source: "git+https://github.com/vo0ov/thefuck.git@master"
+    state: install
+    executable: /usr/bin/pipx
+  when: install_productivity | default(true)
   tags: [tools, productivity]
 
 - name: Patch thefuck for Python 3.12+ (replace distutils with shutil)

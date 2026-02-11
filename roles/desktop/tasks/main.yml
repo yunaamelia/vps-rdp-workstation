@@ -82,15 +82,6 @@
   # Installs system-wide to /usr/share
   tags: [desktop, theme]
 
-- name: Install WhiteSur-kde theme
-  ansible.builtin.command:
-    cmd: ./install.sh -a
-    chdir: /tmp/WhiteSur
-  become: true
-  changed_when: true
-  # Installs system-wide to /usr/share
-  tags: [desktop, theme]
-
 - name: Apply WhiteSur-Dark LookAndFeel
   ansible.builtin.command:
     cmd: lookandfeeltool -a WhiteSur-Dark
@@ -98,6 +89,24 @@
   become_user: "{{ vps_username }}"
   changed_when: true
   tags: [desktop, theme]
+
+- name: Clone La Capitaine icon theme
+  ansible.builtin.git:
+    repo: https://github.com/keeferrourke/la-capitaine-icon-theme.git
+    dest: "/home/{{ vps_username }}/.local/share/icons/La-Capitaine"
+    version: master
+    depth: 1
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [desktop, theme, icons]
+
+- name: Configure La Capitaine icons in KDE
+  ansible.builtin.command:
+    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kdeglobals --group Icons --key Theme La-Capitaine"
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  tags: [desktop, theme, icons]
 
 - name: Remove temporary WhiteSur directory
   ansible.builtin.file:

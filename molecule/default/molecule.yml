@@ -65,7 +65,6 @@ lint: |
 scenario:
   name: default
   test_sequence:
-    - dependency
     - syntax
     - create
     - prepare

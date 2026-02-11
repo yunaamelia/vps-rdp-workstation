@@ -32,6 +32,11 @@ platforms:
 
 provisioner:
   name: ansible
+  env:
+    # Fix duplicate collection warnings by strictly defining the path
+    ANSIBLE_COLLECTIONS_PATH: /usr/lib/python3/dist-packages/ansible_collections:/home/apexdev/.ansible/collections
+    # Suppress deprecation warnings
+    ANSIBLE_DEPRECATION_WARNINGS: "False"
   config_options:
     defaults:
       callbacks_enabled: profile_tasks

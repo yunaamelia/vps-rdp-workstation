@@ -1,21 +1,23 @@
-# Component: Security Role
+# Security Role
 
-## Critical Mission
-**Zero-fail zone.** Configures the firewall, SSH access, and intrusion prevention. A mistake here locks out the user.
+## OVERVIEW
+Hardens network and access security via UFW, Fail2ban, and SSH configuration (Zero-fail zone).
 
-## Enforced Rules
-1.  **Execution Order**: MUST be Phase 2 (immediately after `common`).
-2.  **Fail-Safe**: `ufw` must allow SSH (port `vps_ssh_port`) BEFORE enabling.
-3.  **Root Access**: `vps_ssh_root_login` defaults to `false`. Do not change default without explicit user request.
-4.  **Fail2Ban**: Jails for SSH (`sshd`) and XRDP (`xrdp-sesman`) are mandatory.
+## WHERE TO LOOK
+| Component | Location | Notes |
+|-----------|----------|-------|
+| **Firewall** | `tasks/main.yml` | UFW allow rules for `vps_ssh_port` and `vps_xrdp_port`. |
+| **SSH Config** | `tasks/main.yml` | Uses `lineinfile` for `sshd_config` hardening. |
+| **Fail2Ban** | `templates/jail.local.j2` | Custom jail definitions for SSH and XRDP. |
+| **Updates** | `tasks/main.yml` | Configures `unattended-upgrades` for security patches. |
 
-## Task Specifics
-- **UFW**: Default policy is `deny` incoming. Explicit allow for SSH/XRDP.
-- **SSH Hardening**: `PermitRootLogin`, `PasswordAuthentication`, `PubkeyAuthentication` managed via templates.
-- **Unattended Upgrades**: Enabled for security updates only.
+## CONVENTIONS
+*   **Fail-Safe Ordering**: UFW allow rules MUST be processed before enabling the firewall to prevent lockout.
+*   **Root Access**: `vps_ssh_root_login` defaults to `false`. Override only in inventory, never in defaults.
+*   **Port Visibility**: Only ports explicitly defined in variables (`vps_ssh_port`, `vps_xrdp_port`) are opened.
+*   **Idempotency**: SSH configuration uses regex-based `lineinfile` tasks to ensure safe, repeatable edits.
 
-## Validation
-After changes, verify:
-- SSH port is accessible.
-- UFW status is active.
-- No syntax errors in `sshd_config` (`sshd -t`).
+## ANTI-PATTERNS
+*   **Manual Firewall Edits**: Do not run `ufw` commands manually; state will drift from Ansible configuration.
+*   **Ignoring Lockout Risk**: Never apply this role without verifying SSH key access or having VPS console access.
+*   **Blind Reordering**: This role MUST run after `common` but before any service roles (like `desktop` or `docker`).

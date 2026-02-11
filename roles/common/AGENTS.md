@@ -1,18 +1,17 @@
-# Component: Common Role
+# ROLE: COMMON (FOUNDATION)
 
-## Critical Mission
-The foundation layer. Establishes the environment, creates users, and manages state. Dependency for 20+ other roles.
+**Criticality**: High. Dependency for 20+ roles.
 
-## Key Responsibilities
-- **User Creation**: Creates `vps_username`.
-  - **WARNING**: Handles `vps_user_password_hash`. MUST use `no_log: true` to prevent leaking the hash.
-- **State Tracking**: Creates `/var/lib/vps-setup/` directory.
-- **Package Base**: Installs `curl`, `git`, `build-essential`, `python3-pip`.
+## RESPONSIBILITIES
+1.  **User**: Create `vps_username` (WARNING: Handles password hash).
+2.  **State**: Create `/var/lib/vps-setup/`.
+3.  **Base**: Install curl, git, build-essential.
 
-## Shared Variables
-- `vps_username`: Used globally. Defined here.
-- `vps_user_group`: Primary group for the user.
+## CONVENTIONS
+*   **Secret Handling**: User creation task MUST use `no_log: true` for password hash.
+*   **Variables**: `vps_username` defined here, used globally.
+*   **Apt**: Only this role runs `update_cache: yes`.
 
-## Modification Risks
-- Changing variable names here breaks the entire playbook.
-- Ensure `update_cache: yes` is maintained in the initial apt task.
+## ANTI-PATTERNS
+*   **Renaming Variables**: Changing `vps_username` breaks everything.
+*   **Skipping**: This role cannot be skipped; it establishes the execution user.

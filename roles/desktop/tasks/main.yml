@@ -402,13 +402,15 @@
 #  Performance & Optimization
 # =============================================================================
 
-- name: Disable Baloo file indexing
-  ansible.builtin.command: balooctl disable
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: false
-  register: baloo_disable
-  failed_when: baloo_disable.rc != 0 and 'Failed to connect' not in baloo_disable.stderr
+- name: Disable Baloo file indexing (config)
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/baloofilerc"
+    section: "Basic Settings"
+    option: "Indexing-Enabled"
+    value: "false"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
   tags: [desktop, performance]
 
 - name: Create fontconfig directory

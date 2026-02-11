@@ -1,526 +1,106 @@
 # Desktop Role - KDE Plasma + XRDP + Nordic Theme
 # Full desktop environment for RDP access
 ---
-- name: Detect Plasma tooling
-  ansible.builtin.import_tasks: 'detect_plasma.yml'
-  when: vps_install_desktop | default(true)
-
-# =============================================================================
-#  KDE Plasma Desktop Installation
-# =============================================================================
-
-- name: Install KDE Plasma Desktop
+- name: Install desktop dependencies (Fish, Git, Python DBus)
   ansible.builtin.apt:
     name:
-      - kde-plasma-desktop
-      - kde-spectacle
-      - sddm
+      - fish
+      - git
+      - python3-dbus
+      - qdbus-qt6
+      - libkf6config-bin
       - plasma-workspace
-      - konsole
-      - dolphin
-      - ark
-      - kate
-      - okular
-      - gwenview
-      - plasma-nm
-      - plasma-pa
-      - kscreen
-      - breeze
-      - breeze-gtk-theme
-      - kde-config-gtk-style
-      - qml6-module-org-kde-notifications
-      - qml6-module-org-kde-kirigami
     state: present
-  when: vps_install_desktop | default(true)
-  tags: [desktop, kde]
+  tags: [desktop, dependencies]
 
-- name: Install icon theme
-  ansible.builtin.apt:
-    name: papirus-icon-theme
-    state: present
-  when: vps_install_desktop | default(true)
-  tags: [desktop, kde]
-
-- name: Clone La Capitaine icon theme
-  ansible.builtin.git:
-    repo: https://github.com/keeferrourke/la-capitaine-icon-theme.git
-    dest: "/home/{{ vps_username }}/.local/share/icons/La-Capitaine"
-    depth: 1
-    version: master
-  when: vps_install_desktop | default(true)
-  tags: [desktop, theme, icons]
-
-- name: Install Firefox ESR
-  ansible.builtin.apt:
-    name: firefox-esr
-    state: present
-  when: (install_firefox | default(true)) and (vps_install_desktop | default(true))
-  tags: [desktop, browser]
-
-# =============================================================================
-#  XRDP Installation and Configuration
-# =============================================================================
-
-- name: Install XRDP
-  ansible.builtin.apt:
-    name:
-      - xrdp
-      - xorgxrdp
-    state: present
-  when: vps_install_xrdp
-  tags: [desktop, xrdp]
-
-- name: Add xrdp user to ssl-cert group
-  ansible.builtin.user:
-    name: xrdp
-    groups: ssl-cert
-    append: true
-  when: vps_install_xrdp
-  tags: [desktop, xrdp]
-
-- name: Configure XRDP main settings
-  ansible.builtin.template:
-    src: xrdp.ini.j2
-    dest: /etc/xrdp/xrdp.ini
-    mode: '0644'
-    backup: true
-  when: vps_install_xrdp
-  notify: Restart XRDP
-  tags: [desktop, xrdp]
-
-- name: Configure XRDP session manager
-  ansible.builtin.template:
-    src: sesman.ini.j2
-    dest: /etc/xrdp/sesman.ini
-    mode: '0644'
-    backup: true
-  when: vps_install_xrdp
-  notify: Restart XRDP
-  tags: [desktop, xrdp]
-
-- name: Configure XRDP session startup
-  ansible.builtin.template:
-    src: startwm.sh.j2
-    dest: /etc/xrdp/startwm.sh
-    mode: '0755'
-  when: vps_install_xrdp
-  notify: Restart XRDP
-  tags: [desktop, xrdp]
-
-- name: Create user .xsession file
-  ansible.builtin.copy:
-    dest: "/home/{{ vps_username }}/.xsession"
-    content: |
-      #!/bin/bash
-      export XDG_SESSION_TYPE=x11
-      export XDG_CURRENT_DESKTOP=KDE
-      export KDE_SESSION_VERSION=5
-      export QT_STYLE_OVERRIDE=kvantum
-      startplasma-x11
-    mode: '0755'
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-  when: vps_install_xrdp
-  tags: [desktop, xrdp]
-
-# =============================================================================
-#  Nordic Theme Installation (using EliverLara/Nordic-kde)
-# =============================================================================
-
-- name: Create themes directory for user
+- name: Create local config directory
   ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/themes"
+    path: "/home/{{ vps_username }}/.local/share/kde-config-files"
     state: directory
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0755'
-  tags: [desktop, theme]
+  tags: [desktop, config]
 
-- name: Create Plasma look-and-feel directory for user
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/plasma/look-and-feel"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  tags: [desktop, theme]
-
-- name: Clone Nordic KDE theme
+- name: Clone Shalva97 KDE Configuration Files
   ansible.builtin.git:
-    repo: https://github.com/EliverLara/Nordic-kde.git
-    dest: /tmp/Nordic-kde
-    depth: 1
+    repo: https://github.com/shalva97/kde-configuration-files.git
+    dest: "/home/{{ vps_username }}/.local/share/kde-config-files"
     version: master
-  when: vps_theme_variant == 'nordic'
-  tags: [desktop, theme]
+    force: true
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [desktop, config]
 
-- name: Install Nordic Plasma look-and-feel
-  ansible.builtin.copy:
-    src: /tmp/Nordic-kde/
-    dest: "/home/{{ vps_username }}/.local/share/plasma/look-and-feel/Nordic/"
-    remote_src: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  when: vps_theme_variant == 'nordic'
-  tags: [desktop, theme]
+- name: Detect kwriteconfig binary
+  ansible.builtin.shell: |
+    if command -v kwriteconfig6 >/dev/null; then echo "kwriteconfig6";
+    elif command -v kwriteconfig5 >/dev/null; then echo "kwriteconfig5";
+    else echo "kwriteconfig"; fi
+  register: kwriteconfig_bin
+  changed_when: false
+  tags: [desktop, config]
 
-- name: Remove stale Catppuccin clone
-  ansible.builtin.file:
-    path: /tmp/catppuccin-kde
-    state: absent
-  tags: [desktop, theme]
+- name: Patch setupKDE.fish for correct kwriteconfig version
+  ansible.builtin.replace:
+    path: "/home/{{ vps_username }}/.local/share/kde-config-files/scripts/setupKDE.fish"
+    regexp: 'kwriteconfig5'
+    replace: "{{ kwriteconfig_bin.stdout }}"
+  tags: [desktop, config]
 
-- name: Clone Catppuccin KDE theme
-  ansible.builtin.git:
-    repo: https://github.com/catppuccin/kde.git
-    dest: /tmp/catppuccin-kde
-    depth: 1
-    version: main
-  when: vps_theme_variant == 'catppuccin-mocha'
-  tags: [desktop, theme]
+- name: Ensure qdbus alias exists if needed
+  ansible.builtin.shell: |
+    if ! command -v qdbus >/dev/null; then
+      if command -v qdbus-qt6 >/dev/null; then ln -sf $(which qdbus-qt6) /usr/local/bin/qdbus; fi
+    fi
+  changed_when: false
+  tags: [desktop, config]
 
-- name: Install Catppuccin KDE theme
-  ansible.builtin.shell:
-    cmd: set -o pipefail && echo "y\nn" | ./install.sh 1 13 1
-    chdir: /tmp/catppuccin-kde
+- name: Run setupKDE.fish
+  ansible.builtin.command:
+    cmd: fish setupKDE.fish
+    chdir: "/home/{{ vps_username }}/.local/share/kde-config-files/scripts"
   become: true
   become_user: "{{ vps_username }}"
   changed_when: true
-  when: vps_theme_variant == 'catppuccin-mocha' and not ansible_check_mode
-  tags: [desktop, theme]
+  tags: [desktop, config]
 
-# (Polonium removed in favor of Karousel)
-
-# =============================================================================
-#  KDE Configuration for RDP Performance
-# =============================================================================
-
-- name: Create KDE config directory for user
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.config"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  tags: [desktop, kde]
-
-- name: Disable KDE compositor for RDP performance
-  ansible.builtin.copy:
-    dest: "/home/{{ vps_username }}/.config/kwinrc"
-    content: |
-      [Compositing]
-      Enabled=false
-      OpenGLIsUnsafe=true
-
-      [Windows]
-      Placement=Smart
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  when: not (vps_kde_compositor_enabled | default(false))
-  tags: [desktop, kde]
-
-- name: Configure KDE global settings (Nordic)
-  ansible.builtin.copy:
-    dest: "/home/{{ vps_username }}/.config/kdeglobals"
-    content: |
-      [General]
-      ColorScheme=Nordic
-
-      [Icons]
-      Theme={{ vps_icon_theme }}
-
-      [KDE]
-      AnimationDurationFactor=0.5
-      SingleClick=false
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  when: vps_theme_variant == 'nordic'
-  tags: [desktop, kde]
-
-- name: Configure KDE global settings (Catppuccin)
-  ansible.builtin.template:
-    src: ../roles/catppuccin-theme/templates/kdeglobals.j2
-    dest: "/home/{{ vps_username }}/.config/kdeglobals"
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  vars:
-    vps_system_font: "JetBrainsMono Nerd Font"
-    vps_icon_theme_var: "{{ vps_icon_theme }}"
-    vps_kde_lookandfeel: "Catppuccin-Mocha-Blue"
-  when: vps_theme_variant == 'catppuccin-mocha'
-  tags: [desktop, kde]
-
-# =============================================================================
-#  Power User Tools & Enhancements
-# =============================================================================
-
-- name: Install essential KDE tools
-  ansible.builtin.apt:
-    name:
-      - python3-pip
-      - pipx
-      - python3-venv
-      - yakuake
-      - qt5-style-kvantum
-      - qt6-style-kvantum
-      - kompare
-      - filelight
-      - krdc
-      - smb4k
-      - sweeper
-      - kwalletmanager
-      - dolphin-plugins
-      - kcalc
-      - kdeconnect
-      - ffmpegthumbs
-      - kdegraphics-thumbnailers
-      - svgpart
-      - markdownpart
-      # kpackagetool5 is replaced by dynamic detection variable
-    state: present
-  when: vps_install_desktop | default(true)
-  tags: [desktop, tools]
-
-- name: Install Awesome KDE recommendations
-  ansible.builtin.apt:
-    name:
-      - krusader
-      - okteta
-      - ghostwriter
-      - ksystemlog
-      - kcolorchooser
-      - krename
-    state: present
-  when: vps_install_desktop | default(true)
-  tags: [desktop, tools, awesome-kde]
-
-- name: Create Kvantum config directory
-  ansible.builtin.file:
-    path: '/home/{{ vps_username }}/.config/Kvantum'
-    state: directory
-    owner: '{{ vps_username }}'
-    group: '{{ vps_username }}'
-    mode: '0755'
-    recurse: true
-  tags: [desktop, theme]
-
-- name: Set Kvantum theme
-  community.general.ini_file:
-    path: '/home/{{ vps_username }}/.config/Kvantum/kvantum.kvconfig'
-    section: General
-    option: theme
-    value: "{{ 'Nordic' if vps_theme_variant == 'nordic' else 'Catppuccin-Mocha-Blue' }}"
-    create: true
-    owner: '{{ vps_username }}'
-    group: '{{ vps_username }}'
-    mode: '0644'
-  when: vps_theme_variant in ['nordic', 'catppuccin-mocha']
-  tags: [desktop, theme]
-
-# Plasma containment IDs vary per user/session; avoid pre-seeding wallpaper config here.
-
-- name: Create KWin scripts directory
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/kwin/scripts"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  tags: [desktop, tiling]
-
-- name: Download Karousel release
-  ansible.builtin.get_url:
-    url: https://github.com/peterfajdiga/karousel/releases/download/v0.15/karousel_0_15.tar.gz
-    dest: /tmp/karousel.tar.gz
-    mode: '0644'
-  tags: [desktop, tiling]
-
-- name: Install Karousel (extract)
-  ansible.builtin.unarchive:
-    src: /tmp/karousel.tar.gz
-    dest: "/home/{{ vps_username }}/.local/share/kwin/scripts/"
-    remote_src: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    creates: "/home/{{ vps_username }}/.local/share/kwin/scripts/karousel"
-  when: vps_install_desktop | default(true)
-  tags: [desktop, tiling]
-
-- name: Clone Window Title Applet
+- name: Clone WhiteSur-kde theme
   ansible.builtin.git:
-    repo: https://github.com/dhruv8sh/plasma6-window-title-applet.git
-    dest: /tmp/window-title
-    depth: 1
+    repo: https://github.com/vinceliuice/WhiteSur-kde.git
+    dest: /tmp/WhiteSur
     version: master
-  tags: [desktop, panel]
+    depth: 1
+  tags: [desktop, theme]
 
-- name: Create Window Title Applet directory
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/plasma/plasmoids/org.kde.windowtitle"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  tags: [desktop, panel]
+- name: Install WhiteSur-kde theme
+  ansible.builtin.command:
+    cmd: ./install.sh -a
+    chdir: /tmp/WhiteSur
+  become: true
+  changed_when: true
+  # Installs system-wide to /usr/share
+  tags: [desktop, theme]
 
-- name: Install Window Title Applet (Manual Copy)
-  ansible.builtin.copy:
-    src: /tmp/window-title/
-    dest: "/home/{{ vps_username }}/.local/share/plasma/plasmoids/org.kde.windowtitle/"
-    remote_src: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  when: vps_install_desktop | default(true)
-  tags: [desktop, panel]
+- name: Install WhiteSur-kde theme
+  ansible.builtin.command:
+    cmd: ./install.sh -a
+    chdir: /tmp/WhiteSur
+  become: true
+  changed_when: true
+  # Installs system-wide to /usr/share
+  tags: [desktop, theme]
 
-- name: Create autostart directory
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.config/autostart"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
+- name: Apply WhiteSur-Dark LookAndFeel
+  ansible.builtin.command:
+    cmd: lookandfeeltool -a WhiteSur-Dark
   become: true
   become_user: "{{ vps_username }}"
-  tags: [desktop, tools]
+  changed_when: true
+  tags: [desktop, theme]
 
-- name: Link Yakuake desktop file to autostart
+- name: Remove temporary WhiteSur directory
   ansible.builtin.file:
-    src: /usr/share/applications/org.kde.yakuake.desktop
-    dest: "/home/{{ vps_username }}/.config/autostart/org.kde.yakuake.desktop"
-    state: link
-  become: true
-  become_user: "{{ vps_username }}"
-  tags: [desktop, tools]
-
-# =============================================================================
-#  Performance & Optimization
-# =============================================================================
-
-- name: Disable Baloo file indexing (config)
-  community.general.ini_file:
-    path: "/home/{{ vps_username }}/.config/baloofilerc"
-    section: "Basic Settings"
-    option: "Indexing-Enabled"
-    value: "false"
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  tags: [desktop, performance]
-
-- name: Create fontconfig directory
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.config/fontconfig/conf.d"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  tags: [desktop, fonts]
-
-- name: Configure font rendering for RDP
-  ansible.builtin.copy:
-    dest: "/home/{{ vps_username }}/.config/fontconfig/conf.d/10-rdp-rendering.conf"
-    content: |
-      <?xml version='1.0'?>
-      <!DOCTYPE fontconfig SYSTEM 'fonts.dtd'>
-      <fontconfig>
-        <match target="font">
-          <edit mode="assign" name="rgba"><const>none</const></edit>
-          <edit mode="assign" name="hinting"><bool>true</bool></edit>
-          <edit mode="assign" name="hintstyle"><const>hintfull</const></edit>
-          <edit mode="assign" name="antialias"><bool>true</bool></edit>
-        </match>
-      </fontconfig>
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  tags: [desktop, fonts]
-
-- name: Set animation duration to zero
-  community.general.ini_file:
-    path: "/home/{{ vps_username }}/.config/kdeglobals"
-    section: "KDE"
-    option: "AnimationDurationFactor"
-    value: "0"
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  tags: [desktop, performance]
-
-- name: Create Akonadi config directory
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.config/akonadi"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  tags: [desktop, performance]
-
-- name: Disable Akonadi server
-  community.general.ini_file:
-    path: "/home/{{ vps_username }}/.config/akonadi/akonadiserverrc"
-    section: "General"
-    option: "StartServer"
-    value: "false"
-    create: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  tags: [desktop, performance]
-
-# =============================================================================
-#  Service Management
-# =============================================================================
-
-- name: Enable SDDM display manager
-  ansible.builtin.systemd:
-    name: sddm
-    enabled: true
-    state: started
-  tags: [desktop, sddm]
-
-- name: Enable and start XRDP service
-  ansible.builtin.systemd:
-    name: xrdp
-    enabled: true
-    state: started
-  when: vps_install_xrdp
-  tags: [desktop, xrdp]
-
-- name: Clean up temporary files
-  ansible.builtin.file:
-    path: /tmp/Nordic
+    path: /tmp/WhiteSur
     state: absent
   tags: [desktop, cleanup]
-
-- name: Clean up Catppuccin temporary files
-  ansible.builtin.file:
-    path: /tmp/catppuccin-kde
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Clean up Karousel temporary files
-  ansible.builtin.file:
-    path: /tmp/karousel
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Clean up Window Title temporary files
-  ansible.builtin.file:
-    path: /tmp/window-title
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Run desktop optimizations
-  ansible.builtin.include_tasks: optimizations.yml
-  tags: [desktop, optimization]
-
-- name: Log desktop role completion
-  ansible.builtin.debug:
-    msg: "✓ Desktop role completed - KDE Plasma + XRDP + Nordic theme"
-  tags: [desktop]

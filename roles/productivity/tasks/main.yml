@@ -44,7 +44,8 @@
       eval $(thefuck --alias)
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-  ignore_errors: true
+    create: true
+    mode: '0644'
   tags: [tools, productivity]
 
 - name: Log productivity role completion

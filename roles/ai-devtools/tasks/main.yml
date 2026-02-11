@@ -2,22 +2,23 @@
 ---
 - name: Install aider AI coding assistant (Official Installer)
   ansible.builtin.shell: |
+    set -o pipefail
     export AIDER_INSTALL_DIR="/usr/local/bin"
     curl -LsSf https://aider.chat/install.sh | sh
   args:
     creates: /usr/local/bin/aider
+    executable: /bin/bash
   become: true
-  changed_when: false
-  ignore_errors: true
   tags: [tools, ai]
 
 - name: Install shell-gpt via pipx
   ansible.builtin.shell: |
+    set -o pipefail
     sudo -u {{ vps_username }} pipx install shell-gpt
   args:
     creates: "/home/{{ vps_username }}/.local/bin/sgpt"
+    executable: /bin/bash
   become: true
-  ignore_errors: true
   tags: [tools, ai]
 
 - name: Create AI tools configuration note

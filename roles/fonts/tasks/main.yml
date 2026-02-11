@@ -54,18 +54,26 @@
   when: not ansible_check_mode
   tags: [fonts]
 
+- name: Cleanup stale Powerline clone (if corrupted)
+  ansible.builtin.file:
+    path: /tmp/powerline-fonts
+    state: absent
+  when: not ansible_check_mode
+  tags: [fonts]
+
 - name: Clone Powerline fonts repository
   ansible.builtin.git:
     repo: https://github.com/powerline/fonts.git
     dest: /tmp/powerline-fonts
     depth: 1
+    version: master
   when: not ansible_check_mode
   tags: [fonts]
 
 - name: Install Powerline fonts
   ansible.builtin.shell: |
     cd /tmp/powerline-fonts
-    ./install.sh
+    bash install.sh
   args:
     creates: /usr/share/fonts/truetype/powerline/DejaVu*
   when: not ansible_check_mode

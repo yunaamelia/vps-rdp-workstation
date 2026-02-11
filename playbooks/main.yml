@@ -233,7 +233,7 @@
         src: templates/summary-log.j2
         dest: "{{ vps_summary_log }}"
         mode: '0640'
-      ignore_errors: true
+      failed_when: false
       tags: always
 
     - name: Display completion message

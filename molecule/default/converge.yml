@@ -7,8 +7,39 @@
   become: true
   gather_facts: true
 
+  vars_files:
+    - ../../tests/strict_vars.yml
+
   roles:
+    # Phase 1: Core Foundation
     - role: common
     - role: security
+
+    # Phase 2: Visual & Terminal
+    - role: fonts
     - role: terminal
+    - role: shell-styling
     - role: zsh-enhancements
+    - role: catppuccin-theme
+
+    # Phase 3: Desktop Environment
+    # - role: desktop # Disabled to prevent timeout in CI
+    - role: kde-optimization
+
+    # Phase 4: Development Stack
+    - role: development
+    - role: docker
+    - role: editors
+
+    # Phase 5: Tool Suites (Alphabetical)
+    - role: ai-devtools
+    - role: cloud-native
+    - role: code-quality
+    - role: dev-debugging
+    - role: file-management
+    - role: log-visualization
+    - role: network-tools
+    - role: productivity
+    - role: system-performance
+    - role: text-processing
+    - role: tui-tools

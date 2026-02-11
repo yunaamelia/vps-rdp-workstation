@@ -2,20 +2,36 @@
 - name: Install KDE power tools
   ansible.builtin.apt:
     name:
-      - yakuake
-      - filelight
-      - ksystemlog
-      - kcalc
+      - kde-config-gtk-style
+      - kde-config-sddm
+      - kinfocenter
       - partitionmanager
+      - ksystemlog
     state: present
-  tags: [kde-opt]
+  when: vps_install_desktop | default(true)
+  tags: [kde-opt, tools]
+
+- name: Check if balooctl exists
+  ansible.builtin.command: which balooctl
+  register: balooctl_check
+  changed_when: false
+  failed_when: false
+  tags: [kde-opt, performance]
+
+- name: Check Baloo status
+  ansible.builtin.command: balooctl status
+  register: baloo_status
+  changed_when: false
+  failed_when: false
+  when: balooctl_check.rc == 0
+  tags: [kde-opt, performance]
 
 - name: Disable Baloo file indexing (service)
   ansible.builtin.command: balooctl disable
   become: true
   become_user: "{{ vps_username }}"
-  changed_when: false
-  ignore_errors: true
+  changed_when: "'Baloo is currently disabled' not in baloo_status.stdout"
+  when: balooctl_check.rc == 0 and 'Baloo is currently disabled' not in baloo_status.stdout
   tags: [kde-opt, performance]
 
 - name: Configure Baloo config file

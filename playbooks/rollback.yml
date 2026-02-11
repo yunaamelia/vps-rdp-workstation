@@ -61,6 +61,9 @@
         patterns: "*.backup"
       register: backup_files
 
+    - name: Collect service facts
+      ansible.builtin.service_facts:
+
     # =========================================================================
     # PHASE 2: Stop Services
     # =========================================================================
@@ -69,17 +72,22 @@
       ansible.builtin.systemd:
         name: xrdp
         state: stopped
-      ignore_errors: true
+      when: "'xrdp.service' in ansible_facts.services"
 
     - name: Stop fail2ban
       ansible.builtin.systemd:
         name: fail2ban
         state: stopped
-      ignore_errors: true
+      when: "'fail2ban.service' in ansible_facts.services"
 
     # =========================================================================
     # PHASE 3: Restore Configurations
     # =========================================================================
+
+    - name: Check for SSH backup
+      ansible.builtin.stat:
+        path: "{{ backup_dir }}/sshd_config.backup"
+      register: ssh_backup
 
     - name: Restore SSH configuration
       ansible.builtin.copy:
@@ -87,9 +95,14 @@
         dest: /etc/ssh/sshd_config
         remote_src: true
         backup: true
-      when: backup_files.matched > 0
-      ignore_errors: true
+        mode: '0644'
+      when: ssh_backup.stat.exists
       notify: Restart SSH
+
+    - name: Check for UFW rules backup
+      ansible.builtin.stat:
+        path: "{{ backup_dir }}/ufw-user.rules.backup"
+      register: ufw_backup
 
     - name: Restore UFW rules
       ansible.builtin.copy:
@@ -97,8 +110,8 @@
         dest: /etc/ufw/user.rules
         remote_src: true
         backup: true
-      when: backup_files.matched > 0
-      ignore_errors: true
+        mode: '0640'
+      when: ufw_backup.stat.exists
       notify: Reload UFW
 
     # =========================================================================
@@ -109,33 +122,45 @@
       ansible.builtin.systemd:
         name: sshd
         state: reloaded
-      ignore_errors: true
+      when: "'ssh.service' in ansible_facts.services or 'sshd.service' in ansible_facts.services"
 
     - name: Reload UFW
-      ansible.builtin.shell: ufw reload
-      ignore_errors: true
+      ansible.builtin.command: ufw reload
+      when: "'ufw.service' in ansible_facts.services"
+      changed_when: false
 
     # =========================================================================
     # PHASE 5: Cleanup (Optional)
     # =========================================================================
 
-    - name: Remove installation logs (optional)
-      ansible.builtin.file:
+    - name: Check for logs
+      ansible.builtin.stat:
         path: "{{ item }}"
-        state: absent
       loop:
         - /var/log/vps-setup.log
         - /var/log/vps-setup-error.log
         - /var/log/vps-setup-summary.log
+      register: log_files_check
       when: remove_logs | default(false)
-      ignore_errors: true
+
+    - name: Remove installation logs (optional)
+      ansible.builtin.file:
+        path: "{{ item.item }}"
+        state: absent
+      loop: "{{ log_files_check.results }}"
+      when: (remove_logs | default(false)) and item.stat.exists
+
+    - name: Check state directory
+      ansible.builtin.stat:
+        path: /var/lib/vps-setup
+      register: state_dir_check
+      when: remove_state | default(false)
 
     - name: Remove state directory (optional)
       ansible.builtin.file:
         path: /var/lib/vps-setup
         state: absent
-      when: remove_state | default(false)
-      ignore_errors: true
+      when: (remove_state | default(false)) and state_dir_check.stat.exists
 
     # =========================================================================
     # PHASE 6: Summary
@@ -163,11 +188,12 @@
 
   handlers:
     - name: Restart SSH
-      ansible.builtin.systemd:
+      ansible.builtin.service:
         name: sshd
         state: restarted
-      ignore_errors: true
+      when: "'ssh.service' in ansible_facts.services or 'sshd.service' in ansible_facts.services"
 
     - name: Reload UFW
-      ansible.builtin.shell: ufw reload
-      ignore_errors: true
+      ansible.builtin.command: ufw reload
+      when: "'ufw.service' in ansible_facts.services"
+      changed_when: false

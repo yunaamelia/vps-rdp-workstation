@@ -17,9 +17,11 @@
 
 - name: Install rclone
   ansible.builtin.shell: |
+    set -o pipefail
     curl https://rclone.org/install.sh | bash
   args:
     creates: /usr/bin/rclone
+    executable: /bin/bash
   tags: [tools, files]
 
 - name: Log file-management role completion

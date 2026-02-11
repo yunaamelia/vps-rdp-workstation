@@ -8,7 +8,8 @@
     dest: /tmp/fastfetch.deb
     mode: '0644'
   register: fastfetch_download
-  ignore_errors: true
+  until: fastfetch_download is success
+  retries: 3
   tags: [shell, visual, fastfetch]
 
 - name: Install Fastfetch package
@@ -17,7 +18,6 @@
     state: present
   become: true
   when: fastfetch_download is success
-  ignore_errors: true
   tags: [shell, visual, fastfetch]
 
 - name: Create fastfetch config directory
@@ -46,7 +46,7 @@
   when: vps_install_starship | default(true)
 
 - name: Install Starship
-  ansible.builtin.shell: /tmp/starship_install.sh -y -b /usr/local/bin
+  ansible.builtin.command: sh /tmp/starship_install.sh -y -b /usr/local/bin
   args:
     creates: /usr/local/bin/starship
   become: true

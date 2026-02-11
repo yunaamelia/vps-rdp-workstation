@@ -5,10 +5,13 @@ vps_timezone: "UTC"
 vps_locale: "en_US.UTF-8"
 vps_keyboard_layout: "us"
 
+vps_username: "apexdev"
+# Default password is "changeme" (generated with: openssl passwd -6)
+vps_user_password_hash: "$6$EZSSciHVIMsUrGv7$ARKsSX3wBdne4bGtzaon3NT7/oOnhDfHsETnYyJBbkHSFepREesGxv8enZMP30cI5rOSJ0AncyXbsfuFG4lgC0"
+
 vps_user_shell: "/bin/zsh"
 vps_user_groups:
   - sudo
-  - docker
   - adm
 
 vps_backup_dir: "/var/backups/vps-setup"

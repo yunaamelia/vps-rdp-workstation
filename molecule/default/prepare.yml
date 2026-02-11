@@ -3,7 +3,8 @@
   hosts: all
   gather_facts: false
   tasks:
-    - name: Verify Python
-      ansible.builtin.raw: python3 --version
-      changed_when: false
-      ignore_errors: true
+    - name: Bootstrap Python
+      ansible.builtin.raw: |
+        test -e /usr/bin/python3 || (apt-get -y update && apt-get install -y python3-minimal python3-apt sudo)
+      register: bootstrap_python
+      changed_when: "'Reading package lists' in bootstrap_python.stdout"

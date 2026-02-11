@@ -61,6 +61,12 @@
 #  SSH Hardening
 # =============================================================================
 
+- name: Install OpenSSH Server
+  ansible.builtin.apt:
+    name: openssh-server
+    state: present
+  tags: [security, ssh]
+
 - name: Ensure backup directory exists
   ansible.builtin.file:
     path: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}"

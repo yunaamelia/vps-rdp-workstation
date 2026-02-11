@@ -1,27 +1,30 @@
 # Cloud Native Role (Optional)
 ---
 - name: Install kubectl
-  ansible.builtin.shell: |
-    curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-    install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-    rm kubectl
-  args:
-    creates: /usr/local/bin/kubectl
+  ansible.builtin.get_url:
+    url: "https://dl.k8s.io/release/v1.28.2/bin/linux/amd64/kubectl"
+    dest: /usr/local/bin/kubectl
+    mode: '0755'
+    owner: root
+    group: root
   tags: [tools, cloud, kubernetes]
 
 - name: Install helm
   ansible.builtin.shell: |
+    set -o pipefail
     curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
   args:
     creates: /usr/local/bin/helm
+    executable: /bin/bash
   tags: [tools, cloud, kubernetes]
 
 - name: Install k9s
   ansible.builtin.shell: |
+    set -o pipefail
     curl -sS https://webinstall.dev/k9s | bash
   args:
     creates: /usr/local/bin/k9s
-  ignore_errors: true
+    executable: /bin/bash
   tags: [tools, cloud, kubernetes]
 
 - name: Log cloud-native role completion

@@ -9,6 +9,7 @@
   loop:
     - "{{ catppuccin_themes_dir }}"
     - "{{ catppuccin_icons_dir }}"
+  when: vps_theme_variant == 'catppuccin-mocha'
   tags: [catppuccin-theme, directories]
 
 - name: Download Catppuccin GTK theme
@@ -19,6 +20,7 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
   register: gtk_download
+  when: vps_theme_variant == 'catppuccin-mocha'
   tags: [catppuccin-theme, gtk]
 
 - name: Extract Catppuccin GTK theme
@@ -29,7 +31,7 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     creates: "{{ catppuccin_themes_dir }}/Catppuccin-Mocha-Standard-Blue-Dark"
-  when: not ansible_check_mode
+  when: vps_theme_variant == 'catppuccin-mocha' and not ansible_check_mode
   tags: [catppuccin-theme, gtk]
 
 - name: Download Catppuccin Cursor theme
@@ -40,6 +42,7 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
   register: cursor_download
+  when: vps_theme_variant == 'catppuccin-mocha'
   tags: [catppuccin-theme, cursors]
 
 - name: Extract Catppuccin Cursor theme
@@ -50,7 +53,7 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     creates: "{{ catppuccin_icons_dir }}/Catppuccin-Mocha-Blue-Cursors"
-  when: not ansible_check_mode
+  when: vps_theme_variant == 'catppuccin-mocha' and not ansible_check_mode
   tags: [catppuccin-theme, cursors]
 
 - name: Cleanup temporary files
@@ -60,4 +63,5 @@
   loop:
     - "/tmp/catppuccin-gtk.zip"
     - "/tmp/catppuccin-cursors.zip"
+  when: vps_theme_variant == 'catppuccin-mocha'
   tags: [catppuccin-theme, cleanup]

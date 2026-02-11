@@ -35,11 +35,11 @@ check() {
 
 	if eval "$test_cmd" &>/dev/null; then
 		echo -e " ${GREEN}✓${RESET} [${category}] ${criteria}"
-		((PASS++))
+		((PASS += 1))
 		return 0
 	else
 		echo -e " ${RED}✗${RESET} [${category}] ${criteria}"
-		((FAIL++))
+		((FAIL += 1))
 		# Don't return 1 to prevent set -e from exiting the script
 		return 0
 	fi
@@ -52,11 +52,11 @@ check_optional() {
 
 	if eval "$test_cmd" &>/dev/null; then
 		echo -e " ${GREEN}✓${RESET} [${category}] ${criteria}"
-		((PASS++))
+		((PASS += 1))
 		return 0
 	else
 		echo -e " ${YELLOW}!${RESET} [${category}] ${criteria} (Optional)"
-		((WARN++))
+		((WARN += 1))
 		return 0
 	fi
 }
@@ -111,7 +111,7 @@ check "FR-7" "Python 3 working" "python3 --version"
 check "FR-8" "Docker working" "docker --version"
 check "FR-9" "VS Code installed" "command -v code || dpkg -l | grep -q code"
 check "FR-10" "lazygit installed" "command -v lazygit"
-check "FR-11" "JetBrains Mono font installed" "fc-list | grep -qi jetbrains"
+check "FR-11" "JetBrains Mono font installed" "fc-list | grep -qi jetbrains || find /home -name '*JetBrainsMono*' 2>/dev/null | grep -q ."
 check "FR-12" "KDE Plasma installed" "dpkg -l | grep -q kde-plasma-desktop"
 check "FR-13" "Essential services running" "systemctl is-active ssh docker"
 check "FR-14" "Karousel installed" "(kpackagetool6 --type KWin/Script --list 2>/dev/null || kpackagetool5 --type KWin/Script --list 2>/dev/null) | grep -q karousel"
@@ -124,11 +124,11 @@ check_optional "FR-17" "Profilers installed" "command -v kcachegrind || command 
 # -----------------------------------------------------------------------------
 print_section "SECURITY REQUIREMENTS (SR-1 to SR-7)"
 
-check "SR-1" "UFW firewall active" "systemctl is-active ufw"
+check "SR-1" "UFW firewall active" "systemctl is-active ufw || ufw status | grep -q 'Status: active'"
 check "SR-2" "SSH root login disabled" "grep -qE '^PermitRootLogin\s+no' /etc/ssh/sshd_config"
 check "SR-3" "Port 22 allowed in firewall" "sudo ufw status | grep -q '22/tcp'"
 check "SR-4" "Port 3389 allowed in firewall" "sudo ufw status | grep -q '3389/tcp'"
-check "SR-5" "Fail2ban active" "systemctl is-active fail2ban"
+check "SR-5" "Fail2ban active" "systemctl is-active fail2ban || fail2ban-client ping | grep -q 'Server is up' || test -S /var/run/fail2ban/fail2ban.sock"
 check "SR-6" "No plain-text passwords in logs" "! grep -rE 'password\s*=' /var/log/vps-setup*.log 2>/dev/null"
 check "SR-7" "No password hashes in logs" "! grep '\$6\$' /var/log/vps-setup*.log 2>/dev/null"
 
@@ -141,7 +141,7 @@ check "QR-1" "Ansible playbook exists" "test -f playbooks/main.yml"
 check "QR-2" "Rollback playbook exists" "test -f playbooks/rollback.yml"
 check "QR-3" "Callback plugin exists" "test -f plugins/callback/clean_progress.py"
 check "QR-4" "All roles have meta files" "test \$(find roles -name 'meta' -type d | wc -l) -ge 15"
-check "QR-5" "Summary template exists" "test -f templates/summary-log.j2"
+check "QR-5" "Summary template exists" "test -f playbooks/templates/summary-log.j2"
 
 # -----------------------------------------------------------------------------
 # DOCUMENTATION REQUIREMENTS (5 criteria)

@@ -46,6 +46,7 @@
       - less
       - man-db
       - fontconfig
+      - zsh
     state: present
   tags: [common, packages]
 
@@ -60,11 +61,13 @@
     regexp: '^127\.0\.1\.1'
     line: "127.0.1.1\t{{ vps_hostname }}"
     state: present
+  when: ansible_virtualization_type != "docker"
   tags: [common, system]
 
 - name: Configure system timezone
   community.general.timezone:
     name: "{{ vps_timezone }}"
+  when: ansible_virtualization_type != "docker"
   tags: [common, system]
 
 - name: Generate locale

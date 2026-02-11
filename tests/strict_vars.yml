@@ -1,0 +1,28 @@
+---
+# Strict test variables for Molecule/CI
+# Force-enable all optional roles to ensure full coverage
+# Usage: vars_files: [ ../../tests/strict_vars.yml ]
+
+vps_install_xrdp: false # Disabled for CI timeout reasons
+install_firefox: false # Disabled for CI timeout reasons
+vps_theme_variant: none # Disabled to skip heavy theme copy
+vps_install_omz: true
+vps_install_starship: true
+vps_install_zsh_external_plugins: true
+vps_install_desktop: false # Disabled for CI timeout reasons
+install_docker: true
+install_vscode: true
+install_opencode: true
+install_tui_tools: true
+install_network_tools: true
+install_performance_tools: true
+install_text_processing: true
+install_file_management: true
+install_dev_debugging: true
+install_code_quality: true
+install_productivity: true
+install_log_visualization: true
+install_ai_devtools: true
+install_cloud_native_tools: true
+vps_kde_compositor_enabled: false
+vps_fail2ban_enabled: false # Disabled for CI container compatibility

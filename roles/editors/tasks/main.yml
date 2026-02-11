@@ -55,7 +55,8 @@
   loop: "{{ vscode_extensions }}"
   changed_when: true
   when: install_vscode
-  ignore_errors: true
+  register: vscode_ext_install
+  failed_when: vscode_ext_install.rc != 0 and 'already installed' not in vscode_ext_install.stdout
   tags: [editors, vscode]
 
 # =============================================================================
@@ -68,7 +69,6 @@
     global: true
     state: present
   when: install_opencode
-  ignore_errors: true
   tags: [editors, opencode]
 
 - name: Get OpenCode binary path

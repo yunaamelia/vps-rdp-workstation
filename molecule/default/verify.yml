@@ -8,51 +8,58 @@
   gather_facts: true
 
   tasks:
-    - name: Check if timezone is configured
-      ansible.builtin.command: timedatectl show --value --property=Timezone
-      register: timezone_result
-      changed_when: false
-      failed_when: timezone_result.stdout == ""
+    - name: Ensure validation directory structure exists
+      ansible.builtin.file:
+        path: /root/repo/tests
+        state: directory
+        mode: '0755'
 
-    - name: Check if essential packages are installed
-      ansible.builtin.package:
-        name: "{{ item }}"
-        state: present
-      check_mode: true
-      register: package_check
-      failed_when: package_check.changed
+    - name: Copy project components (lightweight)
+      ansible.builtin.copy:
+        src: "../../{{ item }}"
+        dest: "/root/repo/"
+        mode: preserve
       loop:
-        - curl
-        - wget
-        - git
+        - setup.sh
+        - README.md
+        - tests
+        - docs
+        - playbooks
+        - plugins
+        - templates
 
-    - name: Verify system locale
-      ansible.builtin.command: locale
-      register: locale_result
+    - name: Archive roles locally
+      community.general.archive:
+        path: ../../roles
+        dest: /tmp/roles.tar.gz
+        format: gz
+      delegate_to: localhost
+
+    - name: Copy roles archive
+      ansible.builtin.copy:
+        src: /tmp/roles.tar.gz
+        dest: /tmp/roles.tar.gz
+        mode: '0644'
+
+    - name: Unarchive roles
+      ansible.builtin.unarchive:
+        src: /tmp/roles.tar.gz
+        dest: /root/repo/
+        remote_src: true
+
+    - name: Run validation suite
+      ansible.builtin.command: bash tests/validate.sh
+      args:
+        chdir: /root/repo
+      register: validation_output
       changed_when: false
-      failed_when: "'LANG=' not in locale_result.stdout"
+      ignore_errors: true
 
-    - name: Verify UFW is installed (Security)
-      ansible.builtin.command: which ufw
-      register: ufw_check
-      changed_when: false
-
-    - name: Verify Zsh is installed (Terminal)
-      ansible.builtin.command: which zsh
-      register: zsh_check
-      changed_when: false
-
-    - name: Verify Oh My Zsh directory exists (Zsh Enhancements)
-      ansible.builtin.stat:
-        path: /root/.oh-my-zsh
-      register: omz_path
-
-    - name: Print verification summary
+    - name: Display validation output
       ansible.builtin.debug:
-        msg: |
-          ✓ Timezone: {{ timezone_result.stdout }}
-          ✓ Essential packages installed
-          ✓ Locale configured
-          ✓ Security: UFW installed at {{ ufw_check.stdout }}
-          ✓ Terminal: Zsh installed at {{ zsh_check.stdout }}
-          ✓ Enhancements: Oh My Zsh present: {{ omz_path.stat.exists }}
+        msg: "{{ validation_output.stdout_lines }}"
+
+    - name: Fail if validation failed
+      ansible.builtin.fail:
+        msg: "Validation suite failed! See output above."
+      when: validation_output.rc != 0

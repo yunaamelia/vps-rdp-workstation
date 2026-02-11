@@ -22,13 +22,10 @@ platforms:
     cgroupns_mode: host
     # Use standard init which is available in base image, or install systemd if needed
     # debian:trixie base image might not have systemd installed by default
-    # Use raw image and install python manually in prepare step, or pre-install via shell
-    # We install python3 AND sudo (required by molecule for become: true)
+    # Use raw image. Python and sudo will be installed via prepare.yml using raw module.
     # We also create a dummy systemd placeholder if missing to satisfy checks
     command: >-
-      /bin/sh -c "apt-get update &&
-      apt-get install -y python3 python3-pip sudo &&
-      if [ -x /lib/systemd/systemd ]; then exec /lib/systemd/systemd;
+      /bin/sh -c "if [ -x /lib/systemd/systemd ]; then exec /lib/systemd/systemd;
       else echo 'Systemd not found, sleeping' && while true; do sleep 1000; done; fi"
     tmpfs:
       - /run
@@ -38,7 +35,8 @@ provisioner:
   name: ansible
   env:
     # Fix duplicate collection warnings by strictly defining the path
-    ANSIBLE_COLLECTIONS_PATH: /usr/lib/python3/dist-packages/ansible_collections:/home/apexdev/.ansible/collections
+    # Using only molecule managed collections path to avoid conflicts
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_EPHEMERAL_DIRECTORY}/collections
     # Suppress deprecation warnings
     ANSIBLE_DEPRECATION_WARNINGS: "False"
   config_options:
@@ -57,6 +55,7 @@ provisioner:
       debian-trixie:
         ansible_user: root
         ansible_become_password: "gg123123@"
+        vps_fail2ban_enabled: false
 
 verifier:
   name: ansible
@@ -69,6 +68,7 @@ lint: |
 scenario:
   name: default
   test_sequence:
+    - dependency
     - syntax
     - create
     - prepare

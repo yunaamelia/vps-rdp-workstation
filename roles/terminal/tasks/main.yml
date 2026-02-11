@@ -20,10 +20,12 @@
   tags: [terminal, zsh]
 
 - name: Configure git safe.directory for Oh My Zsh
-  ansible.builtin.command:
-    cmd: git config --global --add safe.directory "/home/{{ vps_username }}/.oh-my-zsh"
+  community.general.git_config:
+    name: safe.directory
+    scope: global
+    value: "/home/{{ vps_username }}/.oh-my-zsh"
+    add_mode: add
   become: true
-  changed_when: false
   tags: [terminal, zsh]
 
 - name: Install Oh My Zsh (Git Clone)
@@ -31,6 +33,7 @@
     repo: https://github.com/ohmyzsh/ohmyzsh.git
     dest: "/home/{{ vps_username }}/.oh-my-zsh"
     depth: 1
+    version: master
   become: true
   when: vps_install_omz
   tags: [terminal, zsh]
@@ -45,6 +48,12 @@
   when: vps_install_omz
   tags: [terminal, zsh]
 
+- name: Check if OMZ template exists
+  ansible.builtin.stat:
+    path: "/home/{{ vps_username }}/.oh-my-zsh/templates/zshrc.zsh-template"
+  register: omz_template_check
+  tags: [terminal, zsh]
+
 - name: Create .zshrc from template
   ansible.builtin.copy:
     src: "/home/{{ vps_username }}/.oh-my-zsh/templates/zshrc.zsh-template"
@@ -52,10 +61,22 @@
     remote_src: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
+    mode: '0644'
     force: false
   become: true
-  when: vps_install_omz
-  ignore_errors: "{{ ansible_check_mode }}"
+  when: vps_install_omz and omz_template_check.stat.exists
+  tags: [terminal, zsh]
+
+- name: Ensure .zshrc exists for dry-run
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.zshrc"
+    state: touch
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  become: true
+  when: vps_install_omz and ansible_check_mode and not omz_template_check.stat.exists
+  check_mode: false
   tags: [terminal, zsh]
 
 

@@ -18,7 +18,6 @@
   ansible.builtin.apt:
     name: btop
     state: present
-  ignore_errors: true
   tags: [tools, performance]
 
 - name: Install ncdu for disk usage
@@ -39,6 +38,7 @@
     regexp: '^ALGO='
     line: 'ALGO=zstd'
     create: true
+    mode: '0644'
   tags: [tools, performance]
 
 - name: Enable BBR congestion control
@@ -48,7 +48,10 @@
     state: present
     sysctl_file: /etc/sysctl.d/99-workstation.conf
     reload: true
-  ignore_errors: true
+  failed_when:
+    - result.failed
+    - ansible_virtualization_type != 'docker'
+  register: result
   tags: [tools, performance]
 
 - name: Optimize VFS cache pressure
@@ -105,19 +108,18 @@
     name: systemd-oomd
     state: started
     enabled: true
-  ignore_errors: true
   tags: [performance, oomd]
 
 - name: Install duf (du alternative)
   ansible.builtin.shell: |
+    set -o pipefail
     DUF_VERSION=$(curl -s https://api.github.com/repos/muesli/duf/releases/latest | grep -oP '"tag_name": "v\K[^"]+')
     curl -LO https://github.com/muesli/duf/releases/download/v${DUF_VERSION}/duf_${DUF_VERSION}_linux_amd64.deb
     dpkg -i duf_${DUF_VERSION}_linux_amd64.deb
   args:
     chdir: /tmp
     creates: /usr/bin/duf
-  changed_when: false
-  ignore_errors: true
+    executable: /bin/bash
   tags: [tools, performance]
 
 - name: Log system-performance role completion

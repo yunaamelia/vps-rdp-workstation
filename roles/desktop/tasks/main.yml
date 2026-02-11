@@ -28,6 +28,7 @@
       - breeze
       - breeze-gtk-theme
       - kde-config-gtk-style
+      - qml6-module-org-kde-notification # Required by Karousel
     state: present
   when: vps_install_desktop | default(true)
   tags: [desktop, kde]
@@ -330,23 +331,21 @@
     mode: '0755'
   tags: [desktop, tiling]
 
-- name: Clone Karousel tiling script
-  ansible.builtin.git:
-    repo: https://github.com/peterfajdiga/karousel.git
-    dest: /tmp/karousel
-    depth: 1
-    version: master
+- name: Download Karousel release
+  ansible.builtin.get_url:
+    url: https://github.com/peterfajdiga/karousel/releases/download/v0.15/karousel_0_15.tar.gz
+    dest: /tmp/karousel.tar.gz
+    mode: '0644'
   tags: [desktop, tiling]
 
-- name: Install Karousel
-  ansible.builtin.command:
-    cmd: "{{ plasma_tool_cmd }} -t KWin/Script -i ."
-    chdir: /tmp/karousel
-  become: true
-  become_user: "{{ vps_username }}"
-  register: karousel_install
-  changed_when: karousel_install.rc == 0
-  failed_when: karousel_install.rc != 0 and 'already installed' not in karousel_install.stderr
+- name: Install Karousel (extract)
+  ansible.builtin.unarchive:
+    src: /tmp/karousel.tar.gz
+    dest: "/home/{{ vps_username }}/.local/share/kwin/scripts/"
+    remote_src: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    creates: "/home/{{ vps_username }}/.local/share/kwin/scripts/karousel"
   when: vps_install_desktop | default(true)
   tags: [desktop, tiling]
 

@@ -107,13 +107,33 @@ ROLE_PHASE_MAP = {
 
 PHASE_ORDER = sorted(list(set(ROLE_PHASE_MAP.values())))
 
-# Custom Palette
-C_LAVENDER = "#a3aed2"  # Light Slate
-C_BLUE     = "#769ff0"  # Cornflower Blue
-C_DARK_BL  = "#394260"  # Dark Blue Grey
-C_DARKER   = "#212736"  # Very Dark Blue Grey
-C_DARKEST  = "#1d2230"  # Darkest Blue
-C_TEXT_DK  = "#090c0c"  # Very Dark Text
+# Colors (Catppuccin Mocha)
+C_ROSEWATER = "#f5e0dc"
+C_FLAMINGO  = "#f2cdcd"
+C_PINK      = "#f5c2e7"
+C_MAUVE     = "#cba6f7"
+C_RED       = "#f38ba8"
+C_MAROON    = "#eba0ac"
+C_PEACH     = "#fab387"
+C_YELLOW    = "#f9e2af"
+C_GREEN     = "#a6e3a1"
+C_TEAL      = "#94e2d5"
+C_SKY       = "#89dceb"
+C_SAPPHIRE  = "#74c7ec"
+C_BLUE      = "#89b4fa"
+C_LAVENDER  = "#b4befe"
+C_TEXT      = "#cdd6f4"
+C_SUBTEXT1  = "#bac2de"
+C_SUBTEXT0  = "#a6adc8"
+C_OVERLAY2  = "#9399b2"
+C_OVERLAY1  = "#7f849c"
+C_OVERLAY0  = "#6c7086"
+C_SURFACE2  = "#585b70"
+C_SURFACE1  = "#45475a"
+C_SURFACE0  = "#313244"
+C_BASE      = "#1e1e2e"
+C_MANTLE    = "#181825"
+C_CRUST     = "#11111b"
 
 # Icons
 ICON_OS    = "" # U+E63F (or similar distro icon)
@@ -179,17 +199,17 @@ class CallbackModule(CallbackBase):
         """Print static banner for log-based outputs using Starship styling."""
         if not self.console: return
         
-        # Segment 1: Icon (Lavender)
-        seg1 = Text(f" {ICON_OS} ", style=f"bold {C_TEXT_DK} on {C_LAVENDER}")
-        sep1 = Text(SEP_R, style=f"{C_LAVENDER} on {C_BLUE}")
+        # Segment 1: Icon (Mauve on Surface0)
+        seg1 = Text(f" {ICON_OS} ", style=f"bold {C_MAUVE} on {C_SURFACE0}")
+        sep1 = Text(SEP_R, style=f"{C_SURFACE0} on {C_SURFACE1}")
         
-        # Segment 2: Title (Blue)
-        seg2 = Text(" VPS RDP WORKSTATION ", style=f"bold white on {C_BLUE}")
-        sep2 = Text(SEP_R, style=f"{C_BLUE} on {C_DARK_BL}")
+        # Segment 2: Title (Blue on Surface1)
+        seg2 = Text(" VPS RDP WORKSTATION ", style=f"bold {C_BLUE} on {C_SURFACE1}")
+        sep2 = Text(SEP_R, style=f"{C_SURFACE1} on {C_SURFACE2}")
         
-        # Segment 3: Stats (Dark Blue)
-        seg3 = Text(f" v{self.CALLBACK_VERSION} ", style=f"white on {C_DARK_BL}")
-        sep3 = Text(SEP_R, style=f"{C_DARK_BL} on default")
+        # Segment 3: Stats (Text on Surface2)
+        seg3 = Text(f" v{self.CALLBACK_VERSION} ", style=f"{C_TEXT} on {C_SURFACE2}")
+        sep3 = Text(SEP_R, style=f"{C_SURFACE2} on default")
         
         # Combine
         header = Text.assemble(seg1, sep1, seg2, sep2, seg3, sep3)
@@ -397,13 +417,13 @@ class CallbackModule(CallbackBase):
         }
         # Map statuses to new palette
         colors = {
-            "ok": C_LAVENDER,
-            "changed": C_BLUE,
-            "failed": "red", # Keep red for critical errors
-            "skipped": C_DARK_BL,
+            "ok": C_GREEN,
+            "changed": C_YELLOW,
+            "failed": C_RED,
+            "skipped": C_OVERLAY0,
         }
         
-        status_color = colors.get(status, "white")
+        status_color = colors.get(status, C_TEXT)
         icon = icons.get(status, "•")
         
         # Determine Phase
@@ -420,22 +440,22 @@ class CallbackModule(CallbackBase):
         status_text = Text(f"{icon} {status.upper()}", style=f"bold {status_color}")
         
         # Task Name (Plain)
-        task_text = Text(task_name, style="white")
+        task_text = Text(task_name, style=C_TEXT)
         
-        # Phase Pill (Darker background)
-        phase_text = Text(f" {phase} ", style=f"{C_LAVENDER} on {C_DARK_BL}")
+        # Phase Pill (Lavender on Surface0)
+        phase_text = Text(f" {phase} ", style=f"{C_LAVENDER} on {C_SURFACE0}")
         
-        # Duration Pill (Darkest background)
-        duration_text = Text(f" {duration} ", style=f"dim white on {C_DARKEST}")
+        # Duration Pill (Overlay1 on Mantle)
+        duration_text = Text(f" {duration} ", style=f"{C_OVERLAY1} on {C_MANTLE}")
 
         grid.add_row(status_text, task_text, phase_text, duration_text)
         
         # Error Message Panel
         if status == "failed":
             error_panel = Panel(
-                Text(message, style="red"),
-                title="[bold red]Error Details[/bold red]",
-                border_style="red",
+                Text(message, style=C_RED),
+                title=f"[bold {C_RED}]Error Details[/]",
+                border_style=C_RED,
                 expand=True
             )
             self.console.print(grid)
@@ -450,10 +470,10 @@ class CallbackModule(CallbackBase):
             summary.add_column("Metric", justify="right")
             summary.add_column("Count", justify="left")
             
-            summary.add_row("OK", f"[{C_LAVENDER}]{self.ok_count}[/]")
-            summary.add_row("Changed", f"[{C_BLUE}]{self.changed_count}[/]")
-            summary.add_row("Failed", f"[red]{self.failed_count}[/red]")
-            summary.add_row("Skipped", f"[{C_DARK_BL}]{self.skipped_count}[/]")
+            summary.add_row("OK", f"[{C_GREEN}]{self.ok_count}[/]")
+            summary.add_row("Changed", f"[{C_YELLOW}]{self.changed_count}[/]")
+            summary.add_row("Failed", f"[{C_RED}]{self.failed_count}[/]")
+            summary.add_row("Skipped", f"[{C_OVERLAY0}]{self.skipped_count}[/]")
             
             total_time = self._get_duration(self.start_time)
             
@@ -461,7 +481,7 @@ class CallbackModule(CallbackBase):
             panel = Panel(
                 summary,
                 title=f"[bold {C_BLUE}]Execution Completed in {total_time}[/]",
-                border_style=C_DARK_BL,
+                border_style=C_SURFACE0,
                 expand=False
             )
             self.console.print(panel)

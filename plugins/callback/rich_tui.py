@@ -140,8 +140,6 @@ class CallbackModule(CallbackBase):
         self.layout = None # type: Layout | None
         self.job_progress = None # type: Progress | None
         self.task_id = None
-        self.log_messages = [] # type: List[Text]
-
         # Phase Tracking
         self.current_phase = None # type: str | None
         self.completed_phases = set() # type: Set[str]
@@ -174,9 +172,6 @@ class CallbackModule(CallbackBase):
         self.job_progress = Progress(
             SpinnerColumn(spinner_name="dots"),
             TextColumn("[bold blue]{task.description}"),
-            BarColumn(bar_width=None),
-            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            TimeElapsedColumn(),
             expand=True
         )
         self.task_id = self.job_progress.add_task("Initializing...", total=None)
@@ -233,11 +228,6 @@ class CallbackModule(CallbackBase):
         body_elements = []
         body_elements.append(self._create_milestones_panel())
 
-        if self.log_level in ["full", "debug"]:
-            body_elements.append(self._create_log_panel())
-        elif self.log_level == "minimal":
-            body_elements.append(Text("\\n" * 2))
-
         if self.job_progress:
             body_elements.append(
                 Panel(self.job_progress, box=box.SIMPLE, border_style="dim")
@@ -289,17 +279,6 @@ class CallbackModule(CallbackBase):
         display = Text.from_markup(f"{dots}  [bold white]{self.current_phase}[/bold white]")
         return Panel(display, box=box.SIMPLE, padding=(0, 1), style="on black")
 
-    def _create_log_panel(self):
-        """Create the scrolling log panel."""
-        visible_logs = self.log_messages[-15:]
-        return Panel(
-            Group(*visible_logs),
-            title="[bold]Execution Log[/bold]",
-            border_style="blue",
-            box=box.ROUNDED,
-            padding=(0, 1)
-        )
-
     def _create_footer(self):
         """Create the footer."""
         credit_text = Text(justify="center")
@@ -347,15 +326,18 @@ class CallbackModule(CallbackBase):
             return
 
         log_line = f"{icon} {task_name} [dim]({duration})[/dim]"
+        renderable = None
         if status == "failed":
-            self._update_body_log(Text.from_markup(f"{log_line}\\n[red]{message}[/red]"))
+            renderable = Text.from_markup(f"{log_line}\n[red]{message}[/red]")
         else:
             style = "dim" if status == "skipped" else ""
-            self._update_body_log(Text.from_markup(log_line, style=style))
+            renderable = Text.from_markup(log_line, style=style)
+        
+        self.live.console.print(renderable)
 
-    def _update_body_log(self, renderable):
-        self.log_messages.append(renderable)
-        self._update_ui()
+    def _print_footer(self):
+        if self.console:
+            self.console.print("[bold green]✓ Execution Completed[/bold green]")
 
     # --- Ansible Callback Hooks ---
 

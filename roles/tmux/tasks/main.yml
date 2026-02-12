@@ -1,0 +1,41 @@
+---
+- name: Install tmux
+  ansible.builtin.apt:
+    name:
+      - tmux
+      - git
+    state: present
+  tags: [tmux, tools]
+
+- name: Ensure TPM plugins directory exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.tmux/plugins"
+    state: directory
+    mode: '0755'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  tags: [tmux, config]
+
+- name: Install Tmux Plugin Manager (TPM)
+  ansible.builtin.git:
+    repo: 'https://github.com/tmux-plugins/tpm'
+    dest: "/home/{{ vps_username }}/.tmux/plugins/tpm"
+    version: master
+    depth: 1
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [tmux, config]
+
+- name: Deploy tmux configuration
+  ansible.builtin.template:
+    src: tmux.conf.j2
+    dest: "/home/{{ vps_username }}/.tmux.conf"
+    mode: '0644'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  tags: [tmux, config]
+
+- name: Log tmux role completion
+  ansible.builtin.debug:
+    msg: "✓ Tmux role completed - tmux installed and configured with TPM"
+  tags: [tmux]

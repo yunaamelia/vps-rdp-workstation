@@ -147,6 +147,9 @@
     - role: terminal
       tags: [terminal, zsh]
 
+    - role: tmux
+      tags: [terminal, tmux, config]
+
     - role: shell-styling
       tags: [shell, visual, fastfetch, starship]
 

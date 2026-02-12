@@ -154,8 +154,8 @@ setup_ansible() {
 	if ! command -v pipx &>/dev/null; then
 		apt-get install -y -qq pipx python3-venv
 		pipx ensurepath
-		export PATH="$PATH:$HOME/.local/bin"
 	fi
+	export PATH="$PATH:$HOME/.local/bin"
 
 	# Install core tools via pipx
 	for tool in ansible-core ansible-navigator ara; do
@@ -173,6 +173,14 @@ setup_ansible() {
 
 get_credentials() {
 	log_info "Configuring credentials..."
+	log_info "DEBUG: HOME=$HOME"
+	log_info "DEBUG: PATH=$PATH"
+	if command -v ansible-navigator; then
+		log_info "DEBUG: ansible-navigator found at $(command -v ansible-navigator)"
+	else
+		log_error "DEBUG: ansible-navigator NOT found in PATH"
+		ls -la "$HOME/.local/bin" || true
+	fi
 
 	# Username
 	if [[ -z "${VPS_USERNAME:-}" ]]; then
@@ -311,7 +319,11 @@ main() {
 	if [[ "$ROLLBACK_MODE" == "true" ]]; then
 		run_playbook "playbooks/rollback.yml"
 	else
-		run_playbook "playbooks/main.yml" "interactive"
+		if [[ "$CI_MODE" == "true" ]]; then
+			run_playbook "playbooks/main.yml" "stdout"
+		else
+			run_playbook "playbooks/main.yml" "interactive"
+		fi
 	fi
 }
 

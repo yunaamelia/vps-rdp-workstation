@@ -1,20 +1,22 @@
 # COMPONENT: PYTHON CALLBACKS
 
-**Purpose**: Enhance Ansible stdout with TUI/Clean formatting.
+**Purpose**: Python callback plugins for enhancing Ansible stdout.
 
-## STRUCTURE
-```
-plugins/
-└── callback/
-    ├── rich_tui.py       # Heavy: Spinners, tables, colors (requires 'rich')
-    └── clean_progress.py # Light: Text-only icons (✓/✗)
-```
+## KEY FILES
+- `callback/clean_progress.py`: Minimalist text-only icons (✓/✗).
+- `callback/rich_tui.py`: Rich TUI with spinners, tables, and colors.
 
 ## CONVENTIONS
-*   **Hooking**: Uses Ansible Callback API (`v2_runner_on_start`, etc.).
-*   **Degradation**: `rich_tui.py` falls back gracefully if `rich` lib missing.
-*   **Performance**: Callbacks run in main thread. Keep logic lightweight.
+- **Inheritance**: MUST inherit from `CallbackBase`.
+- **Documentation**: MUST include a `DOCUMENTATION` YAML block.
+- **Redaction**: Handle `vps_user_password_hash` to prevent secret leakage in TUI/logs.
+- **Performance**: Keep logic lightweight; callbacks run in main Ansible thread.
+- **Degradation**: Gracefully fallback if external libs (e.g., `rich`) are missing.
+
+## INTEGRATION
+- **Control**: `setup.sh` sets `ANSIBLE_STDOUT_CALLBACK` based on environment/flags.
+- **Isolation**: Note that `pipx` isolation can affect plugin path resolution.
 
 ## ANTI-PATTERNS
-*   **Blocking Ops**: No network/heavy I/O in callback methods.
-*   **Stdout Noise**: Do not print unrestricted stdout; strictly format or swallow.
+- **Blocking**: No network/heavy I/O inside callback methods.
+- **Stdout Noise**: Strictly format or swallow unrestricted stdout.

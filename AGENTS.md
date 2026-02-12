@@ -1,67 +1,66 @@
 # Project Knowledge Base
 
-**Generated:** 2026-02-11
-**Context:** High-Performance Ansible Automation for VPS RDP Workstations.
+**Generated:** 2026-02-12
+**Context:** Ansible automation for Debian 13 VPS RDP workstation.
 
 ## OVERVIEW
-Ansible-based automation transforming Debian 13 into a security-hardened RDP developer workstation. Uses a Bash wrapper (`setup.sh`) for secret hashing and Mitogen injection to enforce security and performance.
+Transforms Debian 13 into a security-hardened RDP workstation. Enforces performance via Mitogen and visibility via ARA reporting.
 
 ## STRUCTURE
 ```
 .
-├── setup.sh*             # MASTER CONTROL: Wrapper for ansible-playbook (Secrets+Mitogen)
-├── ansible.cfg           # Core config: Pipelining, Mitogen, ARA, Log paths
-├── playbooks/            # Orchestration logic (main.yml, rollback.yml)
-├── roles/                # 23+ configuration units (flat hierarchy)
-├── plugins/              # Python callbacks (TUI/Clean output)
-├── tests/                # Integration tests (Molecule, validate.sh)
-├── inventory/            # Host definitions + Group Vars
-└── .github/              # CI Pipelines (Molecule + Linting)
+├── setup.sh*             # MASTER CONTROL: Mandatory wrapper (Secrets + Mitogen)
+├── ansible.cfg           # Config: Pipelining, Mitogen, ARA, Log paths
+├── playbooks/            # Orchestration: main.yml, rollback.yml
+├── roles/                # Configuration: Flat units (tasks, defaults, meta)
+├── plugins/              # Extension: Python callbacks (TUI/Clean output)
+├── tests/                # Validation: Molecule, validate.sh
+└── inventory/            # Definition: Host vars, group_vars/all.yml
 ```
 
 ## WHERE TO LOOK
-| Task | Location | Notes |
-|------|----------|-------|
-| **Deploy** | `./setup.sh` | **MANDATORY ENTRY POINT**. Handles secrets. |
-| **Orchestrate** | `playbooks/main.yml` | Defines role order and dependencies. |
-| **Configure** | `inventory/group_vars/all.yml` | 220+ tunable knobs. Source of Truth. |
-| **Validate** | `tests/validate.sh` | 30-point success criteria check. |
-| **UI/UX** | `plugins/callback/` | Custom Python output formatters. |
+| Task | Location |
+|------|----------|
+| **Deploy** | `./setup.sh` |
+| **Orchestrate** | `playbooks/main.yml` |
+| **Configure** | `inventory/group_vars/all.yml` |
+| **Validate** | `tests/validate.sh` |
+| **UI/UX** | `plugins/callback/` |
 
 ## CONVENTIONS
-*   **Wrapper Mandate**: NEVER run `ansible-playbook` directly. Use `setup.sh` to ensure `vps_user_password_hash` is generated securely.
-*   **Role Structure**: Flat `roles/`. Each role has `tasks/`, `defaults/`, `meta/`.
-*   **Variables**: Namespaced with `vps_<role>_` prefix. Booleans `install_<feature>` toggle roles.
-*   **Idempotency**: All tasks must be safe to re-run.
-*   **Check Mode**: Full support for `--check` (dry-run) required.
+*   **Wrapper Mandate**: ALWAYS use `setup.sh`. Never run `ansible-playbook` directly.
+*   **Variables**: Namespaced as `vps_<role>_`. 
+*   **Role Structure**: Flat `roles/` directory.
+*   **Secret Handling**: Use `no_log: true` for tasks handling sensitive data.
+*   **Idempotency**: All tasks must be safe for repeated execution.
 
-## ANTI-PATTERNS (THIS PROJECT)
-*   **Plaintext Secrets**: NEVER store passwords in vars/inventory. Hash in `setup.sh` only.
-*   **Logging Secrets**: Tasks handling sensitive data MUST use `no_log: true`.
-*   **Root Login**: Default disabled. `vps_ssh_root_login` controls this.
-*   **Reordering Roles**: `security` MUST run before services (`desktop`, `docker`).
+## ANTI-PATTERNS
+*   **Direct Execution**: Running `ansible-playbook` skips secret hashing.
+*   **Plaintext Secrets**: Storing passwords in vars or inventory.
+*   **Root Access**: Enabling root login (use `vps_ssh_root_login` to control).
+*   **Out-of-Order**: Running services before security hardening.
 
 ## UNIQUE STYLES
-*   **Mitogen**: Accelerated transport injected dynamically.
-*   **ARA Records**: Execution history recorded to SQLite by default.
-*   **Progress Tracking**: JSON state file at `/var/lib/vps-setup/progress.json`.
+*   **Mitogen**: Dynamic injection for 2-7x execution speedup.
+*   **ARA Reporting**: Automatic run history recorded to SQLite.
+*   **Progress Tracking**: JSON state at `/var/lib/vps-setup/progress.json`.
 
 ## COMMANDS
 ```bash
-# Production Deploy
+# Standard Deployment
 ./setup.sh
 
-# CI / Non-Interactive
-VPS_USERNAME=user VPS_SECRETS_FILE=./secrets ./setup.sh --ci
+# CI/CD (Non-Interactive)
+VPS_USERNAME=dev VPS_SECRETS_FILE=./secrets ./setup.sh --ci
 
-# Dry Run (Safe)
+# Dry Run
 ./setup.sh --dry-run
 
-# Run Validation
+# Validation
 ./tests/validate.sh
 ```
 
 ## NOTES
 *   **Target**: Debian 13 (Trixie) ONLY.
-*   **Memory**: 4GB+ RAM required for KDE Plasma roles.
-*   **Recovery**: Use `./setup.sh --resume` to continue from last successful role.
+*   **Hardware**: 4GB+ RAM required for KDE Plasma.
+*   **Resume**: Use `--resume` to continue from last failed role.

@@ -14,12 +14,18 @@
   when: install_vscode
   tags: [editors, vscode]
 
+- name: Check if Microsoft GPG key exists
+  ansible.builtin.stat:
+    path: /usr/share/keyrings/microsoft.asc
+  register: microsoft_gpg_key
+  tags: [editors, vscode]
+
 - name: Add Microsoft GPG key
   ansible.builtin.get_url:
     url: https://packages.microsoft.com/keys/microsoft.asc
     dest: /usr/share/keyrings/microsoft.asc
     mode: '0644'
-  when: install_vscode
+  when: install_vscode and not microsoft_gpg_key.stat.exists
   tags: [editors, vscode]
 
 - name: Remove conflicting VS Code repository config

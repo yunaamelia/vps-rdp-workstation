@@ -64,7 +64,9 @@ DEBUG=false
 SKIP_VALIDATION=false
 ROLLBACK_MODE=false
 RESUME_MODE=false
+RESUME_MODE=false
 CI_MODE=false
+K8S_MODE=false
 
 # =============================================================================
 #  LOGGING FUNCTIONS
@@ -868,6 +870,11 @@ run_ansible() {
 		ansible_args+=("-e" "vps_git_email='${VPS_GIT_EMAIL}'")
 	fi
 
+	if [[ "$K8S_MODE" == "true" ]]; then
+		ansible_args+=("-e" "install_cloud_native_tools=true")
+		log_info "Enabling Cloud Native tools (K3s, Flux, kubectl)"
+	fi
+
 	if [[ "$DRY_RUN" == "true" ]]; then
 		ansible_args+=("--check" "--diff")
 	fi
@@ -932,11 +939,13 @@ OPTIONS:
     --rollback          Rollback to previous state
     --resume            Resume from last checkpoint
     --ci                CI/CD mode (non-interactive)
+    --k8s               Install Kubernetes (K3s) and GitOps tools
     --log-level         Set log level [minimal|full] (default: minimal)
 
 ENVIRONMENT VARIABLES:
     VPS_USERNAME        Primary workstation username (required in CI mode)
     VPS_PASSWORD        User password (optional, creates risk if in shell history)
+    GITHUB_TOKEN        Required if --k8s is used (for Flux bootstrapping)
     VPS_SECRETS_FILE    Path to secure password file with 0600 permissions
     VPS_CONFIG_FILE     Custom configuration file path
 
@@ -1003,6 +1012,11 @@ main() {
 			export CI_MODE=true
 			shift
 			;;
+		--k8s)
+			# shellcheck disable=SC2034
+			export K8S_MODE=true
+			shift
+			;;
 		--log-level)
 			LOG_LEVEL="$2"
 			shift 2
@@ -1040,6 +1054,25 @@ main() {
 	if [[ "$CI_MODE" != "true" ]]; then
 		get_timezone
 		get_git_identity
+	fi
+
+	# Check GitOps requirements if requested
+	if [[ "$K8S_MODE" == "true" ]]; then
+		if [[ -z "${GITHUB_TOKEN:-}" ]]; then
+			if [[ "$CI_MODE" == "true" ]]; then
+				log_error "GITHUB_TOKEN is required in CI mode when using --k8s"
+				exit 1
+			else
+				print_section "GitOps Setup ${ROCKET}"
+				echo -ne "${BLUE}${INFO}${NC} Enter GitHub Personal Access Token (for Flux): "
+				read -r token
+				if [[ -n "$token" ]]; then
+					export GITHUB_TOKEN="$token"
+				else
+					log_warn "No GITHUB_TOKEN provided. Flux bootstrapping may fail later."
+				fi
+			fi
+		fi
 	fi
 
 	# Run main playbook

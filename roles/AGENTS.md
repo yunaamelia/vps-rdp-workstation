@@ -1,33 +1,19 @@
 # COMPONENT: ANSIBLE ROLES
 
-**Role Architecture**: Flat hierarchy in `roles/`. Modular configuration units.
+**Purpose**: General role development standards.
 
 ## STRUCTURE
-```
-roles/
-├── common/           # Base system (apt, user, git)
-├── security/         # UFW, fail2ban, SSH hardening
-├── desktop/          # KDE Plasma, XRDP
-├── development/      # Node, Python, PHP stack
-├── docker/           # Engine + Compose
-└── [feature]/        # (18+ other roles)
-```
-
-## WHERE TO LOOK
-| Task | Location |
-|------|----------|
-| **Dependencies** | `meta/main.yml` (Explicit chain) |
-| **Variables** | `defaults/main.yml` (Low precedence) |
-| **Logic** | `tasks/main.yml` |
-| **Handlers** | `handlers/main.yml` (Local scope) |
+*   **Hierarchy**: Flat (e.g., `roles/common`, `roles/security`).
+*   **Logic**: `tasks/main.yml` (Entry point).
+*   **Variables**: `defaults/main.yml` (Default vars).
 
 ## CONVENTIONS
-*   **Namespacing**: Variables MUST start with `vps_<role>_` (e.g., `vps_ssh_port`).
-*   **Toggles**: Use `install_<feature>` booleans in `defaults/main.yml`.
-*   **Tags**: Mandatory `[phase, role, feature]` structure.
-*   **Apt**: `state: present`. Only `common` runs `update_cache: yes`.
+*   **Namespacing**: Variables MUST use `vps_<role>_` prefix.
+*   **Tags**: Mandatory `[phase, role, feature]` schema.
+*   **Idempotency**: All tasks MUST be safe to re-run.
+*   **Check Mode**: Full support for `--check` REQUIRED.
 
 ## ANTI-PATTERNS
-*   **Global Handlers**: Do not rely on them. Define handlers locally.
-*   **Check Mode Failures**: Tasks breaking dry-run must handle `ansible_check_mode`.
-*   **Hardcoded Users**: Always use `{{ vps_username }}`.
+*   **Global Handlers**: NEVER rely on them; keep handlers within roles.
+*   **Hardcoded Users**: NEVER use root/fixed names; use `{{ vps_username }}`.
+*   **Sequence Violation**: NEVER move `security` role after services.

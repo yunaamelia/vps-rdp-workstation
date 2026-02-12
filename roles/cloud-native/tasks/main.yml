@@ -18,6 +18,46 @@
     executable: /bin/bash
   tags: [tools, cloud, kubernetes]
 
+- name: Install K3s (Lightweight Kubernetes)
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -sfL https://get.k3s.io | sh -
+  args:
+    creates: /usr/local/bin/k3s
+    executable: /bin/bash
+  tags: [tools, cloud, kubernetes]
+  # noqa: command-instead-of-module
+
+- name: Ensure .kube directory exists for user
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.kube"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [tools, cloud, kubernetes]
+
+- name: Copy K3s config to user kubeconfig
+  ansible.builtin.copy:
+    src: /etc/rancher/k3s/k3s.yaml
+    dest: "/home/{{ vps_username }}/.kube/config"
+    remote_src: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0600'
+  tags: [tools, cloud, kubernetes]
+
+- name: Install Flux CLI
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -s https://fluxcd.io/install.sh | sudo bash
+  args:
+    creates: /usr/local/bin/flux
+    executable: /bin/bash
+  tags: [tools, cloud, kubernetes]
+  # noqa: command-instead-of-module
+
+
 - name: Install k9s
   ansible.builtin.shell: |
     set -o pipefail

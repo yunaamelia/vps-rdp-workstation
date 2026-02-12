@@ -28,11 +28,18 @@
     force: true
   tags: [tools, text]
 
+- name: Check if yq is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/yq
+  register: yq_stat
+  tags: [tools, text]
+
 - name: Install yq (YAML processor)
   ansible.builtin.get_url:
     url: "https://github.com/mikefarah/yq/releases/download/v{{ yq_version | default('4.40.5') }}/yq_linux_amd64"
     dest: /usr/local/bin/yq
     mode: '0755'
+  when: not yq_stat.stat.exists
   tags: [tools, text]
 
 - name: Log text-processing role completion

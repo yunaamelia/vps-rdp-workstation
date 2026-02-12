@@ -8,12 +8,19 @@
     state: present
   tags: [tools, quality]
 
+- name: Check if hadolint is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/hadolint
+  register: hadolint_stat
+  tags: [tools, quality]
+
 - name: Install hadolint for Dockerfile linting
   ansible.builtin.get_url:
     url: >-
       https://github.com/hadolint/hadolint/releases/download/v{{ hadolint_version | default('2.12.0') }}/hadolint-Linux-x86_64
     dest: /usr/local/bin/hadolint
     mode: '0755'
+  when: not hadolint_stat.stat.exists
   tags: [tools, quality]
 
 - name: Log code-quality role completion

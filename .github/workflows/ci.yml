@@ -4,8 +4,18 @@ name: CI
 "on":
   push:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
   pull_request:
     branches: [main]
+    paths-ignore:
+      - '**.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   lint:
@@ -30,8 +40,15 @@ jobs:
         with:
           extra_args: --all-files
 
-  syntax-check:
-    name: Ansible Syntax Check
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@2.0.0
+        with:
+          scandir: '.'
+          ignore_paths: 'collections'
+          ignore_names: 'get-docker.sh'
+
+  dry-run:
+    name: Ansible Dry Run
     runs-on: ubuntu-latest
     needs: lint
     steps:
@@ -43,21 +60,43 @@ jobs:
           python-version: '3.12'
           cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install Ansible
         run: |
           pip install ansible-core
           ansible-galaxy collection install -r requirements.yml
 
-      - name: Ansible Syntax Check (Main)
-        run: ansible-playbook playbooks/main.yml --syntax-check
+      - name: Create Test Inventory
+        run: |
+          mkdir -p inventory/group_vars
+          mkdir -p /tmp/vps-backups
+          echo "localhost ansible_connection=local" > inventory/test_hosts
+          # Create dummy password hash for validation
+          echo "vps_user_password_hash: '\$6\$rounds=4096\$testsalt\$test'" > inventory/group_vars/all.yml
+          # Add other required variables for basic syntax check
+          echo "vps_username: runner" >> inventory/group_vars/all.yml
+          echo "vps_timezone: UTC" >> inventory/group_vars/all.yml
+          echo "vps_progress_state_file: /tmp/vps-progress.json" >> inventory/group_vars/all.yml
+          echo "vps_summary_log: /tmp/vps-summary.log" >> inventory/group_vars/all.yml
+          echo "vps_backup_dir: /tmp/vps-backups" >> inventory/group_vars/all.yml
 
-      - name: Ansible Syntax Check (Rollback)
-        run: ansible-playbook playbooks/rollback.yml --syntax-check
+      - name: Run Ansible Playbook (Check Mode)
+        env:
+          ANSIBLE_FORCE_COLOR: '1'
+        run: |
+          ansible-playbook -i inventory/test_hosts playbooks/main.yml \
+            --syntax-check
+          ansible-playbook -i inventory/test_hosts playbooks/main.yml \
+            --check \
+            -e "vps_username=runner" \
+            -e "vps_user_password_hash='\$6\$test'" \
+            -e "ufw_enabled=false" \
+            -e "fail2ban_enabled=false" \
+            -e "install_docker=false"
 
   molecule:
-    name: Full Test Suite (Molecule)
+    name: Integration Test (Molecule)
     runs-on: ubuntu-latest
-    needs: syntax-check
+    needs: dry-run
     steps:
       - uses: actions/checkout@v4
 

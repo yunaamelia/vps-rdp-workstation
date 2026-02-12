@@ -19,12 +19,18 @@
   when: install_docker
   tags: [docker]
 
+- name: Check if Docker GPG key exists
+  ansible.builtin.stat:
+    path: /etc/apt/keyrings/docker.asc
+  register: docker_gpg_key
+  tags: [docker]
+
 - name: Add Docker GPG key
   ansible.builtin.get_url:
     url: https://download.docker.com/linux/debian/gpg
     dest: /etc/apt/keyrings/docker.asc
     mode: '0644'
-  when: install_docker
+  when: install_docker and not docker_gpg_key.stat.exists
   tags: [docker]
 
 - name: Add Docker repository

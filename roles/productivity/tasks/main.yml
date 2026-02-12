@@ -8,19 +8,60 @@
   changed_when: false
   tags: [tools, productivity]
 
-- name: Install thefuck via pipx (Python 3.12+ compatible fork)
-  community.general.pipx:
-    name: thefuck
-    source: "git+https://github.com/vo0ov/thefuck.git@master"
-    state: install
-    executable: /usr/bin/pipx
-    pip_args: "--no-build-isolation"
-  when: install_productivity | default(true)
+- name: Create directory for thefuck venv
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/venvs/thefuck"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [tools, productivity]
+
+- name: Create venv for thefuck
+  ansible.builtin.command:
+    cmd: python3 -m venv /home/{{ vps_username }}/.local/share/venvs/thefuck
+    creates: "/home/{{ vps_username }}/.local/share/venvs/thefuck/bin/python"
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [tools, productivity]
+
+- name: Install dependencies for thefuck (setuptools)
+  ansible.builtin.command:
+    cmd: /home/{{ vps_username }}/.local/share/venvs/thefuck/bin/pip install "setuptools<70" wheel
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: false
+  tags: [tools, productivity]
+
+- name: Install thefuck into venv (Python 3.12+ compatible fork)
+  ansible.builtin.command:
+    cmd: /home/{{ vps_username }}/.local/share/venvs/thefuck/bin/pip install "git+https://github.com/vo0ov/thefuck.git@master"
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: false
+  tags: [tools, productivity]
+
+- name: Symlink thefuck to user bin
+  ansible.builtin.file:
+    src: "/home/{{ vps_username }}/.local/share/venvs/thefuck/bin/thefuck"
+    dest: "/home/{{ vps_username }}/.local/bin/thefuck"
+    state: link
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  tags: [tools, productivity]
+
+- name: Symlink fuck alias to user bin
+  ansible.builtin.file:
+    src: "/home/{{ vps_username }}/.local/share/venvs/thefuck/bin/fuck"
+    dest: "/home/{{ vps_username }}/.local/bin/fuck"
+    state: link
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
   tags: [tools, productivity]
 
 - name: Patch thefuck for Python 3.12+ (replace distutils with shutil)
   vars:
-    thefuck_site_packages: "/home/{{ vps_username }}/.local/share/pipx/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages"
+    thefuck_site_packages: "/home/{{ vps_username }}/.local/share/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages"
   ansible.builtin.replace:
     path: "{{ thefuck_site_packages }}/thefuck/system/unix.py"
     regexp: '^from distutils\.spawn import find_executable$'
@@ -30,7 +71,7 @@
 
 - name: Patch thefuck find_executable to shutil.which
   vars:
-    thefuck_site_packages: "/home/{{ vps_username }}/.local/share/pipx/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages"
+    thefuck_site_packages: "/home/{{ vps_username }}/.local/share/venvs/thefuck/lib/python{{ ansible_python.version.major }}.{{ ansible_python.version.minor }}/site-packages"
   ansible.builtin.replace:
     path: "{{ thefuck_site_packages }}/thefuck/system/unix.py"
     regexp: 'find_executable\('

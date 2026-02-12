@@ -75,6 +75,15 @@
     recurse: true
   tags: [desktop, config]
 
+- name: Ensure autostart directory exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/autostart"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, config]
+
 - name: Ensure qdbus alias exists if needed
   ansible.builtin.shell: |
     if ! command -v qdbus >/dev/null; then
@@ -84,259 +93,21 @@
   changed_when: false
   tags: [desktop, config]
 
-- name: Run setupKDE.fish
-  ansible.builtin.command:
-    cmd: dbus-run-session -- fish setupKDE.fish
-    chdir: "/home/{{ vps_username }}/.local/share/kde-config-files/scripts"
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: true
+- name: Create setup KDE desktop entry for first login
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.config/autostart/setup_kde.desktop"
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Setup KDE
+      Exec=/bin/bash -c "fish /home/{{ vps_username }}/.local/share/kde-config-files/scripts/setupKDE.fish && rm /home/{{ vps_username }}/.config/autostart/setup_kde.desktop"
+      Hidden=false
+      NoDisplay=false
+      X-GNOME-Autostart-enabled=true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
   tags: [desktop, config]
-
-- name: Clone WhiteSur-kde theme
-  ansible.builtin.git:
-    repo: https://github.com/vinceliuice/WhiteSur-kde.git
-    dest: /tmp/WhiteSur
-    version: master
-    depth: 1
-  tags: [desktop, theme]
-
-- name: Install WhiteSur-kde theme
-  ansible.builtin.command:
-    cmd: ./install.sh -c dark
-    chdir: /tmp/WhiteSur
-  become: true
-  changed_when: true
-  # Installs system-wide to /usr/share
-  tags: [desktop, theme]
-
-- name: Apply WhiteSur-Dark LookAndFeel
-  ansible.builtin.command:
-    cmd: lookandfeeltool -a WhiteSur-Dark
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: true
-  tags: [desktop, theme]
-
-- name: Clone La Capitaine icon theme
-  ansible.builtin.git:
-    repo: https://github.com/keeferrourke/la-capitaine-icon-theme.git
-    dest: "/home/{{ vps_username }}/.local/share/icons/La-Capitaine"
-    version: master
-    depth: 1
-  become: true
-  become_user: "{{ vps_username }}"
-  tags: [desktop, theme, icons]
-
-- name: Configure La Capitaine icons in KDE
-  ansible.builtin.command:
-    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kdeglobals --group Icons --key Theme La-Capitaine"
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: true
-  tags: [desktop, theme, icons]
-
-- name: Download Capitaine Cursors
-  ansible.builtin.get_url:
-    url: https://github.com/sainnhe/capitaine-cursors/releases/download/r5/Linux.zip
-    dest: /tmp/capitaine-cursors.zip
-    mode: '0644'
-  tags: [desktop, theme, cursors]
-
-- name: Install Capitaine Cursors (extract)
-  ansible.builtin.unarchive:
-    src: /tmp/capitaine-cursors.zip
-    dest: "/home/{{ vps_username }}/.local/share/icons/"
-    remote_src: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    creates: "/home/{{ vps_username }}/.local/share/icons/dist"
-  tags: [desktop, theme, cursors]
-
-- name: Rename Capitaine Cursors directory
-  ansible.builtin.command:
-    cmd: mv /home/{{ vps_username }}/.local/share/icons/dist /home/{{ vps_username }}/.local/share/icons/capitaine-cursors
-    creates: "/home/{{ vps_username }}/.local/share/icons/capitaine-cursors"
-  become: true
-  become_user: "{{ vps_username }}"
-  tags: [desktop, theme, cursors]
-
-- name: Set Capitaine Cursors as default
-  ansible.builtin.command:
-    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kcminputrc --group Mouse --key cursorTheme capitaine-cursors/dark"
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: true
-  tags: [desktop, theme, cursors]
-
-- name: Remove Catppuccin Cursors (Redundant)
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/icons/{{ item }}"
-    state: absent
-  loop:
-    - Catppuccin-Mocha-Blue-Cursors
-    - dist
-  tags: [desktop, theme, cursors]
-
-- name: Remove Capitaine Cursors zip
-  ansible.builtin.file:
-    path: /tmp/capitaine-cursors.zip
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Clone SierraBreezeEnhanced
-  ansible.builtin.git:
-    repo: https://github.com/kupiqu/SierraBreezeEnhanced.git
-    dest: /tmp/SierraBreezeEnhanced
-    version: master
-    depth: 1
-  tags: [desktop, theme]
-
-- name: Build and Install SierraBreezeEnhanced
-  ansible.builtin.shell: |
-    mkdir -p build && cd build
-    cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
-    make
-    make install
-  args:
-    chdir: /tmp/SierraBreezeEnhanced
-  become: true
-  changed_when: true
-  tags: [desktop, theme]
-
-- name: Configure SierraBreezeEnhanced as Window Decoration
-  ansible.builtin.command:
-    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group org.kde.kdecoration2 --key library org.kde.sierrabreezeenhanced"
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: true
-  tags: [desktop, theme]
-
-- name: Configure SierraBreezeEnhanced Theme Name
-  ansible.builtin.command:
-    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group org.kde.kdecoration2 --key theme \"Sierra Breeze Enhanced\""
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: true
-  tags: [desktop, theme]
-
-- name: Remove WhiteSur Window Decorations (Redundant)
-  ansible.builtin.file:
-    path: "/usr/share/aurorae/themes/{{ item }}"
-    state: absent
-  loop:
-    - WhiteSur
-    - WhiteSur-Dark
-    - WhiteSur-Light
-  tags: [desktop, theme]
-
-- name: Remove SierraBreezeEnhanced build directory
-  ansible.builtin.file:
-    path: /tmp/SierraBreezeEnhanced
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Remove temporary WhiteSur directory
-  ansible.builtin.file:
-    path: /tmp/WhiteSur
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Create KWin scripts directory
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/kwin/scripts"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  tags: [desktop, tiling]
-
-- name: Clone Fluid Tile
-  ansible.builtin.git:
-    repo: https://codeberg.org/Serroda/fluid-tile.git
-    dest: /tmp/fluid-tile
-    depth: 1
-    version: main
-  tags: [desktop, tiling]
-
-- name: Install Fluid Tile
-  ansible.builtin.copy:
-    src: /tmp/fluid-tile/
-    dest: "/home/{{ vps_username }}/.local/share/kwin/scripts/fluid-tile/"
-    remote_src: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  when: vps_install_desktop | default(true)
-  tags: [desktop, tiling]
-
-- name: Enable Fluid Tile
-  ansible.builtin.command:
-    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key fluid-tileEnabled true"
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: true
-  tags: [desktop, tiling]
-
-- name: Disable Karousel (if present)
-  ansible.builtin.command:
-    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key karouselEnabled false"
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: true
-  tags: [desktop, tiling]
-
-- name: Remove Karousel directory
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/karousel"
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Remove Fluid Tile temp directory
-  ansible.builtin.file:
-    path: /tmp/fluid-tile
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Create Window Title Applet directory
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.local/share/plasma/plasmoids/org.kde.windowtitle"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
-  tags: [desktop, panel]
-
-- name: Clone Window Title Applet
-  ansible.builtin.git:
-    repo: https://github.com/dhruv8sh/plasma6-window-title-applet.git
-    dest: /tmp/window-title
-    depth: 1
-    version: master
-  tags: [desktop, panel]
-
-- name: Install Window Title Applet (Manual Copy)
-  ansible.builtin.copy:
-    src: /tmp/window-title/
-    dest: "/home/{{ vps_username }}/.local/share/plasma/plasmoids/org.kde.windowtitle/"
-    remote_src: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  when: vps_install_desktop | default(true)
-  tags: [desktop, panel]
-
-- name: Remove Window Title temp directory
-  ansible.builtin.file:
-    path: /tmp/window-title
-    state: absent
-  tags: [desktop, cleanup]
-
-- name: Remove Karousel tarball
-  ansible.builtin.file:
-    path: /tmp/karousel.tar.gz
-    state: absent
-  tags: [desktop, cleanup]
 
 - name: Create Kvantum config directory
   ansible.builtin.file:

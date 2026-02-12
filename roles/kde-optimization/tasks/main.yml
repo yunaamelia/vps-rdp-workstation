@@ -87,3 +87,21 @@
     - { option: "ShowFullPath", value: "true" }
     - { option: "FilterBar", value: "true" }
   tags: [kde-opt, ux]
+
+- name: Set System Font to JetBrains Mono
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kdeglobals"
+    section: "General"
+    option: "{{ item.option }}"
+    value: "{{ item.value }}"
+    create: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  loop:
+    - { option: "font", value: "JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0,Regular" }
+    - { option: "fixed", value: "JetBrainsMono Nerd Font Mono,10,-1,5,50,0,0,0,0,0,Regular" }
+    - { option: "menuFont", value: "JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0,Regular" }
+    - { option: "toolBarFont", value: "JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0,Regular" }
+    - { option: "smallestReadableFont", value: "JetBrainsMono Nerd Font,8,-1,5,50,0,0,0,0,0,Regular" }
+  tags: [kde-opt, fonts]

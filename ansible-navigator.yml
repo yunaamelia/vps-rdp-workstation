@@ -8,23 +8,23 @@ ansible-navigator:
 
   # Execution Environment: False runs locally (uses system Ansible/Mitogen)
   execution-environment:
-    enabled: False
+    enabled: false
 
   # Logging: Detailed debug logs
   logging:
     level: debug
     file: ./var/log/ansible-navigator.log
-    append: True
+    append: true
 
   # Artifacts: Replayable JSON logs (The "DVR" feature)
   playbook-artifact:
-    enable: True
+    enable: true
     save-as: ./var/lib/vps-setup/artifacts/{playbook_name}-{time_stamp}.json
 
   # UI/UX: Enhanced TUI
   color:
-    enable: True
-    osc4: True
+    enable: true
+    osc4: true
 
   # Default mode (overridden by --mode in CLI)
   mode: interactive

@@ -24,6 +24,7 @@
       - libkf6windowsystem-dev
       - libkf6kcmutils-dev
       - libkf6iconthemes-dev
+      - libkf6widgetsaddons6
     state: present
   tags: [desktop, dependencies]
 
@@ -177,5 +178,71 @@
 - name: Remove temporary WhiteSur directory
   ansible.builtin.file:
     path: /tmp/WhiteSur
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Install Karousel dependencies
+  ansible.builtin.apt:
+    name:
+      - cmake
+      - build-essential
+      - libkf6config-dev
+      - libkf6coreaddons-dev
+      - libkf6globalaccel-dev
+      - libkf6i18n-dev
+      - libkf6kcmutils-dev
+      - libkf6notifications-dev
+      - libkf6service-dev
+      - libkf6xmlgui-dev
+      - libkf6dbusaddons-dev
+      - qt6-declarative-dev
+      - qt6-sensors-dev
+      - plasma-workspace-dev
+    state: present
+  tags: [desktop, karousel]
+
+- name: Download Karousel source
+  ansible.builtin.get_url:
+    url: https://github.com/emgram769/karousel/archive/refs/tags/v0.0.5.tar.gz
+    dest: /tmp/karousel.tar.gz
+    mode: '0644'
+  tags: [desktop, karousel]
+
+- name: Extract Karousel source
+  ansible.builtin.unarchive:
+    src: /tmp/karousel.tar.gz
+    dest: /tmp
+    remote_src: true
+  tags: [desktop, karousel]
+
+- name: Build and Install Karousel
+  ansible.builtin.shell: |
+    mkdir -p build && cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_TESTING=OFF
+    make
+    make install
+  args:
+    chdir: /tmp/karousel-0.0.5
+  become: true
+  changed_when: true
+  tags: [desktop, karousel]
+
+- name: Enable Karousel in KWin
+  ansible.builtin.command:
+    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key karouselEnabled true"
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  tags: [desktop, karousel]
+
+- name: Remove Karousel build directory
+  ansible.builtin.file:
+    path: /tmp/karousel-0.0.5
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Remove Karousel tarball
+  ansible.builtin.file:
+    path: /tmp/karousel.tar.gz
     state: absent
   tags: [desktop, cleanup]

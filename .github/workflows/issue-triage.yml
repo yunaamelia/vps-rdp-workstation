@@ -93,7 +93,13 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: issue.number,
-                  body: "Thanks for reporting this issue!\\n\\nTo help us investigate, could you please provide:\\n- Steps to reproduce the issue\\n- Expected behavior\\n- Actual behavior\\n- Environment (OS, version, etc.)\\n\\nThis will help us resolve your issue faster. 🙏"
+                  body: "Thanks for reporting this issue!\\n\\n" +
+                        "To help us investigate, could you please provide:\\n" +
+                        "- Steps to reproduce the issue\\n" +
+                        "- Expected behavior\\n" +
+                        "- Actual behavior\\n" +
+                        "- Environment (OS, version, etc.)\\n\\n" +
+                        "This will help us resolve your issue faster. 🙏"
                 });
               }
             } catch (error) {

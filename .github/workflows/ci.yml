@@ -72,6 +72,7 @@ jobs:
       - name: Run Ansible Playbook (Syntax Check)
         env:
           ANSIBLE_FORCE_COLOR: '1'
+          ANSIBLE_COLLECTIONS_PATH: collections
         run: |
           ansible-playbook -i inventory/test_hosts playbooks/main.yml \
             --syntax-check
@@ -99,3 +100,4 @@ jobs:
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
+          ANSIBLE_COLLECTIONS_PATH: collections

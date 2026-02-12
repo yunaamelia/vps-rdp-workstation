@@ -8,7 +8,7 @@
 #   3. Run manually: pre-commit run --all-files
 
 # Exclude vendored collections and roles tests from all hooks
-exclude: ^(collections/|roles/.*/tests/)
+exclude: ^(collections/|roles/.*/tests/|.*\.git/)
 
 repos:
   # Standard Hooks - Basic file hygiene

@@ -57,7 +57,7 @@ readonly LOCK="🔒"
 readonly GEAR="⚙"
 readonly PACKAGE="📦"
 
-# Default values
+LOG_LEVEL="minimal"
 DRY_RUN=false
 VERBOSE=false
 DEBUG=false
@@ -841,6 +841,9 @@ run_ansible() {
 
 	local ansible_args=()
 
+	# Export log level for TUI
+	export VPS_LOG_LEVEL="$LOG_LEVEL"
+
 	# Build ansible-playbook arguments
 	ansible_args+=("-i" "inventory/hosts.yml")
 	ansible_args+=("-e" "vps_username=${VPS_USERNAME}")
@@ -990,6 +993,10 @@ main() {
 			# shellcheck disable=SC2034
 			export CI_MODE=true
 			shift
+			;;
+		--log-level)
+			LOG_LEVEL="$2"
+			shift 2
 			;;
 		*)
 			log_error "Unknown option: $1"

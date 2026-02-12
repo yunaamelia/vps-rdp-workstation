@@ -43,7 +43,7 @@ provisioner:
     defaults:
       callbacks_enabled: profile_tasks
       stdout_callback: yaml
-      roles_path: /home/apexdev/Desktop/Testing/vps-rdp-workstation/roles
+      roles_path: ../../roles
       remote_tmp: /tmp/.ansible/tmp
       allow_world_readable_tmpfiles: true
       pipelining: true

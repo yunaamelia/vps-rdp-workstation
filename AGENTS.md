@@ -29,7 +29,7 @@ Transforms Debian 13 into a security-hardened RDP workstation. Enforces performa
 
 ## CONVENTIONS
 *   **Wrapper Mandate**: ALWAYS use `setup.sh`. Never run `ansible-playbook` directly.
-*   **Variables**: Namespaced as `vps_<role>_`. 
+*   **Variables**: Namespaced as `vps_<role>_`.
 *   **Role Structure**: Flat `roles/` directory.
 *   **Secret Handling**: Use `no_log: true` for tasks handling sensitive data.
 *   **Idempotency**: All tasks must be safe for repeated execution.

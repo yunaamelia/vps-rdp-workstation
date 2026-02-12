@@ -51,7 +51,7 @@ except ImportError:
         def grid(cls, *args, **kwargs): return cls()
 
     Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Tree = Dummy
-    
+
     class Box:
         HEAVY_HEAD = None
         SIMPLE = None
@@ -138,7 +138,7 @@ class CallbackModule(CallbackBase):
         summary.append(f"Changed: {self.changed_count}  ", style="yellow")
         summary.append(f"Failed: {self.failed_count}  ", style="red")
         summary.append(f"Skipped: {self.skipped_count}", style="dim")
-        
+
         self.console.print(Panel(summary, border_style="cyan", box=box.ROUNDED))
 
     def _create_header_table(self):
@@ -146,13 +146,13 @@ class CallbackModule(CallbackBase):
         grid = Table.grid(expand=True)
         grid.add_column(justify="left", ratio=1)
         grid.add_column(justify="right", ratio=1)
-        
+
         # Left side: Title
         title = Text()
         title.append("🚀 ", style="bold")
         title.append("VPS Setup", style="bold cyan")
         title.append(f" ({self.log_level})", style="dim")
-        
+
         # Right side: Live Stats
         stats = Text()
         stats.append(f"✓ {self.ok_count} ", style="green")
@@ -160,23 +160,23 @@ class CallbackModule(CallbackBase):
         stats.append(f"✗ {self.failed_count} ", style="red")
         if self.skipped_count > 0:
             stats.append(f"⊘ {self.skipped_count}", style="dim")
-            
+
         grid.add_row(title, stats)
         return Panel(grid, style="white on blue", box=box.SQUARE)
 
     def _update_ui(self):
         """Update header and body."""
         if not self.live: return
-        
+
         self.layout["header"].update(self._create_header_table())
-        
+
         visible_logs = self.log_messages[-15:] if self.log_level == "minimal" else self.log_messages[-30:]
         self.layout["body"].update(Panel(Group(*visible_logs), title="Activity Log", border_style="white", box=box.ROUNDED))
 
     def v2_playbook_on_start(self, playbook):
         """Called when playbook starts."""
         self.start_time = time.time()
-        
+
         if not RICH_AVAILABLE:
             print("\n🚀 VPS Developer Workstation Setup v3.1.0\n")
             return
@@ -188,7 +188,7 @@ class CallbackModule(CallbackBase):
             Layout(name="body"),
             Layout(name="footer", size=3)
         )
-        
+
         self.layout["header"].update(self._create_header_table())
 
         # Footer (Progress)
@@ -216,7 +216,7 @@ class CallbackModule(CallbackBase):
         self.current_play = play.get_name().strip()
         if self.job_progress:
             self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
-        
+
         if self.log_level != "minimal":
              pass
         self._update_ui()
@@ -226,10 +226,10 @@ class CallbackModule(CallbackBase):
         self.current_task = task.get_name()
         self.task_count += 1
         self.current_task_start = time.time()
-        
+
         if self.job_progress:
             self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
-        
+
         # In Full mode, show task start (optional)
         self._update_ui()
 
@@ -244,7 +244,7 @@ class CallbackModule(CallbackBase):
             "skipped": "[dim]⊘[/dim]",
         }
         icon = icons.get(status, "•")
-        
+
         if self.log_level == "minimal" and status in ["ok", "skipped"]:
             self._update_ui()
             return

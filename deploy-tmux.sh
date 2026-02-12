@@ -5,7 +5,8 @@
 # =============================================================================
 set -euo pipefail
 
-readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_DIR
 readonly LOG_FILE="${SCRIPT_DIR}/logs/vps-tmux-deploy.log"
 readonly TMUX_SESSION="vps-setup"
 readonly STATE_FILE="${SCRIPT_DIR}/var/tmux-deploy.state"
@@ -260,7 +261,7 @@ show_status() {
 	if [[ -f "/var/lib/vps-setup/progress.json" ]]; then
 		echo ""
 		echo "Progress JSON:"
-		cat "/var/lib/vps-setup/progress.json" 2>/dev/null | head -20 || true
+		head -20 "/var/lib/vps-setup/progress.json" 2>/dev/null || true
 	fi
 }
 

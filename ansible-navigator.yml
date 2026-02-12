@@ -1,8 +1,8 @@
 ---
 ansible-navigator:
   ansible:
-    config:
-      path: ./ansible.cfg
+    # config:
+    #   path: ./ansible.cfg
     playbook:
       path: playbooks/main.yml
 
@@ -44,4 +44,4 @@ ansible-navigator:
   # stdout: Streams logs like ansible-playbook (best for scripts)
   # interactive: Full TUI explorer
   mode: stdout
-  enable-prompts: true
+  enable-prompts: false

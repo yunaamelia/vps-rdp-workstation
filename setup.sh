@@ -231,7 +231,10 @@ run_playbook() {
 		export ANSIBLE_STDOUT_CALLBACK="default"
 		mode="stdout"
 	else
-		export ANSIBLE_STDOUT_CALLBACK="rich_tui"
+		# Prevent TUI conflict: ansible-navigator has its own UI.
+		# Do NOT use rich_tui when running inside navigator.
+		export ANSIBLE_STDOUT_CALLBACK="yaml"
+		# export ANSIBLE_STDOUT_CALLBACK="rich_tui"
 	fi
 
 	# Build Args

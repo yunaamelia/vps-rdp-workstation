@@ -174,6 +174,8 @@ class CallbackModule(CallbackBase):
         self.layout = None # type: Any
         self.job_progress = None # type: Any
         self.task_id = None
+        self.overall_progress = None # type: Any
+        self.overall_task_id = None
         # Phase Tracking
         self.current_phase = None # type: str | None
         self.completed_phases = set() # type: Set[str]
@@ -226,24 +228,44 @@ class CallbackModule(CallbackBase):
         self.console.print()
 
     def _init_layout(self):
-        """Initialize the Layout structure."""
+        """Initialize the Layout structure with Header, Body (Split), and Footer."""
         self.layout = Layout()
         self.layout.split(
             Layout(name="header", size=6),
-            Layout(name="body"),
+            Layout(name="body", ratio=1),
             Layout(name="footer", size=3)
         )
+        # Split body into Left (Logs/Milestones) and Right (Progress/Stats)
+        self.layout["body"].split_row(
+            Layout(name="left", ratio=2),
+            Layout(name="right", ratio=3)
+        )
+        
         self.layout["header"].update(self._create_header_table())
         self.layout["footer"].update(self._create_footer())
 
     def _init_progress(self):
-        """Initialize the Progress bar."""
+        """Initialize Progress bars for Current Task and Overall."""
+        # 1. Job Progress (Current Task)
         self.job_progress = Progress(
             SpinnerColumn(spinner_name="dots"),
-            TextColumn("[bold blue]{task.description}"),
+            TextColumn(f"[bold {C_BLUE}]{{task.description}}"),
+            BarColumn(bar_width=None),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             expand=True
         )
         self.task_id = self.job_progress.add_task("Initializing...", total=None)
+
+        # 2. Overall Progress
+        self.overall_progress = Progress(
+            TextColumn(f"[{C_SUBTEXT1}]Overall[/]"),
+            BarColumn(bar_width=None, complete_style=C_GREEN, finished_style=C_GREEN),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            TimeElapsedColumn(),
+            expand=True
+        )
+        # Estimate total tasks (can be updated dynamically if needed)
+        self.overall_task_id = self.overall_progress.add_task("All Tasks", total=100) # Placeholder total
 
     def _start_live_display(self):
         """Start the Live context manager."""
@@ -261,9 +283,13 @@ class CallbackModule(CallbackBase):
             role_name = task._role.get_name()
             self._update_role_and_phase(role_name)
 
-        # Update Spinner
+        # Update Spinner & Overall Progress
         if self.job_progress and self.task_id is not None:
             self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
+        
+        if self.overall_progress and self.overall_task_id is not None:
+            # Simple increment for now - accurate % requires knowing total tasks beforehand
+            self.overall_progress.advance(self.overall_task_id, 1)
 
         self._update_ui()
 
@@ -290,22 +316,50 @@ class CallbackModule(CallbackBase):
         if not self.live or not self.layout:
             return
 
-        # 1. Header (Static + Stats)
         self.layout["header"].update(self._create_header_table())
-
-        # 2. Body (Milestones + Content)
-        body_elements = []
-        body_elements.append(self._create_milestones_panel())
-
-        if self.job_progress:
-            body_elements.append(
-                Panel(self.job_progress, box=box.ROUNDED, border_style="dim")
-            )
-
-        self.layout["body"].update(Panel(Group(*body_elements), box=box.ROUNDED))
-
-        # 3. Footer (Static)
+        self.layout["left"].update(self._create_left_panel())
+        self.layout["right"].update(self._create_right_panel())
         self.layout["footer"].update(self._create_footer())
+
+    def _create_left_panel(self):
+        """Create left panel with milestones."""
+        return self._create_milestones_panel()
+
+    def _create_right_panel(self):
+        """Build the right column with progress and a compact summary table."""
+        # Progress Grid
+        progress_grid = Table.grid(expand=True)
+        progress_grid.add_row(
+            Panel(
+                self.overall_progress,
+                title=f"[bold {C_GREEN}]Overall Progress[/]",
+                border_style=C_GREEN,
+                box=box.ROUNDED,
+                padding=(1, 2)
+            )
+        )
+        progress_grid.add_row(
+            Panel(
+                self.job_progress,
+                title=f"[bold {C_MAUVE}]Current Task[/]",
+                border_style=C_MAUVE,
+                box=box.ROUNDED,
+                padding=(1, 2)
+            )
+        )
+
+        # Live Stats Summary
+        summary = Table(box=box.ROUNDED, show_header=True, header_style=f"bold {C_LAVENDER}", expand=True)
+        summary.add_column("Metric", justify="right")
+        summary.add_column("Count", justify="left")
+        
+        summary.add_row("OK", f"[{C_GREEN}]{self.ok_count}[/]")
+        summary.add_row("Changed", f"[{C_YELLOW}]{self.changed_count}[/]")
+        summary.add_row("Failed", f"[{C_RED}]{self.failed_count}[/]")
+        summary.add_row("Skipped", f"[{C_OVERLAY0}]{self.skipped_count}[/]")
+
+        content = Group(progress_grid, summary)
+        return Panel(content, box=box.ROUNDED, border_style=C_SURFACE0, padding=(1, 1))
 
     def _create_header_table(self):
         """Create the header with ASCII banner and stats."""

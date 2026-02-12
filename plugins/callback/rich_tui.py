@@ -199,6 +199,14 @@ class CallbackModule(CallbackBase):
         """Print static banner for log-based outputs using Starship styling."""
         if not self.console: return
         
+        # Banner from setup.sh
+        banner_ascii = """
+[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
+        
+        self.console.print(Panel(banner_ascii, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2)))
+        
         # Segment 1: Icon (Mauve on Surface0)
         seg1 = Text(f" {ICON_OS} ", style=f"bold {C_MAUVE} on {C_SURFACE0}")
         sep1 = Text(SEP_R, style=f"{C_SURFACE0} on {C_SURFACE1}")
@@ -212,10 +220,9 @@ class CallbackModule(CallbackBase):
         sep3 = Text(SEP_R, style=f"{C_SURFACE2} on default")
         
         # Combine
-        header = Text.assemble(seg1, sep1, seg2, sep2, seg3, sep3)
+        header_bar = Text.assemble(seg1, sep1, seg2, sep2, seg3, sep3)
         
-        self.console.print()
-        self.console.print(header)
+        self.console.print(header_bar)
         self.console.print()
 
     def _init_layout(self):
@@ -292,10 +299,10 @@ class CallbackModule(CallbackBase):
 
         if self.job_progress:
             body_elements.append(
-                Panel(self.job_progress, box=box.SIMPLE, border_style="dim")
+                Panel(self.job_progress, box=box.ROUNDED, border_style="dim")
             )
 
-        self.layout["body"].update(Panel(Group(*body_elements), box=box.SQUARE))
+        self.layout["body"].update(Panel(Group(*body_elements), box=box.ROUNDED))
 
         # 3. Footer (Static)
         self.layout["footer"].update(self._create_footer())
@@ -320,7 +327,7 @@ class CallbackModule(CallbackBase):
         stats.append(f"SKIPPED: {self.skipped_count}", style="dim")
         
         grid.add_row(Panel(stats, box=box.ROUNDED, style="white on black"))
-        return Panel(grid, style="white on black", box=box.HEAVY)
+        return Panel(grid, style="white on black", box=box.ROUNDED)
 
     def _create_milestones_panel(self):
         """Create horizontal phase tracker."""
@@ -339,7 +346,7 @@ class CallbackModule(CallbackBase):
 
         dots = "".join(status_row)
         display = Text.from_markup(f"{dots}  [bold white]{self.current_phase}[/bold white]")
-        return Panel(display, box=box.SIMPLE, padding=(0, 1), style="on black")
+        return Panel(display, box=box.ROUNDED, padding=(0, 1), style="on black")
 
     def _create_footer(self):
         """Create the footer."""
@@ -456,6 +463,7 @@ class CallbackModule(CallbackBase):
                 Text(message, style=C_RED),
                 title=f"[bold {C_RED}]Error Details[/]",
                 border_style=C_RED,
+                box=box.ROUNDED,
                 expand=True
             )
             self.console.print(grid)
@@ -482,6 +490,7 @@ class CallbackModule(CallbackBase):
                 summary,
                 title=f"[bold {C_BLUE}]Execution Completed in {total_time}[/]",
                 border_style=C_SURFACE0,
+                box=box.ROUNDED,
                 expand=False
             )
             self.console.print(panel)

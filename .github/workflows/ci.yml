@@ -82,6 +82,7 @@ jobs:
       - name: Run Ansible Playbook (Check Mode)
         env:
           ANSIBLE_FORCE_COLOR: '1'
+          ANSIBLE_LOG_PATH: '/tmp/ansible.log'
         run: |
           ansible-playbook -i inventory/test_hosts playbooks/main.yml \
             --syntax-check

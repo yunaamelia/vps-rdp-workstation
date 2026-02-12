@@ -167,14 +167,12 @@ class CallbackModule(CallbackBase):
         """Print static banner for log-based outputs."""
         if not self.console: return
         
-        banner_text = """
-[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]
- """
-        self.console.print(banner_text)
-        self.console.print(f"[dim]Version {self.CALLBACK_VERSION} | Log Level: {self.log_level.upper()}[/dim]")
-        self.console.print(Rule(style="cyan"))
+        grid = Table.grid(expand=True)
+        grid.add_column(justify="center", ratio=1)
+        grid.add_row("[bold cyan]VPS RDP Workstation Automation[/bold cyan]")
+        grid.add_row(f"[dim]Version {self.CALLBACK_VERSION} | Log Level: {self.log_level.upper()}[/dim]")
+        
+        self.console.print(Panel(grid, style="cyan", box=box.HEAVY))
 
     def _init_layout(self):
         """Initialize the Layout structure."""
@@ -366,25 +364,74 @@ class CallbackModule(CallbackBase):
         """Print a static log line for non-interactive mode."""
         if not self.console: return
 
+        # Icons and Colors
         icons = {
-            "ok": "[bold green]OK[/bold green]",
-            "changed": "[bold yellow]CHANGED[/bold yellow]",
-            "failed": "[bold red]FAILED[/bold red]",
-            "skipped": "[dim]SKIPPED[/dim]",
+            "ok": "✓",
+            "changed": "⟳",
+            "failed": "✗",
+            "skipped": "⊘",
         }
-        status_label = icons.get(status, status.upper())
+        colors = {
+            "ok": "green",
+            "changed": "yellow",
+            "failed": "red",
+            "skipped": "dim white",
+        }
         
-        # Format: [STATUS] Task Name (Duration)
-        line = f"{status_label:<10} {task_name} [dim]({duration})[/dim]"
+        status_color = colors.get(status, "white")
+        icon = icons.get(status, "•")
         
+        # Determine Phase
+        phase = self.current_phase or "Initializing"
+        
+        # Create a Grid for alignment
+        grid = Table.grid(expand=True)
+        grid.add_column(justify="left", width=12)  # Status
+        grid.add_column(justify="left", ratio=1)   # Task Name
+        grid.add_column(justify="right", width=20) # Phase
+        grid.add_column(justify="right", width=10) # Duration
+
+        status_text = Text(f"{icon} {status.upper()}", style=f"bold {status_color}")
+        task_text = Text(task_name, style="white")
+        phase_text = Text(phase, style="dim cyan")
+        duration_text = Text(duration, style="dim")
+
+        grid.add_row(status_text, task_text, phase_text, duration_text)
+        
+        # Error Message Panel
         if status == "failed":
-            line += f"\n[red]  ERROR: {message}[/red]"
-            
-        self.console.print(line)
+            error_panel = Panel(
+                Text(message, style="red"),
+                title="[bold red]Error Details[/bold red]",
+                border_style="red",
+                expand=True
+            )
+            self.console.print(grid)
+            self.console.print(error_panel)
+        else:
+            self.console.print(grid)
 
     def _print_footer(self):
         if self.console:
-            self.console.print("[bold green]✓ Execution Completed[/bold green]")
+            # Summary Table
+            summary = Table(box=box.ROUNDED, show_header=True, header_style="bold cyan")
+            summary.add_column("Metric", justify="right")
+            summary.add_column("Count", justify="left")
+            
+            summary.add_row("OK", f"[green]{self.ok_count}[/green]")
+            summary.add_row("Changed", f"[yellow]{self.changed_count}[/yellow]")
+            summary.add_row("Failed", f"[red]{self.failed_count}[/red]")
+            summary.add_row("Skipped", f"[dim]{self.skipped_count}[/dim]")
+            
+            total_time = self._get_duration(self.start_time)
+            
+            panel = Panel(
+                summary,
+                title=f"[bold green]Execution Completed in {total_time}[/bold green]",
+                border_style="green",
+                expand=False
+            )
+            self.console.print(panel)
 
     # --- Ansible Callback Hooks ---
 

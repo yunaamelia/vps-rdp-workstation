@@ -1,4 +1,5 @@
 # pylint: disable=C0103,R0903,R0902,W0212,E0401
+# pyright: reportUnusedImport=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportUnknownVariableType=false, reportTypeCommentUsage=false, reportMissingTypeStubs=false, reportUnusedCallResult=false
 """
 Ansible Callback Plugin: Rich TUI
 Beautiful TUI output with progress bars, tables, and live updates.
@@ -23,9 +24,9 @@ try:
     from rich.text import Text
     from rich import box
     from rich.rule import Rule
-    RICH_AVAILABLE = True
+    rich_available = True
 except ImportError:
-    RICH_AVAILABLE = False
+    rich_available = False
     # Define dummy classes to satisfy static analysis
     class Dummy:
         """Dummy class for missing rich dependencies."""
@@ -48,6 +49,8 @@ except ImportError:
 
     Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Rule = cast(Any, Dummy)
     box = cast(Any, Dummy)
+
+RICH_AVAILABLE = rich_available
 
 if TYPE_CHECKING:
     from ansible.plugins.callback import CallbackBase
@@ -151,7 +154,12 @@ class CallbackModule(CallbackBase):
 
     def __init__(self):
         super(CallbackModule, self).__init__()
-        self.console = Console(force_terminal=True, color_system="truecolor") if RICH_AVAILABLE else None
+        force_tui = os.environ.get("VPS_FORCE_TUI") == "true"
+        terminal = force_tui or os.isatty(1)
+        self.console = Console(
+            force_terminal=terminal,
+            color_system="truecolor"
+        ) if RICH_AVAILABLE else None
         
         # State Tracking
         self.start_time = None # type: float | None
@@ -188,16 +196,19 @@ class CallbackModule(CallbackBase):
             print("\\n🚀 VPS Developer Workstation Setup v3.1.0\\n")
             return
 
-        # Force TUI mode even in Navigator (experimental fix)
-        # We previously disabled this to fix hangs, but now we have a proper Layout structure.
-        # Let's try enabling it but keeping an escape hatch if needed.
-        if os.environ.get("VPS_FORCE_STATIC_LOGS") == "true":
+        force_tui = os.environ.get("VPS_FORCE_TUI") == "true"
+        force_static = os.environ.get("VPS_FORCE_STATIC_LOGS") == "true"
+        if force_static or not self.console or not self.console.is_terminal:
              self._print_static_header()
-        else:
-             # Interactive mode: Full TUI
-             self._init_layout()
-             self._init_progress()
-             self._start_live_display()
+             return
+
+        if self.is_navigator and not force_tui:
+             self._print_static_header()
+             return
+
+        self._init_layout()
+        self._init_progress()
+        self._start_live_display()
 
     def _print_static_header(self):
         """Print static banner for log-based outputs using Starship styling."""
@@ -271,7 +282,22 @@ class CallbackModule(CallbackBase):
 
     def _start_live_display(self):
         """Start the Live context manager."""
-        self.live = Live(self.layout, refresh_per_second=12, console=self.console)
+        refresh_rate_env = os.environ.get("VPS_TUI_FPS", "4")
+        try:
+            refresh_rate = max(1, int(refresh_rate_env))
+        except ValueError:
+            refresh_rate = 4
+        
+        # When running in navigator/piped mode, auto_refresh can cause deadlocks if the buffer fills up.
+        # We'll disable auto_refresh and rely on manual refreshes in the callback hooks.
+        auto_refresh = not self.is_navigator
+        
+        self.live = Live(
+            self.layout,
+            refresh_per_second=refresh_rate,
+            console=self.console,
+            auto_refresh=auto_refresh
+        )
         self.live.start()
 
     def v2_playbook_on_task_start(self, task, is_conditional):
@@ -293,7 +319,9 @@ class CallbackModule(CallbackBase):
             # Simple increment for now - accurate % requires knowing total tasks beforehand
             self.overall_progress.advance(self.overall_task_id, 1)
 
-        self._update_ui()
+        # Force a manual refresh to ensure the screen updates even if the Live thread is contending
+        if self.live:
+            self.live.refresh()
 
     def _update_role_and_phase(self, role_name):
         """Update current role and phase, marking previous as complete."""

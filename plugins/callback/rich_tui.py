@@ -22,6 +22,7 @@ try:
     from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
     from rich.text import Text
     from rich import box
+    from rich.rule import Rule
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
@@ -45,7 +46,7 @@ except ImportError:
         @classmethod
         def from_markup(cls, *args, **kwargs): return cls()
 
-    Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = cast(Any, Dummy)
+    Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Rule = cast(Any, Dummy)
     box = cast(Any, Dummy)
 
 if TYPE_CHECKING:
@@ -118,7 +119,7 @@ class CallbackModule(CallbackBase):
 
     def __init__(self):
         super(CallbackModule, self).__init__()
-        self.console = Console() if RICH_AVAILABLE else None
+        self.console = Console(force_terminal=True, color_system="truecolor") if RICH_AVAILABLE else None
         
         # State Tracking
         self.start_time = None # type: float | None
@@ -127,6 +128,7 @@ class CallbackModule(CallbackBase):
         self.current_role = None # type: str | None
         self.current_task_start = None # type: float | None
         self.log_level = os.environ.get("VPS_LOG_LEVEL", "minimal").lower()
+        self.is_navigator = "ansible-navigator" in os.environ.get("ansible_cmdline", "") or os.environ.get("ANSIBLE_NAVIGATOR_MODE")
 
         # Statistics
         self.task_count = 0
@@ -152,9 +154,27 @@ class CallbackModule(CallbackBase):
             print("\\n🚀 VPS Developer Workstation Setup v3.1.0\\n")
             return
 
-        self._init_layout()
-        self._init_progress()
-        self._start_live_display()
+        if self.is_navigator:
+            # Navigator mode: Print static banner, NO live display
+            self._print_static_header()
+        else:
+            # Interactive mode: Full TUI
+            self._init_layout()
+            self._init_progress()
+            self._start_live_display()
+
+    def _print_static_header(self):
+        """Print static banner for log-based outputs."""
+        if not self.console: return
+        
+        banner_text = """
+[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]
+ """
+        self.console.print(banner_text)
+        self.console.print(f"[dim]Version {CallbackBase.CALLBACK_VERSION} | Log Level: {self.log_level.upper()}[/dim]")
+        self.console.print(Rule(style="cyan"))
 
     def _init_layout(self):
         """Initialize the Layout structure."""
@@ -310,6 +330,13 @@ class CallbackModule(CallbackBase):
 
     def _print_task_result(self, status, task_name, duration, message=""):
         """Add formatted result to logs."""
+        if not self.console: return
+
+        # In navigator mode, print linear logs without TUI updates
+        if self.is_navigator:
+            self._print_log_line(status, task_name, duration, message)
+            return
+
         if not self.live: return
 
         icons = {
@@ -334,6 +361,26 @@ class CallbackModule(CallbackBase):
             renderable = Text.from_markup(log_line, style=style)
         
         self.live.console.print(renderable)
+
+    def _print_log_line(self, status, task_name, duration, message=""):
+        """Print a static log line for non-interactive mode."""
+        if not self.console: return
+
+        icons = {
+            "ok": "[bold green]OK[/bold green]",
+            "changed": "[bold yellow]CHANGED[/bold yellow]",
+            "failed": "[bold red]FAILED[/bold red]",
+            "skipped": "[dim]SKIPPED[/dim]",
+        }
+        status_label = icons.get(status, status.upper())
+        
+        # Format: [STATUS] Task Name (Duration)
+        line = f"{status_label:<10} {task_name} [dim]({duration})[/dim]"
+        
+        if status == "failed":
+            line += f"\n[red]  ERROR: {message}[/red]"
+            
+        self.console.print(line)
 
     def _print_footer(self):
         if self.console:

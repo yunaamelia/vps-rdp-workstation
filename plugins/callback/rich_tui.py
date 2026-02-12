@@ -9,22 +9,91 @@ from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import sys
 import time
 from datetime import datetime
 
 try:
-    from rich.console import Console
+    from rich.console import Console, Group
     from rich.live import Live
+    from rich.layout import Layout
     from rich.table import Table
     from rich.panel import Panel
     from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
-    from rich.tree import Tree
     from rich.text import Text
     from rich import box
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
+    # Define dummy classes to satisfy static analysis
+    class Dummy:
+        """Dummy class for missing rich dependencies."""
+        def __init__(self, *args, **kwargs): pass
+        def __getitem__(self, key): return self
+        def __setitem__(self, key, value): pass
+        def __call__(self, *args, **kwargs): return self
+        def split(self, *args, **kwargs): pass
+        def update(self, *args, **kwargs): pass
+        def start(self): pass
+        def stop(self): pass
+        def add_task(self, *args, **kwargs): pass
+        def append(self, *args, **kwargs): pass
+        def print(self, *args, **kwargs): pass
+        @classmethod
+        def from_markup(cls, *args, **kwargs): return cls()
+
+    Console = Dummy
+    Group = Dummy
+    Live = Dummy
+    Layout = Dummy
+    Table = Dummy
+    Panel = Dummy
+    Progress = Dummy
+    SpinnerColumn = Dummy
+    TextColumn = Dummy
+    BarColumn = Dummy
+    TimeElapsedColumn = Dummy
+    Text = Dummy
+    
+    class Box:
+        HEAVY_HEAD = None
+        SIMPLE = None
+        ROUNDED = None
+    box = Box
+    # Define dummy classes to satisfy static analysis
+    class Dummy:
+        """Dummy class for missing rich dependencies."""
+        def __init__(self, *args, **kwargs): pass
+        def __getitem__(self, key): return self
+        def __setitem__(self, key, value): pass
+        def __call__(self, *args, **kwargs): return self
+        def split(self, *args, **kwargs): pass
+        def update(self, *args, **kwargs): pass
+        def start(self): pass
+        def stop(self): pass
+        def add_task(self, *args, **kwargs): pass
+        def append(self, *args, **kwargs): pass
+        def print(self, *args, **kwargs): pass
+        @classmethod
+        def from_markup(cls, *args, **kwargs): return cls()
+
+    Console = Dummy
+    Group = Dummy
+    Live = Dummy
+    Layout = Dummy
+    Table = Dummy
+    Panel = Dummy
+    Progress = Dummy
+    SpinnerColumn = Dummy
+    TextColumn = Dummy
+    BarColumn = Dummy
+    TimeElapsedColumn = Dummy
+    Text = Dummy
+    
+    class Box:
+        HEAVY_HEAD = None
+        SIMPLE = None
+        ROUNDED = None
+    box = Box
 
 try:
     from ansible.plugins.callback import CallbackBase
@@ -69,6 +138,11 @@ class CallbackModule(CallbackBase):
         self.current_play = None
         self.current_task = None
         self.current_role = None
+        self.current_task_start = None
+
+        # Configuration
+        import os
+        self.log_level = os.environ.get("VPS_LOG_LEVEL", "full").lower()
 
         # Statistics
         self.task_count = 0
@@ -77,97 +151,102 @@ class CallbackModule(CallbackBase):
         self.failed_count = 0
         self.skipped_count = 0
 
-        # Task tracking
-        self.tasks = []
-        self.roles_seen = set()
-        self.current_task_start = None
-
-        # Progress tracking
-        self.progress = None
+        # UI Components
+        self.live = None
+        self.layout = None
+        self.job_progress = None
         self.task_id = None
+        self.log_messages = []  # Store recent logs for display
 
     def _get_duration(self, start_time):
-        """Calculate duration from start time."""
-        if not start_time:
-            return "0.0s"
-        elapsed = time.time() - start_time
-        if elapsed < 60:
-            return f"{elapsed:.1f}s"
-        minutes = int(elapsed // 60)
-        seconds = elapsed % 60
-        return f"{minutes}m{seconds:.0f}s"
+        """Calculate duration string."""
+        if not start_time: return "0.0s"
+        return f"{time.time() - start_time:.1f}s"
 
-    def _print_header(self):
-        """Display installation header using Rich."""
+    def _print_footer(self):
+        """Print final stats."""
+        if not RICH_AVAILABLE or not self.console:
+            return
+
+        summary = Text()
+        summary.append("\nExecution Summary\n", style="bold underline")
+        summary.append(f"OK: {self.ok_count}  ", style="green")
+        summary.append(f"Changed: {self.changed_count}  ", style="yellow")
+        summary.append(f"Failed: {self.failed_count}  ", style="red")
+        summary.append(f"Skipped: {self.skipped_count}", style="dim")
+        
+        self.console.print(Panel(summary, border_style="cyan", box=box.ROUNDED))
+
+    def v2_playbook_on_start(self, playbook):
+        """Called when playbook starts."""
+        self.start_time = time.time()
+        
         if not RICH_AVAILABLE:
             print("\n🚀 VPS Developer Workstation Setup v3.1.0\n")
             return
 
+        # Initialize Layout
+        self.layout = Layout()
+        self.layout.split(
+            Layout(name="header", size=3),
+            Layout(name="body"),
+            Layout(name="footer", size=3)
+        )
+        
+        # Header
         header_text = Text()
         header_text.append("🚀 ", style="bold")
         header_text.append("VPS Developer Workstation Setup", style="bold cyan")
         header_text.append(" v3.1.0", style="dim")
+        self.layout["header"].update(Panel(header_text, border_style="cyan", box=box.HEAVY_HEAD))
 
-        panel = Panel(
-            header_text,
-            box=box.DOUBLE,
-            border_style="cyan",
-            padding=(0, 2),
+        # Footer (Progress)
+        self.job_progress = Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(bar_width=None),
+            TimeElapsedColumn(),
+            expand=True
         )
-        self.console.print(panel)
+        self.task_id = self.job_progress.add_task("Initializing...", total=None)
+        self.layout["footer"].update(Panel(self.job_progress, border_style="blue", box=box.SIMPLE))
 
-    def _print_footer(self):
-        """Display installation summary using Rich table."""
-        if not RICH_AVAILABLE:
-            print(f"\n✨ Complete! OK: {self.ok_count} Changed: {self.changed_count} "
-                  f"Failed: {self.failed_count} Skipped: {self.skipped_count}\n")
-            return
+        # Start Live Display
+        self.live = Live(self.layout, refresh_per_second=10, console=self.console)
+        self.live.start()
 
-        # Duration
-        duration = self._get_duration(self.start_time)
+    def _update_body(self, renderable):
+        """Update the body section with new logs."""
+        if not self.live: return
 
-        # Summary table
-        table = Table(
-            title="📊 Execution Summary",
-            box=box.ROUNDED,
-            border_style="cyan",
-            show_header=False,
-            padding=(0, 1),
-        )
-        table.add_column("Metric", style="bold")
-        table.add_column("Value", justify="right")
+        self.log_messages.append(renderable)
+        # Keep last 20 messages to prevent overflow visual clutter
+        visible_logs = self.log_messages[-15:] if self.log_level == "minimal" else self.log_messages[-30:]
+        self.layout["body"].update(Panel(Group(*visible_logs), title="Activity Log", border_style="white", box=box.ROUNDED))
 
-        table.add_row("✓ OK", f"[green]{self.ok_count}[/green]")
-        table.add_row("⟳ Changed", f"[yellow]{self.changed_count}[/yellow]")
-        table.add_row("✗ Failed", f"[red]{self.failed_count}[/red]")
-        table.add_row("⊘ Skipped", f"[dim]{self.skipped_count}[/dim]")
-        table.add_row("⏱ Duration", f"[cyan]{duration}[/cyan]")
-        table.add_row("📋 Total Tasks", str(self.task_count))
+    def v2_playbook_on_play_start(self, play):
+        """Called when a play starts."""
+        self.current_play = play.get_name().strip()
+        if self.job_progress:
+            self.job_progress.update(self.task_id, description=f"Play: {self.current_play}")
 
-        self.console.print()
-        self.console.print(table)
+    def v2_playbook_on_task_start(self, task, is_conditional):
+        """Called when a task starts."""
+        self.current_task = task.get_name()
+        self.task_count += 1
+        self.current_task_start = time.time()
+        
+        if self.job_progress:
+            self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
 
-        # Status panel
-        if self.failed_count == 0:
-            status_panel = Panel(
-                Text("✨ Installation Complete!", style="bold green", justify="center"),
-                box=box.DOUBLE,
-                border_style="green",
-            )
-        else:
-            status_panel = Panel(
-                Text(f"❌ {self.failed_count} task(s) failed", style="bold red", justify="center"),
-                box=box.DOUBLE,
-                border_style="red",
-            )
-
-        self.console.print(status_panel)
+    def _get_duration(self, start_time):
+        """Calculate duration string."""
+        if not start_time: return "0.0s"
+        return f"{time.time() - start_time:.1f}s"
 
     def _print_task_result(self, status, task_name, duration, message=None):
-        """Print task result with status icon."""
-        if not RICH_AVAILABLE:
-            print(f" {status} {task_name} ({duration})")
-            return
+        """Print task result to body."""
+        if not self.live: return
 
         icons = {
             "ok": "[green]✓[/green]",
@@ -176,63 +255,17 @@ class CallbackModule(CallbackBase):
             "skipped": "[dim]⊘[/dim]",
         }
         icon = icons.get(status, "•")
-
-        # Format task line
-        if status == "failed" and message:
-            self.console.print(f" {icon} {task_name} [dim]({duration})[/dim]")
-            error_panel = Panel(
-                Text(message, style="red"),
-                title="[red]Error Details[/red]",
-                border_style="red",
-                padding=(0, 1),
-            )
-            self.console.print(error_panel)
-        else:
-            style = "dim" if status == "skipped" else ""
-            self.console.print(f" {icon} {task_name} [dim]({duration})[/dim]", style=style)
-
-    def v2_playbook_on_start(self, playbook):
-        """Called when playbook starts."""
-        self.start_time = time.time()
-        self._print_header()
-
-    def v2_playbook_on_play_start(self, play):
-        """Called when a play starts."""
-        self.current_play = play.get_name().strip()
-
-        if not RICH_AVAILABLE:
-            print(f"\n📦 {self.current_play}")
+        
+        # Minimal Mode: Only show changed/failed
+        if self.log_level == "minimal" and status in ["ok", "skipped"]:
             return
 
-        if self.current_play:
-            self.console.print()
-            play_panel = Panel(
-                Text(self.current_play, style="bold"),
-                box=box.SIMPLE,
-                border_style="blue",
-                padding=(0, 1),
-            )
-            self.console.print(play_panel)
-
-    def v2_playbook_on_task_start(self, task, is_conditional):
-        """Called when a task starts."""
-        self.current_task = task.get_name()
-        self.task_count += 1
-        self.current_task_start = time.time()
-
-        # Extract role name if present
-        if task._role:
-            role_name = task._role.get_name()
-            if role_name not in self.roles_seen:
-                self.roles_seen.add(role_name)
-                if RICH_AVAILABLE:
-                    self.console.print(f"\n [cyan]⚙[/cyan] Role: [bold]{role_name}[/bold]")
-                else:
-                    print(f"\n⚙ Role: {role_name}")
-
-        # Show spinner for current task
-        if RICH_AVAILABLE:
-            self.console.print(f" [dim]⋯[/dim] {self.current_task}...", end="\r")
+        log_line = f"{icon} {task_name} [dim]({duration})[/dim]"
+        if status == "failed":
+            self._update_body(Text.from_markup(f"{log_line}\n[red]{message}[/red]"))
+        else:
+            style = "dim" if status == "skipped" else ""
+            self._update_body(Text.from_markup(log_line, style=style))
 
     def v2_runner_on_ok(self, result):
         """Called when a task succeeds."""
@@ -270,8 +303,24 @@ class CallbackModule(CallbackBase):
         message = result._result.get("msg", "Host unreachable")
         self._print_task_result("failed", f"{self.current_task} (unreachable)", duration, message)
 
+    def _print_footer(self):
+        """Print final stats."""
+        if not RICH_AVAILABLE or not self.console:
+            return
+
+        summary = Text()
+        summary.append("\nExecution Summary\n", style="bold underline")
+        summary.append(f"OK: {self.ok_count}  ", style="green")
+        summary.append(f"Changed: {self.changed_count}  ", style="yellow")
+        summary.append(f"Failed: {self.failed_count}  ", style="red")
+        summary.append(f"Skipped: {self.skipped_count}", style="dim")
+        
+        self.console.print(Panel(summary, border_style="cyan", box=box.ROUNDED))
+
     def v2_playbook_on_stats(self, stats):
         """Called at the end with statistics."""
+        if self.live:
+            self.live.stop()
         self._print_footer()
 
     def v2_on_any(self, *args, **kwargs):

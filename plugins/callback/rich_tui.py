@@ -328,7 +328,3 @@ class CallbackModule(CallbackBase):
         if self.live:
             self.live.stop()
         self._print_footer()
-
-    def v2_on_any(self, *args, **kwargs):
-        """Catch-all for debugging."""
-        pass

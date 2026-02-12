@@ -923,6 +923,7 @@ run_ansible() {
 
 	# Export log level for TUI
 	export VPS_LOG_LEVEL="$LOG_LEVEL"
+	export ANSIBLE_DEPRECATION_WARNINGS=False
 
 	# Build ansible-playbook arguments
 	ansible_args+=("-i" "inventory/hosts.yml")

@@ -221,8 +221,8 @@
     enabled: true
     state: started
     daemon_reload: true
-  tags: [desktop, sddm]
   ignore_errors: "{{ ansible_check_mode }}"
+  tags: [desktop, sddm]
 
 - name: Run desktop optimizations
   ansible.builtin.include_tasks: optimizations.yml

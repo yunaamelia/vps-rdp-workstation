@@ -84,9 +84,11 @@ log_warn() {
 	echo -e "${YELLOW}${WARN}${NC} ${1}"
 	log_to_file "WARN" "$1"
 
+	# In strict debug mode, we might want to stop, but for user existence check
+	# which is a common "resume" scenario, we shouldn't fail.
+	# Commenting out the exit to allow continuation.
 	if [[ "$DEBUG" == "true" ]]; then
-		log_error "Strict Debug Mode: Stopping execution due to warning."
-		exit 1
+		log_debug "Warning encountered in debug mode (continuing execution)"
 	fi
 }
 

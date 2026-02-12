@@ -67,17 +67,7 @@ jobs:
 
       - name: Create Test Inventory
         run: |
-          mkdir -p inventory/group_vars
-          mkdir -p /tmp/vps-backups
           echo "localhost ansible_connection=local" > inventory/test_hosts
-          # Create dummy password hash for validation
-          echo "vps_user_password_hash: '\$6\$rounds=4096\$testsalt\$test'" > inventory/group_vars/all.yml
-          # Add other required variables for basic syntax check
-          echo "vps_username: runner" >> inventory/group_vars/all.yml
-          echo "vps_timezone: UTC" >> inventory/group_vars/all.yml
-          echo "vps_progress_state_file: /tmp/vps-progress.json" >> inventory/group_vars/all.yml
-          echo "vps_summary_log: /tmp/vps-summary.log" >> inventory/group_vars/all.yml
-          echo "vps_backup_dir: /tmp/vps-backups" >> inventory/group_vars/all.yml
 
       - name: Run Ansible Playbook (Check Mode)
         env:

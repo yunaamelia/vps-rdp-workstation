@@ -107,6 +107,18 @@ ROLE_PHASE_MAP = {
 
 PHASE_ORDER = sorted(list(set(ROLE_PHASE_MAP.values())))
 
+# Custom Palette
+C_LAVENDER = "#a3aed2"  # Light Slate
+C_BLUE     = "#769ff0"  # Cornflower Blue
+C_DARK_BL  = "#394260"  # Dark Blue Grey
+C_DARKER   = "#212736"  # Very Dark Blue Grey
+C_DARKEST  = "#1d2230"  # Darkest Blue
+C_TEXT_DK  = "#090c0c"  # Very Dark Text
+
+# Icons
+ICON_OS    = "" # U+E63F (or similar distro icon)
+SEP_R      = "" # U+E0B4
+
 class CallbackModule(CallbackBase):
     """
     Rich TUI Callback Plugin for beautiful Ansible output.
@@ -138,9 +150,9 @@ class CallbackModule(CallbackBase):
         self.skipped_count = 0
 
         # UI Components
-        self.live = None # type: Live | None
-        self.layout = None # type: Layout | None
-        self.job_progress = None # type: Progress | None
+        self.live = None # type: Any
+        self.layout = None # type: Any
+        self.job_progress = None # type: Any
         self.task_id = None
         # Phase Tracking
         self.current_phase = None # type: str | None
@@ -164,15 +176,27 @@ class CallbackModule(CallbackBase):
             self._start_live_display()
 
     def _print_static_header(self):
-        """Print static banner for log-based outputs."""
+        """Print static banner for log-based outputs using Starship styling."""
         if not self.console: return
         
-        grid = Table.grid(expand=True)
-        grid.add_column(justify="center", ratio=1)
-        grid.add_row("[bold cyan]VPS RDP Workstation Automation[/bold cyan]")
-        grid.add_row(f"[dim]Version {self.CALLBACK_VERSION} | Log Level: {self.log_level.upper()}[/dim]")
+        # Segment 1: Icon (Lavender)
+        seg1 = Text(f" {ICON_OS} ", style=f"bold {C_TEXT_DK} on {C_LAVENDER}")
+        sep1 = Text(SEP_R, style=f"{C_LAVENDER} on {C_BLUE}")
         
-        self.console.print(Panel(grid, style="cyan", box=box.HEAVY))
+        # Segment 2: Title (Blue)
+        seg2 = Text(" VPS RDP WORKSTATION ", style=f"bold white on {C_BLUE}")
+        sep2 = Text(SEP_R, style=f"{C_BLUE} on {C_DARK_BL}")
+        
+        # Segment 3: Stats (Dark Blue)
+        seg3 = Text(f" v{self.CALLBACK_VERSION} ", style=f"white on {C_DARK_BL}")
+        sep3 = Text(SEP_R, style=f"{C_DARK_BL} on default")
+        
+        # Combine
+        header = Text.assemble(seg1, sep1, seg2, sep2, seg3, sep3)
+        
+        self.console.print()
+        self.console.print(header)
+        self.console.print()
 
     def _init_layout(self):
         """Initialize the Layout structure."""
@@ -222,7 +246,7 @@ class CallbackModule(CallbackBase):
             return
 
         # If switching roles, check phase transition
-        if self.current_phase:
+        if self.current_phase and self.current_role:
             prev_phase = ROLE_PHASE_MAP.get(self.current_role)
             new_phase = ROLE_PHASE_MAP.get(role_name)
             
@@ -338,10 +362,10 @@ class CallbackModule(CallbackBase):
         if not self.live: return
 
         icons = {
-            "ok": "[green]✓[/green]",
-            "changed": "[yellow]⟳[/yellow]",
-            "failed": "[red]✗[/red]",
-            "skipped": "[dim]⊘[/dim]",
+            "ok": "[green][/green]",
+            "changed": "[yellow][/yellow]",
+            "failed": "[red][/red]",
+            "skipped": "[dim][/dim]",
         }
         icon = icons.get(status, "•")
 
@@ -366,23 +390,24 @@ class CallbackModule(CallbackBase):
 
         # Icons and Colors
         icons = {
-            "ok": "✓",
-            "changed": "⟳",
-            "failed": "✗",
-            "skipped": "⊘",
+            "ok": "",
+            "changed": "",
+            "failed": "",
+            "skipped": "",
         }
+        # Map statuses to new palette
         colors = {
-            "ok": "green",
-            "changed": "yellow",
-            "failed": "red",
-            "skipped": "dim white",
+            "ok": C_LAVENDER,
+            "changed": C_BLUE,
+            "failed": "red", # Keep red for critical errors
+            "skipped": C_DARK_BL,
         }
         
         status_color = colors.get(status, "white")
         icon = icons.get(status, "•")
         
         # Determine Phase
-        phase = self.current_phase or "Initializing"
+        phase = self.current_phase or "Init"
         
         # Create a Grid for alignment
         grid = Table.grid(expand=True)
@@ -391,10 +416,17 @@ class CallbackModule(CallbackBase):
         grid.add_column(justify="right", width=20) # Phase
         grid.add_column(justify="right", width=10) # Duration
 
+        # Status Pill
         status_text = Text(f"{icon} {status.upper()}", style=f"bold {status_color}")
+        
+        # Task Name (Plain)
         task_text = Text(task_name, style="white")
-        phase_text = Text(phase, style="dim cyan")
-        duration_text = Text(duration, style="dim")
+        
+        # Phase Pill (Darker background)
+        phase_text = Text(f" {phase} ", style=f"{C_LAVENDER} on {C_DARK_BL}")
+        
+        # Duration Pill (Darkest background)
+        duration_text = Text(f" {duration} ", style=f"dim white on {C_DARKEST}")
 
         grid.add_row(status_text, task_text, phase_text, duration_text)
         
@@ -414,21 +446,22 @@ class CallbackModule(CallbackBase):
     def _print_footer(self):
         if self.console:
             # Summary Table
-            summary = Table(box=box.ROUNDED, show_header=True, header_style="bold cyan")
+            summary = Table(box=box.ROUNDED, show_header=True, header_style=f"bold {C_LAVENDER}")
             summary.add_column("Metric", justify="right")
             summary.add_column("Count", justify="left")
             
-            summary.add_row("OK", f"[green]{self.ok_count}[/green]")
-            summary.add_row("Changed", f"[yellow]{self.changed_count}[/yellow]")
+            summary.add_row("OK", f"[{C_LAVENDER}]{self.ok_count}[/]")
+            summary.add_row("Changed", f"[{C_BLUE}]{self.changed_count}[/]")
             summary.add_row("Failed", f"[red]{self.failed_count}[/red]")
-            summary.add_row("Skipped", f"[dim]{self.skipped_count}[/dim]")
+            summary.add_row("Skipped", f"[{C_DARK_BL}]{self.skipped_count}[/]")
             
             total_time = self._get_duration(self.start_time)
             
+            # Starship Footer Style
             panel = Panel(
                 summary,
-                title=f"[bold green]Execution Completed in {total_time}[/bold green]",
-                border_style="green",
+                title=f"[bold {C_BLUE}]Execution Completed in {total_time}[/]",
+                border_style=C_DARK_BL,
                 expand=False
             )
             self.console.print(panel)

@@ -12,18 +12,8 @@
     source: "git+https://github.com/vo0ov/thefuck.git@master"
     state: install
     executable: /usr/bin/pipx
+    pip_args: "--no-build-isolation"
   when: install_productivity | default(true)
-  tags: [tools, productivity]
-
-- name: Inject setuptools into thefuck venv
-  community.general.pipx:
-    name: thefuck
-    inject_packages:
-      - setuptools
-    state: inject
-    executable: /usr/bin/pipx
-  become: true
-  become_user: "{{ vps_username }}"
   tags: [tools, productivity]
 
 - name: Patch thefuck for Python 3.12+ (replace distutils with shutil)

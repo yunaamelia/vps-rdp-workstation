@@ -1020,7 +1020,6 @@ main() {
 
 	# Get credentials (after ansible install to ensure deps)
 	get_credentials || exit 1
-
 	# Interactive enhancements (Timezone & Git)
 	if [[ "$CI_MODE" != "true" ]]; then
 		get_timezone

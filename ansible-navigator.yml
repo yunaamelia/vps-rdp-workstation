@@ -6,9 +6,21 @@ ansible-navigator:
     playbook:
       path: playbooks/main.yml
 
-  # Execution Environment: False runs locally (uses system Ansible/Mitogen)
+  # Execution Environment: True runs in a container (Consistency & Stability)
   execution-environment:
-    enabled: false
+    enabled: true
+    image: ghcr.io/ansible/creator-ee:v0.22.0
+    pull:
+      policy: missing
+    volume-mounts:
+      - src: "~/.ssh/id_ed25519"
+        dest: "/home/runner/.ssh/id_ed25519"
+        options: "ro"
+      - src: "./ansible.cfg"
+        dest: "/home/runner/ansible.cfg"
+        options: "ro"
+      - src: "."
+        dest: "/home/runner/project"
 
   # Logging: Detailed debug logs
   logging:
@@ -26,5 +38,22 @@ ansible-navigator:
     enable: true
     osc4: true
 
-  # Default mode (overridden by --mode in CLI)
-  mode: interactive
+  # TUI: Analyst Mode optimizations
+  inventory-columns:
+    - ansible_host
+    - os_family
+    - ansible_connection
+
+  time-zone: local
+
+  editor:
+    command: code
+    console: false
+
+  # UI/UX: Stdout for visibility (fixes blank screen)
+  #  - mode: stdout (streams logs like ansible-playbook)
+  #  - enable-prompts: true (allows password inputs)
+  mode: stdout
+  enable-prompts: true
+
+  # TUI: Analyst Mode optimizations (still available via --mode interactive)

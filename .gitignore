@@ -36,6 +36,7 @@ ENV/
 # Logs - local only
 *.log
 logs/
+var/
 
 # Backups
 *.bak

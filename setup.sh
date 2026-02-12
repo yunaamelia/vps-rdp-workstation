@@ -83,6 +83,11 @@ log_success() {
 log_warn() {
 	echo -e "${YELLOW}${WARN}${NC} ${1}"
 	log_to_file "WARN" "$1"
+
+	if [[ "$DEBUG" == "true" ]]; then
+		log_error "Strict Debug Mode: Stopping execution due to warning."
+		exit 1
+	fi
 }
 
 log_error() {

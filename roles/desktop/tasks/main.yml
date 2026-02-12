@@ -10,7 +10,8 @@
       - python-is-python3
       - xdg-user-dirs
       - qdbus-qt6
-      - libkf6config-bin
+      # libkf6config-bin is not available on Ubuntu 24.04 (Noble), use libkf5config-bin or skip
+      - "{{ 'libkf5config-bin' if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '24' else 'libkf6config-bin' }}"
       - plasma-workspace
       # Build dependencies for SierraBreezeEnhanced
       - build-essential
@@ -51,6 +52,7 @@
     force: true
   become: true
   become_user: "{{ vps_username }}"
+  ignore_errors: "{{ ansible_check_mode }}"
   tags: [desktop, config]
 
 - name: Detect kwriteconfig binary
@@ -67,6 +69,7 @@
     path: "/home/{{ vps_username }}/.local/share/kde-config-files/scripts/setupKDE.fish"
     regexp: 'kwriteconfig5'
     replace: "{{ kwriteconfig_bin.stdout }}"
+  ignore_errors: "{{ ansible_check_mode }}"
   tags: [desktop, config]
 
 - name: Make setup scripts executable

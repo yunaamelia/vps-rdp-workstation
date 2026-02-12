@@ -9,6 +9,10 @@
   vars:
     installation_start_time: "{{ ansible_date_time.iso8601 }}"
 
+  # NOTE: Role order has been refactored in v3.0.0.
+  # Using --resume with a progress.json from a previous version will NOT work correctly.
+  # Please start fresh if upgrading from an older version.
+
   pre_tasks:
     - name: Display installation banner
       ansible.builtin.debug:
@@ -93,30 +97,33 @@
 
   roles:
     # =========================================================================
-    #  PHASE 1: System Foundation
+    #  PHASE 1: Bootstrap
     # =========================================================================
 
     - role: common
-      tags: [common, foundation]
+      tags: [bootstrap, common]
 
     # =========================================================================
-    #  PHASE 2: Security (BEFORE any services exposed)
+    #  PHASE 2: Security
     # =========================================================================
 
     - role: security
-      tags: [security]
+      tags: [security, hardening]
 
     # =========================================================================
-    #  PHASE 3: Desktop Environment
+    #  PHASE 3: Base System
+    # =========================================================================
+
+    - role: fonts
+      tags: [base, fonts]
+
+    # =========================================================================
+    #  PHASE 4: Desktop Environment
     # =========================================================================
 
     - role: desktop
       tags: [desktop, kde]
       when: vps_install_desktop | default(true)
-
-    # =========================================================================
-    #  PHASE 3.1: Remote Access (Strictly after Desktop Base)
-    # =========================================================================
 
     - role: xrdp
       tags: [desktop, xrdp]
@@ -126,61 +133,47 @@
       tags: [desktop, kde, optimization]
       when: vps_install_desktop | default(true)
 
-    # =========================================================================
-    #  PHASE 3.2: Desktop Apps & Tools (Strictly after XRDP)
-    # =========================================================================
-
     - role: kde-apps
-      tags: [desktop, tools, kde-apps]
+      tags: [desktop, kde, apps]
       when: vps_install_desktop | default(true)
 
-    # =========================================================================
-    #  PHASE 4: Visual Foundation & Terminal
-    # =========================================================================
-
-    - role: fonts
-      tags: [fonts, visual]
-
     - role: catppuccin-theme
-      tags: [catppuccin, theme, visual]
+      tags: [desktop, theme, catppuccin]
+
+    # =========================================================================
+    #  PHASE 5: User Configuration
+    # =========================================================================
 
     - role: terminal
-      tags: [terminal, zsh]
+      tags: [userconfig, terminal]
 
     - role: tmux
       tags: [terminal, tmux, config]
 
     - role: shell-styling
-      tags: [shell, visual, fastfetch, starship]
+      tags: [userconfig, shell, styling]
 
     - role: zsh-enhancements
-      tags: [terminal, zsh-plugins]
+      tags: [userconfig, zsh, plugins]
       when: vps_install_zsh_external_plugins | default(true)
 
     # =========================================================================
-    #  PHASE 5: Development Languages
+    #  PHASE 6: Development Tools
     # =========================================================================
 
     - role: development
-      tags: [development, languages]
-
-    # =========================================================================
-    #  PHASE 6: Containerization
-    # =========================================================================
+      tags: [devtools, languages]
 
     - role: docker
-      tags: [docker, containers]
+      tags: [devtools, docker]
       when: install_docker | default(true)
 
-    # =========================================================================
-    #  PHASE 7: Code Editors (Moved up from Phase 8)
-    # =========================================================================
-
     - role: editors
-      tags: [editors, vscode, opencode]
+      tags: [devtools, editors]
 
     # =========================================================================
-    #  PHASE 8: Development Tools (Renumbered)
+    #  PHASE 7: CLI Tool Roles
+    # =========================================================================
 
     - role: tui-tools
       tags: [tools, tui]
@@ -222,12 +215,8 @@
       tags: [tools, ai]
       when: install_ai_devtools | default(true)
 
-    # =========================================================================
-    #  PHASE 10: Optional Cloud-Native Tools
-    # =========================================================================
-
     - role: cloud-native
-      tags: [tools, cloud, kubernetes]
+      tags: [tools, cloud]
       when: install_cloud_native_tools | default(false)
 
   post_tasks:
@@ -258,7 +247,6 @@
     - name: Display completion message
       ansible.builtin.debug:
         msg: |
-
           ╔══════════════════════════════════════════════════════════╗
           ║  ✓ Installation Complete!                                ║
           ╠══════════════════════════════════════════════════════════╣

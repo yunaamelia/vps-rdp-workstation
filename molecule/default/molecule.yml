@@ -34,16 +34,13 @@ platforms:
 provisioner:
   name: ansible
   env:
-    # Fix duplicate collection warnings by strictly defining the path
-    # Using only molecule managed collections path to avoid conflicts
-    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_EPHEMERAL_DIRECTORY}/collections
     # Suppress deprecation warnings
     ANSIBLE_DEPRECATION_WARNINGS: "False"
   config_options:
     defaults:
       callbacks_enabled: profile_tasks
       stdout_callback: yaml
-      roles_path: ../../roles
+      roles_path: ${MOLECULE_PROJECT_DIRECTORY}/roles
       remote_tmp: /tmp/.ansible/tmp
       allow_world_readable_tmpfiles: true
       pipelining: true

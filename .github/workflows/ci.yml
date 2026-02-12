@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install ansible-core ansible-lint yamllint pylint
-          ansible-galaxy collection install -r requirements.yml
+          ansible-galaxy collection install -r requirements.yml -p collections
 
       - name: Run pre-commit hooks (Linting)
         uses: pre-commit/action@v3.0.1
@@ -63,7 +63,7 @@ jobs:
       - name: Install Ansible
         run: |
           pip install ansible-core pipx
-          ansible-galaxy collection install -r requirements.yml
+          ansible-galaxy collection install -r requirements.yml -p collections
 
       - name: Create Test Inventory
         run: |
@@ -92,7 +92,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install -r requirements.txt
-          ansible-galaxy collection install -r requirements.yml
+          ansible-galaxy collection install -r requirements.yml -p collections
 
       - name: Run Molecule Test
         run: molecule test

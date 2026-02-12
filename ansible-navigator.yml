@@ -13,9 +13,6 @@ ansible-navigator:
     pull:
       policy: missing
     volume-mounts:
-      - src: "~/.ssh/id_ed25519"
-        dest: "/home/runner/.ssh/id_ed25519"
-        options: "ro"
       - src: "./ansible.cfg"
         dest: "/home/runner/ansible.cfg"
         options: "ro"

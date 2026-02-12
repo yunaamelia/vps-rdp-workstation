@@ -350,6 +350,7 @@ get_credentials() {
 			read -r reset_choice
 			if [[ ! "$reset_choice" =~ ^[Yy]$ ]]; then
 				log_info "Skipping password update for existing user."
+				export VPS_USERNAME="$username"
 				export VPS_PASSWORD_POLICY="on_create"
 				# Dummy hash to satisfy Ansible variable requirement (won't be used)
 				export VPS_USER_PASSWORD_HASH="SKIP"

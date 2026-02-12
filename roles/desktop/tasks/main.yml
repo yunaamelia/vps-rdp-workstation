@@ -29,6 +29,7 @@
       - libkf6widgetsaddons6
       - sassc
       - libglib2.0-dev-bin
+      - sddm
     state: present
   tags: [desktop, dependencies]
 
@@ -215,6 +216,7 @@
     name: sddm
     enabled: true
     state: started
+    daemon_reload: true
   tags: [desktop, sddm]
 
 - name: Run desktop optimizations

@@ -1,9 +1,11 @@
 # Productivity Role
 ---
-- name: Ensure setuptools is installed for thefuck build
-  ansible.builtin.apt:
-    name: python3-setuptools
-    state: present
+- name: Ensure setuptools and wheel are installed in pipx shared environment
+  ansible.builtin.command:
+    cmd: /home/{{ vps_username }}/.local/share/pipx/shared/bin/pip install setuptools wheel
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: false
   tags: [tools, productivity]
 
 - name: Install thefuck via pipx (Python 3.12+ compatible fork)
@@ -12,7 +14,6 @@
     source: "git+https://github.com/vo0ov/thefuck.git@master"
     state: install
     executable: /usr/bin/pipx
-    pip_args: "--no-build-isolation"
   when: install_productivity | default(true)
   tags: [tools, productivity]
 

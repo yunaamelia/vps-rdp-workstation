@@ -10,6 +10,7 @@ from __future__ import absolute_import, division, print_function
 __metaclass__ = type
 
 import time
+import os
 from datetime import datetime
 
 try:
@@ -24,70 +25,10 @@ try:
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
-    # Define dummy classes to satisfy static analysis
     class Dummy:
-        """Dummy class for missing rich dependencies."""
-        def __init__(self, *args, **kwargs): pass
-        def __getitem__(self, key): return self
-        def __setitem__(self, key, value): pass
-        def __call__(self, *args, **kwargs): return self
-        def split(self, *args, **kwargs): pass
-        def update(self, *args, **kwargs): pass
-        def start(self): pass
-        def stop(self): pass
-        def add_task(self, *args, **kwargs): pass
-        def append(self, *args, **kwargs): pass
-        def print(self, *args, **kwargs): pass
-        @classmethod
-        def from_markup(cls, *args, **kwargs): return cls()
+        pass
 
-    Console = Dummy
-    Group = Dummy
-    Live = Dummy
-    Layout = Dummy
-    Table = Dummy
-    Panel = Dummy
-    Progress = Dummy
-    SpinnerColumn = Dummy
-    TextColumn = Dummy
-    BarColumn = Dummy
-    TimeElapsedColumn = Dummy
-    Text = Dummy
-    
-    class Box:
-        HEAVY_HEAD = None
-        SIMPLE = None
-        ROUNDED = None
-    box = Box
-    # Define dummy classes to satisfy static analysis
-    class Dummy:
-        """Dummy class for missing rich dependencies."""
-        def __init__(self, *args, **kwargs): pass
-        def __getitem__(self, key): return self
-        def __setitem__(self, key, value): pass
-        def __call__(self, *args, **kwargs): return self
-        def split(self, *args, **kwargs): pass
-        def update(self, *args, **kwargs): pass
-        def start(self): pass
-        def stop(self): pass
-        def add_task(self, *args, **kwargs): pass
-        def append(self, *args, **kwargs): pass
-        def print(self, *args, **kwargs): pass
-        @classmethod
-        def from_markup(cls, *args, **kwargs): return cls()
-
-    Console = Dummy
-    Group = Dummy
-    Live = Dummy
-    Layout = Dummy
-    Table = Dummy
-    Panel = Dummy
-    Progress = Dummy
-    SpinnerColumn = Dummy
-    TextColumn = Dummy
-    BarColumn = Dummy
-    TimeElapsedColumn = Dummy
-    Text = Dummy
+    Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Dummy
     
     class Box:
         HEAVY_HEAD = None
@@ -141,7 +82,6 @@ class CallbackModule(CallbackBase):
         self.current_task_start = None
 
         # Configuration
-        import os
         self.log_level = os.environ.get("VPS_LOG_LEVEL", "full").lower()
 
         # Statistics
@@ -239,11 +179,6 @@ class CallbackModule(CallbackBase):
         if self.job_progress:
             self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
 
-    def _get_duration(self, start_time):
-        """Calculate duration string."""
-        if not start_time: return "0.0s"
-        return f"{time.time() - start_time:.1f}s"
-
     def _print_task_result(self, status, task_name, duration, message=None):
         """Print task result to body."""
         if not self.live: return
@@ -302,20 +237,6 @@ class CallbackModule(CallbackBase):
         duration = self._get_duration(self.current_task_start)
         message = result._result.get("msg", "Host unreachable")
         self._print_task_result("failed", f"{self.current_task} (unreachable)", duration, message)
-
-    def _print_footer(self):
-        """Print final stats."""
-        if not RICH_AVAILABLE or not self.console:
-            return
-
-        summary = Text()
-        summary.append("\nExecution Summary\n", style="bold underline")
-        summary.append(f"OK: {self.ok_count}  ", style="green")
-        summary.append(f"Changed: {self.changed_count}  ", style="yellow")
-        summary.append(f"Failed: {self.failed_count}  ", style="red")
-        summary.append(f"Skipped: {self.skipped_count}", style="dim")
-        
-        self.console.print(Panel(summary, border_style="cyan", box=box.ROUNDED))
 
     def v2_playbook_on_stats(self, stats):
         """Called at the end with statistics."""

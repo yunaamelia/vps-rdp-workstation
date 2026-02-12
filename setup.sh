@@ -319,6 +319,9 @@ get_credentials() {
 	fi
 
 	# Get password
+	# Default policy: Always update password
+	export VPS_PASSWORD_POLICY="always"
+
 	if [[ -n "${VPS_PASSWORD:-}" ]]; then
 		password="$VPS_PASSWORD"
 		log_info "Using password from environment variable"
@@ -341,14 +344,30 @@ get_credentials() {
 
 		log_info "Using password from secure file"
 	elif [[ -z "${VPS_PASSWORD:-}" ]]; then
-		# Interactive password input
-		password=$(read_password_secure "Enter password")
-		password_confirm=$(read_password_secure "Confirm password")
-
-		if [[ "$password" != "$password_confirm" ]]; then
-			log_error "Passwords do not match"
-			return 1
+		# Check if user exists to offer skip
+		if id "$username" &>/dev/null; then
+			echo -ne "${YELLOW}${WARN}${NC} User '$username' already exists. Reset password? [y/N]: "
+			read -r reset_choice
+			if [[ ! "$reset_choice" =~ ^[Yy]$ ]]; then
+				log_info "Skipping password update for existing user."
+				export VPS_PASSWORD_POLICY="on_create"
+				# Dummy hash to satisfy Ansible variable requirement (won't be used)
+				export VPS_USER_PASSWORD_HASH="SKIP"
+				return 0
+			fi
 		fi
+
+		# Interactive password input with retry loop
+		while true; do
+			password=$(read_password_secure "Enter password")
+			password_confirm=$(read_password_secure "Confirm password")
+
+			if [[ "$password" == "$password_confirm" ]]; then
+				break
+			fi
+
+			log_warn "Passwords do not match. Please try again."
+		done
 	fi
 
 	# Validate password
@@ -769,6 +788,7 @@ run_ansible() {
 	ansible_args+=("-i" "inventory/hosts.yml")
 	ansible_args+=("-e" "vps_username=${VPS_USERNAME}")
 	ansible_args+=("-e" "vps_user_password_hash=${VPS_USER_PASSWORD_HASH}")
+	ansible_args+=("-e" "vps_password_policy=${VPS_PASSWORD_POLICY:-always}")
 
 	if [[ "$DRY_RUN" == "true" ]]; then
 		ansible_args+=("--check" "--diff")

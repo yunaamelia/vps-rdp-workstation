@@ -89,6 +89,7 @@
   ansible.builtin.user:
     name: "{{ vps_username }}"
     password: "{{ vps_user_password_hash }}"
+    update_password: "{{ vps_password_policy | default('always') }}"
     shell: "{{ vps_user_shell }}"
     groups: "{{ vps_user_groups }}"
     append: true

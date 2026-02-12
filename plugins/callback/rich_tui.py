@@ -188,14 +188,16 @@ class CallbackModule(CallbackBase):
             print("\\n🚀 VPS Developer Workstation Setup v3.1.0\\n")
             return
 
-        if self.is_navigator:
-            # Navigator mode: Print static banner, NO live display
-            self._print_static_header()
+        # Force TUI mode even in Navigator (experimental fix)
+        # We previously disabled this to fix hangs, but now we have a proper Layout structure.
+        # Let's try enabling it but keeping an escape hatch if needed.
+        if os.environ.get("VPS_FORCE_STATIC_LOGS") == "true":
+             self._print_static_header()
         else:
-            # Interactive mode: Full TUI
-            self._init_layout()
-            self._init_progress()
-            self._start_live_display()
+             # Interactive mode: Full TUI
+             self._init_layout()
+             self._init_progress()
+             self._start_live_display()
 
     def _print_static_header(self):
         """Print static banner for log-based outputs using Starship styling."""
@@ -436,9 +438,10 @@ class CallbackModule(CallbackBase):
         if not self.console: return
 
         # In navigator mode, print linear logs without TUI updates
-        if self.is_navigator:
-            self._print_log_line(status, task_name, duration, message)
-            return
+        # DISABLED: We want TUI even in navigator for now
+        # if self.is_navigator:
+        #     self._print_log_line(status, task_name, duration, message)
+        #     return
 
         if not self.live: return
 

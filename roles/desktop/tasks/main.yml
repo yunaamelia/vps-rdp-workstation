@@ -86,7 +86,7 @@
 
 - name: Run setupKDE.fish
   ansible.builtin.command:
-    cmd: fish setupKDE.fish
+    cmd: dbus-run-session -- fish setupKDE.fish
     chdir: "/home/{{ vps_username }}/.local/share/kde-config-files/scripts"
   become: true
   become_user: "{{ vps_username }}"

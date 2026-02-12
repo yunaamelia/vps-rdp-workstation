@@ -40,4 +40,3 @@ This pipeline performs "CIOps" for the Ansible portion of this project:
 3.  Deploys to the VPS using `setup.sh --ci`
 
 **Note:** True GitOps (pull-based) is configured via ArgoCD/Flux monitoring this repository, while the Ansible setup uses push-based CI.
-

@@ -1,5 +1,11 @@
 # Productivity Role
 ---
+- name: Ensure setuptools is installed for thefuck build
+  ansible.builtin.apt:
+    name: python3-setuptools
+    state: present
+  tags: [tools, productivity]
+
 - name: Install thefuck via pipx (Python 3.12+ compatible fork)
   community.general.pipx:
     name: thefuck
@@ -7,6 +13,17 @@
     state: install
     executable: /usr/bin/pipx
   when: install_productivity | default(true)
+  tags: [tools, productivity]
+
+- name: Inject setuptools into thefuck venv
+  community.general.pipx:
+    name: thefuck
+    inject_packages:
+      - setuptools
+    state: inject
+    executable: /usr/bin/pipx
+  become: true
+  become_user: "{{ vps_username }}"
   tags: [tools, productivity]
 
 - name: Patch thefuck for Python 3.12+ (replace distutils with shutil)

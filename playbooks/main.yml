@@ -107,7 +107,19 @@
       tags: [security]
 
     # =========================================================================
-    #  PHASE 3: Visual Foundation & Terminal
+    #  PHASE 3: Desktop Environment
+    # =========================================================================
+
+    - role: desktop
+      tags: [desktop, kde, xrdp]
+      when: vps_install_desktop | default(true)
+
+    - role: kde-optimization
+      tags: [desktop, kde, optimization]
+      when: vps_install_desktop | default(true)
+
+    # =========================================================================
+    #  PHASE 4: Visual Foundation & Terminal
     # =========================================================================
 
     - role: fonts
@@ -125,18 +137,6 @@
     - role: zsh-enhancements
       tags: [terminal, zsh-plugins]
       when: vps_install_zsh_external_plugins | default(true)
-
-    # =========================================================================
-    #  PHASE 4: Desktop Environment
-    # =========================================================================
-
-    - role: desktop
-      tags: [desktop, kde, xrdp]
-      when: vps_install_desktop | default(true)
-
-    - role: kde-optimization
-      tags: [desktop, kde, optimization]
-      when: vps_install_desktop | default(true)
 
     # =========================================================================
     #  PHASE 5: Development Languages

@@ -125,3 +125,23 @@
   ansible.builtin.debug:
     msg: "✓ Common role completed - System foundation configured"
   tags: [common]
+
+- name: Configure Git global username
+  community.general.git_config:
+    name: user.name
+    scope: global
+    value: "{{ vps_git_name }}"
+  become: true
+  become_user: "{{ vps_username }}"
+  when: vps_git_name is defined and vps_git_name | length > 0
+  tags: [common, git]
+
+- name: Configure Git global email
+  community.general.git_config:
+    name: user.email
+    scope: global
+    value: "{{ vps_git_email }}"
+  become: true
+  become_user: "{{ vps_username }}"
+  when: vps_git_email is defined and vps_git_email | length > 0
+  tags: [common, git]

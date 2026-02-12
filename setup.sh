@@ -393,6 +393,76 @@ get_credentials() {
 }
 
 # =============================================================================
+get_timezone() {
+	local timezone="UTC"
+	local current_tz=""
+
+	print_section "Timezone Setup ${GEAR}"
+
+	# Try to detect current timezone
+	if [[ -f /etc/timezone ]]; then
+		current_tz=$(cat /etc/timezone)
+	elif [[ -h /etc/localtime ]]; then
+		current_tz=$(readlink /etc/localtime | sed 's|/usr/share/zoneinfo/||')
+	fi
+
+	if [[ -n "${VPS_TIMEZONE:-}" ]]; then
+		timezone="$VPS_TIMEZONE"
+		log_info "Using timezone from environment: $timezone"
+	elif [[ "$CI_MODE" == "true" ]]; then
+		log_info "CI mode: Using default timezone ($timezone)"
+	else
+		echo -ne "${BLUE}${INFO}${NC} Enter system timezone (e.g., America/New_York) [Default: ${current_tz:-UTC}]: "
+		read -r input_tz
+		if [[ -n "$input_tz" ]]; then
+			timezone="$input_tz"
+		elif [[ -n "$current_tz" ]]; then
+			timezone="$current_tz"
+		fi
+	fi
+
+	# Basic validation
+	if [[ -f "/usr/share/zoneinfo/$timezone" ]]; then
+		export VPS_TIMEZONE="$timezone"
+		log_success "Timezone set to: $timezone"
+	else
+		log_warn "Timezone '$timezone' not found in /usr/share/zoneinfo. Reverting to UTC."
+		export VPS_TIMEZONE="UTC"
+	fi
+	return 0
+}
+
+get_git_identity() {
+	local git_name=""
+	local git_email=""
+
+	print_section "Git Configuration (Optional) ${GEAR}"
+
+	if [[ -n "${VPS_GIT_NAME:-}" ]] && [[ -n "${VPS_GIT_EMAIL:-}" ]]; then
+		log_info "Using Git identity from environment"
+	elif [[ "$CI_MODE" == "true" ]]; then
+		log_info "CI mode: Skipping Git identity setup"
+	else
+		echo -e "${DIM}Configure your global Git identity for commits.${NC}"
+		
+		echo -ne "${BLUE}${INFO}${NC} Enter Git Name (leave empty to skip): "
+		read -r git_name
+
+		if [[ -n "$git_name" ]]; then
+			echo -ne "${BLUE}${INFO}${NC} Enter Git Email: "
+			read -r git_email
+		fi
+	fi
+
+	if [[ -n "$git_name" ]]; then
+		export VPS_GIT_NAME="$git_name"
+		export VPS_GIT_EMAIL="$git_email"
+		log_success "Git identity configured: $git_name <$git_email>"
+	else
+		log_info "Git identity setup skipped"
+	fi
+	return 0
+}
 #  SYSTEM CHECKS
 # =============================================================================
 
@@ -789,6 +859,9 @@ run_ansible() {
 	ansible_args+=("-e" "vps_username=${VPS_USERNAME}")
 	ansible_args+=("-e" "vps_user_password_hash=${VPS_USER_PASSWORD_HASH}")
 	ansible_args+=("-e" "vps_password_policy=${VPS_PASSWORD_POLICY:-always}")
+	ansible_args+=("-e" "vps_timezone=${VPS_TIMEZONE:-UTC}")
+	ansible_args+=("-e" "vps_git_name=${VPS_GIT_NAME:-}")
+	ansible_args+=("-e" "vps_git_email=${VPS_GIT_EMAIL:-}")
 
 	if [[ "$DRY_RUN" == "true" ]]; then
 		ansible_args+=("--check" "--diff")
@@ -953,6 +1026,11 @@ main() {
 
 	# Get credentials (after ansible install to ensure deps)
 	get_credentials || exit 1
+	# Get timezone
+	get_timezone || exit 1
+
+	# Get Git identity
+	get_git_identity || exit 1
 
 	# Run main playbook
 	run_ansible || exit 1

@@ -123,6 +123,54 @@
   changed_when: true
   tags: [desktop, theme, icons]
 
+- name: Download Capitaine Cursors
+  ansible.builtin.get_url:
+    url: https://github.com/sainnhe/capitaine-cursors/releases/download/r5/Linux.zip
+    dest: /tmp/capitaine-cursors.zip
+    mode: '0644'
+  tags: [desktop, theme, cursors]
+
+- name: Install Capitaine Cursors (extract)
+  ansible.builtin.unarchive:
+    src: /tmp/capitaine-cursors.zip
+    dest: "/home/{{ vps_username }}/.local/share/icons/"
+    remote_src: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    creates: "/home/{{ vps_username }}/.local/share/icons/dist"
+  tags: [desktop, theme, cursors]
+
+- name: Rename Capitaine Cursors directory
+  ansible.builtin.command:
+    cmd: mv /home/{{ vps_username }}/.local/share/icons/dist /home/{{ vps_username }}/.local/share/icons/capitaine-cursors
+    creates: "/home/{{ vps_username }}/.local/share/icons/capitaine-cursors"
+  become: true
+  become_user: "{{ vps_username }}"
+  tags: [desktop, theme, cursors]
+
+- name: Set Capitaine Cursors as default
+  ansible.builtin.command:
+    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kcminputrc --group Mouse --key cursorTheme capitaine-cursors/dark"
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  tags: [desktop, theme, cursors]
+
+- name: Remove Catppuccin Cursors (Redundant)
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/icons/{{ item }}"
+    state: absent
+  loop:
+    - Catppuccin-Mocha-Blue-Cursors
+    - dist
+  tags: [desktop, theme, cursors]
+
+- name: Remove Capitaine Cursors zip
+  ansible.builtin.file:
+    path: /tmp/capitaine-cursors.zip
+    state: absent
+  tags: [desktop, cleanup]
+
 - name: Clone SierraBreezeEnhanced
   ansible.builtin.git:
     repo: https://github.com/kupiqu/SierraBreezeEnhanced.git

@@ -6,36 +6,29 @@ ansible-navigator:
     playbook:
       path: playbooks/main.yml
 
-  # Execution Environment: False (Use local environment with Rich/Mitogen installed)
+  # Local Execution (Required for Rich/Mitogen support)
   execution-environment:
     enabled: false
-    image: ghcr.io/ansible/creator-ee:v0.22.0
     pull:
       policy: missing
-    volume-mounts:
-      - src: "./ansible.cfg"
-        dest: "/home/runner/ansible.cfg"
-        options: "ro"
-      - src: "."
-        dest: "/home/runner/project"
 
-  # Logging: Detailed debug logs
+  # Logging
   logging:
     level: debug
     file: ./var/log/ansible-navigator.log
     append: true
 
-  # Artifacts: Replayable JSON logs (The "DVR" feature)
+  # Artifacts (Replayable logs)
   playbook-artifact:
     enable: true
     save-as: ./var/lib/vps-setup/artifacts/{playbook_name}-{time_stamp}.json
 
-  # UI/UX: Enhanced TUI
+  # UI/UX Settings
   color:
     enable: true
     osc4: true
 
-  # TUI: Analyst Mode optimizations
+  # TUI Optimizations
   inventory-columns:
     - ansible_host
     - os_family
@@ -47,10 +40,8 @@ ansible-navigator:
     command: code
     console: false
 
-  # UI/UX: Stdout for visibility (fixes blank screen)
-  #  - mode: stdout (streams logs like ansible-playbook)
-  #  - enable-prompts: true (allows password inputs)
+  # Mode Configuration
+  # stdout: Streams logs like ansible-playbook (best for scripts)
+  # interactive: Full TUI explorer
   mode: stdout
   enable-prompts: true
-
-  # TUI: Analyst Mode optimizations (still available via --mode interactive)

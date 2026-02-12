@@ -10,6 +10,20 @@
       - qdbus-qt6
       - libkf6config-bin
       - plasma-workspace
+      # Build dependencies for SierraBreezeEnhanced
+      - build-essential
+      - cmake
+      - extra-cmake-modules
+      - qt6-base-dev
+      - libkdecorations3-dev
+      - libkf6config-dev
+      - libkf6coreaddons-dev
+      - libkf6guiaddons-dev
+      - libkf6i18n-dev
+      - libkf6widgetsaddons-dev
+      - libkf6windowsystem-dev
+      - libkf6kcmutils-dev
+      - libkf6iconthemes-dev
     state: present
   tags: [desktop, dependencies]
 
@@ -107,6 +121,58 @@
   become_user: "{{ vps_username }}"
   changed_when: true
   tags: [desktop, theme, icons]
+
+- name: Clone SierraBreezeEnhanced
+  ansible.builtin.git:
+    repo: https://github.com/kupiqu/SierraBreezeEnhanced.git
+    dest: /tmp/SierraBreezeEnhanced
+    version: master
+    depth: 1
+  tags: [desktop, theme]
+
+- name: Build and Install SierraBreezeEnhanced
+  ansible.builtin.shell: |
+    mkdir -p build && cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+    make
+    make install
+  args:
+    chdir: /tmp/SierraBreezeEnhanced
+  become: true
+  changed_when: true
+  tags: [desktop, theme]
+
+- name: Configure SierraBreezeEnhanced as Window Decoration
+  ansible.builtin.command:
+    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group org.kde.kdecoration2 --key library org.kde.sierrabreezeenhanced"
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  tags: [desktop, theme]
+
+- name: Configure SierraBreezeEnhanced Theme Name
+  ansible.builtin.command:
+    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group org.kde.kdecoration2 --key theme \"Sierra Breeze Enhanced\""
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  tags: [desktop, theme]
+
+- name: Remove WhiteSur Window Decorations (Redundant)
+  ansible.builtin.file:
+    path: "/usr/share/aurorae/themes/{{ item }}"
+    state: absent
+  loop:
+    - WhiteSur
+    - WhiteSur-Dark
+    - WhiteSur-Light
+  tags: [desktop, theme]
+
+- name: Remove SierraBreezeEnhanced build directory
+  ansible.builtin.file:
+    path: /tmp/SierraBreezeEnhanced
+    state: absent
+  tags: [desktop, cleanup]
 
 - name: Remove temporary WhiteSur directory
   ansible.builtin.file:

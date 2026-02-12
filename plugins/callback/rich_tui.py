@@ -240,8 +240,13 @@ class CallbackModule(CallbackBase):
         grid = Table.grid(expand=True)
         grid.add_column(justify="center", ratio=1)
 
-        milestones = self._create_milestones_panel()
-        grid.add_row(milestones)
+        # Custom Banner
+        banner_text = """
+[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]
+"""
+        grid.add_row(banner_text)
         
         # Stats Row
         stats = Text()
@@ -254,6 +259,7 @@ class CallbackModule(CallbackBase):
         grid.add_row(Panel(stats, box=box.ROUNDED, style="white on black"))
         
         return Panel(grid, style="white on black", box=box.HEAVY)
+
 
     def _create_footer(self):
         """Create the footer with credits."""
@@ -274,8 +280,11 @@ class CallbackModule(CallbackBase):
 
         body_elements = []
         
+        # Add compact milestone tracker for all modes (Horizontal bar)
+        body_elements.append(self._create_milestones_panel())
+
         if self.log_level in ["full", "debug"]:
-            visible_logs = self.log_messages[-20:]
+            visible_logs = self.log_messages[-15:] # Reduced to fit layout
             log_panel = Panel(
                 Group(*visible_logs), 
                 title="[bold]Execution Log[/bold]", 
@@ -285,7 +294,8 @@ class CallbackModule(CallbackBase):
             )
             body_elements.append(log_panel)
         elif self.log_level == "minimal":
-             body_elements.append(Text("\n" * 5))
+             # In minimal, maybe show more details or just filler
+             body_elements.append(Text("\n" * 2))
 
         if self.job_progress:
             self.layout["body"].update(

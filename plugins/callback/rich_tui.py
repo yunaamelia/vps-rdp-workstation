@@ -11,7 +11,7 @@ __metaclass__ = type
 
 import time
 import os
-from datetime import datetime
+from typing import Any, TYPE_CHECKING, cast
 
 try:
     from rich.console import Console, Group
@@ -50,7 +50,7 @@ except ImportError:
         @classmethod
         def grid(cls, *args, **kwargs): return cls()
 
-    Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Tree = Dummy
+    Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Tree = cast(Any, Dummy)
 
     class Box:
         HEAVY_HEAD = None
@@ -58,16 +58,20 @@ except ImportError:
         ROUNDED = None
         DOUBLE = None
         SQUARE = None
-    box = Box
+    box = cast(Any, Box)
 
-try:
-    from ansible.plugins.callback import CallbackBase
-except ImportError:
-    class CallbackBase:
-        """Mock class for pylint when ansible is not installed"""
-        CALLBACK_VERSION = 2.0
-        CALLBACK_TYPE = "stdout"
-        CALLBACK_NAME = "rich_tui"
+if TYPE_CHECKING:
+    from ansible.plugins.callback import CallbackBase as CallbackBase
+else:
+    try:
+        from ansible.plugins.callback import CallbackBase as CallbackBase
+    except ImportError:
+        class CallbackBase:
+            """Mock class for pylint when ansible is not installed"""
+            CALLBACK_VERSION = 2.0
+            CALLBACK_TYPE = "stdout"
+            CALLBACK_NAME = "rich_tui"
+    CallbackBase = cast(Any, CallbackBase)
 
 
 DOCUMENTATION = """
@@ -159,17 +163,18 @@ class CallbackModule(CallbackBase):
 
     def _create_footer(self):
         """Create the footer with credits."""
-        credit_text = Text()
+        credit_text = Text(justify="center")
         credit_text.append("CREDITS: ", style="bold magenta")
         credit_text.append("VPS RDP Workstation Automation ", style="cyan")
         credit_text.append("| ", style="dim")
         credit_text.append("Designed for Developers", style="italic white")
         
-        return Panel(credit_text, box=box.ROUNDED, style="white on black", justify="center")
+        return Panel(credit_text, box=box.ROUNDED, style="white on black")
 
     def _update_ui(self):
         """Update the entire layout."""
         if not self.live: return
+        if not self.layout: return
 
         self.layout["header"].update(self._create_header_table())
 
@@ -195,7 +200,7 @@ class CallbackModule(CallbackBase):
                         *body_elements,
                         Panel(self.job_progress, box=box.SIMPLE, border_style="dim")
                     ),
-                    box=box.void
+                    box=box.SQUARE
                 )
             )
         
@@ -240,7 +245,7 @@ class CallbackModule(CallbackBase):
     def v2_playbook_on_play_start(self, play):
         """Called when a play starts."""
         self.current_play = play.get_name().strip()
-        if self.job_progress:
+        if self.job_progress and self.task_id is not None:
             self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
 
         if self.log_level != "minimal":
@@ -253,7 +258,7 @@ class CallbackModule(CallbackBase):
         self.task_count += 1
         self.current_task_start = time.time()
 
-        if self.job_progress:
+        if self.job_progress and self.task_id is not None:
             self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
 
         # In Full mode, show task start (optional)

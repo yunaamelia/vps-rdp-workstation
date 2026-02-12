@@ -6,9 +6,9 @@ ansible-navigator:
     playbook:
       path: playbooks/main.yml
 
-  # Execution Environment: True runs in a container (Consistency & Stability)
+  # Execution Environment: False (Use local environment with Rich/Mitogen installed)
   execution-environment:
-    enabled: true
+    enabled: false
     image: ghcr.io/ansible/creator-ee:v0.22.0
     pull:
       policy: missing

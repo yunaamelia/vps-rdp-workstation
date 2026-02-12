@@ -322,11 +322,8 @@ main() {
 	if [[ "$ROLLBACK_MODE" == "true" ]]; then
 		run_playbook "playbooks/rollback.yml"
 	else
-		if [[ "$CI_MODE" == "true" ]]; then
-			run_playbook "playbooks/main.yml" "stdout"
-		else
-			run_playbook "playbooks/main.yml" "interactive"
-		fi
+		# Always use stdout mode for better visibility and to avoid TUI conflicts
+		run_playbook "playbooks/main.yml" "stdout"
 	fi
 }
 

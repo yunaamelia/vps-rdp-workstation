@@ -14,8 +14,8 @@ ansible-navigator:
 
   # Logging
   logging:
-    level: debug
-    file: ./var/log/ansible-navigator.log
+    level: info
+    file: ./ansible-navigator.log
     append: true
 
   # Artifacts (Replayable logs)

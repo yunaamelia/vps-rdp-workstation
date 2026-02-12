@@ -25,6 +25,8 @@
       - libkf6kcmutils-dev
       - libkf6iconthemes-dev
       - libkf6widgetsaddons6
+      - sassc
+      - libglib2.0-dev-bin
     state: present
   tags: [desktop, dependencies]
 

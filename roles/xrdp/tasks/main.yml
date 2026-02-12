@@ -52,4 +52,5 @@
     name: xrdp
     enabled: true
     state: started
+  ignore_errors: "{{ ansible_check_mode }}"
   tags: [xrdp, service]

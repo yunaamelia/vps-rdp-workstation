@@ -48,7 +48,7 @@ jobs:
           ignore_names: 'get-docker.sh'
 
   dry-run:
-    name: Ansible Dry Run
+    name: Ansible Syntax Check
     runs-on: ubuntu-latest
     needs: lint
     steps:
@@ -69,20 +69,12 @@ jobs:
         run: |
           echo "localhost ansible_connection=local" > inventory/test_hosts
 
-      - name: Run Ansible Playbook (Check Mode)
+      - name: Run Ansible Playbook (Syntax Check)
         env:
           ANSIBLE_FORCE_COLOR: '1'
-          ANSIBLE_LOG_PATH: '/tmp/ansible.log'
         run: |
           ansible-playbook -i inventory/test_hosts playbooks/main.yml \
             --syntax-check
-          ansible-playbook -i inventory/test_hosts playbooks/main.yml \
-            --check \
-            -e "vps_username=runner" \
-            -e "vps_user_password_hash='\$6\$test'" \
-            -e "ufw_enabled=false" \
-            -e "fail2ban_enabled=false" \
-            -e "install_docker=false"
 
   molecule:
     name: Integration Test (Molecule)

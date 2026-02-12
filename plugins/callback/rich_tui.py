@@ -22,18 +22,42 @@ try:
     from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
     from rich.text import Text
     from rich import box
+    from rich.tree import Tree
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
+    # Define dummy classes to satisfy static analysis
     class Dummy:
-        pass
+        """Dummy class for missing rich dependencies."""
+        def __init__(self, *args, **kwargs): pass
+        def __getitem__(self, key): return self
+        def __setitem__(self, key, value): pass
+        def __call__(self, *args, **kwargs): return self
+        def split(self, *args, **kwargs): pass
+        def split_column(self, *args, **kwargs): pass
+        def split_row(self, *args, **kwargs): pass
+        def update(self, *args, **kwargs): pass
+        def start(self): pass
+        def stop(self): pass
+        def add_task(self, *args, **kwargs): pass
+        def append(self, *args, **kwargs): pass
+        def print(self, *args, **kwargs): pass
+        def add(self, *args, **kwargs): pass
+        def add_row(self, *args, **kwargs): pass
+        def add_column(self, *args, **kwargs): pass
+        @classmethod
+        def from_markup(cls, *args, **kwargs): return cls()
+        @classmethod
+        def grid(cls, *args, **kwargs): return cls()
 
-    Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Dummy
+    Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Tree = Dummy
     
     class Box:
         HEAVY_HEAD = None
         SIMPLE = None
         ROUNDED = None
+        DOUBLE = None
+        SQUARE = None
     box = Box
 
 try:
@@ -54,7 +78,7 @@ DOCUMENTATION = """
         - Modern TUI callback plugin using Rich library
         - Live progress bars with ETA
         - Colored tables for task summary
-        - Tree view for role hierarchy
+        - Live Header with Stats
         - Error panels with context
     requirements:
         - rich>=13.0.0 (pip install rich)
@@ -82,7 +106,7 @@ class CallbackModule(CallbackBase):
         self.current_task_start = None
 
         # Configuration
-        self.log_level = os.environ.get("VPS_LOG_LEVEL", "full").lower()
+        self.log_level = os.environ.get("VPS_LOG_LEVEL", "minimal").lower()
 
         # Statistics
         self.task_count = 0
@@ -117,6 +141,38 @@ class CallbackModule(CallbackBase):
         
         self.console.print(Panel(summary, border_style="cyan", box=box.ROUNDED))
 
+    def _create_header_table(self):
+        """Create a table for the header showing live stats."""
+        grid = Table.grid(expand=True)
+        grid.add_column(justify="left", ratio=1)
+        grid.add_column(justify="right", ratio=1)
+        
+        # Left side: Title
+        title = Text()
+        title.append("🚀 ", style="bold")
+        title.append("VPS Setup", style="bold cyan")
+        title.append(f" ({self.log_level})", style="dim")
+        
+        # Right side: Live Stats
+        stats = Text()
+        stats.append(f"✓ {self.ok_count} ", style="green")
+        stats.append(f"⟳ {self.changed_count} ", style="yellow")
+        stats.append(f"✗ {self.failed_count} ", style="red")
+        if self.skipped_count > 0:
+            stats.append(f"⊘ {self.skipped_count}", style="dim")
+            
+        grid.add_row(title, stats)
+        return Panel(grid, style="white on blue", box=box.SQUARE)
+
+    def _update_ui(self):
+        """Update header and body."""
+        if not self.live: return
+        
+        self.layout["header"].update(self._create_header_table())
+        
+        visible_logs = self.log_messages[-15:] if self.log_level == "minimal" else self.log_messages[-30:]
+        self.layout["body"].update(Panel(Group(*visible_logs), title="Activity Log", border_style="white", box=box.ROUNDED))
+
     def v2_playbook_on_start(self, playbook):
         """Called when playbook starts."""
         self.start_time = time.time()
@@ -133,12 +189,7 @@ class CallbackModule(CallbackBase):
             Layout(name="footer", size=3)
         )
         
-        # Header
-        header_text = Text()
-        header_text.append("🚀 ", style="bold")
-        header_text.append("VPS Developer Workstation Setup", style="bold cyan")
-        header_text.append(" v3.1.0", style="dim")
-        self.layout["header"].update(Panel(header_text, border_style="cyan", box=box.HEAVY_HEAD))
+        self.layout["header"].update(self._create_header_table())
 
         # Footer (Progress)
         self.job_progress = Progress(
@@ -155,20 +206,20 @@ class CallbackModule(CallbackBase):
         self.live = Live(self.layout, refresh_per_second=10, console=self.console)
         self.live.start()
 
-    def _update_body(self, renderable):
-        """Update the body section with new logs."""
-        if not self.live: return
-
+    def _update_body_log(self, renderable):
+        """Add a log message to the list and update UI."""
         self.log_messages.append(renderable)
-        # Keep last 20 messages to prevent overflow visual clutter
-        visible_logs = self.log_messages[-15:] if self.log_level == "minimal" else self.log_messages[-30:]
-        self.layout["body"].update(Panel(Group(*visible_logs), title="Activity Log", border_style="white", box=box.ROUNDED))
+        self._update_ui()
 
     def v2_playbook_on_play_start(self, play):
         """Called when a play starts."""
         self.current_play = play.get_name().strip()
         if self.job_progress:
-            self.job_progress.update(self.task_id, description=f"Play: {self.current_play}")
+            self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
+        
+        if self.log_level != "minimal":
+             pass
+        self._update_ui()
 
     def v2_playbook_on_task_start(self, task, is_conditional):
         """Called when a task starts."""
@@ -178,6 +229,9 @@ class CallbackModule(CallbackBase):
         
         if self.job_progress:
             self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
+        
+        # In Full mode, show task start (optional)
+        self._update_ui()
 
     def _print_task_result(self, status, task_name, duration, message=None):
         """Print task result to body."""
@@ -191,16 +245,16 @@ class CallbackModule(CallbackBase):
         }
         icon = icons.get(status, "•")
         
-        # Minimal Mode: Only show changed/failed
         if self.log_level == "minimal" and status in ["ok", "skipped"]:
+            self._update_ui()
             return
 
         log_line = f"{icon} {task_name} [dim]({duration})[/dim]"
         if status == "failed":
-            self._update_body(Text.from_markup(f"{log_line}\n[red]{message}[/red]"))
+            self._update_body_log(Text.from_markup(f"{log_line}\n[red]{message}[/red]"))
         else:
             style = "dim" if status == "skipped" else ""
-            self._update_body(Text.from_markup(log_line, style=style))
+            self._update_body_log(Text.from_markup(log_line, style=style))
 
     def v2_runner_on_ok(self, result):
         """Called when a task succeeds."""

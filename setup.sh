@@ -896,11 +896,22 @@ run_ansible() {
 
 	log_info "Starting installation (this may take 20-40 minutes)..."
 
-	if ansible-playbook playbooks/main.yml "${ansible_args[@]}"; then
+	# Check if running in CI or non-interactive shell
+	local nav_mode="interactive"
+	if [[ "${CI_MODE:-false}" == "true" ]] || [[ ! -t 0 ]]; then
+		nav_mode="stdout"
+	fi
+
+	# Use ansible-navigator for enhanced UI and logging
+	if ansible-navigator run playbooks/main.yml \
+		--inventory inventory/hosts.yml \
+		--mode "$nav_mode" \
+		--ee false \
+		"${ansible_args[@]}"; then
 		log_success "Installation completed successfully!"
 		return 0
 	else
-		log_error "Installation failed. Check logs at $LOG_DIR/vps-setup.log"
+		log_error "Installation failed. Check logs at $LOG_DIR/vps-setup.log or use 'ansible-navigator replay'"
 		return 1
 	fi
 }

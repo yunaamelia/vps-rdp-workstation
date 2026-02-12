@@ -62,7 +62,7 @@ jobs:
 
       - name: Install Ansible
         run: |
-          pip install ansible-core
+          pip install ansible-core pipx
           ansible-galaxy collection install -r requirements.yml
 
       - name: Create Test Inventory

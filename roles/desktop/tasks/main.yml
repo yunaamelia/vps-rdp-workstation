@@ -338,49 +338,6 @@
     state: absent
   tags: [desktop, cleanup]
 
-# =============================================================================
-#  Power User Tools & Enhancements
-# =============================================================================
-
-- name: Install essential KDE tools
-  ansible.builtin.apt:
-    name:
-      - python3-pip
-      - pipx
-      - python3-venv
-      - yakuake
-      - qt5-style-kvantum
-      - qt6-style-kvantum
-      - kompare
-      - filelight
-      - krdc
-      - smb4k
-      - sweeper
-      - kwalletmanager
-      - dolphin-plugins
-      - kcalc
-      - kdeconnect
-      - ffmpegthumbs
-      - kdegraphics-thumbnailers
-      - svgpart
-      - markdownpart
-    state: present
-  when: vps_install_desktop | default(true)
-  tags: [desktop, tools]
-
-- name: Install Awesome KDE recommendations
-  ansible.builtin.apt:
-    name:
-      - krusader
-      - okteta
-      - ghostwriter
-      - ksystemlog
-      - kcolorchooser
-      - krename
-    state: present
-  when: vps_install_desktop | default(true)
-  tags: [desktop, tools, awesome-kde]
-
 - name: Create Kvantum config directory
   ansible.builtin.file:
     path: '/home/{{ vps_username }}/.config/Kvantum'
@@ -488,14 +445,6 @@
     enabled: true
     state: started
   tags: [desktop, sddm]
-
-- name: Enable and start XRDP service
-  ansible.builtin.systemd:
-    name: xrdp
-    enabled: true
-    state: started
-  when: vps_install_xrdp
-  tags: [desktop, xrdp]
 
 - name: Run desktop optimizations
   ansible.builtin.include_tasks: optimizations.yml

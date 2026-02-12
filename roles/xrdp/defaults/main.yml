@@ -1,0 +1,7 @@
+# XRDP Role - Default Variables
+---
+vps_install_xrdp: true
+vps_xrdp_port: 3389
+vps_xrdp_color_depth: 24
+vps_xrdp_encryption: "high"
+vps_xrdp_audio: true

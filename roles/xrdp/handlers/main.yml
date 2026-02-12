@@ -1,0 +1,6 @@
+# XRDP Role - Handlers
+---
+- name: Restart XRDP
+  ansible.builtin.systemd:
+    name: xrdp
+    state: restarted

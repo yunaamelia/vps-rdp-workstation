@@ -111,11 +111,27 @@
     # =========================================================================
 
     - role: desktop
-      tags: [desktop, kde, xrdp]
+      tags: [desktop, kde]
       when: vps_install_desktop | default(true)
+
+    # =========================================================================
+    #  PHASE 3.1: Remote Access (Strictly after Desktop Base)
+    # =========================================================================
+
+    - role: xrdp
+      tags: [desktop, xrdp]
+      when: vps_install_xrdp | default(true)
 
     - role: kde-optimization
       tags: [desktop, kde, optimization]
+      when: vps_install_desktop | default(true)
+
+    # =========================================================================
+    #  PHASE 3.2: Desktop Apps & Tools (Strictly after XRDP)
+    # =========================================================================
+
+    - role: kde-apps
+      tags: [desktop, tools, kde-apps]
       when: vps_install_desktop | default(true)
 
     # =========================================================================

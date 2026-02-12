@@ -1,0 +1,188 @@
+# XRDP Session Manager (sesman) Configuration - Managed by Ansible
+# Comprehensive template for Debian 13 + KDE Plasma
+# Controls session lifecycle, security, and Xorg parameters
+# Reference: https://github.com/neutrinolabs/xrdp/wiki
+
+# =============================================================================
+#  Global Settings
+# =============================================================================
+[Globals]
+; Address to listen on (127.0.0.1 = localhost only for security)
+ListenAddress=127.0.0.1
+; Port for sesman (internal communication with xrdp)
+ListenPort=3350
+
+; Enable user's custom window manager script
+EnableUserWindowManager=true
+; User's window manager script (relative to home directory)
+UserWindowManager=startwm.sh
+; Default window manager fallback
+DefaultWindowManager=/etc/xrdp/startwm.sh
+; Script to run on session reconnection
+ReconnectScript=/etc/xrdp/reconnectwm.sh
+
+; Socket directory group (for non-root xrdp operation)
+SessionSockdirGroup={{ vps_xrdp_socket_group | default('xrdp') }}
+
+# =============================================================================
+#  Security Configuration (Hardened)
+# =============================================================================
+[Security]
+; Allow root login via RDP (DISABLED for security)
+AllowRootLogin={{ vps_xrdp_allow_root | default('false') }}
+; Maximum login retry attempts before disconnect
+MaxLoginRetry={{ vps_xrdp_max_login_retry | default(4) }}
+
+; Terminal server users group (blank = any user can connect)
+TerminalServerUsers={{ vps_xrdp_ts_users | default('') }}
+; Terminal server admins group (can disconnect other users' sessions)
+TerminalServerAdmins={{ vps_xrdp_ts_admins | default('') }}
+; Always check group membership even for local users
+AlwaysGroupCheck={{ vps_xrdp_always_group_check | default('false') }}
+
+; Allow alternate shell execution (for custom session scripts)
+AllowAlternateShell={{ vps_xrdp_allow_alternate_shell | default('true') }}
+
+; Xorg privilege restrictions (AppArmor/SELinux compatibility)
+; Set to true on systems with mandatory access controls
+XorgNoNewPrivileges={{ vps_xrdp_xorg_no_new_privs | default('true') }}
+
+; Clipboard restrictions (none, text, file, image, all)
+; 'none' = no restrictions, 'all' = fully disabled
+RestrictOutboundClipboard={{ vps_xrdp_restrict_clipboard | default('none') }}
+RestrictInboundClipboard={{ vps_xrdp_restrict_clipboard | default('none') }}
+
+# =============================================================================
+#  Session Management
+# =============================================================================
+[Sessions]
+; X11 display offset (first display will be :10)
+X11DisplayOffset={{ vps_xrdp_x11_display_offset | default(10) }}
+; Maximum display number (63 = IANA registered port range limit)
+MaxDisplayNumber={{ vps_xrdp_max_display | default(63) }}
+; Maximum concurrent sessions (0 = unlimited)
+MaxSessions={{ vps_xrdp_max_sessions | default(50) }}
+
+; Kill disconnected sessions immediately
+KillDisconnected={{ vps_xrdp_kill_disconnected | default('false') }}
+; Disconnected session timeout in seconds (0 = never timeout)
+DisconnectedTimeLimit={{ vps_xrdp_disconnected_timeout | default(0) }}
+; Idle session timeout in seconds (0 = never timeout)
+IdleTimeLimit={{ vps_xrdp_idle_timeout | default(0) }}
+
+; Session allocation policy - controls how sessions are matched for reconnection
+; Options:
+;   Default   - First available session
+;   UB        - Match by Username and BPP (color depth)
+;   UBI       - Match by Username, BPP, and IP address
+;   UBD       - Match by Username, BPP, and Display geometry
+;   UBDI      - Match by Username, BPP, Display geometry, and IP
+;   Separate  - Always create new session (no reconnection)
+Policy={{ vps_xrdp_session_policy | default('UBI') }}
+
+# =============================================================================
+#  Xorg Session Configuration
+# =============================================================================
+[Xorg]
+; Xorg binary path
+param=/usr/lib/xorg/Xorg
+; Configuration file (relative to /etc/X11/)
+param=-config
+param=xrdp/xorg.conf
+; Don't reset server on last client disconnect (enables reconnection)
+param=-noreset
+; Don't listen on TCP (security - Xorg should not be network accessible)
+param=-nolisten
+param=tcp
+; Log file pattern (%s = display number)
+param=-logfile
+param=.xorgxrdp.%s.log
+
+# =============================================================================
+#  Xvnc Session Configuration (Alternative Backend)
+# =============================================================================
+[Xvnc]
+; Xvnc binary parameters
+param=Xvnc
+param=-bs
+; Security: don't listen on TCP
+param=-nolisten
+param=tcp
+param=-localhost
+; DPI setting for font scaling
+param=-dpi
+param={{ vps_xrdp_xvnc_dpi | default(96) }}
+
+# =============================================================================
+#  Channel Service (chansrv) Configuration
+# =============================================================================
+[Chansrv]
+; FUSE mount name for drive redirection (appears in file manager)
+FuseMountName={{ vps_xrdp_fuse_mount_name | default('thinclient_drives') }}
+; Enable FUSE mount for drive redirection
+EnableFuseMount={{ vps_xrdp_enable_fuse_mount | default('true') }}
+; File permission mask for redirected files (077 = owner only)
+FileUmask={{ vps_xrdp_file_umask | default('077') }}
+
+; Use Nautilus 3.29.92+ file list format (compatibility with GNOME Files)
+UseNautilus3FlistFormat={{ vps_xrdp_nautilus3_flist | default('true') }}
+
+; Sound redirection tuning (reduce noise/silence issues)
+; Number of silent frames to add at start for AAC codec
+SoundNumSilentFramesAAC={{ vps_xrdp_sound_silent_frames_aac | default(4) }}
+; Number of silent frames for MP3 codec
+SoundNumSilentFramesMP3={{ vps_xrdp_sound_silent_frames_mp3 | default(2) }}
+; Milliseconds of silence before stopping audio stream
+SoundMsecDoNotSend={{ vps_xrdp_sound_msec_do_not_send | default(1000) }}
+
+# =============================================================================
+#  Session Variables
+# =============================================================================
+[SessionVariables]
+; PulseAudio configuration for audio redirection
+PULSE_SCRIPT=/etc/xrdp/pulse/default.pa
+; XDG runtime directory (required for many desktop applications)
+;XDG_RUNTIME_DIR=/run/user/%U
+
+# =============================================================================
+#  Sesman Logging Configuration
+# =============================================================================
+[Logging]
+; Log file location
+LogFile=xrdp-sesman.log
+; Log levels: LOG_LEVEL_TRACE, LOG_LEVEL_DEBUG, LOG_LEVEL_INFO, LOG_LEVEL_WARNING, LOG_LEVEL_ERROR
+LogLevel={{ vps_xrdp_sesman_log_level | default('INFO') }}
+; Enable syslog integration
+EnableSyslog=true
+SyslogLevel={{ vps_xrdp_sesman_syslog_level | default('INFO') }}
+; Enable console output
+EnableConsole=false
+; Enable processor ID in log
+EnableProcessId=true
+
+; Per-logger configuration for debugging
+[LoggingPerLogger]
+; Uncomment to enable debug for specific components:
+; sesman.c=DEBUG
+; session.c=DEBUG
+; env.c=DEBUG
+
+# =============================================================================
+#  Channel Service Logging
+# =============================================================================
+[ChansrvLogging]
+; Log file location (in user's .xorgxrdp directory)
+LogFile=xrdp-chansrv.log
+; Log level for channel service
+LogLevel={{ vps_xrdp_chansrv_log_level | default('INFO') }}
+; Enable syslog for chansrv
+EnableSyslog=true
+SyslogLevel=INFO
+EnableConsole=false
+EnableProcessId=true
+
+[ChansrvLoggingPerLogger]
+; Uncomment to debug specific channel components:
+; clipboard.c=DEBUG
+; sound.c=DEBUG
+; drive.c=DEBUG

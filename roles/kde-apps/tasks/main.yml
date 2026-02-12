@@ -1,0 +1,38 @@
+# KDE Apps Role - Essential Tools & Enhancements
+---
+- name: Install essential KDE tools
+  ansible.builtin.apt:
+    name:
+      - python3-pip
+      - pipx
+      - python3-venv
+      - yakuake
+      - qt5-style-kvantum
+      - qt6-style-kvantum
+      - kompare
+      - filelight
+      - krdc
+      - smb4k
+      - sweeper
+      - kwalletmanager
+      - dolphin-plugins
+      - kcalc
+      - kdeconnect
+      - ffmpegthumbs
+      - kdegraphics-thumbnailers
+      - svgpart
+      - markdownpart
+    state: present
+  tags: [kde-apps, tools]
+
+- name: Install Awesome KDE recommendations
+  ansible.builtin.apt:
+    name:
+      - krusader
+      - okteta
+      - ghostwriter
+      - ksystemlog
+      - kcolorchooser
+      - krename
+    state: present
+  tags: [kde-apps, awesome-kde]

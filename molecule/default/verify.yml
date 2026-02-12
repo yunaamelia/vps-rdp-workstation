@@ -33,6 +33,7 @@
         path: ../../roles
         dest: /tmp/roles.tar.gz
         format: gz
+        mode: '0644'
       delegate_to: localhost
 
     - name: Copy roles archive

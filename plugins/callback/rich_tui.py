@@ -173,7 +173,7 @@ class CallbackModule(CallbackBase):
  ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]
  """
         self.console.print(banner_text)
-        self.console.print(f"[dim]Version {CallbackBase.CALLBACK_VERSION} | Log Level: {self.log_level.upper()}[/dim]")
+        self.console.print(f"[dim]Version {self.CALLBACK_VERSION} | Log Level: {self.log_level.upper()}[/dim]")
         self.console.print(Rule(style="cyan"))
 
     def _init_layout(self):

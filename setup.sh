@@ -40,8 +40,8 @@ readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
 readonly YELLOW='\033[0;33m'
 readonly BLUE='\033[0;34m'
+readonly MAGENTA='\033[0;35m'
 readonly CYAN='\033[0;36m'
-# MAGENTA removed - unused
 readonly BOLD='\033[1m'
 readonly DIM='\033[2m'
 readonly NC='\033[0m' # No Color
@@ -129,23 +129,100 @@ log_to_file() {
 #  UI HELPER FUNCTIONS
 # =============================================================================
 
-print_header() {
-	local title="$1"
-	local width=60
-	local padding=$(((width - ${#title} - 2) / 2))
+# TUI Constants
+HEADER_HEIGHT=5
+FOOTER_HEIGHT=3
 
-	echo ""
-	echo -e "${CYAN}╔$(printf '═%.0s' $(seq 1 $width))╗${NC}"
-	echo -e "${CYAN}║${NC}$(printf ' %.0s' $(seq 1 $padding))${BOLD}$title${NC}$(printf ' %.0s' $(seq 1 $((width - padding - ${#title}))))${CYAN}║${NC}"
-	echo -e "${CYAN}╚$(printf '═%.0s' $(seq 1 $width))╝${NC}"
-	echo ""
+draw_header() {
+	# Save cursor
+	tput sc
+
+	# Move to top
+	tput cup 0 0
+	# Clear line
+	tput el
+
+	echo -e "${CYAN}${BOLD}"
+	cat <<'EOF'
+╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝
+EOF
+	echo -e "${NC}"
+	echo -e "${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}"
+	# Restore cursor
+	tput rc
+}
+
+draw_footer() {
+	local rows
+	rows=$(tput lines)
+	local footer_row=$((rows - FOOTER_HEIGHT))
+
+	tput sc
+	tput cup "$footer_row" 0
+	echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+	echo -e "${BOLD}${MAGENTA}CREDITS:${NC} ${CYAN}VPS RDP Workstation Automation${NC} ${DIM}|${NC} ${DIM}Designed for Developers${NC}"
+	echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+	tput rc
+}
+
+init_tui() {
+	# Only init TUI if interactive
+	if [[ "${CI_MODE:-false}" == "true" ]] || [[ ! -t 1 ]]; then
+		return
+	fi
+
+	clear
+	local rows
+	rows=$(tput lines)
+	local scroll_start=$((HEADER_HEIGHT + 1))
+	local scroll_end=$((rows - FOOTER_HEIGHT))
+
+	# Set scroll region (DECSTBM) - Top line is 1
+	# Region: From line (Header+1) to (Total - Footer)
+	echo -ne "\033[${scroll_start};${scroll_end}r"
+
+	# Draw static elements
+	draw_header
+	draw_footer
+
+	# Move cursor to start of log area
+	tput cup $((scroll_start - 1)) 0
+}
+
+cleanup_tui() {
+	# Reset scroll region
+	echo -ne "\033[r"
+	# Move to bottom
+	tput cup $(($(tput lines) - 1)) 0
+}
+
+# Override logging to update footer occasionally or re-draw header if needed?
+# For simple bash, just drawing once at start is usually enough unless resized.
+# We can add a trap for SIGWINCH to redraw.
+
+# shellcheck disable=SC2317
+handle_resize() {
+	cleanup_tui
+	init_tui
+}
+
+trap 'handle_resize' WINCH
+
+print_header() {
+	# Legacy wrapper - just log info now as header is static
+	log_info "--- $1 ---"
 }
 
 print_section() {
 	local title="$1"
 	echo ""
 	echo -e "${BOLD}${BLUE}━━━ $title ━━━${NC}"
-	echo ""
+	# Redraw footer to keep it fresh
+	if [[ "${CI_MODE:-false}" != "true" ]] && [[ -t 1 ]]; then
+		draw_footer
+	fi
 }
 
 print_step() {
@@ -156,15 +233,8 @@ print_step() {
 }
 
 show_banner() {
-	echo -e "${CYAN}"
-	cat <<'EOF'
-  ╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-  ╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
-   ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝
-EOF
-	echo -e "${NC}"
-	echo -e "${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}"
-	echo ""
+	# Initial TUI setup
+	init_tui
 }
 
 # =============================================================================
@@ -903,6 +973,9 @@ run_ansible() {
 	fi
 
 	# Use ansible-navigator for enhanced UI and logging
+	# Reset bash TUI to allow navigator to take over full screen
+	cleanup_tui
+
 	if ansible-navigator run playbooks/main.yml \
 		--inventory inventory/hosts.yml \
 		--mode "$nav_mode" \
@@ -951,7 +1024,7 @@ OPTIONS:
     --resume            Resume from last checkpoint
     --ci                CI/CD mode (non-interactive)
     --k8s               Install Kubernetes (K3s) and GitOps tools
-    --log-level         Set log level [minimal|full] (default: minimal)
+    --log-level         Set log level [minimal|full|debug] (default: minimal)
 
 ENVIRONMENT VARIABLES:
     VPS_USERNAME        Primary workstation username (required in CI mode)
@@ -1103,6 +1176,11 @@ cleanup() {
 
 	# Re-enable echo if we were interrupted during password input
 	stty echo 2>/dev/null || true
+
+	# Reset TUI if used
+	if command -v cleanup_tui &>/dev/null; then
+		cleanup_tui
+	fi
 }
 
 trap cleanup EXIT

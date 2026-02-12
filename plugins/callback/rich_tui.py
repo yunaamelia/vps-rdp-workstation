@@ -105,22 +105,19 @@ class CallbackModule(CallbackBase):
         self.current_role = None
         self.current_task_start = None
 
-        # Configuration
         self.log_level = os.environ.get("VPS_LOG_LEVEL", "minimal").lower()
 
-        # Statistics
         self.task_count = 0
         self.ok_count = 0
         self.changed_count = 0
         self.failed_count = 0
         self.skipped_count = 0
 
-        # UI Components
         self.live = None
         self.layout = None
         self.job_progress = None
         self.task_id = None
-        self.log_messages = []  # Store recent logs for display
+        self.log_messages = []
 
     def _get_duration(self, start_time):
         """Calculate duration string."""
@@ -132,46 +129,77 @@ class CallbackModule(CallbackBase):
         if not RICH_AVAILABLE or not self.console:
             return
 
-        summary = Text()
-        summary.append("\nExecution Summary\n", style="bold underline")
-        summary.append(f"OK: {self.ok_count}  ", style="green")
-        summary.append(f"Changed: {self.changed_count}  ", style="yellow")
-        summary.append(f"Failed: {self.failed_count}  ", style="red")
-        summary.append(f"Skipped: {self.skipped_count}", style="dim")
+        self._update_ui()
 
-        self.console.print(Panel(summary, border_style="cyan", box=box.ROUNDED))
 
     def _create_header_table(self):
-        """Create a table for the header showing live stats."""
+        """Create the header with ASCII banner and stats."""
         grid = Table.grid(expand=True)
-        grid.add_column(justify="left", ratio=1)
-        grid.add_column(justify="right", ratio=1)
+        grid.add_column(justify="center", ratio=1)
 
-        # Left side: Title
-        title = Text()
-        title.append("🚀 ", style="bold")
-        title.append("VPS Setup", style="bold cyan")
-        title.append(f" ({self.log_level})", style="dim")
-
-        # Right side: Live Stats
+        # Custom Banner
+        banner_text = """
+[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]
+"""
+        grid.add_row(banner_text)
+        
+        # Stats Row
         stats = Text()
-        stats.append(f"✓ {self.ok_count} ", style="green")
-        stats.append(f"⟳ {self.changed_count} ", style="yellow")
-        stats.append(f"✗ {self.failed_count} ", style="red")
-        if self.skipped_count > 0:
-            stats.append(f"⊘ {self.skipped_count}", style="dim")
+        stats.append(f"LOG LEVEL: {self.log_level.upper()}  |  ", style="dim")
+        stats.append(f"OK: {self.ok_count} ", style="green")
+        stats.append(f"CHANGED: {self.changed_count} ", style="yellow")
+        stats.append(f"FAILED: {self.failed_count} ", style="red")
+        stats.append(f"SKIPPED: {self.skipped_count}", style="dim")
+        
+        grid.add_row(stats)
+        
+        return Panel(grid, style="white on black", box=box.HEAVY)
 
-        grid.add_row(title, stats)
-        return Panel(grid, style="white on blue", box=box.SQUARE)
+    def _create_footer(self):
+        """Create the footer with credits."""
+        credit_text = Text()
+        credit_text.append("CREDITS: ", style="bold magenta")
+        credit_text.append("VPS RDP Workstation Automation ", style="cyan")
+        credit_text.append("| ", style="dim")
+        credit_text.append("Designed for Developers", style="italic white")
+        
+        return Panel(credit_text, box=box.ROUNDED, style="white on black", justify="center")
 
     def _update_ui(self):
-        """Update header and body."""
+        """Update the entire layout."""
         if not self.live: return
 
         self.layout["header"].update(self._create_header_table())
 
-        visible_logs = self.log_messages[-15:] if self.log_level == "minimal" else self.log_messages[-30:]
-        self.layout["body"].update(Panel(Group(*visible_logs), title="Activity Log", border_style="white", box=box.ROUNDED))
+        body_elements = []
+        
+        if self.log_level in ["full", "debug"]:
+            visible_logs = self.log_messages[-20:]
+            log_panel = Panel(
+                Group(*visible_logs), 
+                title="[bold]Execution Log[/bold]", 
+                border_style="blue", 
+                box=box.ROUNDED,
+                padding=(0, 1)
+            )
+            body_elements.append(log_panel)
+        elif self.log_level == "minimal":
+             body_elements.append(Text("\n" * 5))
+
+        if self.job_progress:
+            self.layout["body"].update(
+                Panel(
+                    Group(
+                        *body_elements,
+                        Panel(self.job_progress, box=box.SIMPLE, border_style="dim")
+                    ),
+                    box=box.void
+                )
+            )
+        
+        self.layout["footer"].update(self._create_footer())
 
     def v2_playbook_on_start(self, playbook):
         """Called when playbook starts."""
@@ -181,29 +209,27 @@ class CallbackModule(CallbackBase):
             print("\n🚀 VPS Developer Workstation Setup v3.1.0\n")
             return
 
-        # Initialize Layout
         self.layout = Layout()
         self.layout.split(
-            Layout(name="header", size=3),
+            Layout(name="header", size=6),
             Layout(name="body"),
             Layout(name="footer", size=3)
         )
 
         self.layout["header"].update(self._create_header_table())
+        self.layout["footer"].update(self._create_footer())
 
-        # Footer (Progress)
         self.job_progress = Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
+            SpinnerColumn(spinner_name="dots"),
+            TextColumn("[bold blue]{task.description}"),
             BarColumn(bar_width=None),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             TimeElapsedColumn(),
             expand=True
         )
         self.task_id = self.job_progress.add_task("Initializing...", total=None)
-        self.layout["footer"].update(Panel(self.job_progress, border_style="blue", box=box.SIMPLE))
 
-        # Start Live Display
-        self.live = Live(self.layout, refresh_per_second=10, console=self.console)
+        self.live = Live(self.layout, refresh_per_second=12, console=self.console)
         self.live.start()
 
     def _update_body_log(self, renderable):

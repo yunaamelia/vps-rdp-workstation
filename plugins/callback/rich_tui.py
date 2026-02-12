@@ -253,11 +253,11 @@ class CallbackModule(CallbackBase):
         grid = Table.grid(expand=True)
         grid.add_column(justify="center", ratio=1)
 
-        banner_text = \"\"\"
+        banner_text = """
 [bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
 ╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
  ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]
-\"\"\"
+ """
         grid.add_row(banner_text)
         
         stats = Text()

@@ -224,7 +224,9 @@ run_playbook() {
 	# Export Configs
 	export VPS_LOG_LEVEL="$LOG_LEVEL"
 	export ANSIBLE_DEPRECATION_WARNINGS=False
+	# Ensure absolute path for callback plugins and python path
 	export ANSIBLE_CALLBACK_PLUGINS="${SCRIPT_DIR}/plugins/callback"
+	export PYTHONPATH="${SCRIPT_DIR}:${PYTHONPATH:-}"
 
 	# UI Mode Selection
 	if [[ "$VERBOSE" == "true" ]]; then

@@ -292,11 +292,16 @@ class CallbackModule(CallbackBase):
         # We'll disable auto_refresh and rely on manual refreshes in the callback hooks.
         auto_refresh = not self.is_navigator
         
+        # Prevent Rich from capturing streams which causes deadlocks in Ansible Navigator
+        redirect = not self.is_navigator
+
         self.live = Live(
             self.layout,
             refresh_per_second=refresh_rate,
             console=self.console,
-            auto_refresh=auto_refresh
+            auto_refresh=auto_refresh,
+            redirect_stderr=redirect,
+            redirect_stdout=redirect
         )
         self.live.start()
 
@@ -321,6 +326,10 @@ class CallbackModule(CallbackBase):
 
         # Force a manual refresh to ensure the screen updates even if the Live thread is contending
         if self.live:
+            # In navigator mode, we disabled auto-refresh to prevent deadlocks.
+            # We must manually trigger the refresh here.
+            # We use _update_ui() to ensure the layout content is fresh before refreshing the screen.
+            self._update_ui()
             self.live.refresh()
 
     def _update_role_and_phase(self, role_name):

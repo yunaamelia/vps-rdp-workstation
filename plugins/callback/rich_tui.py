@@ -123,6 +123,105 @@ class CallbackModule(CallbackBase):
         self.task_id = None
         self.log_messages = []
 
+        # Milestone / Phase Tracking
+        self.current_phase = None
+        self.phases = {
+            "System Foundation": "pending",
+            "Security Hardening": "pending",
+            "Desktop Environment": "pending",
+            "Remote Access": "pending",
+            "Desktop Tools": "pending",
+            "Visual Foundation": "pending",
+            "Dev Languages": "pending",
+            "Containerization": "pending",
+            "Code Editors": "pending",
+            "Dev Tools": "pending",
+            "Cloud Tools": "pending"
+        }
+        self.phase_order = list(self.phases.keys())
+        
+        # Map roles to phases
+        self.role_phase_map = {
+            "common": "System Foundation",
+            "security": "Security Hardening",
+            "desktop": "Desktop Environment",
+            "xrdp": "Remote Access",
+            "kde-optimization": "Desktop Tools",
+            "kde-apps": "Desktop Tools",
+            "fonts": "Visual Foundation",
+            "catppuccin-theme": "Visual Foundation",
+            "terminal": "Visual Foundation",
+            "shell-styling": "Visual Foundation",
+            "zsh-enhancements": "Visual Foundation",
+            "development": "Dev Languages",
+            "docker": "Containerization",
+            "editors": "Code Editors",
+            "tui-tools": "Dev Tools",
+            "network-tools": "Dev Tools",
+            "system-performance": "Dev Tools",
+            "text-processing": "Dev Tools",
+            "file-management": "Dev Tools",
+            "dev-debugging": "Dev Tools",
+            "code-quality": "Dev Tools",
+            "productivity": "Dev Tools",
+            "log-visualization": "Dev Tools",
+            "ai-devtools": "Dev Tools",
+            "cloud-native": "Cloud Tools"
+        }
+
+    def _update_phase_status(self, new_role):
+        """Update phase status based on current role."""
+        if not new_role or new_role not in self.role_phase_map:
+            return
+
+        phase = self.role_phase_map[new_role]
+        
+        # If we entered a new phase
+        if phase != self.current_phase:
+            # Mark previous phase as completed (if exists)
+            if self.current_phase and self.phases[self.current_phase] == "running":
+                self.phases[self.current_phase] = "completed"
+            
+            # Mark previous phases as completed (catch-up if jumped)
+            if phase in self.phase_order:
+                idx = self.phase_order.index(phase)
+                for i in range(idx):
+                    p = self.phase_order[i]
+                    if self.phases[p] == "pending":
+                        self.phases[p] = "completed"
+
+            # Set new phase to running
+            self.current_phase = phase
+            self.phases[phase] = "running"
+
+    def _create_milestones_panel(self):
+        """Create a compact milestone progress bar."""
+        if not self.current_phase:
+            return Text("Initializing...", style="dim")
+
+        # Create a compact grid of phases
+        grid = Table.grid(padding=(0, 1))
+        
+        # Simple row of dots/names
+        status_row = []
+        for phase in self.phase_order:
+            status = self.phases[phase]
+            if status == "completed":
+                icon = "[green]●[/green]"
+            elif status == "running":
+                icon = "[blue]◉[/blue]"
+            else:
+                icon = "[dim]○[/dim]"
+            
+            status_row.append(f"{icon}")
+
+        # Construct the display
+        # ● ● ● ◉ ○ ○ ○  [bold blue]Current Phase Name[/bold blue]
+        
+        dots = "".join(status_row)
+        display = Text.from_markup(f"{dots}  [bold white]{self.current_phase}[/bold white]")
+        return Panel(display, box=box.SIMPLE, padding=(0,1), style="on black")
+
     def _get_duration(self, start_time):
         """Calculate duration string."""
         if not start_time: return "0.0s"
@@ -141,13 +240,8 @@ class CallbackModule(CallbackBase):
         grid = Table.grid(expand=True)
         grid.add_column(justify="center", ratio=1)
 
-        # Custom Banner
-        banner_text = """
-[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]
-"""
-        grid.add_row(banner_text)
+        milestones = self._create_milestones_panel()
+        grid.add_row(milestones)
         
         # Stats Row
         stats = Text()
@@ -157,7 +251,7 @@ class CallbackModule(CallbackBase):
         stats.append(f"FAILED: {self.failed_count} ", style="red")
         stats.append(f"SKIPPED: {self.skipped_count}", style="dim")
         
-        grid.add_row(stats)
+        grid.add_row(Panel(stats, box=box.ROUNDED, style="white on black"))
         
         return Panel(grid, style="white on black", box=box.HEAVY)
 
@@ -258,10 +352,15 @@ class CallbackModule(CallbackBase):
         self.task_count += 1
         self.current_task_start = time.time()
 
+        if hasattr(task, '_role') and task._role:
+            role_name = task._role.get_name()
+            if role_name != self.current_role:
+                self.current_role = role_name
+                self._update_phase_status(role_name)
+
         if self.job_progress and self.task_id is not None:
             self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
 
-        # In Full mode, show task start (optional)
         self._update_ui()
 
     def _print_task_result(self, status, task_name, duration, message=None):

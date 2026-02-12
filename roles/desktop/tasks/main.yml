@@ -7,6 +7,8 @@
       - fish
       - git
       - python3-dbus
+      - python-is-python3
+      - xdg-user-dirs
       - qdbus-qt6
       - libkf6config-bin
       - plasma-workspace
@@ -65,10 +67,19 @@
     replace: "{{ kwriteconfig_bin.stdout }}"
   tags: [desktop, config]
 
+- name: Make setup scripts executable
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/kde-config-files/scripts"
+    state: directory
+    mode: '0755'
+    recurse: true
+  tags: [desktop, config]
+
 - name: Ensure qdbus alias exists if needed
   ansible.builtin.shell: |
     if ! command -v qdbus >/dev/null; then
-      if command -v qdbus-qt6 >/dev/null; then ln -sf $(which qdbus-qt6) /usr/local/bin/qdbus; fi
+      if command -v qdbus-qt6 >/dev/null; then ln -sf $(which qdbus-qt6) /usr/local/bin/qdbus;
+      elif command -v qdbus6 >/dev/null; then ln -sf $(which qdbus6) /usr/local/bin/qdbus; fi
     fi
   changed_when: false
   tags: [desktop, config]
@@ -92,7 +103,7 @@
 
 - name: Install WhiteSur-kde theme
   ansible.builtin.command:
-    cmd: ./install.sh -a
+    cmd: ./install.sh
     chdir: /tmp/WhiteSur
   become: true
   changed_when: true

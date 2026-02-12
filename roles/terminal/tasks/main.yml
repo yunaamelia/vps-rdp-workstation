@@ -35,7 +35,7 @@
     depth: 1
     version: master
   become: true
-  when: vps_install_omz
+  when: vps_terminal_install_omz
   tags: [terminal, zsh]
 
 - name: Fix Oh My Zsh ownership
@@ -45,7 +45,7 @@
     group: "{{ vps_username }}"
     recurse: true
   become: true
-  when: vps_install_omz
+  when: vps_terminal_install_omz
   tags: [terminal, zsh]
 
 - name: Check if OMZ template exists
@@ -64,7 +64,7 @@
     mode: '0644'
     force: false
   become: true
-  when: vps_install_omz and omz_template_check.stat.exists
+  when: vps_terminal_install_omz and omz_template_check.stat.exists
   tags: [terminal, zsh]
 
 - name: Ensure .zshrc exists for dry-run
@@ -75,7 +75,7 @@
     group: "{{ vps_username }}"
     mode: '0644'
   become: true
-  when: vps_install_omz and ansible_check_mode and not omz_template_check.stat.exists
+  when: vps_terminal_install_omz and ansible_check_mode and not omz_template_check.stat.exists
   check_mode: false
   tags: [terminal, zsh]
 
@@ -84,7 +84,7 @@
   ansible.builtin.lineinfile:
     path: "/home/{{ vps_username }}/.zshrc"
     regexp: '^ZSH_THEME='
-    line: 'ZSH_THEME="{{ vps_zsh_theme }}"'
+    line: 'ZSH_THEME="{{ vps_terminal_zsh_theme }}"'
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
   tags: [terminal, zsh]
@@ -93,7 +93,7 @@
   ansible.builtin.lineinfile:
     path: "/home/{{ vps_username }}/.zshrc"
     regexp: '^plugins='
-    line: 'plugins=({{ vps_omz_builtin_plugins | join(" ") }})'
+    line: 'plugins=({{ vps_terminal_omz_builtin_plugins | join(" ") }})'
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
   tags: [terminal, zsh]
@@ -149,6 +149,33 @@
     group: "{{ vps_username }}"
     mode: '0644'
   tags: [terminal, konsole]
+
+- name: Install Kitty terminal
+  ansible.builtin.apt:
+    name: kitty
+    state: present
+  when: vps_terminal_install_kitty | default(true)
+  tags: [terminal, kitty]
+
+- name: Create Kitty config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/kitty"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  when: vps_terminal_install_kitty | default(true)
+  tags: [terminal, kitty]
+
+- name: Configure Kitty (Theme & Fonts)
+  ansible.builtin.template:
+    src: kitty.conf.j2
+    dest: "/home/{{ vps_username }}/.config/kitty/kitty.conf"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: vps_terminal_install_kitty | default(true)
+  tags: [terminal, kitty]
 
 - name: Log terminal role completion
   ansible.builtin.debug:

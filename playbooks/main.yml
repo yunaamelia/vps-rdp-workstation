@@ -166,7 +166,7 @@
 
     - role: docker
       tags: [devtools, docker]
-      when: install_docker | default(true)
+      when: vps_docker_install | default(true)
 
     - role: editors
       tags: [devtools, editors]
@@ -177,47 +177,47 @@
 
     - role: tui-tools
       tags: [tools, tui]
-      when: install_tui_tools | default(true)
+      when: vps_tui_tools_install | default(true)
 
     - role: network-tools
       tags: [tools, network]
-      when: install_network_tools | default(true)
+      when: vps_network_tools_install | default(true)
 
     - role: system-performance
       tags: [tools, performance]
-      when: install_performance_tools | default(true)
+      when: vps_system_performance_install | default(true)
 
     - role: text-processing
       tags: [tools, text]
-      when: install_text_processing | default(true)
+      when: vps_text_processing_install | default(true)
 
     - role: file-management
       tags: [tools, files]
-      when: install_file_management | default(true)
+      when: vps_file_management_install | default(true)
 
     - role: dev-debugging
       tags: [tools, debugging]
-      when: install_dev_debugging | default(true)
+      when: vps_dev_debugging_install | default(true)
 
     - role: code-quality
       tags: [tools, quality]
-      when: install_code_quality | default(true)
+      when: vps_code_quality_install | default(true)
 
     - role: productivity
       tags: [tools, productivity]
-      when: install_productivity | default(true)
+      when: vps_productivity_install | default(true)
 
     - role: log-visualization
       tags: [tools, logging]
-      when: install_log_visualization | default(true)
+      when: vps_log_visualization_install | default(true)
 
     - role: ai-devtools
       tags: [tools, ai]
-      when: install_ai_devtools | default(true)
+      when: vps_ai_devtools_install | default(true)
 
     - role: cloud-native
       tags: [tools, cloud]
-      when: install_cloud_native_tools | default(false)
+      when: vps_cloud_native_tools_install | default(false)
 
   post_tasks:
     - name: Update progress tracking - completed

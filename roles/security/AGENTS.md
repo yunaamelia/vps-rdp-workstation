@@ -1,7 +1,7 @@
 # Security Role
 
 ## OVERVIEW
-Hardens network and access security via UFW, Fail2ban, and SSH configuration (Zero-fail zone).
+Hardens network and access security via UFW, Fail2ban, SSH configuration, and unattended-upgrades. **Zero-fail zone** — errors here can lock you out.
 
 ## WHERE TO LOOK
 | Component | Location | Notes |
@@ -16,6 +16,7 @@ Hardens network and access security via UFW, Fail2ban, and SSH configuration (Ze
 *   **Root Access**: `vps_ssh_root_login` defaults to `false`. Override only in inventory, never in defaults.
 *   **Port Visibility**: Only ports explicitly defined in variables (`vps_ssh_port`, `vps_xrdp_port`) are opened.
 *   **Idempotency**: SSH configuration uses regex-based `lineinfile` tasks to ensure safe, repeatable edits.
+*   **Ordering**: Phase 2 — MUST run after `common` but before any service roles.
 
 ## ANTI-PATTERNS
 *   **Manual Firewall Edits**: Do not run `ufw` commands manually; state will drift from Ansible configuration.

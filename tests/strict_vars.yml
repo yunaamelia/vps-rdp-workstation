@@ -4,25 +4,25 @@
 # Usage: vars_files: [ ../../tests/strict_vars.yml ]
 
 vps_install_xrdp: false # Disabled for CI timeout reasons
-install_firefox: false # Disabled for CI timeout reasons
+vps_desktop_install_firefox: false # Disabled for CI timeout reasons
 vps_theme_variant: none # Disabled to skip heavy theme copy
 vps_install_omz: true
 vps_install_starship: true
 vps_install_zsh_external_plugins: true
 vps_install_desktop: false # Disabled for CI timeout reasons
-install_docker: true
-install_vscode: true
-install_opencode: true
-install_tui_tools: true
-install_network_tools: true
-install_performance_tools: true
-install_text_processing: true
-install_file_management: true
-install_dev_debugging: true
-install_code_quality: true
-install_productivity: true
-install_log_visualization: true
-install_ai_devtools: true
-install_cloud_native_tools: true
+vps_docker_install: true
+vps_editors_install_vscode: true
+vps_editors_install_opencode: true
+vps_tui_tools_install: true
+vps_network_tools_install: true
+vps_system_performance_install: true
+vps_text_processing_install: true
+vps_file_management_install: true
+vps_dev_debugging_install: true
+vps_code_quality_install: true
+vps_productivity_install: true
+vps_log_visualization_install: true
+vps_ai_devtools_install: true
+vps_cloud_native_tools_install: true
 vps_kde_compositor_enabled: false
 vps_fail2ban_enabled: false # Disabled for CI container compatibility

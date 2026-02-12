@@ -23,7 +23,7 @@ This Ansible automation transforms a Debian 13 VPS into an RDP developer worksta
 
 **10-Phase Execution Order** (CRITICAL - security before services):
 
-1. `common` → 2. `security` → 3. `fonts` → 4. `terminal` → 5. `shell-styling` → 6. `zsh-enhancements` → 7. `desktop` → 8. `development` → 9. `docker` → 10. `editors` + 12 tool roles
+1. `common` → 2. `security` → 3. `fonts` → 4. `desktop` → 5. `xrdp` → 6. `kde-optimization` → 7. `kde-apps` → 8. `catppuccin-theme` → 9. `terminal` → 10. `shell-styling` → 11. `zsh-enhancements` → 12. `development` → 13. `docker` → 14. `editors` → 15-25. tool roles
 
 **Variable Hierarchy**: Role defaults → [group_vars/all.yml](../inventory/group_vars/all.yml) → playbook vars → CLI extra vars
 
@@ -59,6 +59,12 @@ pylint plugins/callback/*.py
 
 **Secrets Management**: NEVER log passwords. Use `no_log: true` for tasks handling `vps_user_password_hash`. See [setup.sh](../setup.sh) lines 463-489 for secure password hashing pattern.
 
+**Variable Naming Convention**: All role variables use the `vps_<role>_` prefix. Examples:
+- Docker role: `vps_docker_install`, `vps_docker_log_max_size`
+- Development role: `vps_development_install_nodejs`, `vps_development_nodejs_version`
+- Terminal role: `vps_terminal_install_kitty`, `vps_terminal_kitty_theme`
+- Shared system variables: `vps_username`, `vps_timezone`, `vps_default_font_size`, `vps_default_monospace_font`
+
 **Idempotency**: All tasks must be safe to run multiple times. Test by running twice - second run should report zero changes.
 
 **Mitogen Acceleration**: 2-7x speedup via dynamic strategy plugin detection. See [setup.sh](../setup.sh) lines 184-215.
@@ -67,8 +73,10 @@ pylint plugins/callback/*.py
 
 ```yaml
 - role: desktop
-  tags: [visual, desktop, kde] # broad → specific → feature
+  tags: [desktop, kde, optimization] # phase → role → feature
 ```
+
+**Block/Rescue Error Handling**: Critical roles (common, security, desktop, xrdp, docker) include block/rescue error handling for improved failure recovery.
 
 **Role Dependencies**: NEVER move `security` role before `common`. NEVER expose services before security hardening completes.
 

@@ -12,14 +12,14 @@
       - curl
       - gnupg
     state: present
-  when: install_nodejs
+  when: vps_development_install_nodejs
   tags: [development, nodejs]
 
 - name: Remove old NodeSource keyring if exists
   ansible.builtin.file:
     path: /usr/share/keyrings/nodesource.gpg
     state: absent
-  when: install_nodejs
+  when: vps_development_install_nodejs
   tags: [development, nodejs]
 
 - name: Add NodeSource GPG key
@@ -27,7 +27,7 @@
     url: https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key
     dest: /usr/share/keyrings/nodesource.asc
     mode: '0644'
-  when: install_nodejs
+  when: vps_development_install_nodejs
   tags: [development, nodejs]
 
 - name: Add NodeSource repository
@@ -35,7 +35,7 @@
     repo: "deb [signed-by=/usr/share/keyrings/nodesource.asc] https://deb.nodesource.com/node_20.x nodistro main"
     state: present
     filename: nodesource
-  when: install_nodejs
+  when: vps_development_install_nodejs
   tags: [development, nodejs]
 
 - name: Install Node.js
@@ -43,7 +43,7 @@
     name: nodejs
     state: present
     update_cache: true
-  when: install_nodejs
+  when: vps_development_install_nodejs
   tags: [development, nodejs]
 
 - name: Configure npm global directory for user
@@ -53,14 +53,21 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0755'
-  when: install_nodejs
+  when: vps_development_install_nodejs
+  tags: [development, nodejs]
+
+- name: Check npm prefix
+  ansible.builtin.command: sudo -u {{ vps_username }} npm config get prefix
+  register: npm_prefix_check
+  changed_when: false
+  when: vps_development_install_nodejs
   tags: [development, nodejs]
 
 - name: Configure npm prefix
   ansible.builtin.command: |
     sudo -u {{ vps_username }} npm config set prefix "/home/{{ vps_username }}/.npm-global"
   changed_when: true
-  when: install_nodejs
+  when: vps_development_install_nodejs and npm_prefix_check.stdout != '/home/' + vps_username + '/.npm-global'
   tags: [development, nodejs]
 
 - name: Install global npm packages
@@ -68,9 +75,9 @@
     sudo -u {{ vps_username }} npm install -g {{ item }}
   args:
     creates: "/home/{{ vps_username }}/.npm-global/bin/{{ item.split('@')[0] }}"
-  loop: "{{ npm_global_packages }}"
+  loop: "{{ vps_development_npm_global_packages }}"
   become: true
-  when: install_nodejs
+  when: vps_development_install_nodejs
   tags: [development, nodejs]
 
 # =============================================================================
@@ -94,14 +101,23 @@
       - python3-apt
       - pipx
     state: present
-  when: install_python
+  when: vps_development_install_python
+  tags: [development, python]
+
+- name: Check if pipx needs to modify PATH
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} grep -q "Created by pipx" /home/{{ vps_username }}/.bashrc || sudo -u {{ vps_username }} grep -q "Created by pipx" /home/{{ vps_username }}/.zshrc
+  register: pipx_path_check
+  changed_when: false
+  failed_when: false
+  when: vps_development_install_python
   tags: [development, python]
 
 - name: Ensure pipx is in PATH for user
   ansible.builtin.command: |
     sudo -u {{ vps_username }} pipx ensurepath
   changed_when: true
-  when: install_python
+  when: vps_development_install_python and pipx_path_check.rc != 0
   tags: [development, python]
 
 - name: Install Python tools via pipx
@@ -109,9 +125,9 @@
     sudo -u {{ vps_username }} pipx install {{ item }}
   args:
     creates: "/home/{{ vps_username }}/.local/bin/{{ item.split('[')[0] }}"
-  loop: "{{ python_pipx_packages }}"
+  loop: "{{ vps_development_python_pipx_packages }}"
   become: true
-  when: install_python
+  when: vps_development_install_python
   tags: [development, python]
 
 # =============================================================================
@@ -126,15 +142,15 @@
       - php-fpm
       - php-common
     state: present
-  when: install_php
+  when: vps_development_install_php
   tags: [development, php]
 
 - name: Install PHP extensions
   ansible.builtin.apt:
     name: "php-{{ item }}"
     state: present
-  loop: "{{ php_extensions }}"
-  when: install_php
+  loop: "{{ vps_development_php_extensions }}"
+  when: vps_development_install_php
   tags: [development, php]
 
 - name: Download Composer installer
@@ -142,7 +158,7 @@
     url: https://getcomposer.org/installer
     dest: /tmp/composer-setup.php
     mode: '0644'
-  when: install_composer
+  when: vps_development_install_composer
   tags: [development, php]
 
 - name: Verify Composer installer signature
@@ -155,7 +171,7 @@
       exit 1
     fi
   changed_when: false
-  when: install_composer
+  when: vps_development_install_composer
   tags: [development, php]
 
 - name: Install Composer globally
@@ -163,14 +179,14 @@
     php /tmp/composer-setup.php --install-dir=/usr/local/bin --filename=composer
   args:
     creates: /usr/local/bin/composer
-  when: install_composer
+  when: vps_development_install_composer
   tags: [development, php]
 
 - name: Remove Composer installer
   ansible.builtin.file:
     path: /tmp/composer-setup.php
     state: absent
-  when: install_composer
+  when: vps_development_install_composer
   tags: [development, php]
 
 - name: Log development role completion

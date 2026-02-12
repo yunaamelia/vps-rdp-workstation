@@ -1,56 +1,64 @@
 # XRDP Role - Remote Desktop Protocol Server
 ---
-- name: Install XRDP and dependencies
-  ansible.builtin.apt:
-    name:
-      - xrdp
-      - xorgxrdp
-      - ssl-cert
-    state: present
-  tags: [xrdp, packages]
+- name: XRDP Role Tasks
+  block:
+    - name: Install XRDP and dependencies
+      ansible.builtin.apt:
+        name:
+          - xrdp
+          - xorgxrdp
+          - ssl-cert
+        state: present
+      tags: [xrdp, packages]
 
-- name: Add xrdp user to ssl-cert group
-  ansible.builtin.user:
-    name: xrdp
-    groups: ssl-cert
-    append: true
-  notify: Restart XRDP
-  tags: [xrdp, config]
+    - name: Add xrdp user to ssl-cert group
+      ansible.builtin.user:
+        name: xrdp
+        groups: ssl-cert
+        append: true
+      notify: Restart XRDP
+      tags: [xrdp, config]
 
-- name: Configure xrdp.ini
-  ansible.builtin.template:
-    src: xrdp.ini.j2
-    dest: /etc/xrdp/xrdp.ini
-    owner: root
-    group: root
-    mode: '0644'
-  notify: Restart XRDP
-  tags: [xrdp, config]
+    - name: Configure xrdp.ini
+      ansible.builtin.template:
+        src: xrdp.ini.j2
+        dest: /etc/xrdp/xrdp.ini
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart XRDP
+      tags: [xrdp, config]
 
-- name: Configure sesman.ini
-  ansible.builtin.template:
-    src: sesman.ini.j2
-    dest: /etc/xrdp/sesman.ini
-    owner: root
-    group: root
-    mode: '0644'
-  notify: Restart XRDP
-  tags: [xrdp, config]
+    - name: Configure sesman.ini
+      ansible.builtin.template:
+        src: sesman.ini.j2
+        dest: /etc/xrdp/sesman.ini
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart XRDP
+      tags: [xrdp, config]
 
-- name: Configure startwm.sh
-  ansible.builtin.template:
-    src: startwm.sh.j2
-    dest: /etc/xrdp/startwm.sh
-    owner: root
-    group: root
-    mode: '0755'
-  notify: Restart XRDP
-  tags: [xrdp, config]
+    - name: Configure startwm.sh
+      ansible.builtin.template:
+        src: startwm.sh.j2
+        dest: /etc/xrdp/startwm.sh
+        owner: root
+        group: root
+        mode: '0755'
+      notify: Restart XRDP
+      tags: [xrdp, config]
 
-- name: Enable and start XRDP service
-  ansible.builtin.systemd:
-    name: xrdp
-    enabled: true
-    state: started
-  ignore_errors: "{{ ansible_check_mode }}"
-  tags: [xrdp, service]
+    - name: Enable and start XRDP service
+      ansible.builtin.systemd:
+        name: xrdp
+        enabled: true
+        state: started
+      ignore_errors: "{{ ansible_check_mode }}"
+      tags: [xrdp, service]
+
+  rescue:
+    - name: Log XRDP role failure
+      ansible.builtin.fail:
+        msg: "CRITICAL FAILURE in XRDP Role: {{ ansible_failed_result.msg | default('Unknown error') }}"
+      tags: [xrdp]

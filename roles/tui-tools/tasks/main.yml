@@ -44,7 +44,7 @@
 - name: Download lazygit (versioned with checksum)
   ansible.builtin.get_url:
     url: >-
-      https://github.com/jesseduffield/lazygit/releases/download/v{{ lazygit_version }}/lazygit_{{ lazygit_version }}_Linux_x86_64.tar.gz
+      https://github.com/jesseduffield/lazygit/releases/download/v{{ vps_tui_tools_lazygit_version }}/lazygit_{{ vps_tui_tools_lazygit_version }}_Linux_x86_64.tar.gz
     dest: /tmp/lazygit.tar.gz
     mode: '0644'
   register: lazygit_download
@@ -79,7 +79,7 @@
 
 - name: Verify lazygit installation
   ansible.builtin.command: lazygit --version
-  register: lazygit_version_check
+  register: vps_tui_tools_lazygit_version_check
   changed_when: false
   failed_when: false
   tags: [tools, tui]

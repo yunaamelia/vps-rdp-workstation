@@ -21,4 +21,4 @@ vps_xrdp_encryption: "high"
 vps_xrdp_audio: true
 
 # Browser
-install_firefox: true
+vps_desktop_install_firefox: true

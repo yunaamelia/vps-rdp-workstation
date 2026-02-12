@@ -11,7 +11,7 @@
       - apt-transport-https
       - gnupg
     state: present
-  when: install_vscode
+  when: vps_editors_install_vscode
   tags: [editors, vscode]
 
 - name: Check if Microsoft GPG key exists
@@ -25,7 +25,7 @@
     url: https://packages.microsoft.com/keys/microsoft.asc
     dest: /usr/share/keyrings/microsoft.asc
     mode: '0644'
-  when: install_vscode and not microsoft_gpg_key.stat.exists
+  when: vps_editors_install_vscode and not microsoft_gpg_key.stat.exists
   tags: [editors, vscode]
 
 - name: Remove conflicting VS Code repository config
@@ -35,7 +35,7 @@
   loop:
     - /etc/apt/sources.list.d/vscode.list
     - /etc/apt/sources.list.d/vscode.sources
-  when: install_vscode
+  when: vps_editors_install_vscode
   tags: [editors, vscode]
 
 - name: Add VS Code repository
@@ -44,7 +44,7 @@
       deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft.asc] https://packages.microsoft.com/repos/code stable main
     state: present
     filename: vscode
-  when: install_vscode
+  when: vps_editors_install_vscode
   tags: [editors, vscode]
 
 - name: Install Visual Studio Code
@@ -52,16 +52,23 @@
     name: code
     state: present
     update_cache: true
-  when: install_vscode
+  when: vps_editors_install_vscode
+  tags: [editors, vscode]
+
+- name: Get installed VS Code extensions
+  ansible.builtin.command: sudo -u {{ vps_username }} code --list-extensions
+  register: vscode_installed_extensions
+  changed_when: false
+  when: vps_editors_install_vscode
   tags: [editors, vscode]
 
 - name: Install VS Code extensions
   ansible.builtin.command: |
     sudo -u {{ vps_username }} code --install-extension {{ item }} --force
-  loop: "{{ vscode_extensions }}"
-  changed_when: true
-  when: install_vscode
+  loop: "{{ vps_editors_vscode_extensions }}"
+  when: vps_editors_install_vscode and item|lower not in vscode_installed_extensions.stdout|lower
   register: vscode_ext_install
+  changed_when: true
   failed_when: vscode_ext_install.rc != 0 and 'already installed' not in vscode_ext_install.stdout
   tags: [editors, vscode]
 
@@ -74,7 +81,7 @@
     name: "opencode-ai"
     global: true
     state: present
-  when: install_opencode
+  when: vps_editors_install_opencode
   tags: [editors, opencode]
 
 - name: Get OpenCode binary path
@@ -82,7 +89,7 @@
   register: opencode_bin
   changed_when: false
   failed_when: false
-  when: install_opencode
+  when: vps_editors_install_opencode
   tags: [editors, opencode]
 
 - name: Ensure VS Code User directory exists
@@ -92,7 +99,7 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0755'
-  when: install_vscode
+  when: vps_editors_install_vscode
   tags: [editors, vscode]
 
 - name: Configure VS Code settings
@@ -107,7 +114,7 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0644'
-  when: install_vscode
+  when: vps_editors_install_vscode
   tags: [editors, vscode, opencode]
 
 # =============================================================================
@@ -118,7 +125,7 @@
   ansible.builtin.stat:
     path: /opt/antigravity/antigravity
   register: antigravity_check
-  when: install_antigravity | default(false)
+  when: vps_editors_install_antigravity | default(false)
   tags: [editors, antigravity]
 
 - name: Create Antigravity installation note
@@ -143,7 +150,7 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
   when:
-    - install_antigravity | default(false)
+    - vps_editors_install_antigravity | default(false)
     - not antigravity_check.stat.exists | default(true)
   tags: [editors, antigravity]
 

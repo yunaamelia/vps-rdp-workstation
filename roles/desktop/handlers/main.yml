@@ -1,10 +1,5 @@
 # Desktop Role - Handlers
 ---
-- name: Restart XRDP
-  ansible.builtin.systemd:
-    name: xrdp
-    state: restarted
-
 - name: Restart SDDM
   ansible.builtin.systemd:
     name: sddm

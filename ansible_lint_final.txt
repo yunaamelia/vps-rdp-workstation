@@ -1,0 +1,7 @@
+[WARNING]: log file at '/var/log/vps-setup-ansible.log' is not writeable and we cannot create it, aborting
+
+[WARNING]: log file at '/var/log/vps-setup-ansible.log' is not writeable and we cannot create it, aborting
+
+WARNING  Skipped installing collection dependencies due to running in offline mode.
+
+Passed: 0 failure(s), 0 warning(s) in 214 files processed of 658 encountered. Profile 'production' was required, and it passed.

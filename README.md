@@ -88,7 +88,9 @@ chmod 600 ~/.secrets
 
 ### Terminal Environment
 
-- Zsh with Oh My Zsh
+- Zsh with Oh My Zsh (primary)
+- Konsole (KDE-native terminal, primary)
+- **Kitty** (backup terminal emulator with Catppuccin theme)
 - Agnoster theme with JetBrains Mono Nerd Font
 - 7 external plugins: autosuggestions, syntax-highlighting, fzf-tab, forgit
 - Zoxide for smart directory jumping

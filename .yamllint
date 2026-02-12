@@ -21,3 +21,5 @@ rules:
 ignore: |
   collections/
   .github/workflows/vps-setup.yml
+  venv/
+  .git/

@@ -1,149 +1,157 @@
 # Docker Role - Container Platform
 # Docker Engine, Compose V2, daemon configuration
 ---
-- name: Install Docker prerequisites
-  ansible.builtin.apt:
-    name:
-      - ca-certificates
-      - curl
-      - gnupg
-    state: present
-  when: install_docker
-  tags: [docker]
+- name: Docker Role Tasks
+  block:
+    - name: Install Docker prerequisites
+      ansible.builtin.apt:
+        name:
+          - ca-certificates
+          - curl
+          - gnupg
+        state: present
+      when: vps_docker_install
+      tags: [docker]
 
-- name: Create Docker keyring directory
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: '0755'
-  when: install_docker
-  tags: [docker]
+    - name: Create Docker keyring directory
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: '0755'
+      when: vps_docker_install
+      tags: [docker]
 
-- name: Check if Docker GPG key exists
-  ansible.builtin.stat:
-    path: /etc/apt/keyrings/docker.asc
-  register: docker_gpg_key
-  tags: [docker]
+    - name: Check if Docker GPG key exists
+      ansible.builtin.stat:
+        path: /etc/apt/keyrings/docker.asc
+      register: docker_gpg_key
+      tags: [docker]
 
-- name: Add Docker GPG key
-  ansible.builtin.get_url:
-    url: https://download.docker.com/linux/debian/gpg
-    dest: /etc/apt/keyrings/docker.asc
-    mode: '0644'
-  when: install_docker and not docker_gpg_key.stat.exists
-  tags: [docker]
+    - name: Add Docker GPG key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: /etc/apt/keyrings/docker.asc
+        mode: '0644'
+      when: vps_docker_install and not docker_gpg_key.stat.exists
+      tags: [docker]
 
-- name: Add Docker repository
-  ansible.builtin.apt_repository:
-    repo: >-
-      deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
-    state: present
-    filename: docker
-  when: install_docker
-  tags: [docker]
+    - name: Add Docker repository
+      ansible.builtin.apt_repository:
+        repo: >-
+          deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+        state: present
+        filename: docker
+      when: vps_docker_install
+      tags: [docker]
 
-- name: Install Docker packages
-  ansible.builtin.apt:
-    name:
-      - docker-ce
-      - docker-ce-cli
-      - containerd.io
-      - docker-buildx-plugin
-      - docker-compose-plugin
-    state: present
-    update_cache: true
-  when: install_docker
-  notify: Restart Docker
-  tags: [docker]
+    - name: Install Docker packages
+      ansible.builtin.apt:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-compose-plugin
+        state: present
+        update_cache: true
+      when: vps_docker_install
+      notify: Restart Docker
+      tags: [docker]
 
-- name: Add user to docker group
-  ansible.builtin.user:
-    name: "{{ vps_username }}"
-    groups: docker
-    append: true
-  when: install_docker
-  tags: [docker]
+    - name: Add user to docker group
+      ansible.builtin.user:
+        name: "{{ vps_username }}"
+        groups: docker
+        append: true
+      when: vps_docker_install
+      tags: [docker]
 
-- name: Create Docker daemon configuration directory
-  ansible.builtin.file:
-    path: /etc/docker
-    state: directory
-    mode: '0755'
-  when: install_docker
-  tags: [docker]
+    - name: Create Docker daemon configuration directory
+      ansible.builtin.file:
+        path: /etc/docker
+        state: directory
+        mode: '0755'
+      when: vps_docker_install
+      tags: [docker]
 
-- name: Configure Docker daemon
-  ansible.builtin.template:
-    src: daemon.json.j2
-    dest: /etc/docker/daemon.json
-    mode: '0644'
-  when: install_docker
-  notify: Restart Docker
-  tags: [docker]
+    - name: Configure Docker daemon
+      ansible.builtin.template:
+        src: daemon.json.j2
+        dest: /etc/docker/daemon.json
+        mode: '0644'
+      when: vps_docker_install
+      notify: Restart Docker
+      tags: [docker]
 
-- name: Enable and start Docker service
-  ansible.builtin.systemd:
-    name: docker
-    enabled: true
-    state: started
-  when: install_docker and ansible_virtualization_type != "docker"
-  tags: [docker]
+    - name: Enable and start Docker service
+      ansible.builtin.systemd:
+        name: docker
+        enabled: true
+        state: started
+      when: vps_docker_install and ansible_virtualization_type != "docker"
+      tags: [docker]
 
-- name: Get lazydocker latest release info
-  ansible.builtin.uri:
-    url: https://api.github.com/repos/jesseduffield/lazydocker/releases/latest
-    return_content: true
-  register: lazydocker_release
-  when: install_docker
-  tags: [docker, tui]
+    - name: Get lazydocker latest release info
+      ansible.builtin.uri:
+        url: https://api.github.com/repos/jesseduffield/lazydocker/releases/latest
+        return_content: true
+      register: lazydocker_release
+      when: vps_docker_install
+      tags: [docker, tui]
 
-- name: Download lazydocker archive
-  vars:
-    ld_tag: "{{ lazydocker_release.json.tag_name }}"
-    ld_ver: "{{ lazydocker_release.json.tag_name | regex_replace('^v', '') }}"
-  ansible.builtin.get_url:
-    url: "https://github.com/jesseduffield/lazydocker/releases/download/{{ ld_tag }}/lazydocker_{{ ld_ver }}_Linux_x86_64.tar.gz"
-    dest: /tmp/lazydocker.tar.gz
-    mode: '0644'
-  when: install_docker
-  tags: [docker, tui]
+    - name: Download lazydocker archive
+      vars:
+        ld_tag: "{{ lazydocker_release.json.tag_name }}"
+        ld_ver: "{{ lazydocker_release.json.tag_name | regex_replace('^v', '') }}"
+      ansible.builtin.get_url:
+        url: "https://github.com/jesseduffield/lazydocker/releases/download/{{ ld_tag }}/lazydocker_{{ ld_ver }}_Linux_x86_64.tar.gz"
+        dest: /tmp/lazydocker.tar.gz
+        mode: '0644'
+      when: vps_docker_install
+      tags: [docker, tui]
 
-- name: Create temporary extraction directory for lazydocker
-  ansible.builtin.file:
-    path: /tmp/lazydocker_extract
-    state: directory
-    mode: '0755'
-  when: install_docker
-  tags: [docker, tui]
+    - name: Create temporary extraction directory for lazydocker
+      ansible.builtin.file:
+        path: /tmp/lazydocker_extract
+        state: directory
+        mode: '0755'
+      when: vps_docker_install
+      tags: [docker, tui]
 
-- name: Extract lazydocker archive
-  ansible.builtin.unarchive:
-    src: /tmp/lazydocker.tar.gz
-    dest: /tmp/lazydocker_extract
-    remote_src: true
-  when: install_docker
-  tags: [docker, tui]
+    - name: Extract lazydocker archive
+      ansible.builtin.unarchive:
+        src: /tmp/lazydocker.tar.gz
+        dest: /tmp/lazydocker_extract
+        remote_src: true
+      when: vps_docker_install
+      tags: [docker, tui]
 
-- name: Install lazydocker binary
-  ansible.builtin.copy:
-    src: /tmp/lazydocker_extract/lazydocker
-    dest: /usr/local/bin/lazydocker
-    mode: '0755'
-    remote_src: true
-  when: install_docker
-  tags: [docker, tui]
+    - name: Install lazydocker binary
+      ansible.builtin.copy:
+        src: /tmp/lazydocker_extract/lazydocker
+        dest: /usr/local/bin/lazydocker
+        mode: '0755'
+        remote_src: true
+      when: vps_docker_install
+      tags: [docker, tui]
 
-- name: Clean up lazydocker artifacts
-  ansible.builtin.file:
-    path: "{{ item }}"
-    state: absent
-  loop:
-    - /tmp/lazydocker.tar.gz
-    - /tmp/lazydocker_extract
-  when: install_docker
-  tags: [docker, tui]
+    - name: Clean up lazydocker artifacts
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: absent
+      loop:
+        - /tmp/lazydocker.tar.gz
+        - /tmp/lazydocker_extract
+      when: vps_docker_install
+      tags: [docker, tui]
 
-- name: Log docker role completion
-  ansible.builtin.debug:
-    msg: "✓ Docker role completed - Docker Engine, Compose V2, lazydocker installed"
-  tags: [docker]
+    - name: Log docker role completion
+      ansible.builtin.debug:
+        msg: "✓ Docker role completed - Docker Engine, Compose V2, lazydocker installed"
+      tags: [docker]
+
+  rescue:
+    - name: Log docker role failure
+      ansible.builtin.fail:
+        msg: "CRITICAL FAILURE in Docker Role: {{ ansible_failed_result.msg | default('Unknown error') }}"
+      tags: [docker]

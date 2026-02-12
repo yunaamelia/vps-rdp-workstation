@@ -1,147 +1,155 @@
 # Common Role - System Foundation
 # Installs essential packages, configures system basics
 ---
-- name: Update apt cache
-  ansible.builtin.apt:
-    update_cache: true
-    cache_valid_time: 3600
-  tags: [common, packages]
+- name: Common Role Tasks
+  block:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+      tags: [common, packages]
 
-- name: Perform full system upgrade
-  ansible.builtin.apt:
-    upgrade: dist
-    autoclean: true
-    autoremove: true
-  tags: [common, packages]
+    - name: Perform full system upgrade
+      ansible.builtin.apt:
+        upgrade: dist
+        autoclean: true
+        autoremove: true
+      tags: [common, packages]
 
-- name: Install essential system packages
-  ansible.builtin.apt:
-    name:
-      - build-essential
-      - curl
-      - wget
-      - git
-      - ca-certificates
-      - gnupg
-      - lsb-release
-      - apt-transport-https
-      - vim
-      - nano
-      - htop
-      - tree
-      - unzip
-      - zip
-      - tar
-      - gzip
-      - xz-utils
-      - pv
-      - dialog
-      - locales
-      - sudo
-      - dbus
-      - systemd
-      - acl
-      - procps
-      - file
-      - less
-      - man-db
-      - fontconfig
-      - zsh
-    state: present
-  tags: [common, packages]
+    - name: Install essential system packages
+      ansible.builtin.apt:
+        name:
+          - build-essential
+          - curl
+          - wget
+          - git
+          - ca-certificates
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+          - vim
+          - nano
+          - htop
+          - tree
+          - unzip
+          - zip
+          - tar
+          - gzip
+          - xz-utils
+          - pv
+          - dialog
+          - locales
+          - sudo
+          - dbus
+          - systemd
+          - acl
+          - procps
+          - file
+          - less
+          - man-db
+          - fontconfig
+          - zsh
+        state: present
+      tags: [common, packages]
 
-- name: Set system hostname
-  ansible.builtin.hostname:
-    name: "{{ vps_hostname }}"
-  tags: [common, system]
+    - name: Set system hostname
+      ansible.builtin.hostname:
+        name: "{{ vps_hostname }}"
+      tags: [common, system]
 
-- name: Update /etc/hosts with hostname
-  ansible.builtin.lineinfile:
-    path: /etc/hosts
-    regexp: '^127\.0\.1\.1'
-    line: "127.0.1.1\t{{ vps_hostname }}"
-    state: present
-  when: ansible_virtualization_type != "docker"
-  tags: [common, system]
+    - name: Update /etc/hosts with hostname
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '^127\.0\.1\.1'
+        line: "127.0.1.1\t{{ vps_hostname }}"
+        state: present
+      when: ansible_virtualization_type != "docker"
+      tags: [common, system]
 
-- name: Configure system timezone
-  community.general.timezone:
-    name: "{{ vps_timezone }}"
-  when: ansible_virtualization_type != "docker"
-  tags: [common, system]
+    - name: Configure system timezone
+      community.general.timezone:
+        name: "{{ vps_timezone }}"
+      when: ansible_virtualization_type != "docker"
+      tags: [common, system]
 
-- name: Generate locale
-  community.general.locale_gen:
-    name: "{{ vps_locale }}"
-    state: present
-  tags: [common, system]
+    - name: Generate locale
+      community.general.locale_gen:
+        name: "{{ vps_locale }}"
+        state: present
+      tags: [common, system]
 
-- name: Set default locale
-  ansible.builtin.copy:
-    dest: /etc/default/locale
-    content: |
-      LANG={{ vps_locale }}
-      LC_ALL={{ vps_locale }}
-    mode: '0644'
-  tags: [common, system]
+    - name: Set default locale
+      ansible.builtin.copy:
+        dest: /etc/default/locale
+        content: |
+          LANG={{ vps_locale }}
+          LC_ALL={{ vps_locale }}
+        mode: '0644'
+      tags: [common, system]
 
-- name: Create primary user
-  ansible.builtin.user:
-    name: "{{ vps_username }}"
-    password: "{{ vps_user_password_hash }}"
-    update_password: "{{ vps_password_policy | default('always') }}"
-    shell: "{{ vps_user_shell }}"
-    groups: "{{ vps_user_groups }}"
-    append: true
-    create_home: true
-    state: present
-  no_log: true
-  tags: [common, user]
+    - name: Create primary user
+      ansible.builtin.user:
+        name: "{{ vps_username }}"
+        password: "{{ vps_user_password_hash }}"
+        update_password: "{{ vps_password_policy | default('always') }}"
+        shell: "{{ vps_user_shell }}"
+        groups: "{{ vps_user_groups }}"
+        append: true
+        create_home: true
+        state: present
+      no_log: true
+      tags: [common, user]
 
-- name: Configure sudoers for user
-  ansible.builtin.lineinfile:
-    path: /etc/sudoers.d/{{ vps_username }}
-    line: "{{ vps_username }} ALL=(ALL) NOPASSWD:ALL"
-    create: true
-    mode: '0440'
-    validate: 'visudo -cf %s'
-  tags: [common, user]
+    - name: Configure sudoers for user
+      ansible.builtin.lineinfile:
+        path: /etc/sudoers.d/{{ vps_username }}
+        line: "{{ vps_username }} ALL=(ALL) NOPASSWD:ALL"
+        create: true
+        mode: '0440'
+        validate: 'visudo -cf %s'
+      tags: [common, user]
 
-- name: Create state tracking directory
-  ansible.builtin.file:
-    path: /var/lib/vps-setup
-    state: directory
-    mode: '0755'
-  tags: [common, state]
+    - name: Create state tracking directory
+      ansible.builtin.file:
+        path: /var/lib/vps-setup
+        state: directory
+        mode: '0755'
+      tags: [common, state]
 
-- name: Create backup directory
-  ansible.builtin.file:
-    path: "{{ vps_backup_dir }}"
-    state: directory
-    mode: '0750'
-  tags: [common, state]
+    - name: Create backup directory
+      ansible.builtin.file:
+        path: "{{ vps_backup_dir }}"
+        state: directory
+        mode: '0750'
+      tags: [common, state]
 
-- name: Log common role completion
-  ansible.builtin.debug:
-    msg: "✓ Common role completed - System foundation configured"
-  tags: [common]
+    - name: Log common role completion
+      ansible.builtin.debug:
+        msg: "✓ Common role completed - System foundation configured"
+      tags: [common]
 
-- name: Configure Git global username
-  community.general.git_config:
-    name: user.name
-    scope: global
-    value: "{{ vps_git_name }}"
-  become: true
-  become_user: "{{ vps_username }}"
-  when: vps_git_name is defined and vps_git_name | length > 0
-  tags: [common, git]
+    - name: Configure Git global username
+      community.general.git_config:
+        name: user.name
+        scope: global
+        value: "{{ vps_git_name }}"
+      become: true
+      become_user: "{{ vps_username }}"
+      when: vps_git_name is defined and vps_git_name | length > 0
+      tags: [common, git]
 
-- name: Configure Git global email
-  community.general.git_config:
-    name: user.email
-    scope: global
-    value: "{{ vps_git_email }}"
-  become: true
-  become_user: "{{ vps_username }}"
-  when: vps_git_email is defined and vps_git_email | length > 0
-  tags: [common, git]
+    - name: Configure Git global email
+      community.general.git_config:
+        name: user.email
+        scope: global
+        value: "{{ vps_git_email }}"
+      become: true
+      become_user: "{{ vps_username }}"
+      when: vps_git_email is defined and vps_git_email | length > 0
+      tags: [common, git]
+
+  rescue:
+    - name: Log common role failure
+      ansible.builtin.fail:
+        msg: "CRITICAL FAILURE in Common Role: {{ ansible_failed_result.msg | default('Unknown error') }}"
+      tags: [common]

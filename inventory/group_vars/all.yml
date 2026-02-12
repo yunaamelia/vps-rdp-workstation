@@ -64,9 +64,13 @@ vps_desktop_environment: "kde-plasma"     # Desktop environment
 
 # Theme Configuration
 vps_kde_theme: "catppuccin-mocha"         # KDE theme: catppuccin-mocha
+vps_kde_lookandfeel: "org.kde.breezedark.desktop" # KDE Look and Feel package
 vps_icon_theme: "papirus-dark"            # Icon theme
 vps_kde_compositor_enabled: false         # Disable for RDP performance
 vps_kde_effects_enabled: false            # Disable heavy effects
+vps_kde_clone_config: true                # Clone Shalva97 config
+vps_kde_autostart_apps: []                # List of apps to autostart (e.g. "firefox.desktop")
+vps_system_font: "Noto Sans"              # System font family
 
 # Catppuccin Theme Configuration
 vps_theme_variant: "catppuccin-mocha"
@@ -198,9 +202,9 @@ vps_install_zoxide: true                  # Smart directory jumping
 # =============================================================================
 
 # Node.js
-install_nodejs: true
-nodejs_version: "lts"                     # LTS or specific version (e.g., "20")
-npm_global_packages:
+vps_development_install_nodejs: true
+vps_development_nodejs_version: "lts"                     # LTS or specific version (e.g., "20")
+vps_development_npm_global_packages:
   - yarn
   - pnpm
   - typescript
@@ -209,8 +213,8 @@ npm_global_packages:
   - eslint
 
 # Python
-install_python: true
-python_pipx_packages:
+vps_development_install_python: true
+vps_development_python_pipx_packages:
   - black
   - pylint
   - pytest
@@ -220,8 +224,8 @@ python_pipx_packages:
   - tqdm
 
 # PHP
-install_php: true
-php_extensions:
+vps_development_install_php: true
+vps_development_php_extensions:
   - curl
   - mbstring
   - xml
@@ -230,23 +234,23 @@ php_extensions:
   - gd
   - intl
   - bcmath
-install_composer: true
+vps_development_install_composer: true
 
 # =============================================================================
 #  DOCKER CONFIGURATION
 # =============================================================================
 
-install_docker: true
-docker_log_max_size: "10m"                # Max log size per container
-docker_log_max_file: "3"                  # Max log files to keep
-docker_storage_driver: "overlay2"         # Storage driver
+vps_docker_install: true
+vps_docker_log_max_size: "10m"                # Max log size per container
+vps_docker_log_max_file: "3"                  # Max log files to keep
+vps_docker_storage_driver: "overlay2"         # Storage driver
 
 # =============================================================================
 #  CODE EDITORS
 # =============================================================================
 
-install_vscode: true
-vscode_extensions:
+vps_editors_install_vscode: true
+vps_editors_vscode_extensions:
   - esbenp.prettier-vscode
   - dbaeumer.vscode-eslint
   - ms-python.python
@@ -262,25 +266,24 @@ vscode_extensions:
   - codeium.codeium
   - tabnine.tabnine-vscode
 
-install_opencode: true                    # OpenCode AI agent
-install_antigravity: true                 # Google Antigravity IDE
+vps_editors_install_opencode: true                    # OpenCode AI agent
+vps_editors_install_antigravity: true                 # Google Antigravity IDE
 
 # =============================================================================
 #  TOOL INSTALLATION FLAGS
 # =============================================================================
 
-install_tui_tools: true                   # lazygit, tig, ranger, mc
-install_network_tools: true               # nmap, mtr, iftop, httpie
-install_security_scanners: true           # lynis, rkhunter, chkrootkit
-install_performance_tools: true           # btop, dstat, inxi
-install_text_processing: true             # ag, fd, jq, yq, pandoc
-install_file_management: true             # rsync, rclone, ncdu
-install_dev_debugging: true               # gdb, valgrind, cmake
-install_code_quality: true                # shellcheck, hadolint
-install_productivity: true                # thefuck, tldr, cheat
-install_log_visualization: true           # lnav, gum, sampler
-install_ai_devtools: true                 # aider, shell-gpt
-install_cloud_native_tools: false         # kubectl, helm, k9s (optional)
+vps_tui_tools_install: true                   # lazygit, tig, ranger, mc
+vps_network_tools_install: true               # nmap, mtr, iftop, httpie
+vps_system_performance_install: true           # btop, dstat, inxi
+vps_text_processing_install: true             # ag, fd, jq, yq, pandoc
+vps_file_management_install: true             # rsync, rclone, ncdu
+vps_dev_debugging_install: true               # gdb, valgrind, cmake
+vps_code_quality_install: true                # shellcheck, hadolint
+vps_productivity_install: true                # thefuck, tldr, cheat
+vps_log_visualization_install: true           # lnav, gum, sampler
+vps_ai_devtools_install: true                 # aider, shell-gpt
+vps_cloud_native_tools_install: false         # kubectl, helm, k9s (optional)
 
 # =============================================================================
 #  LOGGING CONFIGURATION
@@ -334,18 +337,18 @@ vps_backup_before_changes: true
 #  BROWSER CONFIGURATION
 # =============================================================================
 
-install_firefox: true
-firefox_default_browser: true
-firefox_privacy_mode: "strict"            # standard | strict
+vps_desktop_install_firefox: true
+vps_desktop_firefox_default_browser: true
+vps_desktop_firefox_privacy_mode: "strict"            # standard | strict
 
 # =============================================================================
 #  FONTS
 # =============================================================================
 
-install_nerd_fonts: true
-install_powerline_fonts: true
-default_monospace_font: "JetBrainsMono Nerd Font"
-default_font_size: 11
+vps_fonts_install_nerd_fonts: true
+vps_fonts_install_powerline_fonts: true
+vps_fonts_default_monospace_font: "JetBrainsMono Nerd Font"
+vps_fonts_default_font_size: 11
 
 # =============================================================================
 #  CHECKSUMS FOR VERIFIED DOWNLOADS

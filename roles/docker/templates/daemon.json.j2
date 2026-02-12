@@ -1,10 +1,10 @@
 {
   "log-driver": "json-file",
   "log-opts": {
-    "max-size": "{{ docker_log_max_size }}",
-    "max-file": "{{ docker_log_max_file }}"
+    "max-size": "{{ vps_docker_log_max_size }}",
+    "max-file": "{{ vps_docker_log_max_file }}"
   },
-  "storage-driver": "{{ docker_storage_driver }}",
+  "storage-driver": "{{ vps_docker_storage_driver }}",
   "features": {
     "buildkit": true
   }

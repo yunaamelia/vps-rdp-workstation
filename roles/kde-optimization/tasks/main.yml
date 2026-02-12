@@ -105,3 +105,22 @@
     - { option: "toolBarFont", value: "JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0,Regular" }
     - { option: "smallestReadableFont", value: "JetBrainsMono Nerd Font,8,-1,5,50,0,0,0,0,0,Regular" }
   tags: [kde-opt, fonts]
+- name: Configure KDE Global Shortcuts
+  ansible.builtin.template:
+    src: kglobalshortcutsrc.j2
+    dest: "/home/{{ vps_username }}/.config/kglobalshortcutsrc"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [kde-opt, keybindings]
+
+- name: Enable Autostart Applications
+  ansible.builtin.file:
+    src: "/usr/share/applications/{{ item }}"
+    dest: "/home/{{ vps_username }}/.config/autostart/{{ item }}"
+    state: link
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+  loop: "{{ vps_kde_autostart_apps | default([]) }}"
+  when: vps_kde_autostart_apps | default([]) | length > 0
+  tags: [kde-opt, autostart]

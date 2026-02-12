@@ -4,7 +4,7 @@ galaxy_info:
   description: Catppuccin theme for GTK and Cursors
   company: VPS Setup
   license: MIT
-  min_ansible_version: 2.1
+  min_ansible_version: "2.14"
   platforms:
     - name: Debian
       versions:

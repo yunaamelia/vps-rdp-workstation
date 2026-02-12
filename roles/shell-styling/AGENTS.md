@@ -1,6 +1,6 @@
 # Role: Shell Styling
 
-**Context:** Delivers Fastfetch, Starship prompt, and a "batteries-included" Zsh configuration.
+**Context:** Delivers Fastfetch, Starship prompt, and a "batteries-included" Zsh configuration. Phase 4 (Visual).
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
@@ -11,11 +11,12 @@
 
 ## CONVENTIONS
 *   **Monolithic Template**: `zshrc.j2` is the central brain. It integrates `eza`, `bat`, `fzf`, `zoxide`, `atuin` if present.
-*   **Conditional Features**: The Zsh script checks for command existence (e.g., `(( $+commands[fzf] ))`) before enabling integration.
-*   **Direct Sourcing**: Plugins are sourced directly from `/home/{{ vps_username }}/.oh-my-zsh/custom/plugins/` for performance, avoiding runtime plugin managers.
+*   **Conditional Features**: Zsh checks for command existence (e.g., `(( $+commands[fzf] ))`) before enabling.
+*   **Direct Sourcing**: Plugins sourced directly from `~/.oh-my-zsh/custom/plugins/` — no runtime plugin managers.
 *   **Local Overrides**: Supports `~/.zshrc.local` for user-specific customizations not managed by Ansible.
+*   **Depends On**: Requires `terminal` role (Zsh + OMZ installed first).
 
 ## ANTI-PATTERNS
-*   **Runtime Plugin Managers**: Do not use `zplug`, `antigen`, or `oh-my-zsh` bundled logic in the template. We source specific files directly.
-*   **Hardcoded Secrets**: Never put API keys in `zshrc.j2`. Use environment variables or `~/.zshrc.local`.
-*   **Blocking Operations**: Fastfetch is configured to run only in interactive terminals (`[[ -o interactive ]]`).
+*   **Runtime Plugin Managers**: Do not use `zplug`, `antigen`, or bundled OMZ logic. We source specific files directly.
+*   **Hardcoded Secrets**: Never put API keys in `zshrc.j2`. Use `~/.zshrc.local`.
+*   **Blocking Operations**: Fastfetch configured to run only in interactive terminals (`[[ -o interactive ]]`).

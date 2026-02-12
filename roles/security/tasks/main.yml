@@ -5,202 +5,198 @@
 #  UFW Firewall Configuration
 # =============================================================================
 
-- name: Install UFW firewall
-  ansible.builtin.apt:
-    name: ufw
-    state: present
-  become: true
-  tags: [security, firewall]
+- name: Security Role Tasks
+  block:
+    - name: Install UFW firewall
+      ansible.builtin.apt:
+        name: ufw
+        state: present
+      become: true
+      tags: [security, firewall]
 
-- name: Set UFW default deny incoming
-  community.general.ufw:
-    direction: incoming
-    default: deny
-  become: true
-  tags: [security, firewall]
+    - name: Set UFW default deny incoming
+      community.general.ufw:
+        direction: incoming
+        default: deny
+      become: true
+      tags: [security, firewall]
 
-- name: Set UFW default allow outgoing
-  community.general.ufw:
-    direction: outgoing
-    default: allow
-  become: true
-  tags: [security, firewall]
+    - name: Set UFW default allow outgoing
+      community.general.ufw:
+        direction: outgoing
+        default: allow
+      become: true
+      tags: [security, firewall]
 
-- name: Allow SSH with rate limiting
-  community.general.ufw:
-    rule: limit
-    port: "{{ vps_ssh_port }}"
-    proto: tcp
-    comment: "SSH with rate limiting"
-  become: true
-  tags: [security, firewall]
+    - name: Allow SSH with rate limiting
+      community.general.ufw:
+        rule: limit
+        port: "{{ vps_ssh_port }}"
+        proto: tcp
+        comment: "SSH with rate limiting"
+      become: true
+      tags: [security, firewall]
 
-- name: Allow RDP with rate limiting
-  community.general.ufw:
-    rule: limit
-    port: "{{ vps_xrdp_port }}"
-    proto: tcp
-    comment: "RDP with rate limiting"
-  when: vps_install_xrdp | default(true)
-  become: true
-  tags: [security, firewall]
+    - name: Allow RDP with rate limiting
+      community.general.ufw:
+        rule: limit
+        port: "{{ vps_xrdp_port }}"
+        proto: tcp
+        comment: "RDP with rate limiting"
+      when: vps_install_xrdp | default(true)
+      become: true
+      tags: [security, firewall]
 
-- name: Configure UFW logging
-  community.general.ufw:
-    logging: "{{ vps_firewall_logging }}"
-  become: true
-  tags: [security, firewall]
+    - name: Configure UFW logging
+      community.general.ufw:
+        logging: "{{ vps_firewall_logging }}"
+      become: true
+      tags: [security, firewall]
 
-- name: Enable UFW firewall
-  community.general.ufw:
-    state: enabled
-  become: true
-  tags: [security, firewall]
+    - name: Enable UFW firewall
+      community.general.ufw:
+        state: enabled
+      become: true
+      tags: [security, firewall]
 
-# =============================================================================
-#  SSH Hardening
-# =============================================================================
+    - name: Install OpenSSH Server
+      ansible.builtin.apt:
+        name: openssh-server
+        state: present
+      tags: [security, ssh]
 
-- name: Install OpenSSH Server
-  ansible.builtin.apt:
-    name: openssh-server
-    state: present
-  tags: [security, ssh]
+    - name: Ensure backup directory exists
+      ansible.builtin.file:
+        path: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}"
+        state: directory
+        mode: '0750'
+      check_mode: false
+      tags: [security, ssh]
 
-- name: Ensure backup directory exists
-  ansible.builtin.file:
-    path: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}"
-    state: directory
-    mode: '0750'
-  check_mode: false
-  tags: [security, ssh]
+    - name: Backup SSH configuration
+      ansible.builtin.copy:
+        src: /etc/ssh/sshd_config
+        dest: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}/sshd_config.backup"
+        remote_src: true
+        mode: '0600'
+      tags: [security, ssh]
 
-- name: Backup SSH configuration
-  ansible.builtin.copy:
-    src: /etc/ssh/sshd_config
-    dest: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}/sshd_config.backup"
-    remote_src: true
-    mode: '0600'
-  tags: [security, ssh]
+    - name: Configure SSH - Disable root login
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PermitRootLogin'
+        line: "PermitRootLogin {{ 'yes' if vps_ssh_root_login else 'no' }}"
+        validate: 'sshd -t -f %s'
+      notify: Restart SSH
+      tags: [security, ssh]
 
-- name: Configure SSH - Disable root login
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^#?PermitRootLogin'
-    line: "PermitRootLogin {{ 'yes' if vps_ssh_root_login else 'no' }}"
-    validate: 'sshd -t -f %s'
-  notify: Restart SSH
-  tags: [security, ssh]
+    - name: Configure SSH - Password authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PasswordAuthentication'
+        line: "PasswordAuthentication {{ 'yes' if vps_ssh_password_auth else 'no' }}"
+        validate: 'sshd -t -f %s'
+      notify: Restart SSH
+      tags: [security, ssh]
 
-- name: Configure SSH - Password authentication
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^#?PasswordAuthentication'
-    line: "PasswordAuthentication {{ 'yes' if vps_ssh_password_auth else 'no' }}"
-    validate: 'sshd -t -f %s'
-  notify: Restart SSH
-  tags: [security, ssh]
+    - name: Configure SSH - Public key authentication
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?PubkeyAuthentication'
+        line: "PubkeyAuthentication {{ 'yes' if vps_ssh_pubkey_auth else 'no' }}"
+        validate: 'sshd -t -f %s'
+      notify: Restart SSH
+      tags: [security, ssh]
 
-- name: Configure SSH - Public key authentication
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^#?PubkeyAuthentication'
-    line: "PubkeyAuthentication {{ 'yes' if vps_ssh_pubkey_auth else 'no' }}"
-    validate: 'sshd -t -f %s'
-  notify: Restart SSH
-  tags: [security, ssh]
+    - name: Configure SSH - Max auth tries
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?MaxAuthTries'
+        line: "MaxAuthTries {{ vps_ssh_max_auth_tries }}"
+        validate: 'sshd -t -f %s'
+      notify: Restart SSH
+      tags: [security, ssh]
 
-- name: Configure SSH - Max auth tries
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^#?MaxAuthTries'
-    line: "MaxAuthTries {{ vps_ssh_max_auth_tries }}"
-    validate: 'sshd -t -f %s'
-  notify: Restart SSH
-  tags: [security, ssh]
+    - name: Configure SSH - Client alive interval
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?ClientAliveInterval'
+        line: "ClientAliveInterval {{ vps_ssh_client_alive_interval }}"
+        validate: 'sshd -t -f %s'
+      notify: Restart SSH
+      tags: [security, ssh]
 
-- name: Configure SSH - Client alive interval
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^#?ClientAliveInterval'
-    line: "ClientAliveInterval {{ vps_ssh_client_alive_interval }}"
-    validate: 'sshd -t -f %s'
-  notify: Restart SSH
-  tags: [security, ssh]
+    - name: Configure SSH - X11 Forwarding disabled
+      ansible.builtin.lineinfile:
+        path: /etc/ssh/sshd_config
+        regexp: '^#?X11Forwarding'
+        line: "X11Forwarding no"
+        validate: 'sshd -t -f %s'
+      notify: Restart SSH
+      tags: [security, ssh]
 
-- name: Configure SSH - X11 Forwarding disabled
-  ansible.builtin.lineinfile:
-    path: /etc/ssh/sshd_config
-    regexp: '^#?X11Forwarding'
-    line: "X11Forwarding no"
-    validate: 'sshd -t -f %s'
-  notify: Restart SSH
-  tags: [security, ssh]
+    - name: Install fail2ban
+      ansible.builtin.apt:
+        name: fail2ban
+        state: present
+      when: vps_fail2ban_enabled
+      tags: [security, fail2ban]
 
-# =============================================================================
-#  Fail2ban Configuration
-# =============================================================================
+    - name: Configure fail2ban jail.local
+      ansible.builtin.template:
+        src: jail.local.j2
+        dest: /etc/fail2ban/jail.local
+        mode: '0644'
+      when: vps_fail2ban_enabled
+      notify: Restart Fail2ban
+      tags: [security, fail2ban]
 
-- name: Install fail2ban
-  ansible.builtin.apt:
-    name: fail2ban
-    state: present
-  when: vps_fail2ban_enabled
-  tags: [security, fail2ban]
+    - name: Enable and start fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        enabled: true
+        state: started
+      when: vps_fail2ban_enabled
+      ignore_errors: "{{ ansible_check_mode }}"
+      tags: [security, fail2ban]
 
-- name: Configure fail2ban jail.local
-  ansible.builtin.template:
-    src: jail.local.j2
-    dest: /etc/fail2ban/jail.local
-    mode: '0644'
-  when: vps_fail2ban_enabled
-  notify: Restart Fail2ban
-  tags: [security, fail2ban]
+    - name: Install unattended-upgrades
+      ansible.builtin.apt:
+        name:
+          - unattended-upgrades
+          - apt-listchanges
+        state: present
+      when: vps_unattended_upgrades
+      tags: [security, updates]
 
-- name: Enable and start fail2ban
-  ansible.builtin.systemd:
-    name: fail2ban
-    enabled: true
-    state: started
-  when: vps_fail2ban_enabled
-  ignore_errors: "{{ ansible_check_mode }}"
-  tags: [security, fail2ban]
+    - name: Enable unattended-upgrades
+      ansible.builtin.debconf:
+        name: unattended-upgrades
+        question: unattended-upgrades/enable_auto_updates
+        value: "true"
+        vtype: boolean
+      when: vps_unattended_upgrades
+      tags: [security, updates]
 
-# =============================================================================
-#  Unattended Upgrades
-# =============================================================================
+    - name: Configure auto-upgrades
+      ansible.builtin.copy:
+        dest: /etc/apt/apt.conf.d/20auto-upgrades
+        content: |
+          APT::Periodic::Update-Package-Lists "1";
+          APT::Periodic::Download-Upgradeable-Packages "1";
+          APT::Periodic::AutocleanInterval "7";
+          APT::Periodic::Unattended-Upgrade "1";
+        mode: '0644'
+      when: vps_unattended_upgrades
+      tags: [security, updates]
 
-- name: Install unattended-upgrades
-  ansible.builtin.apt:
-    name:
-      - unattended-upgrades
-      - apt-listchanges
-    state: present
-  when: vps_unattended_upgrades
-  tags: [security, updates]
+    - name: Log security role completion
+      ansible.builtin.debug:
+        msg: "✓ Security role completed - Firewall, SSH, Fail2ban configured"
+      tags: [security]
 
-- name: Enable unattended-upgrades
-  ansible.builtin.debconf:
-    name: unattended-upgrades
-    question: unattended-upgrades/enable_auto_updates
-    value: "true"
-    vtype: boolean
-  when: vps_unattended_upgrades
-  tags: [security, updates]
-
-- name: Configure auto-upgrades
-  ansible.builtin.copy:
-    dest: /etc/apt/apt.conf.d/20auto-upgrades
-    content: |
-      APT::Periodic::Update-Package-Lists "1";
-      APT::Periodic::Download-Upgradeable-Packages "1";
-      APT::Periodic::AutocleanInterval "7";
-      APT::Periodic::Unattended-Upgrade "1";
-    mode: '0644'
-  when: vps_unattended_upgrades
-  tags: [security, updates]
-
-- name: Log security role completion
-  ansible.builtin.debug:
-    msg: "✓ Security role completed - Firewall, SSH, Fail2ban configured"
-  tags: [security]
+  rescue:
+    - name: Log security role failure
+      ansible.builtin.fail:
+        msg: "CRITICAL FAILURE in Security Role: {{ ansible_failed_result.msg | default('Unknown error') }}"
+      tags: [security]

@@ -1,4 +1,4 @@
-# COMPONENT: Catppuccin Theme Role
+# COMPONENT: Catppuccin Theme Role — Phase 4 (Visual)
 
 **Context**: Visual styling for GTK, KDE, and Cursors using the Catppuccin Mocha palette.
 
@@ -27,6 +27,9 @@ roles/catppuccin-theme/
 *   **User Scope**: Installs to user directories (`/home/{{ vps_username }}/...`), NOT system-wide (`/usr/share`).
 *   **Idempotency**: `unarchive` tasks use `creates` to prevent redownloading/re-extracting.
 *   **Cleanup**: Always removes temporary `.zip` files from `/tmp`.
+
+## CROSS-ROLE
+*   **Konsole colorscheme**: `files/konsole/catppuccin-mocha.colorscheme` is copied by `roles/terminal/` into user's Konsole profile directory. Keep file in sync.
 
 ## ANTI-PATTERNS
 *   **External Deps**: Relies on GitHub releases. No fallback if offline.

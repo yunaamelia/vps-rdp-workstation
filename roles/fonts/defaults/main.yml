@@ -1,6 +1,6 @@
 # Fonts Role - Default Variables
 ---
-install_nerd_fonts: true
-install_powerline_fonts: true
-default_monospace_font: "JetBrainsMono Nerd Font"
-default_font_size: 11
+vps_fonts_install_nerd_fonts: true
+vps_fonts_install_powerline_fonts: true
+vps_fonts_default_monospace_font: "JetBrainsMono Nerd Font"
+vps_fonts_default_font_size: 11

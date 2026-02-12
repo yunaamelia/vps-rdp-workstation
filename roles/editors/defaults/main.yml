@@ -1,7 +1,7 @@
 # Editors Role - Default Variables
 ---
-install_vscode: true
-vscode_extensions:
+vps_editors_install_vscode: true
+vps_editors_vscode_extensions:
   - esbenp.prettier-vscode
   - dbaeumer.vscode-eslint
   - ms-python.python
@@ -13,6 +13,9 @@ vscode_extensions:
   - equinusocio.vsc-material-theme
   - github.copilot
   - github.copilot-chat
+  - continue.continue
+  - codeium.codeium
+  - tabnine.tabnine-vscode
 
-install_opencode: true
-install_antigravity: false  # Disabled by default - not publicly available
+vps_editors_install_opencode: true
+vps_editors_install_antigravity: false  # Disabled by default - not publicly available

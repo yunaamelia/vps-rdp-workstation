@@ -38,19 +38,19 @@
 
 📦 Development Tools
 ━━━━━━━━━━━━━━━━━━━━━━━━
-{% if install_nodejs %}
+{% if vps_development_install_nodejs %}
   ✓ Node.js with npm, yarn, pnpm
 {% endif %}
-{% if install_python %}
+{% if vps_development_install_python %}
   ✓ Python with pipx tools
 {% endif %}
-{% if install_php %}
+{% if vps_development_install_php %}
   ✓ PHP with Composer
 {% endif %}
-{% if install_docker %}
+{% if vps_docker_install %}
   ✓ Docker with Compose V2
 {% endif %}
-{% if install_vscode %}
+{% if vps_editors_install_vscode %}
   ✓ Visual Studio Code
 {% endif %}
 

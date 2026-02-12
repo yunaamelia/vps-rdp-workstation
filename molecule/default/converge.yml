@@ -11,35 +11,39 @@
     - ../../tests/strict_vars.yml
 
   roles:
-    # Phase 1: Core Foundation
+    # Phase 1: Bootstrap
     - role: common
     - role: security
 
-    # Phase 2: Visual & Terminal
+    # Phase 2: Base System
     - role: fonts
-    - role: terminal
-    - role: shell-styling
-    - role: zsh-enhancements
-    - role: catppuccin-theme
 
     # Phase 3: Desktop Environment
     # - role: desktop # Disabled to prevent timeout in CI
+    # - role: xrdp # Disabled for CI
     - role: kde-optimization
+    # - role: kde-apps # Disabled for CI
+    - role: catppuccin-theme
 
-    # Phase 4: Development Stack
+    # Phase 4: User Configuration
+    - role: terminal
+    - role: shell-styling
+    - role: zsh-enhancements
+
+    # Phase 5: Development Tools
     - role: development
     - role: docker
     - role: editors
 
-    # Phase 5: Tool Suites (Alphabetical)
-    - role: ai-devtools
-    - role: cloud-native
-    - role: code-quality
-    - role: dev-debugging
-    - role: file-management
-    - role: log-visualization
+    # Phase 6: CLI Tool Roles
+    - role: tui-tools
     - role: network-tools
-    - role: productivity
     - role: system-performance
     - role: text-processing
-    - role: tui-tools
+    - role: file-management
+    - role: dev-debugging
+    - role: code-quality
+    - role: productivity
+    - role: log-visualization
+    - role: ai-devtools
+    - role: cloud-native

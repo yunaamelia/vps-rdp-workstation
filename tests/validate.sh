@@ -72,8 +72,8 @@ print_summary() {
 	echo -e "${BOLD} 📊 Validation Results${RESET}"
 	echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${RESET}"
 	echo ""
-	echo -e "   ${GREEN}Passed:${RESET}  ${PASS}/30"
-	echo -e "   ${RED}Failed:${RESET}  ${FAIL}/30"
+	echo -e "   ${GREEN}Passed:${RESET}  ${PASS}/31"
+	echo -e "   ${RED}Failed:${RESET}  ${FAIL}/31"
 	echo -e "   ${YELLOW}Warnings:${RESET} ${WARN}"
 	echo ""
 
@@ -117,6 +117,7 @@ check "FR-13" "Essential services running" "systemctl is-active ssh docker"
 check_optional "FR-14" "Polonium (Tiling) installed" "(kpackagetool6 --type KWin/Script --list 2>/dev/null || kpackagetool5 --type KWin/Script --list 2>/dev/null) | grep -iE 'karousel|polonium'"
 check "FR-15" "Spectacle installed" "command -v spectacle"
 check "FR-16" "Yakuake installed" "command -v yakuake"
+check "FR-18" "Kitty installed" "command -v kitty"
 check_optional "FR-17" "Profilers installed" "command -v kcachegrind || command -v heaptrack"
 
 # -----------------------------------------------------------------------------

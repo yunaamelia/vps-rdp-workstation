@@ -36,7 +36,7 @@
 
 - name: Install yq (YAML processor)
   ansible.builtin.get_url:
-    url: "https://github.com/mikefarah/yq/releases/download/v{{ yq_version | default('4.40.5') }}/yq_linux_amd64"
+    url: "https://github.com/mikefarah/yq/releases/download/v{{ vps_text_processing_yq_version }}/yq_linux_amd64"
     dest: /usr/local/bin/yq
     mode: '0755'
   when: not yq_stat.stat.exists

@@ -27,7 +27,7 @@
 - name: Install shfmt for shell formatting
   ansible.builtin.get_url:
     url: >-
-      https://github.com/mvdan/sh/releases/download/v{{ shfmt_version | default('3.7.0') }}/shfmt_v{{ shfmt_version | default('3.7.0') }}_linux_amd64
+      https://github.com/mvdan/sh/releases/download/v{{ vps_dev_debugging_shfmt_version }}/shfmt_v{{ vps_dev_debugging_shfmt_version }}_linux_amd64
     dest: /usr/local/bin/shfmt
     mode: '0755'
   when: not shfmt_stat.stat.exists

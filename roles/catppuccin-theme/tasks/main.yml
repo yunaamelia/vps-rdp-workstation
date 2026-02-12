@@ -7,14 +7,14 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
   loop:
-    - "{{ catppuccin_themes_dir }}"
-    - "{{ catppuccin_icons_dir }}"
+    - "{{ vps_catppuccin_themes_dir }}"
+    - "{{ vps_catppuccin_icons_dir }}"
   when: vps_theme_variant == 'catppuccin-mocha'
   tags: [catppuccin-theme, directories]
 
 - name: Download Catppuccin GTK theme
   ansible.builtin.get_url:
-    url: "{{ catppuccin_gtk_url }}"
+    url: "{{ vps_catppuccin_gtk_url }}"
     dest: "/tmp/catppuccin-gtk.zip"
     mode: '0644'
     owner: "{{ vps_username }}"
@@ -26,17 +26,17 @@
 - name: Extract Catppuccin GTK theme
   ansible.builtin.unarchive:
     src: "/tmp/catppuccin-gtk.zip"
-    dest: "{{ catppuccin_themes_dir }}"
+    dest: "{{ vps_catppuccin_themes_dir }}"
     remote_src: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    creates: "{{ catppuccin_themes_dir }}/Catppuccin-Mocha-Standard-Blue-Dark"
+    creates: "{{ vps_catppuccin_themes_dir }}/Catppuccin-Mocha-Standard-Blue-Dark"
   when: vps_theme_variant == 'catppuccin-mocha' and not ansible_check_mode
   tags: [catppuccin-theme, gtk]
 
 - name: Download Catppuccin Cursor theme
   ansible.builtin.get_url:
-    url: "{{ catppuccin_cursors_url }}"
+    url: "{{ vps_catppuccin_cursors_url }}"
     dest: "/tmp/catppuccin-cursors.zip"
     mode: '0644'
     owner: "{{ vps_username }}"
@@ -48,11 +48,11 @@
 - name: Extract Catppuccin Cursor theme
   ansible.builtin.unarchive:
     src: "/tmp/catppuccin-cursors.zip"
-    dest: "{{ catppuccin_icons_dir }}"
+    dest: "{{ vps_catppuccin_icons_dir }}"
     remote_src: true
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
-    creates: "{{ catppuccin_icons_dir }}/Catppuccin-Mocha-Blue-Cursors"
+    creates: "{{ vps_catppuccin_icons_dir }}/Catppuccin-Mocha-Blue-Cursors"
   when: vps_theme_variant == 'catppuccin-mocha' and not ansible_check_mode
   tags: [catppuccin-theme, cursors]
 
@@ -65,3 +65,13 @@
     - "/tmp/catppuccin-cursors.zip"
   when: vps_theme_variant == 'catppuccin-mocha'
   tags: [catppuccin-theme, cleanup]
+
+- name: Apply KDE Globals Theme
+  ansible.builtin.template:
+    src: kdeglobals.j2
+    dest: "/home/{{ vps_username }}/.config/kdeglobals"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: vps_theme_variant == 'catppuccin-mocha'
+  tags: [catppuccin-theme, kde]

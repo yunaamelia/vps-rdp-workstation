@@ -1,9 +1,9 @@
 # Development Role - Default Variables
 ---
 # Node.js
-install_nodejs: true
-nodejs_version: "lts"
-npm_global_packages:
+vps_development_install_nodejs: true
+vps_development_nodejs_version: "lts"
+vps_development_npm_global_packages:
   - yarn
   - pnpm
   - typescript
@@ -12,8 +12,8 @@ npm_global_packages:
   - eslint
 
 # Python
-install_python: true
-python_pipx_packages:
+vps_development_install_python: true
+vps_development_python_pipx_packages:
   - black
   - pylint
   - pytest
@@ -23,8 +23,8 @@ python_pipx_packages:
   - tqdm
 
 # PHP
-install_php: true
-php_extensions:
+vps_development_install_php: true
+vps_development_php_extensions:
   - curl
   - mbstring
   - xml
@@ -33,4 +33,4 @@ php_extensions:
   - gd
   - intl
   - bcmath
-install_composer: true
+vps_development_install_composer: true

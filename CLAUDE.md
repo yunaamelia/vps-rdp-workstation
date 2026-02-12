@@ -121,10 +121,11 @@ cat docs/STARSHIP_OPTIMIZATION.md
    - Post-installation summary generation
 
 2. **playbooks/main.yml** - Main orchestration playbook that:
-   - Executes 21 roles in dependency order across 5 phases
-   - Tracks progress in state file (`/var/lib/vps-setup/progress.json`)
-   - Generates summary logs after completion
-   - Uses custom callback plugins for enhanced output
+    - Executes 25 roles in dependency order across 7 phases
+    - Tracks progress in state file (`/var/lib/vps-setup/progress.json`)
+    - Generates summary logs after completion
+    - Uses custom callback plugins for enhanced output
+    - NOTE: Role order refactored in v3.0.0 - `--resume` from older versions requires fresh start
 
 3. **Roles** - Modular components organized by function (see Role Phases below)
 
@@ -132,7 +133,7 @@ cat docs/STARSHIP_OPTIMIZATION.md
 
 Roles execute in strict order to manage dependencies:
 
-**Phase 1: Foundation**
+**Phase 1: Bootstrap**
 
 - `common` - System packages, apt configuration, base utilities
 
@@ -140,24 +141,31 @@ Roles execute in strict order to manage dependencies:
 
 - `security` - UFW firewall, fail2ban, SSH hardening, unattended upgrades
 
-**Phase 3: Visual Foundation**
+**Phase 3: Base System**
 
-- `fonts` - Nerd Fonts (JetBrains Mono)
-- `terminal` - Zsh, Oh My Zsh base installation
-- `shell-styling` - Agnoster theme, fastfetch (if enabled)
+- `fonts` - Nerd Fonts (JetBrains Mono), font installation and configuration
+
+**Phase 4: Desktop Environment** (runs AFTER fonts for theme dependencies)
+
+- `desktop` - KDE Plasma, XRDP, SDDM display manager, Polonium tiling
+- `xrdp` - XRDP service configuration and templates
+- `kde-optimization` - KDE fine-tuning via `ini_file`, keybindings configuration
+- `kde-apps` - KDE applications (Konsole, Spectacle, etc.)
+- `catppuccin-theme` - Catppuccin color scheme, KDE theme templates (kdeglobals)
+
+**Phase 5: User Configuration** (runs AFTER desktop/fonts)
+
+- `terminal` - Zsh, Oh My Zsh base installation, **Kitty terminal** (backup)
+- `shell-styling` - Agnoster theme, fastfetch
 - `zsh-enhancements` - External plugins (autosuggestions, syntax-highlighting, fzf-tab, forgit)
 
-**Phase 4: Desktop**
-
-- `desktop` - KDE Plasma, XRDP, Nordic theme, SDDM, Polonium tiling
-
-**Phase 5: Development**
+**Phase 6: Development Tools**
 
 - `development` - Node.js 20 LTS, Python 3.12, PHP, Composer
 - `docker` - Docker Engine, Docker Compose V2
 - `editors` - VS Code, OpenCode AI agent
 
-**Phase 6-7: Tools** (conditionally installed)
+**Phase 7: CLI Tools** (conditionally installed)
 
 - `tui-tools` - lazygit, tig, ranger, mc
 - `network-tools` - nmap, mtr, iftop, httpie

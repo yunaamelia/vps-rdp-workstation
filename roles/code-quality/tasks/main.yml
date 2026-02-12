@@ -17,7 +17,7 @@
 - name: Install hadolint for Dockerfile linting
   ansible.builtin.get_url:
     url: >-
-      https://github.com/hadolint/hadolint/releases/download/v{{ hadolint_version | default('2.12.0') }}/hadolint-Linux-x86_64
+      https://github.com/hadolint/hadolint/releases/download/v{{ vps_code_quality_hadolint_version }}/hadolint-Linux-x86_64
     dest: /usr/local/bin/hadolint
     mode: '0755'
   when: not hadolint_stat.stat.exists

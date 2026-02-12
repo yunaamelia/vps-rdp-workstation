@@ -181,63 +181,93 @@
     state: absent
   tags: [desktop, cleanup]
 
-- name: Install Karousel dependencies
-  ansible.builtin.apt:
-    name:
-      - cmake
-      - build-essential
-      - libkf6config-dev
-      - libkf6coreaddons-dev
-      - libkf6globalaccel-dev
-      - libkf6i18n-dev
-      - libkf6kcmutils-dev
-      - libkf6notifications-dev
-      - libkf6service-dev
-      - libkf6xmlgui-dev
-      - libkf6dbusaddons-dev
-      - qt6-declarative-dev
-      - qt6-sensors-dev
-      - plasma-workspace-dev
-    state: present
-  tags: [desktop, karousel]
+- name: Create KWin scripts directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, tiling]
 
-- name: Download Karousel source
-  ansible.builtin.get_url:
-    url: https://github.com/emgram769/karousel/archive/refs/tags/v0.0.5.tar.gz
-    dest: /tmp/karousel.tar.gz
-    mode: '0644'
-  tags: [desktop, karousel]
+- name: Clone Fluid Tile
+  ansible.builtin.git:
+    repo: https://codeberg.org/Serroda/fluid-tile.git
+    dest: /tmp/fluid-tile
+    depth: 1
+    version: main
+  tags: [desktop, tiling]
 
-- name: Extract Karousel source
-  ansible.builtin.unarchive:
-    src: /tmp/karousel.tar.gz
-    dest: /tmp
+- name: Install Fluid Tile
+  ansible.builtin.copy:
+    src: /tmp/fluid-tile/
+    dest: "/home/{{ vps_username }}/.local/share/kwin/scripts/fluid-tile/"
     remote_src: true
-  tags: [desktop, karousel]
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: vps_install_desktop | default(true)
+  tags: [desktop, tiling]
 
-- name: Build and Install Karousel
-  ansible.builtin.shell: |
-    mkdir -p build && cd build
-    cmake .. -DCMAKE_INSTALL_PREFIX=/usr -DBUILD_TESTING=OFF
-    make
-    make install
-  args:
-    chdir: /tmp/karousel-0.0.5
-  become: true
-  changed_when: true
-  tags: [desktop, karousel]
-
-- name: Enable Karousel in KWin
+- name: Enable Fluid Tile
   ansible.builtin.command:
-    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key karouselEnabled true"
+    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key fluid-tileEnabled true"
   become: true
   become_user: "{{ vps_username }}"
   changed_when: true
-  tags: [desktop, karousel]
+  tags: [desktop, tiling]
 
-- name: Remove Karousel build directory
+- name: Disable Karousel (if present)
+  ansible.builtin.command:
+    cmd: "{{ kwriteconfig_bin.stdout }} --file /home/{{ vps_username }}/.config/kwinrc --group Plugins --key karouselEnabled false"
+  become: true
+  become_user: "{{ vps_username }}"
+  changed_when: true
+  tags: [desktop, tiling]
+
+- name: Remove Karousel directory
   ansible.builtin.file:
-    path: /tmp/karousel-0.0.5
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/karousel"
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Remove Fluid Tile temp directory
+  ansible.builtin.file:
+    path: /tmp/fluid-tile
+    state: absent
+  tags: [desktop, cleanup]
+
+- name: Create Window Title Applet directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/plasma/plasmoids/org.kde.windowtitle"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [desktop, panel]
+
+- name: Clone Window Title Applet
+  ansible.builtin.git:
+    repo: https://github.com/dhruv8sh/plasma6-window-title-applet.git
+    dest: /tmp/window-title
+    depth: 1
+    version: master
+  tags: [desktop, panel]
+
+- name: Install Window Title Applet (Manual Copy)
+  ansible.builtin.copy:
+    src: /tmp/window-title/
+    dest: "/home/{{ vps_username }}/.local/share/plasma/plasmoids/org.kde.windowtitle/"
+    remote_src: true
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: vps_install_desktop | default(true)
+  tags: [desktop, panel]
+
+- name: Remove Window Title temp directory
+  ansible.builtin.file:
+    path: /tmp/window-title
     state: absent
   tags: [desktop, cleanup]
 

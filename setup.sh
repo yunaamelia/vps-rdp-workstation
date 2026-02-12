@@ -924,6 +924,7 @@ OPTIONS:
     --rollback          Rollback to previous state
     --resume            Resume from last checkpoint
     --ci                CI/CD mode (non-interactive)
+    --log-level         Set log level [minimal|full] (default: minimal)
 
 ENVIRONMENT VARIABLES:
     VPS_USERNAME        Primary workstation username (required in CI mode)

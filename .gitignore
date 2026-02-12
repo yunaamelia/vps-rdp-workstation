@@ -19,6 +19,7 @@ id_rsa*
 /tmp/
 .ansible/
 ansible_facts_cache/
+collections/
 
 # Python
 __pycache__/

@@ -31,6 +31,7 @@
       - libglib2.0-dev-bin
       - sddm
     state: present
+  ignore_errors: "{{ ansible_check_mode }}"
   tags: [desktop, dependencies]
 
 - name: Create local config directory

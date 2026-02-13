@@ -334,7 +334,7 @@ run_playbook() {
 		# Do NOT use rich_tui when running inside navigator.
 		export ANSIBLE_STDOUT_CALLBACK="rich_tui"
 		export ANSIBLE_NAVIGATOR_MODE="1" # Explicitly signal navigator mode to callback
-		# export ANSIBLE_STDOUT_CALLBACK="rich_tui"
+		export VPS_FORCE_TUI="true"       # Force TUI output even in navigator mode (fixes silent execution)
 	fi
 
 	# Build Args

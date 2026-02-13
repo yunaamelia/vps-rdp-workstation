@@ -166,9 +166,10 @@ setup_ansible() {
 		fi
 	done
 
-	# Install Python libs
+	# Install Python libs (via apt to avoid break-system-packages)
 	if ! python3 -c "import rich" &>/dev/null; then
-		pip3 install --quiet --break-system-packages rich
+		log_info "Installing python3-rich..."
+		apt-get install -y -qq python3-rich
 	fi
 }
 

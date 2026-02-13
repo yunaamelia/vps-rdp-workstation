@@ -151,6 +151,17 @@
       notify: Restart Fail2ban
       tags: [security, fail2ban]
 
+    - name: Deploy fail2ban XRDP filter
+      ansible.builtin.template:
+        src: xrdp-fail2ban-filter.conf.j2
+        dest: /etc/fail2ban/filter.d/xrdp.conf
+        mode: '0644'
+      when:
+        - vps_fail2ban_enabled
+        - vps_install_xrdp | default(true)
+      notify: Restart Fail2ban
+      tags: [security, fail2ban, xrdp]
+
     - name: Enable and start fail2ban
       ansible.builtin.systemd:
         name: fail2ban

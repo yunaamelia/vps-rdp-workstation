@@ -1,0 +1,10 @@
+# Fail2Ban filter for xrdp
+# Detects repeated connection attempts from scanners and brute-force bots
+
+[Definition]
+
+failregex = connection accepted from \[<HOST>\]:\d+
+
+ignoreregex =
+
+datepattern = {^LN-BEG}

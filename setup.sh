@@ -214,11 +214,19 @@ setup_ansible() {
 	export PATH="$PATH:$HOME/.local/bin"
 
 	# Install core tools via pipx
-	for tool in ansible-core ansible-navigator ara; do
-		if ! command -v "$tool" &>/dev/null; then
-			log_info "Installing $tool..."
-			run_with_spinner "Installing $tool via pipx..." \
-				"pipx install --quiet $tool"
+	# Map package names to their main binary commands
+	declare -A tools=(
+		["ansible-core"]="ansible"
+		["ansible-navigator"]="ansible-navigator"
+		["ara"]="ara-manage"
+	)
+
+	for package in "${!tools[@]}"; do
+		binary="${tools[$package]}"
+		if ! command -v "$binary" &>/dev/null; then
+			log_info "Installing $package..."
+			run_with_spinner "Installing $package via pipx..." \
+				"pipx install --quiet $package"
 		fi
 	done
 

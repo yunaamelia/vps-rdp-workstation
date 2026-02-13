@@ -187,6 +187,10 @@ class CallbackModule(CallbackBase):
         # Phase Tracking
         self.current_phase = None # type: str | None
         self.completed_phases = set() # type: Set[str]
+        
+        # Log History for Pure TUI
+        self.log_history = [] # type: List[Dict[str, str]]
+        self.max_log_items = 12 # Keep last N items to fit in panel
 
     def v2_playbook_on_start(self, playbook):
         """Called when playbook starts."""
@@ -331,6 +335,8 @@ class CallbackModule(CallbackBase):
             # We must manually trigger the refresh here.
             # We use _update_ui() to ensure the layout content is fresh before refreshing the screen.
             self._update_ui()
+            # Only refresh if NOT using navigator, or rely on auto-refresh if enabled?
+            # Actually, with Pure TUI, we should just refresh.
             self.live.refresh()
 
     def _update_role_and_phase(self, role_name):
@@ -361,8 +367,38 @@ class CallbackModule(CallbackBase):
         self.layout["footer"].update(self._create_footer())
 
     def _create_left_panel(self):
-        """Create left panel with milestones."""
-        return self._create_milestones_panel()
+        """Create left panel with milestones and log history."""
+        # 1. Milestones
+        milestones = self._create_milestones_panel()
+        
+        # 2. Log History
+        log_table = Table.grid(expand=True, padding=(0, 1))
+        log_table.add_column(justify="center", width=3) # Icon
+        log_table.add_column(ratio=1) # Task
+        log_table.add_column(justify="right", width=8) # Duration
+        
+        for entry in self.log_history:
+            icon = f"[{entry['color']}]{entry['icon']}[/]"
+            task = f"[{entry['color']}]{entry['task']}[/]"
+            if entry['status'] == 'skipped':
+                task = f"[dim]{entry['task']}[/dim]"
+            
+            duration = f"[dim]{entry['duration']}[/dim]"
+            log_table.add_row(icon, task, duration)
+            
+            # Show error details on next row if failed
+            if entry['status'] == 'failed' and entry['message']:
+                log_table.add_row("", f"[red]{entry['message']}[/red]", "")
+
+        log_panel = Panel(
+            log_table,
+            title="[bold blue]Recent Activity[/]",
+            border_style="blue",
+            box=box.ROUNDED,
+            padding=(0, 0)
+        )
+        
+        return Group(milestones, log_panel)
 
     def _create_right_panel(self):
         """Build the right column with progress and a compact summary table."""
@@ -471,39 +507,43 @@ class CallbackModule(CallbackBase):
         self._print_task_result(status, self.current_task, duration, result._result.get("msg", ""))
 
     def _print_task_result(self, status, task_name, duration, message=""):
-        """Add formatted result to logs."""
+        """Add formatted result to internal log history instead of printing."""
         if not self.console: return
 
-        # In navigator mode, print linear logs without TUI updates
-        # DISABLED: We want TUI even in navigator for now
-        # if self.is_navigator:
-        #     self._print_log_line(status, task_name, duration, message)
-        #     return
-
-        if not self.live: return
-
+        # Icons and Colors
         icons = {
-            "ok": "[green][/green]",
-            "changed": "[yellow][/yellow]",
-            "failed": "[red][/red]",
-            "skipped": "[dim][/dim]",
+            "ok": "", # Nerd Font check
+            "changed": "", # Nerd Font refresh
+            "failed": "", # Nerd Font cross
+            "skipped": "", # Nerd Font skip
         }
-        icon = icons.get(status, "•")
-
-        # Skip display in minimal mode for non-failures
-        if self.log_level == "minimal" and status in ["ok", "skipped"]:
-            self._update_ui()
-            return
-
-        log_line = f"{icon} {task_name} [dim]({duration})[/dim]"
-        renderable = None
-        if status == "failed":
-            renderable = Text.from_markup(f"{log_line}\n[red]{message}[/red]")
-        else:
-            style = "dim" if status == "skipped" else ""
-            renderable = Text.from_markup(log_line, style=style)
+        colors = {
+            "ok": "green",
+            "changed": "yellow",
+            "failed": "red",
+            "skipped": "dim",
+        }
         
-        self.live.console.print(renderable)
+        icon = icons.get(status, "•")
+        color = colors.get(status, "white")
+        
+        # Format the log entry
+        log_entry = {
+            "icon": icon,
+            "status": status,
+            "color": color,
+            "task": task_name,
+            "duration": duration,
+            "message": message
+        }
+        
+        # Add to history
+        self.log_history.append(log_entry)
+        if len(self.log_history) > self.max_log_items:
+            self.log_history.pop(0)
+            
+        # Update the UI to show the new log
+        self._update_ui()
 
     def _print_log_line(self, status, task_name, duration, message=""):
         """Print a static log line for non-interactive mode."""

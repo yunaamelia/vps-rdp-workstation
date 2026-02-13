@@ -188,6 +188,9 @@ class CallbackModule(CallbackBase):
         self.current_phase = None # type: str | None
         self.completed_phases = set() # type: Set[str]
         
+        # Layout State
+        self.is_narrow = False
+        
         # Log History for Pure TUI
         self.log_history = [] # type: List[Dict[str, str]]
         self.max_log_items = 12 # Keep last N items to fit in panel
@@ -210,8 +213,8 @@ class CallbackModule(CallbackBase):
              self._print_static_header()
              return
 
-        # Print the banner once before starting Live display to prevent flickering/stacking
-        self._print_static_header()
+        # Banner is part of the Layout for Live mode
+        # self._print_static_header()
 
         self._init_layout()
         self._init_progress()
@@ -247,19 +250,60 @@ class CallbackModule(CallbackBase):
         self.console.print(header_bar)
         self.console.print()
 
+    def _create_header_panel(self):
+        """Create the header panel with ASCII banner and stats."""
+        # Banner from setup.sh
+        banner_ascii = """
+[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
+        
+        banner_panel = Panel(banner_ascii, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
+        
+        # Segment 1: Icon (Mauve on Surface0)
+        seg1 = Text(f" {ICON_OS} ", style=f"bold {C_MAUVE} on {C_SURFACE0}")
+        sep1 = Text(SEP_R, style=f"{C_SURFACE0} on {C_SURFACE1}")
+        
+        # Segment 2: Title (Blue on Surface1)
+        seg2 = Text(" VPS RDP WORKSTATION ", style=f"bold {C_BLUE} on {C_SURFACE1}")
+        sep2 = Text(SEP_R, style=f"{C_SURFACE1} on {C_SURFACE2}")
+        
+        # Segment 3: Stats (Text on Surface2)
+        seg3 = Text(f" v{self.CALLBACK_VERSION} ", style=f"{C_TEXT} on {C_SURFACE2}")
+        sep3 = Text(SEP_R, style=f"{C_SURFACE2} on default")
+        
+        # Combine
+        header_bar = Text.assemble(seg1, sep1, seg2, sep2, seg3, sep3)
+        
+        return Group(banner_panel, header_bar)
+
     def _init_layout(self):
-        """Initialize the Layout structure with Body (Split) and Footer. Header is static."""
+        """Initialize the Layout structure with Header, Body (Split), and Footer."""
         self.layout = Layout()
+        
+        # Main vertical split: Header, Body, Footer
         self.layout.split(
+            Layout(name="header", size=7),
             Layout(name="body", ratio=1),
             Layout(name="footer", size=3)
         )
-        # Split body into Left (Logs/Milestones) and Right (Progress/Stats)
-        self.layout["body"].split_row(
-            Layout(name="left", ratio=2),
-            Layout(name="right", ratio=3)
-        )
         
+        # Responsive Body Split
+        # If terminal width is small (< 100), stack panels vertically
+        self.is_narrow = self.console and self.console.width < 100
+        if self.is_narrow:
+            self.layout["body"].split_column(
+                Layout(name="right", size=14), # Progress/Stats on top
+                Layout(name="left", ratio=1)   # Logs below
+            )
+        else:
+            # Standard horizontal split
+            self.layout["body"].split_row(
+                Layout(name="left", ratio=2),
+                Layout(name="right", ratio=3)
+            )
+        
+        self.layout["header"].update(self._create_header_panel())
         self.layout["footer"].update(self._create_footer())
 
     def _init_progress(self):
@@ -361,6 +405,22 @@ class CallbackModule(CallbackBase):
         """Refresh the UI layout."""
         if not self.live or not self.layout:
             return
+
+        # Dynamic Responsiveness
+        if self.console:
+            is_narrow = self.console.width < 100
+            if is_narrow != self.is_narrow:
+                self.is_narrow = is_narrow
+                if is_narrow:
+                    self.layout["body"].split_column(
+                        Layout(name="right", size=14),
+                        Layout(name="left", ratio=1)
+                    )
+                else:
+                    self.layout["body"].split_row(
+                        Layout(name="left", ratio=2),
+                        Layout(name="right", ratio=3)
+                    )
 
         self.layout["left"].update(self._create_left_panel())
         self.layout["right"].update(self._create_right_panel())

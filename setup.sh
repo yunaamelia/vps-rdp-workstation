@@ -238,6 +238,9 @@ setup_ansible() {
 	fi
 
 	log_info "Installing Ansible collections..."
+	log_warn "⏱  Downloading Ansible collections (60+ MB) - this may take 10-15 minutes on slow connections"
+	log_info "   Progress is logged to: /var/log/vps-setup-ansible.log"
+	log_info "   You can monitor with: tail -f /var/log/vps-setup-ansible.log"
 	# Install into local ./collections dir to match ansible.cfg configuration
 	mkdir -p "${SCRIPT_DIR}/collections"
 	export ANSIBLE_COLLECTIONS_PATH="${SCRIPT_DIR}/collections"

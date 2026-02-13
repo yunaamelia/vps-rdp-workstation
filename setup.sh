@@ -13,16 +13,6 @@ readonly SCRIPT_DIR
 readonly LOG_DIR="/var/log"
 readonly STATE_DIR="/var/lib/vps-setup"
 
-# Banner Art
-readonly BANNER_ART="
-${CYAN}
-╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝
-${NC}
-${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}
-"
-
 # Colors & Symbols
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
@@ -38,6 +28,16 @@ readonly CHECK="✓"
 readonly CROSS="✗"
 readonly WARN="⚠"
 readonly INFO="ℹ"
+
+# Banner Art
+readonly BANNER_ART="
+${CYAN}
+╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝
+${NC}
+${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}
+"
 
 # Defaults
 LOG_LEVEL="minimal"

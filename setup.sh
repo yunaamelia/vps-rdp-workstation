@@ -237,6 +237,17 @@ setup_ansible() {
 			"apt-get install -y -qq python3-rich"
 	fi
 
+	# Inject rich into Ansible pipx environments to ensure TUI callback works
+	log_info "Injecting dependencies into Ansible environments..."
+	for tool in ansible-core ansible-navigator; do
+		if pipx list --short | grep -q "^$tool "; then
+			# We use --force to ensure it's injected even if pipx thinks it might be there but broken
+			# and || true to prevent exit if injection fails (it's not strictly critical for basic execution, just UI)
+			run_with_spinner "Injecting 'rich' into $tool..." \
+				"pipx inject $tool rich --force" || true
+		fi
+	done
+
 	log_info "Installing Ansible collections..."
 	log_warn "⏱  Downloading Ansible collections (60+ MB) - this may take 10-15 minutes on slow connections"
 	log_info "   Progress is logged to: /var/log/vps-setup-ansible.log"

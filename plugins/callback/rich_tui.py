@@ -15,15 +15,15 @@ import os
 from typing import Any, TYPE_CHECKING, cast, List, Dict, Optional, Set
 
 try:
-    from rich.console import Console, Group
-    from rich.live import Live
-    from rich.layout import Layout
-    from rich.table import Table
-    from rich.panel import Panel
-    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
-    from rich.text import Text
-    from rich import box
-    from rich.rule import Rule
+    from rich.console import Console, Group # type: ignore
+    from rich.live import Live # type: ignore
+    from rich.layout import Layout # type: ignore
+    from rich.table import Table # type: ignore
+    from rich.panel import Panel # type: ignore
+    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn # type: ignore
+    from rich.text import Text # type: ignore
+    from rich import box # type: ignore
+    from rich.rule import Rule # type: ignore
     rich_available = True
 except ImportError:
     rich_available = False
@@ -252,14 +252,9 @@ class CallbackModule(CallbackBase):
 
     def _create_header_panel(self):
         """Create the header panel with ASCII banner and stats."""
-        # Banner from setup.sh
-        banner_ascii = """
-[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
-        
-        banner_panel = Panel(banner_ascii, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
-        
+        # Check for compact mode
+        is_compact = self.console.width < 100 if self.console else False
+
         # Segment 1: Icon (Mauve on Surface0)
         seg1 = Text(f" {ICON_OS} ", style=f"bold {C_MAUVE} on {C_SURFACE0}")
         sep1 = Text(SEP_R, style=f"{C_SURFACE0} on {C_SURFACE1}")
@@ -274,6 +269,17 @@ class CallbackModule(CallbackBase):
         
         # Combine
         header_bar = Text.assemble(seg1, sep1, seg2, sep2, seg3, sep3)
+
+        if is_compact:
+            return Panel(header_bar, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 1))
+
+        # Banner from setup.sh
+        banner_ascii = """
+[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
+        
+        banner_panel = Panel(banner_ascii, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
         
         return Group(banner_panel, header_bar)
 
@@ -281,16 +287,20 @@ class CallbackModule(CallbackBase):
         """Initialize the Layout structure with Header, Body (Split), and Footer."""
         self.layout = Layout()
         
+        # Responsive Header Size
+        is_compact = self.console.width < 100 if self.console else False
+        header_size = 3 if is_compact else 7
+
         # Main vertical split: Header, Body, Footer
         self.layout.split(
-            Layout(name="header", size=7),
+            Layout(name="header", size=header_size),
             Layout(name="body", ratio=1),
             Layout(name="footer", size=3)
         )
         
         # Responsive Body Split
         # If terminal width is small (< 100), stack panels vertically
-        self.is_narrow = self.console and self.console.width < 100
+        self.is_narrow = is_compact
         if self.is_narrow:
             self.layout["body"].split_column(
                 Layout(name="right", size=14), # Progress/Stats on top
@@ -411,6 +421,12 @@ class CallbackModule(CallbackBase):
             is_narrow = self.console.width < 100
             if is_narrow != self.is_narrow:
                 self.is_narrow = is_narrow
+                
+                # Update Header Size & Content
+                self.layout["header"].size = 3 if is_narrow else 7
+                self.layout["header"].update(self._create_header_panel())
+
+                # Update Body Layout
                 if is_narrow:
                     self.layout["body"].split_column(
                         Layout(name="right", size=14),

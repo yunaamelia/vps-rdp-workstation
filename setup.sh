@@ -101,7 +101,7 @@ run_with_spinner() {
 	pid=$!
 
 	# Run command and capture output
-	if eval "$cmd" >"$temp_log" 2>&1; then
+	if eval "$cmd" </dev/null >"$temp_log" 2>&1; then
 		kill "$pid" 2>/dev/null
 		wait "$pid" 2>/dev/null
 		echo -e "\b${GREEN}${CHECK}${NC}"
@@ -240,8 +240,9 @@ setup_ansible() {
 	log_info "Installing Ansible collections..."
 	# Install into local ./collections dir to match ansible.cfg configuration
 	mkdir -p "${SCRIPT_DIR}/collections"
+	export ANSIBLE_COLLECTIONS_PATH="${SCRIPT_DIR}/collections"
 	run_with_spinner "Installing collections (community.general, ansible.posix)..." \
-		"ansible-galaxy collection install community.general ansible.posix -p ${SCRIPT_DIR}/collections"
+		"ansible-galaxy collection install community.general ansible.posix -p ${SCRIPT_DIR}/collections --force"
 }
 
 get_credentials() {
@@ -307,6 +308,7 @@ run_playbook() {
 	export ANSIBLE_DEPRECATION_WARNINGS=False
 	# Ensure absolute path for callback plugins and python path
 	export ANSIBLE_CALLBACK_PLUGINS="${SCRIPT_DIR}/plugins/callback"
+	export ANSIBLE_COLLECTIONS_PATH="${SCRIPT_DIR}/collections"
 	export PYTHONPATH="${SCRIPT_DIR}:${PYTHONPATH:-}"
 
 	# UI Mode Selection

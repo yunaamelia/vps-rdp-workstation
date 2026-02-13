@@ -13,6 +13,16 @@ readonly SCRIPT_DIR
 readonly LOG_DIR="/var/log"
 readonly STATE_DIR="/var/lib/vps-setup"
 
+# Banner Art
+readonly BANNER_ART="
+${CYAN}
+╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
+╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝
+${NC}
+${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}
+"
+
 # Colors & Symbols
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
@@ -62,17 +72,63 @@ log_success() { log "SUCCESS" "$1" "$GREEN" "$CHECK"; }
 log_warn() { log "WARN" "$1" "$YELLOW" "$WARN"; }
 log_error() { log "ERROR" "$1" "$RED" "$CROSS"; }
 
+# --- Spinner ---
+run_with_spinner() {
+	local msg="$1"
+	local cmd="$2"
+	local temp_log
+	temp_log=$(mktemp)
+
+	# If verbose or CI, just run the command without spinner
+	if [[ "${VERBOSE:-false}" == "true" ]] || [[ "${CI_MODE:-false}" == "true" ]]; then
+		log_info "$msg"
+		if eval "$cmd"; then
+			rm -f "$temp_log"
+			return 0
+		else
+			return $?
+		fi
+	fi
+
+	echo -ne "${CYAN}${INFO} ${msg}${NC} "
+	local pid
+
+	(
+		while :; do
+			for s in / - \\ \|; do
+				echo -ne "\b$s"
+				sleep 0.1
+			done
+		done
+	) &
+	pid=$!
+
+	# Run command and capture output
+	if eval "$cmd" >"$temp_log" 2>&1; then
+		kill "$pid" 2>/dev/null
+		wait "$pid" 2>/dev/null
+		echo -e "\b${GREEN}${CHECK}${NC}"
+		rm -f "$temp_log"
+		return 0
+	else
+		local ret=$?
+		kill "$pid" 2>/dev/null
+		wait "$pid" 2>/dev/null
+		echo -e "\b${RED}${CROSS}${NC}"
+		log_error "Command failed: $cmd"
+		echo -e "${RED}Error output:${NC}"
+		cat "$temp_log"
+		rm -f "$temp_log"
+		return $ret
+	fi
+}
+
 # TUI Functions
 HEADER_HEIGHT=5
 FOOTER_HEIGHT=3
 
 draw_banner() {
-	cat <<'EOF'
-╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝
-EOF
-	echo -e "${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}"
+	echo "$BANNER_ART"
 }
 
 init_tui() {
@@ -144,7 +200,8 @@ validate_system() {
 
 	if [[ ${#missing[@]} -gt 0 ]]; then
 		log_info "Installing dependencies: ${missing[*]}"
-		apt-get update -qq && apt-get install -y -qq "${missing[@]}"
+		run_with_spinner "Installing system dependencies..." \
+			"apt-get update -qq && apt-get install -y -qq ${missing[*]}"
 	fi
 }
 
@@ -153,8 +210,9 @@ setup_ansible() {
 
 	# Install pipx & ansible if missing
 	if ! command -v pipx &>/dev/null; then
-		apt-get install -y -qq pipx python3-venv
-		pipx ensurepath
+		run_with_spinner "Installing pipx..." \
+			"apt-get install -y -qq pipx python3-venv"
+		pipx ensurepath >/dev/null 2>&1
 	fi
 	export PATH="$PATH:$HOME/.local/bin"
 
@@ -162,26 +220,34 @@ setup_ansible() {
 	for tool in ansible-core ansible-navigator ara; do
 		if ! command -v "$tool" &>/dev/null; then
 			log_info "Installing $tool..."
-			pipx install --quiet "$tool"
+			run_with_spinner "Installing $tool via pipx..." \
+				"pipx install --quiet $tool"
 		fi
 	done
 
 	# Install Python libs (via apt to avoid break-system-packages)
 	if ! python3 -c "import rich" &>/dev/null; then
 		log_info "Installing python3-rich..."
-		apt-get install -y -qq python3-rich
+		run_with_spinner "Installing python3-rich..." \
+			"apt-get install -y -qq python3-rich"
 	fi
+
+	log_info "Installing Ansible collections..."
+	run_with_spinner "Installing collections (community.general, ansible.posix)..." \
+		"ansible-galaxy collection install community.general ansible.posix"
 }
 
 get_credentials() {
 	log_info "Configuring credentials..."
-	log_info "DEBUG: HOME=$HOME"
-	log_info "DEBUG: PATH=$PATH"
-	if command -v ansible-navigator; then
-		log_info "DEBUG: ansible-navigator found at $(command -v ansible-navigator)"
-	else
-		log_error "DEBUG: ansible-navigator NOT found in PATH"
-		ls -la "$HOME/.local/bin" || true
+	if [[ "${VERBOSE:-false}" == "true" ]]; then
+		log_info "DEBUG: HOME=$HOME"
+		log_info "DEBUG: PATH=$PATH"
+		if command -v ansible-navigator; then
+			log_info "DEBUG: ansible-navigator found at $(command -v ansible-navigator)"
+		else
+			log_error "DEBUG: ansible-navigator NOT found in PATH"
+			ls -la "$HOME/.local/bin" || true
+		fi
 	fi
 
 	# Username

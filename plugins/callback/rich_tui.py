@@ -251,47 +251,22 @@ class CallbackModule(CallbackBase):
         self.console.print()
 
     def _create_header_panel(self):
-        """Create the header panel with ASCII banner and stats."""
-        # Check for compact mode
-        is_compact = self.console.width < 100 if self.console else False
-
-        # Segment 1: Icon (Mauve on Surface0)
-        seg1 = Text(f" {ICON_OS} ", style=f"bold {C_MAUVE} on {C_SURFACE0}")
-        sep1 = Text(SEP_R, style=f"{C_SURFACE0} on {C_SURFACE1}")
-        
-        # Segment 2: Title (Blue on Surface1)
-        seg2 = Text(" VPS RDP WORKSTATION ", style=f"bold {C_BLUE} on {C_SURFACE1}")
-        sep2 = Text(SEP_R, style=f"{C_SURFACE1} on {C_SURFACE2}")
-        
-        # Segment 3: Stats (Text on Surface2)
-        seg3 = Text(f" v{self.CALLBACK_VERSION} ", style=f"{C_TEXT} on {C_SURFACE2}")
-        sep3 = Text(SEP_R, style=f"{C_SURFACE2} on default")
-        
-        # Combine
-        header_bar = Text.assemble(seg1, sep1, seg2, sep2, seg3, sep3)
-
-        if is_compact:
-            return Panel(header_bar, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 1))
-
+        """Create the header panel with ASCII banner only."""
         # Banner from setup.sh
         banner_ascii = """
 [bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
 ╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
  ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
         
-        # Create a single unified panel for the header
-        # User requested to remove the stats bar (header_bar) from the large header
         content = Text.from_markup(banner_ascii)
-        
         return Panel(content, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
 
     def _init_layout(self):
         """Initialize the Layout structure with Header, Body (Split), and Footer."""
         self.layout = Layout()
         
-        # Responsive Header Size
-        is_compact = self.console.width < 100 if self.console else False
-        header_size = 3 if is_compact else 7
+        # Header size fixed to accommodate banner (7 lines)
+        header_size = 7
 
         # Main vertical split: Header, Body, Footer
         self.layout.split(
@@ -410,15 +385,9 @@ class CallbackModule(CallbackBase):
         if not self.live or not self.layout:
             return
 
-        # Dynamic Responsiveness (Header Height Only)
+        # Ensure Header Content is Updated
         if self.console:
-            is_compact = self.console.width < 100
-            
-            # Update Header Size & Content
-            target_header_size = 3 if is_compact else 7
-            if self.layout["header"].size != target_header_size:
-                 self.layout["header"].size = target_header_size
-            
+            # Always update header with banner
             self.layout["header"].update(self._create_header_panel())
 
         self.layout["left"].update(self._create_left_panel())
@@ -426,11 +395,8 @@ class CallbackModule(CallbackBase):
         self.layout["footer"].update(self._create_footer())
 
     def _create_left_panel(self):
-        """Create left panel with milestones and log history."""
-        # 1. Milestones
-        milestones = self._create_milestones_panel()
-        
-        # 2. Log History
+        """Create left panel with log history."""
+        # Log History Table
         log_table = Table.grid(expand=True, padding=(0, 1))
         log_table.add_column(justify="center", width=3) # Icon
         log_table.add_column(ratio=1) # Task
@@ -452,15 +418,13 @@ class CallbackModule(CallbackBase):
                 if entry['status'] == 'failed' and entry['message']:
                     log_table.add_row("", f"[red]{entry['message']}[/red]", "")
 
-        log_panel = Panel(
+        return Panel(
             log_table,
             title="[bold blue]Recent Activity[/]",
             border_style="blue",
             box=box.ROUNDED,
             padding=(0, 0)
         )
-        
-        return Group(milestones, log_panel)
 
     def _create_right_panel(self):
         """Build the right column with progress and a compact summary table."""
@@ -540,13 +504,8 @@ class CallbackModule(CallbackBase):
         return Panel(display, box=box.ROUNDED, padding=(0, 1), style="on black")
 
     def _create_footer(self):
-        """Create the footer."""
-        credit_text = Text(justify="center")
-        credit_text.append("CREDITS: ", style="bold magenta")
-        credit_text.append("VPS RDP Workstation Automation ", style="cyan")
-        credit_text.append("| ", style="dim")
-        credit_text.append("Designed for Developers", style="italic white")
-        return Panel(credit_text, box=box.ROUNDED, style="white on black")
+        """Create the footer with milestone tracking."""
+        return self._create_milestones_panel()
 
     def _get_duration(self, start_time):
         if not start_time: return "0.0s"

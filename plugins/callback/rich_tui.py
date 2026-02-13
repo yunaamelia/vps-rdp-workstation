@@ -298,20 +298,12 @@ class CallbackModule(CallbackBase):
             Layout(name="footer", size=3)
         )
         
-        # Responsive Body Split
-        # If terminal width is small (< 100), stack panels vertically
-        self.is_narrow = is_compact
-        if self.is_narrow:
-            self.layout["body"].split_column(
-                Layout(name="right", size=14), # Progress/Stats on top
-                Layout(name="left", ratio=1)   # Logs below
-            )
-        else:
-            # Standard horizontal split
-            self.layout["body"].split_row(
-                Layout(name="left", ratio=2),
-                Layout(name="right", ratio=3)
-            )
+        # Fixed Body Split: Always Horizontal (Row)
+        # Left (Logs) and Right (Progress) side-by-side with equal ratio
+        self.layout["body"].split_row(
+            Layout(name="left", ratio=1),
+            Layout(name="right", ratio=1)
+        )
         
         self.layout["header"].update(self._create_header_panel())
         self.layout["footer"].update(self._create_footer())
@@ -416,27 +408,16 @@ class CallbackModule(CallbackBase):
         if not self.live or not self.layout:
             return
 
-        # Dynamic Responsiveness
+        # Dynamic Responsiveness (Header Height Only)
         if self.console:
-            is_narrow = self.console.width < 100
-            if is_narrow != self.is_narrow:
-                self.is_narrow = is_narrow
-                
-                # Update Header Size & Content
-                self.layout["header"].size = 3 if is_narrow else 7
-                self.layout["header"].update(self._create_header_panel())
-
-                # Update Body Layout
-                if is_narrow:
-                    self.layout["body"].split_column(
-                        Layout(name="right", size=14),
-                        Layout(name="left", ratio=1)
-                    )
-                else:
-                    self.layout["body"].split_row(
-                        Layout(name="left", ratio=2),
-                        Layout(name="right", ratio=3)
-                    )
+            is_compact = self.console.width < 100
+            
+            # Update Header Size & Content
+            target_header_size = 3 if is_compact else 7
+            if self.layout["header"].size != target_header_size:
+                 self.layout["header"].size = target_header_size
+            
+            self.layout["header"].update(self._create_header_panel())
 
         self.layout["left"].update(self._create_left_panel())
         self.layout["right"].update(self._create_right_panel())

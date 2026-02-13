@@ -280,7 +280,8 @@ class CallbackModule(CallbackBase):
  ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
         
         # Create a single unified panel for the header
-        content = Group(Text.from_markup(banner_ascii), Text(""), header_bar)
+        # User requested to remove the stats bar (header_bar) from the large header
+        content = Text.from_markup(banner_ascii)
         
         return Panel(content, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
 

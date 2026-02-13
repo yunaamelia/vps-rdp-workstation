@@ -377,18 +377,21 @@ class CallbackModule(CallbackBase):
         log_table.add_column(ratio=1) # Task
         log_table.add_column(justify="right", width=8) # Duration
         
-        for entry in self.log_history:
-            icon = f"[{entry['color']}]{entry['icon']}[/]"
-            task = f"[{entry['color']}]{entry['task']}[/]"
-            if entry['status'] == 'skipped':
-                task = f"[dim]{entry['task']}[/dim]"
-            
-            duration = f"[dim]{entry['duration']}[/dim]"
-            log_table.add_row(icon, task, duration)
-            
-            # Show error details on next row if failed
-            if entry['status'] == 'failed' and entry['message']:
-                log_table.add_row("", f"[red]{entry['message']}[/red]", "")
+        if not self.log_history:
+            log_table.add_row("", "[dim]Waiting for tasks...[/dim]", "")
+        else:
+            for entry in self.log_history:
+                icon = f"[{entry['color']}]{entry['icon']}[/]"
+                task = f"[{entry['color']}]{entry['task']}[/]"
+                if entry['status'] == 'skipped':
+                    task = f"[dim]{entry['task']}[/dim]"
+                
+                duration = f"[dim]{entry['duration']}[/dim]"
+                log_table.add_row(icon, task, duration)
+                
+                # Show error details on next row if failed
+                if entry['status'] == 'failed' and entry['message']:
+                    log_table.add_row("", f"[red]{entry['message']}[/red]", "")
 
         log_panel = Panel(
             log_table,
@@ -509,6 +512,11 @@ class CallbackModule(CallbackBase):
     def _print_task_result(self, status, task_name, duration, message=""):
         """Add formatted result to internal log history instead of printing."""
         if not self.console: return
+        
+        # In navigator mode with Pure TUI, we never print to stream directly
+        # if self.is_navigator: ... (disabled)
+
+        if not self.live: return
 
         # Icons and Colors
         icons = {

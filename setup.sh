@@ -149,8 +149,6 @@ init_tui() {
 	tput sc
 	tput cup "$footer_row" 0
 	echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-	echo -e "${BOLD}${MAGENTA}CREDITS:${NC} ${CYAN}VPS RDP Workstation Automation${NC} ${DIM}|${NC} ${DIM}Designed for Developers${NC}"
-	echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
 	tput rc
 
 	# Set Scroll Region (Middle)

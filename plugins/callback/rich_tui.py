@@ -1,5 +1,5 @@
 # pylint: disable=C0103,R0903,R0902,W0212,E0401
-# pyright: reportUnusedImport=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportUnknownVariableType=false, reportTypeCommentUsage=false, reportMissingTypeStubs=false, reportUnusedCallResult=false
+# pyright: reportMissingImports=false, reportUnusedImport=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportUnknownVariableType=false, reportTypeCommentUsage=false, reportMissingTypeStubs=false, reportUnusedCallResult=false
 """
 Ansible Callback Plugin: Rich TUI
 Beautiful TUI output with progress bars, tables, and live updates.

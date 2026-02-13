@@ -252,12 +252,19 @@ class CallbackModule(CallbackBase):
 
     def _create_header_panel(self):
         """Create the header panel with ASCII banner only."""
-        # Banner from setup.sh
-        banner_ascii = """
+        # Check if terminal is wide enough for full banner
+        is_wide = self.console.width >= 100 if self.console else True
+
+        if is_wide:
+            banner_ascii = """
 [bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
 ╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
  ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
-        
+        else:
+            banner_ascii = """
+[bold cyan]  VPS RDP WORKSTATION v3.0.0 [/bold cyan]
+[dim] Security-Hardened | Debian 13 [/dim]"""
+
         content = Text.from_markup(banner_ascii)
         return Panel(content, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
 
@@ -265,8 +272,9 @@ class CallbackModule(CallbackBase):
         """Initialize the Layout structure with Header, Body (Split), and Footer."""
         self.layout = Layout()
         
-        # Header size fixed to accommodate banner (7 lines)
-        header_size = 7
+        # Responsive Header Size
+        is_wide = self.console.width >= 100 if self.console else True
+        header_size = 7 if is_wide else 5
 
         # Main vertical split: Header, Body, Footer
         self.layout.split(
@@ -387,6 +395,13 @@ class CallbackModule(CallbackBase):
 
         # Ensure Header Content is Updated
         if self.console:
+            is_wide = self.console.width >= 100
+            
+            # Update Header Size & Content
+            target_header_size = 7 if is_wide else 5
+            if self.layout["header"].size != target_header_size:
+                 self.layout["header"].size = target_header_size
+            
             # Always update header with banner
             self.layout["header"].update(self._create_header_panel())
 

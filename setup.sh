@@ -125,6 +125,7 @@ run_with_spinner() {
 }
 
 # TUI Functions
+# HEADER_HEIGHT will be set dynamically in init_tui
 HEADER_HEIGHT=5
 FOOTER_HEIGHT=1
 
@@ -145,6 +146,15 @@ init_tui() {
 	clear
 	local rows
 	rows=$(tput lines)
+	local cols
+	cols=$(tput cols)
+
+	# Determine Header Height based on width
+	if [[ $cols -ge 100 ]]; then
+		HEADER_HEIGHT=5
+	else
+		HEADER_HEIGHT=3
+	fi
 
 	# Draw Header (Fixed top)
 	# Clear screen explicitly first

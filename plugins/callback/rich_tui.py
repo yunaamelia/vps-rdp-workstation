@@ -2,690 +2,440 @@
 # pyright: reportUnusedImport=false, reportUnknownParameterType=false, reportMissingParameterType=false, reportUnknownMemberType=false, reportUnknownArgumentType=false, reportUnknownVariableType=false, reportTypeCommentUsage=false, reportMissingTypeStubs=false, reportUnusedCallResult=false
 """
 Ansible Callback Plugin: Rich TUI
-Beautiful TUI output with progress bars, tables, and live updates.
-Uses the Rich library for terminal rendering.
+Modern, beautiful TUI output for Ansible using the Rich library.
+Features: Catppuccin theme, live layout, progress tracking, and structured logging.
 """
 
 from __future__ import absolute_import, division, print_function
 
 __metaclass__ = type
 
-import time
 import os
-from typing import Any, TYPE_CHECKING, cast, List, Dict, Optional, Set
+import time
+from datetime import datetime
+from typing import Any, Dict, List, Optional, Set, Union
 
 try:
-    from rich.console import Console, Group # type: ignore
-    from rich.live import Live # type: ignore
-    from rich.layout import Layout # type: ignore
-    from rich.table import Table # type: ignore
-    from rich.panel import Panel # type: ignore
-    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn # type: ignore
-    from rich.text import Text # type: ignore
-    from rich import box # type: ignore
-    from rich.rule import Rule # type: ignore
-    rich_available = True
+    from rich.console import Console, Group
+    from rich.live import Live
+    from rich.layout import Layout
+    from rich.table import Table
+    from rich.panel import Panel
+    from rich.progress import (
+        Progress,
+        SpinnerColumn,
+        TextColumn,
+        BarColumn,
+        TimeElapsedColumn,
+        TaskID,
+    )
+    from rich.text import Text
+    from rich import box
+    from rich.theme import Theme
+    from rich.style import Style
+
+    RICH_AVAILABLE = True
 except ImportError:
-    rich_available = False
-    # Define dummy classes to satisfy static analysis
+    RICH_AVAILABLE = False
+
+    # Dummy classes for static analysis and fallback
     class Dummy:
-        """Dummy class for missing rich dependencies."""
-        def __init__(self, *args, **kwargs): pass
-        def __getattr__(self, name): return self
-        def __call__(self, *args, **kwargs): return self
-        def __getitem__(self, key): return self
-        def split(self, *args, **kwargs): pass
-        def update(self, *args, **kwargs): pass
-        def start(self): pass
-        def stop(self): pass
-        def add_task(self, *args, **kwargs): pass
-        def append(self, *args, **kwargs): pass
-        def add_row(self, *args, **kwargs): pass
-        def add_column(self, *args, **kwargs): pass
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def __getattr__(self, _):
+            return self
+
+        def __call__(self, *args, **kwargs):
+            return self
+
+        def __getitem__(self, _):
+            return self
+
         @classmethod
-        def grid(cls, *args, **kwargs): return cls()
-        @classmethod
-        def from_markup(cls, *args, **kwargs): return cls()
+        def grid(cls, *args, **kwargs):
+            return cls()
 
-    Console = Group = Live = Layout = Table = Panel = Progress = SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = Text = Rule = cast(Any, Dummy)
-    box = cast(Any, Dummy)
+    # Mock attributes for module-level constants
+    Dummy.ROUNDED = Dummy()
+    Dummy.SQUARE = Dummy()
+    Dummy.MINIMAL = Dummy()
 
-RICH_AVAILABLE = rich_available
+    Console = Group = Live = Layout = Table = Panel = Progress = Theme = Style = Dummy  # type: ignore
+    SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = TaskID = Text = box = Dummy  # type: ignore
 
-if TYPE_CHECKING:
-    from ansible.plugins.callback import CallbackBase
-else:
-    try:
-        from ansible.plugins.callback import CallbackBase
-    except ImportError:
-        class CallbackBase:
-            """Mock class for pylint when ansible is not installed"""
-            CALLBACK_VERSION = 2.0
-            CALLBACK_TYPE = "stdout"
-            CALLBACK_NAME = "rich_tui"
+
+from ansible.plugins.callback import CallbackBase
+
+
+# --- Configuration & Constants ---
 
 DOCUMENTATION = """
     name: rich_tui
     type: stdout
-    short_description: Beautiful TUI output with Rich library
+    short_description: Modern TUI output with Rich library
     description:
-        - Modern TUI callback plugin using Rich library
-        - Live progress bars with ETA
-        - Colored tables for task summary
-        - Live Header with Stats
-        - Milestone tracking
+        - Beautiful terminal UI for Ansible execution.
+        - Uses Catppuccin Mocha palette.
+        - Live progress tracking and layout.
     requirements:
-        - rich>=13.0.0 (pip install rich)
-    version_added: "3.1.0"
+        - rich>=13.0.0
+    version_added: "3.2.0"
 """
 
-# Milestone Definitions
-ROLE_PHASE_MAP = {
-    'common': 'Phase 1: System Foundation',
-    'security': 'Phase 2: Security Hardening',
-    'desktop': 'Phase 3: Desktop Environment',
-    'xrdp': 'Phase 3: Desktop Environment',
-    'kde-optimization': 'Phase 3: Desktop Environment',
-    'kde-apps': 'Phase 3: Desktop Environment',
-    'fonts': 'Phase 4: Visual Foundation',
-    'catppuccin-theme': 'Phase 4: Visual Foundation',
-    'terminal': 'Phase 4: Visual Foundation',
-    'shell-styling': 'Phase 4: Visual Foundation',
-    'zsh-enhancements': 'Phase 4: Visual Foundation',
-    'development': 'Phase 5: Dev Languages',
-    'docker': 'Phase 6: Containers',
-    'editors': 'Phase 7: Code Editors',
-    'tui-tools': 'Phase 8: Dev Tools',
-    'network-tools': 'Phase 8: Dev Tools',
-    'system-performance': 'Phase 8: Dev Tools',
-    'text-processing': 'Phase 8: Dev Tools',
-    'file-management': 'Phase 8: Dev Tools',
-    'dev-debugging': 'Phase 8: Dev Tools',
-    'code-quality': 'Phase 8: Dev Tools',
-    'productivity': 'Phase 8: Dev Tools',
-    'log-visualization': 'Phase 8: Dev Tools',
-    'ai-devtools': 'Phase 8: Dev Tools',
-    'cloud-native': 'Phase 9: Cloud Native'
+# Catppuccin Mocha Theme
+THEME_COLORS = {
+    "rosewater": "#f5e0dc",
+    "flamingo": "#f2cdcd",
+    "pink": "#f5c2e7",
+    "mauve": "#cba6f7",
+    "red": "#f38ba8",
+    "maroon": "#eba0ac",
+    "peach": "#fab387",
+    "yellow": "#f9e2af",
+    "green": "#a6e3a1",
+    "teal": "#94e2d5",
+    "sky": "#89dceb",
+    "sapphire": "#74c7ec",
+    "blue": "#89b4fa",
+    "lavender": "#b4befe",
+    "text": "#cdd6f4",
+    "subtext1": "#bac2de",
+    "subtext0": "#a6adc8",
+    "overlay2": "#9399b2",
+    "overlay1": "#7f849c",
+    "overlay0": "#6c7086",
+    "surface2": "#585b70",
+    "surface1": "#45475a",
+    "surface0": "#313244",
+    "base": "#1e1e2e",
+    "mantle": "#181825",
+    "crust": "#11111b",
 }
 
-PHASE_ORDER = sorted(list(set(ROLE_PHASE_MAP.values())))
+# Role to Phase Mapping (for milestone tracking)
+ROLE_PHASE_MAP = {
+    "common": "System Foundation",
+    "security": "Security Hardening",
+    "desktop": "Desktop Environment",
+    "xrdp": "Desktop Environment",
+    "kde-optimization": "Desktop Environment",
+    "kde-apps": "Desktop Environment",
+    "fonts": "Visual Foundation",
+    "catppuccin-theme": "Visual Foundation",
+    "terminal": "Visual Foundation",
+    "shell-styling": "Visual Foundation",
+    "zsh-enhancements": "Visual Foundation",
+    "development": "Dev Languages",
+    "docker": "Containers",
+    "editors": "Code Editors",
+    "tui-tools": "Dev Tools",
+    "network-tools": "Dev Tools",
+    "system-performance": "Dev Tools",
+    "text-processing": "Dev Tools",
+    "file-management": "Dev Tools",
+    "dev-debugging": "Dev Tools",
+    "code-quality": "Dev Tools",
+    "productivity": "Dev Tools",
+    "log-visualization": "Dev Tools",
+    "ai-devtools": "Dev Tools",
+    "cloud-native": "Cloud Native",
+}
 
-# Colors (Catppuccin Mocha)
-C_ROSEWATER = "#f5e0dc"
-C_FLAMINGO  = "#f2cdcd"
-C_PINK      = "#f5c2e7"
-C_MAUVE     = "#cba6f7"
-C_RED       = "#f38ba8"
-C_MAROON    = "#eba0ac"
-C_PEACH     = "#fab387"
-C_YELLOW    = "#f9e2af"
-C_GREEN     = "#a6e3a1"
-C_TEAL      = "#94e2d5"
-C_SKY       = "#89dceb"
-C_SAPPHIRE  = "#74c7ec"
-C_BLUE      = "#89b4fa"
-C_LAVENDER  = "#b4befe"
-C_TEXT      = "#cdd6f4"
-C_SUBTEXT1  = "#bac2de"
-C_SUBTEXT0  = "#a6adc8"
-C_OVERLAY2  = "#9399b2"
-C_OVERLAY1  = "#7f849c"
-C_OVERLAY0  = "#6c7086"
-C_SURFACE2  = "#585b70"
-C_SURFACE1  = "#45475a"
-C_SURFACE0  = "#313244"
-C_BASE      = "#1e1e2e"
-C_MANTLE    = "#181825"
-C_CRUST     = "#11111b"
+PHASE_ORDER = sorted(list(set(ROLE_PHASE_MAP.values())), key=list(ROLE_PHASE_MAP.values()).index)
 
-# Icons
-ICON_OS    = "" # U+E63F (or similar distro icon)
-SEP_R      = "" # U+E0B4
 
-class CallbackModule(CallbackBase):
-    """
-    Rich TUI Callback Plugin for beautiful Ansible output.
-    """
+class RichInterface:
+    """Handles all Rich rendering logic."""
 
-    CALLBACK_VERSION = 2.0
-    CALLBACK_TYPE = "stdout"
-    CALLBACK_NAME = "rich_tui"
-    CALLBACK_NEEDS_WHITELIST = False
-
-    def __init__(self):
-        super(CallbackModule, self).__init__()
-        force_tui = os.environ.get("VPS_FORCE_TUI") == "true"
-        terminal = force_tui or os.isatty(1)
-        self.console = Console(
-            force_terminal=terminal,
-            color_system="truecolor"
-        ) if RICH_AVAILABLE else None
+    def __init__(self, console: Any):
+        self.console = console
+        self.layout = Layout()
+        self.log_messages: List[Dict[str, Any]] = []
+        self.max_log_items = 15
         
-        # State Tracking
-        self.start_time = None # type: float | None
-        self.current_play = None # type: str | None
-        self.current_task = None # type: str | None
-        self.current_role = None # type: str | None
-        self.current_task_start = None # type: float | None
-        self.log_level = os.environ.get("VPS_LOG_LEVEL", "minimal").lower()
-        self.is_navigator = "ansible-navigator" in os.environ.get("ansible_cmdline", "") or os.environ.get("ANSIBLE_NAVIGATOR_MODE")
-
-        # Statistics
-        self.task_count = 0
-        self.ok_count = 0
-        self.changed_count = 0
-        self.failed_count = 0
-        self.skipped_count = 0
-
-        # UI Components
-        self.live = None # type: Any
-        self.layout = None # type: Any
-        self.job_progress = None # type: Any
-        self.task_id = None
-        self.overall_progress = None # type: Any
-        self.overall_task_id = None
-        # Phase Tracking
-        self.current_phase = None # type: str | None
-        self.completed_phases = set() # type: Set[str]
-        
-        # Layout State
-        self.is_narrow = False
-        
-        # Log History for Pure TUI
-        self.log_history = [] # type: List[Dict[str, str]]
-        self.max_log_items = 12 # Keep last N items to fit in panel
-
-    def v2_playbook_on_start(self, playbook):
-        """Called when playbook starts."""
+        # State
+        self.current_phase: Optional[str] = None
+        self.completed_phases: Set[str] = set()
+        self.stats = {"ok": 0, "changed": 0, "failed": 0, "skipped": 0}
         self.start_time = time.time()
 
-        if not RICH_AVAILABLE:
-            print("\\n🚀 VPS Developer Workstation Setup v3.1.0\\n")
-            return
-
-        force_tui = os.environ.get("VPS_FORCE_TUI") == "true"
-        force_static = os.environ.get("VPS_FORCE_STATIC_LOGS") == "true"
-        if force_static or not self.console or not self.console.is_terminal:
-             self._print_static_header()
-             return
-
-        if self.is_navigator and not force_tui:
-             self._print_static_header()
-             return
-
-        # Banner is part of the Layout for Live mode
-        # self._print_static_header()
-
-        self._init_layout()
-        self._init_progress()
-        self._start_live_display()
-
-    def _print_static_header(self):
-        """Print static banner for log-based outputs using Starship styling."""
-        if not self.console: return
-        
-        # Banner from setup.sh
-        banner_ascii = """
-[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
-        
-        self.console.print(Panel(banner_ascii, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2)))
-        
-        # Segment 1: Icon (Mauve on Surface0)
-        seg1 = Text(f" {ICON_OS} ", style=f"bold {C_MAUVE} on {C_SURFACE0}")
-        sep1 = Text(SEP_R, style=f"{C_SURFACE0} on {C_SURFACE1}")
-        
-        # Segment 2: Title (Blue on Surface1)
-        seg2 = Text(" VPS RDP WORKSTATION ", style=f"bold {C_BLUE} on {C_SURFACE1}")
-        sep2 = Text(SEP_R, style=f"{C_SURFACE1} on {C_SURFACE2}")
-        
-        # Segment 3: Stats (Text on Surface2)
-        seg3 = Text(f" v{self.CALLBACK_VERSION} ", style=f"{C_TEXT} on {C_SURFACE2}")
-        sep3 = Text(SEP_R, style=f"{C_SURFACE2} on default")
-        
-        # Combine
-        header_bar = Text.assemble(seg1, sep1, seg2, sep2, seg3, sep3)
-        
-        self.console.print(header_bar)
-        self.console.print()
-
-    def _create_header_panel(self):
-        """Create the header panel with ASCII banner only."""
-        # Check if terminal is wide enough for full banner
-        is_wide = self.console.width >= 100 if self.console else True
-
-        if is_wide:
-            banner_ascii = """
-[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
-        else:
-            banner_ascii = """
-[bold cyan]  VPS RDP WORKSTATION v3.0.0 [/bold cyan]
-[dim] Security-Hardened | Debian 13 [/dim]"""
-
-        content = Text.from_markup(banner_ascii)
-        return Panel(content, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
-
-    def _init_layout(self):
-        """Initialize the Layout structure with Header, Body (Split), and Footer."""
-        self.layout = Layout()
-        
-        # Responsive Header Size
-        is_wide = self.console.width >= 100 if self.console else True
-        header_size = 7 if is_wide else 5
-
-        # Main vertical split: Header, Body, Footer
-        self.layout.split(
-            Layout(name="header", size=header_size),
-            Layout(name="body", ratio=1),
-            Layout(name="footer", size=3)
-        )
-        
-        # Fixed Body Split: Always Horizontal (Row)
-        # Left (Logs) and Right (Progress) side-by-side with equal ratio
-        self.layout["body"].split_row(
-            Layout(name="left", ratio=1),
-            Layout(name="right", ratio=1)
-        )
-        
-        self.layout["header"].update(self._create_header_panel())
-        self.layout["footer"].update(self._create_footer())
-
-    def _init_progress(self):
-        """Initialize Progress bars for Current Task and Overall."""
-        # 1. Job Progress (Current Task)
-        self.job_progress = Progress(
-            SpinnerColumn(spinner_name="dots"),
-            TextColumn(f"[bold {C_BLUE}]{{task.description}}"),
-            BarColumn(bar_width=None),
-            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
-            expand=True
-        )
-        self.task_id = self.job_progress.add_task("Initializing...", total=None)
-
-        # 2. Overall Progress
+        # Progress components
         self.overall_progress = Progress(
-            TextColumn(f"[{C_SUBTEXT1}]Overall[/]"),
-            BarColumn(bar_width=None, complete_style=C_GREEN, finished_style=C_GREEN),
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(bar_width=None, complete_style="green", finished_style="green"),
             TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
             TimeElapsedColumn(),
-            expand=True
+            expand=True,
         )
-        # Estimate total tasks (can be updated dynamically if needed)
-        self.overall_task_id = self.overall_progress.add_task("All Tasks", total=100) # Placeholder total
-
-    def _start_live_display(self):
-        """Start the Live context manager."""
-        refresh_rate_env = os.environ.get("VPS_TUI_FPS", "4")
-        try:
-            refresh_rate = max(1, int(refresh_rate_env))
-        except ValueError:
-            refresh_rate = 4
-        
-        # When running in navigator/piped mode, auto_refresh can cause deadlocks if the buffer fills up.
-        # We'll disable auto_refresh and rely on manual refreshes in the callback hooks.
-        auto_refresh = not self.is_navigator
-        
-        # Prevent Rich from capturing streams which causes deadlocks in Ansible Navigator
-        redirect = not self.is_navigator
-
-        self.live = Live(
-            self.layout,
-            refresh_per_second=refresh_rate,
-            console=self.console,
-            auto_refresh=auto_refresh,
-            redirect_stderr=redirect,
-            redirect_stdout=redirect
+        self.task_progress = Progress(
+            SpinnerColumn(spinner_name="dots", style="mauve"),
+            TextColumn("[bold mauve]{task.description}"),
+            BarColumn(bar_width=None, style="surface2"),
+            TextColumn("[progress.percentage]{task.percentage:>3.0f}%"),
+            expand=True,
         )
-        self.live.start()
-
-    def v2_playbook_on_task_start(self, task, is_conditional):
-        """Called when a task starts."""
-        self.current_task = task.get_name()
-        self.task_count += 1
-        self.current_task_start = time.time()
-
-        # Role & Phase Tracking
-        if hasattr(task, '_role') and task._role:
-            role_name = task._role.get_name()
-            self._update_role_and_phase(role_name)
-
-        # Update Spinner & Overall Progress
-        if self.job_progress and self.task_id is not None:
-            self.job_progress.update(self.task_id, description=f"Running: {self.current_task}")
         
-        if self.overall_progress and self.overall_task_id is not None:
-            # Simple increment for now - accurate % requires knowing total tasks beforehand
-            self.overall_progress.advance(self.overall_task_id, 1)
+        self.overall_task_id = self.overall_progress.add_task("Total Progress", total=100)
+        self.current_task_id: Optional[TaskID] = None
 
-        # Force a manual refresh to ensure the screen updates even if the Live thread is contending
-        if self.live:
-            # In navigator mode, we disabled auto-refresh to prevent deadlocks.
-            # We must manually trigger the refresh here.
-            # We use _update_ui() to ensure the layout content is fresh before refreshing the screen.
-            self._update_ui()
-            # Only refresh if NOT using navigator, or rely on auto-refresh if enabled?
-            # Actually, with Pure TUI, we should just refresh.
-            self.live.refresh()
+        self._init_layout()
 
-    def _update_role_and_phase(self, role_name):
-        """Update current role and phase, marking previous as complete."""
-        if role_name == self.current_role:
-            return
+    def _init_layout(self):
+        """Define the TUI grid layout."""
+        self.layout.split(
+            Layout(name="header", size=3),
+            Layout(name="main", ratio=1),
+            Layout(name="footer", size=3),
+        )
+        self.layout["main"].split_row(
+            Layout(name="logs", ratio=6),
+            Layout(name="status", ratio=4),
+        )
 
-        # If switching roles, check phase transition
-        if self.current_phase and self.current_role:
-            prev_phase = ROLE_PHASE_MAP.get(self.current_role)
-            new_phase = ROLE_PHASE_MAP.get(role_name)
-            
-            # If we are moving to a new phase (or just finished the last one for that phase)
-            # Logic: If the new role belongs to a DIFFERENT phase, mark the OLD phase as complete.
-            if prev_phase and prev_phase != new_phase:
-                self.completed_phases.add(prev_phase)
-
-        self.current_role = role_name
-        self.current_phase = ROLE_PHASE_MAP.get(role_name, "Unknown Phase")
-
-    def _update_ui(self):
-        """Refresh the UI layout."""
-        if not self.live or not self.layout:
-            return
-
-        # Ensure Header Content is Updated
-        if self.console:
-            is_wide = self.console.width >= 100
-            
-            # Update Header Size & Content
-            target_header_size = 7 if is_wide else 5
-            if self.layout["header"].size != target_header_size:
-                 self.layout["header"].size = target_header_size
-            
-            # Always update header with banner
-            self.layout["header"].update(self._create_header_panel())
-
-        self.layout["left"].update(self._create_left_panel())
-        self.layout["right"].update(self._create_right_panel())
-        self.layout["footer"].update(self._create_footer())
-
-    def _create_left_panel(self):
-        """Create left panel with log history."""
-        # Log History Table
-        log_table = Table.grid(expand=True, padding=(0, 1))
-        log_table.add_column(justify="center", width=3) # Icon
-        log_table.add_column(ratio=1) # Task
-        log_table.add_column(justify="right", width=8) # Duration
+    def get_renderable(self):
+        """Update and return the main layout."""
+        # Header
+        self.layout["header"].update(self._make_header())
         
-        if not self.log_history:
-            log_table.add_row("", "[dim]Waiting for tasks...[/dim]", "")
-        else:
-            for entry in self.log_history:
-                icon = f"[{entry['color']}]{entry['icon']}[/]"
-                task = f"[{entry['color']}]{entry['task']}[/]"
-                if entry['status'] == 'skipped':
-                    task = f"[dim]{entry['task']}[/dim]"
-                
-                duration = f"[dim]{entry['duration']}[/dim]"
-                log_table.add_row(icon, task, duration)
-                
-                # Show error details on next row if failed
-                if entry['status'] == 'failed' and entry['message']:
-                    log_table.add_row("", f"[red]{entry['message']}[/red]", "")
+        # Logs Panel
+        self.layout["logs"].update(self._make_logs_panel())
+        
+        # Status Panel (Progress + Stats)
+        self.layout["status"].update(self._make_status_panel())
+        
+        # Footer (Milestones)
+        self.layout["footer"].update(self._make_footer())
+        
+        return self.layout
+
+    def _make_header(self):
+        """Create the top header bar."""
+        grid = Table.grid(expand=True)
+        grid.add_column(justify="left", ratio=1)
+        grid.add_column(justify="right")
+        
+        title = Text("  VPS RDP WORKSTATION ", style="bold white on blue")
+        version = Text(" v3.0.0 ", style="white on surface0")
+        
+        grid.add_row(title, version)
+        return Panel(grid, style="on base", box=box.SQUARE, padding=(0, 1), border_style="blue")
+
+    def _make_logs_panel(self):
+        """Create the scrolling log table."""
+        table = Table.grid(expand=True, padding=(0, 1))
+        table.add_column(width=3)  # Icon
+        table.add_column(ratio=1)  # Message
+        table.add_column(width=10, justify="right")  # Duration
+
+        if not self.log_messages:
+            table.add_row("", "[dim]Initializing...[/dim]", "")
+        
+        for msg in self.log_messages[-self.max_log_items:]:
+            icon = msg.get("icon", "•")
+            text = msg.get("text", "")
+            style = msg.get("style", "white")
+            duration = msg.get("duration", "")
+            
+            table.add_row(
+                Text(icon, style=style),
+                Text(text, style=style),
+                Text(duration, style="dim")
+            )
 
         return Panel(
-            log_table,
-            title="[bold blue]Recent Activity[/]",
-            border_style="blue",
+            table,
+            title="[bold blue]Activity Log[/]",
+            border_style="surface0",
             box=box.ROUNDED,
-            padding=(0, 0)
+            padding=(0, 0),
         )
 
-    def _create_right_panel(self):
-        """Build the right column with progress and a compact summary table."""
-        # Progress Grid
-        progress_grid = Table.grid(expand=True)
-        progress_grid.add_row(
-            Panel(
-                self.overall_progress,
-                title=f"[bold {C_GREEN}]Overall Progress[/]",
-                border_style=C_GREEN,
-                box=box.ROUNDED,
-                padding=(1, 2)
-            )
+    def _make_status_panel(self):
+        """Create the right-side status panel."""
+        stats_table = Table.grid(expand=True, padding=(0, 1))
+        stats_table.add_column(ratio=1)
+        stats_table.add_column(justify="right")
+        
+        stats_table.add_row("[green]✓ OK[/]", str(self.stats["ok"]))
+        stats_table.add_row("[yellow]~ Changed[/]", str(self.stats["changed"]))
+        stats_table.add_row("[red]✗ Failed[/]", str(self.stats["failed"]))
+        stats_table.add_row("[dim]- Skipped[/]", str(self.stats["skipped"]))
+
+        content = Group(
+            Panel(self.overall_progress, box=box.MINIMAL, title="Overall", border_style="blue"),
+            Panel(self.task_progress, box=box.MINIMAL, title="Current Task", border_style="mauve"),
+            Panel(stats_table, box=box.MINIMAL, title="Statistics", border_style="surface1"),
         )
-        progress_grid.add_row(
-            Panel(
-                self.job_progress,
-                title=f"[bold {C_MAUVE}]Current Task[/]",
-                border_style=C_MAUVE,
-                box=box.ROUNDED,
-                padding=(1, 2)
-            )
+        
+        return Panel(
+            content,
+            title="[bold mauve]Status[/]",
+            border_style="surface0",
+            box=box.ROUNDED,
         )
 
-        # Live Stats Summary
-        summary = Table(box=box.ROUNDED, show_header=True, header_style=f"bold {C_LAVENDER}", expand=True)
-        summary.add_column("Metric", justify="right")
-        summary.add_column("Count", justify="left")
-        
-        summary.add_row("OK", f"[{C_GREEN}]{self.ok_count}[/]")
-        summary.add_row("Changed", f"[{C_YELLOW}]{self.changed_count}[/]")
-        summary.add_row("Failed", f"[{C_RED}]{self.failed_count}[/]")
-        summary.add_row("Skipped", f"[{C_OVERLAY0}]{self.skipped_count}[/]")
-
-        content = Group(progress_grid, summary)
-        return Panel(content, box=box.ROUNDED, border_style=C_SURFACE0, padding=(1, 1))
-
-    def _create_header_table(self):
-        """Create the header with ASCII banner and stats."""
-        grid = Table.grid(expand=True)
-        grid.add_column(justify="center", ratio=1)
-
-        banner_text = """
-[bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]
- """
-        grid.add_row(banner_text)
-        
-        stats = Text()
-        stats.append(f"LOG LEVEL: {self.log_level.upper()}  |  ", style="dim")
-        stats.append(f"OK: {self.ok_count} ", style="green")
-        stats.append(f"CHANGED: {self.changed_count} ", style="yellow")
-        stats.append(f"FAILED: {self.failed_count} ", style="red")
-        stats.append(f"SKIPPED: {self.skipped_count}", style="dim")
-        
-        grid.add_row(Panel(stats, box=box.ROUNDED, style="white on black"))
-        return Panel(grid, style="white on black", box=box.ROUNDED)
-
-    def _create_milestones_panel(self):
-        """Create horizontal phase tracker."""
-        if not self.current_phase:
-            return Text("Initializing...", style="dim")
-
-        status_row = []
+    def _make_footer(self):
+        """Create the milestone tracker footer."""
+        phases = []
         for phase in PHASE_ORDER:
             if phase in self.completed_phases:
-                icon = "[green]●[/green]"
+                style = "green"
+                icon = "●"
             elif phase == self.current_phase:
-                icon = "[blue]◉[/blue]"
+                style = "bold blue"
+                icon = "◉"
             else:
-                icon = "[dim]○[/dim]"
-            status_row.append(icon)
+                style = "dim surface1"
+                icon = "○"
+            phases.append(Text(f"{icon} {phase}", style=style))
+            phases.append(Text("  ")) # Spacer
 
-        dots = "".join(status_row)
-        display = Text.from_markup(f"{dots}  [bold white]{self.current_phase}[/bold white]")
-        return Panel(display, box=box.ROUNDED, padding=(0, 1), style="on black")
+        return Panel(
+            Text.assemble(*phases),
+            style="on base",
+            box=box.SQUARE,
+            padding=(0, 1),
+            border_style="surface0"
+        )
 
-    def _create_footer(self):
-        """Create the footer with milestone tracking."""
-        return self._create_milestones_panel()
-
-    def _get_duration(self, start_time):
-        if not start_time: return "0.0s"
-        return f"{time.time() - start_time:.1f}s"
-
-    def _handle_task_result(self, status, result, ignore_errors=False):
-        """Generic handler for task results."""
-        duration = self._get_duration(self.current_task_start)
-        
-        if status == "ok":
-            self.ok_count += 1
-            if result._result.get("changed", False):
-                status = "changed"
-                self.changed_count += 1
-        elif status == "failed":
-            self.failed_count += 1
-        elif status == "skipped":
-            self.skipped_count += 1
-        
-        self._print_task_result(status, self.current_task, duration, result._result.get("msg", ""))
-
-    def _print_task_result(self, status, task_name, duration, message=""):
-        """Add formatted result to internal log history instead of printing."""
-        if not self.console: return
-        
-        # In navigator mode with Pure TUI, we never print to stream directly
-        # if self.is_navigator: ... (disabled)
-
-        if not self.live: return
-
-        # Icons and Colors
+    def add_log(self, status: str, message: str, duration: float = 0.0):
+        """Add a log entry."""
         icons = {
-            "ok": "", # Nerd Font check
-            "changed": "", # Nerd Font refresh
-            "failed": "", # Nerd Font cross
-            "skipped": "", # Nerd Font skip
+            "ok": "✓",
+            "changed": "⟳",
+            "failed": "✗",
+            "skipped": "−",
+            "info": "ℹ"
         }
-        colors = {
+        styles = {
             "ok": "green",
             "changed": "yellow",
             "failed": "red",
             "skipped": "dim",
+            "info": "blue"
         }
         
-        icon = icons.get(status, "•")
-        color = colors.get(status, "white")
+        dur_str = f"{duration:.1f}s" if duration > 0 else ""
         
-        # Format the log entry
-        log_entry = {
-            "icon": icon,
-            "status": status,
-            "color": color,
-            "task": task_name,
-            "duration": duration,
-            "message": message
-        }
-        
-        # Add to history
-        self.log_history.append(log_entry)
-        if len(self.log_history) > self.max_log_items:
-            self.log_history.pop(0)
-            
-        # Update the UI to show the new log
-        self._update_ui()
+        self.log_messages.append({
+            "icon": icons.get(status, "•"),
+            "text": message,
+            "style": styles.get(status, "white"),
+            "duration": dur_str
+        })
 
-    def _print_log_line(self, status, task_name, duration, message=""):
-        """Print a static log line for non-interactive mode."""
-        if not self.console: return
+    def set_phase(self, role_name: str):
+        """Update current phase based on role."""
+        new_phase = ROLE_PHASE_MAP.get(role_name)
+        if new_phase and new_phase != self.current_phase:
+            if self.current_phase:
+                self.completed_phases.add(self.current_phase)
+            self.current_phase = new_phase
 
-        # Icons and Colors
-        icons = {
-            "ok": "",
-            "changed": "",
-            "failed": "",
-            "skipped": "",
-        }
-        # Map statuses to new palette
-        colors = {
-            "ok": C_GREEN,
-            "changed": C_YELLOW,
-            "failed": C_RED,
-            "skipped": C_OVERLAY0,
-        }
-        
-        status_color = colors.get(status, C_TEXT)
-        icon = icons.get(status, "•")
-        
-        # Determine Phase
-        phase = self.current_phase or "Init"
-        
-        # Create a Grid for alignment
-        grid = Table.grid(expand=True)
-        grid.add_column(justify="left", width=12)  # Status
-        grid.add_column(justify="left", ratio=1)   # Task Name
-        grid.add_column(justify="right", width=20) # Phase
-        grid.add_column(justify="right", width=10) # Duration
-
-        # Status Pill
-        status_text = Text(f"{icon} {status.upper()}", style=f"bold {status_color}")
-        
-        # Task Name (Plain)
-        task_text = Text(task_name, style=C_TEXT)
-        
-        # Phase Pill (Lavender on Surface0)
-        phase_text = Text(f" {phase} ", style=f"{C_LAVENDER} on {C_SURFACE0}")
-        
-        # Duration Pill (Overlay1 on Mantle)
-        duration_text = Text(f" {duration} ", style=f"{C_OVERLAY1} on {C_MANTLE}")
-
-        grid.add_row(status_text, task_text, phase_text, duration_text)
-        
-        # Error Message Panel
-        if status == "failed":
-            error_panel = Panel(
-                Text(message, style=C_RED),
-                title=f"[bold {C_RED}]Error Details[/]",
-                border_style=C_RED,
-                box=box.ROUNDED,
-                expand=True
-            )
-            self.console.print(grid)
-            self.console.print(error_panel)
+    def update_task(self, description: str):
+        """Update the current task spinner."""
+        if self.current_task_id is None:
+            self.current_task_id = self.task_progress.add_task(description, total=None)
         else:
-            self.console.print(grid)
+            self.task_progress.update(self.current_task_id, description=description)
+        
+        # Advance overall progress slightly
+        self.overall_progress.advance(self.overall_task_id, 0.5)
 
-    def _print_footer(self):
-        if self.console:
-            # Summary Table
-            summary = Table(box=box.ROUNDED, show_header=True, header_style=f"bold {C_LAVENDER}")
-            summary.add_column("Metric", justify="right")
-            summary.add_column("Count", justify="left")
-            
-            summary.add_row("OK", f"[{C_GREEN}]{self.ok_count}[/]")
-            summary.add_row("Changed", f"[{C_YELLOW}]{self.changed_count}[/]")
-            summary.add_row("Failed", f"[{C_RED}]{self.failed_count}[/]")
-            summary.add_row("Skipped", f"[{C_OVERLAY0}]{self.skipped_count}[/]")
-            
-            total_time = self._get_duration(self.start_time)
-            
-            # Starship Footer Style
-            panel = Panel(
-                summary,
-                title=f"[bold {C_BLUE}]Execution Completed in {total_time}[/]",
-                border_style=C_SURFACE0,
-                box=box.ROUNDED,
-                expand=False
-            )
-            self.console.print(panel)
 
-    # --- Ansible Callback Hooks ---
+class CallbackModule(CallbackBase):
+    """
+    Ansible callback plugin for Rich TUI.
+    """
+    CALLBACK_VERSION = 2.0
+    CALLBACK_TYPE = "stdout"
+    CALLBACK_NAME = "rich_tui"
+
+    def __init__(self):
+        super(CallbackModule, self).__init__()
+        self.ui: Optional[RichInterface] = None
+        self.live: Optional[Live] = None
+        self.current_task_start = 0.0
+        
+        # Theme setup
+        self.theme = Theme(THEME_COLORS)
+        
+        # Detect environment
+        self.is_tty = os.isatty(1) or os.environ.get("VPS_FORCE_TUI") == "true"
+        self.is_navigator = "ansible-navigator" in os.environ.get("ansible_cmdline", "")
+
+    def v2_playbook_on_start(self, playbook):
+        if not RICH_AVAILABLE or not self.is_tty:
+            return
+
+        console = Console(theme=self.theme, force_terminal=True)
+        self.ui = RichInterface(console)
+        
+        # Use Live context for automatic refreshing
+        # In navigator, we might need to be careful with stdout redirection
+        self.live = Live(
+            self.ui.get_renderable(),
+            console=console,
+            refresh_per_second=4,
+            auto_refresh=True,
+            redirect_stdout=False,
+            redirect_stderr=False,
+            screen=True # Fullscreen mode
+        )
+        self.live.start()
+
+    def v2_playbook_on_task_start(self, task, is_conditional):
+        self.current_task_start = time.time()
+        if self.ui:
+            # Update Role/Phase
+            if hasattr(task, '_role') and task._role:
+                self.ui.set_phase(task._role.get_name())
+            
+            # Update Task Spinner
+            self.ui.update_task(task.get_name())
+            
+            if self.live:
+                self.live.update(self.ui.get_renderable())
+
+    def _handle_result(self, result, status: str):
+        if not self.ui:
+            return
+
+        duration = time.time() - self.current_task_start
+        task_name = result._task.get_name()
+        
+        # Stats update
+        self.ui.stats[status] += 1
+        
+        # Log update
+        msg = task_name
+        if status == "failed":
+            msg += f" - {result._result.get('msg', 'Unknown Error')}"
+            
+        self.ui.add_log(status, msg, duration)
+        
+        if self.live:
+            self.live.update(self.ui.get_renderable())
 
     def v2_runner_on_ok(self, result):
-        self._handle_task_result("ok", result)
+        status = "changed" if result._result.get("changed", False) else "ok"
+        self._handle_result(result, status)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
         status = "skipped" if ignore_errors else "failed"
-        self._handle_task_result(status, result, ignore_errors)
+        self._handle_result(result, status)
 
     def v2_runner_on_skipped(self, result):
-        self._handle_task_result("skipped", result)
+        self._handle_result(result, "skipped")
 
     def v2_runner_on_unreachable(self, result):
-        self._handle_task_result("failed", result)
+        self._handle_result(result, "failed")
 
     def v2_playbook_on_stats(self, stats):
         if self.live:
             self.live.stop()
-        self._print_footer()
+        
+        # Print final summary if needed
+        if self.ui and self.ui.console:
+            self.ui.console.print(self.ui._make_status_panel())

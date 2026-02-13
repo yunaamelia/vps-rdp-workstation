@@ -13,33 +13,6 @@ readonly SCRIPT_DIR
 readonly LOG_DIR="/var/log"
 readonly STATE_DIR="/var/lib/vps-setup"
 
-# Colors & Symbols
-readonly RED='\033[0;31m'
-readonly GREEN='\033[0;32m'
-readonly YELLOW='\033[0;33m'
-readonly BLUE='\033[0;34m'
-readonly MAGENTA='\033[0;35m'
-readonly CYAN='\033[0;36m'
-readonly BOLD='\033[1m'
-readonly DIM='\033[2m'
-readonly NC='\033[0m'
-
-readonly CHECK="✓"
-readonly CROSS="✗"
-readonly WARN="⚠"
-readonly INFO="ℹ"
-
-# Banner Art
-readonly BANNER_ART_FULL="${CYAN}
-╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
-╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝${NC}
-${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}"
-
-readonly BANNER_ART_COMPACT="${CYAN}
-  VPS RDP WORKSTATION v${SCRIPT_VERSION}${NC}
-${DIM} Security-Hardened | Debian 13${NC}"
-
 # Defaults
 LOG_LEVEL="minimal"
 DRY_RUN=false
@@ -51,146 +24,40 @@ ANSIBLE_ARGS=()
 
 # --- Logging & UI ---
 
-log() {
-	local level="$1"
-	local msg="$2"
-	local color="$3"
-	local icon="$4"
-
-	# Console Output
-	echo -e "${color}${icon}${NC} ${msg}" >&2
-
-	# File Output (Redacted)
-	if [[ -w "$LOG_DIR" ]]; then
-		local clean_msg
-		clean_msg=$(echo "$msg" | sed -E 's/(password|secret)=[^ ]+/\1=***/g')
-		echo "[$(date +'%F %T')] [$level] $clean_msg" >>"${LOG_DIR}/vps-setup.log"
+run_rich() {
+	# Ensure python3 is available before calling
+	if command -v python3 &>/dev/null; then
+		python3 "${SCRIPT_DIR}/scripts/rich_cli.py" "$@"
+	else
+		# Fallback if python3 is missing (should only happen during bootstrap)
+		local cmd="$1"
+		shift
+		case "$cmd" in
+		log) echo "[$1] $2" ;;
+		spinner)
+			echo "Running: $1..."
+			eval "$2"
+			;;
+		banner) echo "VPS RDP WORKSTATION v${SCRIPT_VERSION}" ;;
+		esac
 	fi
 }
 
-log_info() { log "INFO" "$1" "$BLUE" "$INFO"; }
-log_success() { log "SUCCESS" "$1" "$GREEN" "$CHECK"; }
-log_warn() { log "WARN" "$1" "$YELLOW" "$WARN"; }
-log_error() { log "ERROR" "$1" "$RED" "$CROSS"; }
+log_info() { run_rich log info "$1"; }
+log_success() { run_rich log success "$1"; }
+log_warn() { run_rich log warn "$1"; }
+log_error() { run_rich log error "$1"; }
 
-# --- Spinner ---
 run_with_spinner() {
 	local msg="$1"
 	local cmd="$2"
-	local temp_log
-	temp_log=$(mktemp)
-
-	# If verbose or CI, just run the command without spinner
+	# If verbose or CI, skip spinner
 	if [[ "${VERBOSE:-false}" == "true" ]] || [[ "${CI_MODE:-false}" == "true" ]]; then
 		log_info "$msg"
-		if eval "$cmd"; then
-			rm -f "$temp_log"
-			return 0
-		else
-			return $?
-		fi
-	fi
-
-	echo -ne "${CYAN}${INFO} ${msg}${NC} "
-	local pid
-
-	(
-		while :; do
-			for s in / - \\ \|; do
-				echo -ne "\b$s"
-				sleep 0.1
-			done
-		done
-	) &
-	pid=$!
-
-	# Run command and capture output
-	if eval "$cmd" </dev/null >"$temp_log" 2>&1; then
-		kill "$pid" 2>/dev/null || true
-		wait "$pid" 2>/dev/null || true
-		echo -e "\b${GREEN}${CHECK}${NC}"
-		rm -f "$temp_log"
-		return 0
+		eval "$cmd"
 	else
-		local ret=$?
-		kill "$pid" 2>/dev/null || true
-		wait "$pid" 2>/dev/null || true
-		echo -e "\b${RED}${CROSS}${NC}"
-		log_error "Command failed: $cmd"
-		echo -e "${RED}Error output:${NC}"
-		cat "$temp_log"
-		rm -f "$temp_log"
-		return $ret
+		run_rich spinner "$msg" "$cmd"
 	fi
-}
-
-# TUI Functions
-# HEADER_HEIGHT will be set dynamically in init_tui
-HEADER_HEIGHT=5
-FOOTER_HEIGHT=1
-
-draw_banner() {
-	local cols
-	cols=$(tput cols)
-	if [[ $cols -ge 100 ]]; then
-		echo -e "$BANNER_ART_FULL"
-	else
-		echo -e "$BANNER_ART_COMPACT"
-	fi
-}
-
-init_tui() {
-	# Skip if non-interactive or CI
-	if [[ "${CI_MODE}" == "true" ]] || [[ ! -t 1 ]]; then return; fi
-
-	clear
-	local rows
-	rows=$(tput lines)
-	local cols
-	cols=$(tput cols)
-
-	# Determine Header Height based on width
-	if [[ $cols -ge 100 ]]; then
-		HEADER_HEIGHT=5
-	else
-		HEADER_HEIGHT=3
-	fi
-
-	# Draw Header (Fixed top)
-	# Clear screen explicitly first
-	clear
-
-	tput sc
-	tput cup 0 0
-	echo -e "${CYAN}${BOLD}"
-	draw_banner
-	echo -e "${NC}"
-	tput rc
-
-	# Draw Footer (Fixed bottom)
-	# Footer box removed as per request
-	# local footer_row=$((rows - FOOTER_HEIGHT))
-	# tput sc
-	# tput cup "$footer_row" 0
-	# echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-	# tput rc
-
-	# Set Scroll Region (Middle)
-	echo -ne "\033[$((HEADER_HEIGHT + 2));$((rows - FOOTER_HEIGHT))r"
-	tput cup $((HEADER_HEIGHT + 1)) 0
-}
-
-cleanup_tui() {
-	# Reset scroll region and cursor
-	if [[ -t 1 ]]; then
-		echo -ne "\033[r"
-		tput cup $(($(tput lines) - 1)) 0
-	fi
-}
-
-handle_resize() {
-	cleanup_tui
-	init_tui
 }
 
 # --- Core Logic ---
@@ -219,8 +86,8 @@ validate_system() {
 
 	if [[ ${#missing[@]} -gt 0 ]]; then
 		log_info "Installing dependencies: ${missing[*]}"
-		run_with_spinner "Installing system dependencies..." \
-			"apt-get update -qq && apt-get install -y -qq ${missing[*]}"
+		# Use simple apt-get here as python3 might be missing
+		apt-get update -qq && apt-get install -y -qq "${missing[@]}"
 	fi
 }
 
@@ -236,7 +103,6 @@ setup_ansible() {
 	export PATH="$PATH:$HOME/.local/bin"
 
 	# Install core tools via pipx
-	# Map package names to their main binary commands
 	declare -A tools=(
 		["ansible-core"]="ansible"
 		["ansible-navigator"]="ansible-navigator"
@@ -263,17 +129,12 @@ setup_ansible() {
 	log_info "Injecting dependencies into Ansible environments..."
 	for tool in ansible-core ansible-navigator; do
 		if pipx list --short | grep -q "^$tool "; then
-			# We use --force to ensure it's injected even if pipx thinks it might be there but broken
-			# and || true to prevent exit if injection fails (it's not strictly critical for basic execution, just UI)
 			run_with_spinner "Injecting 'rich' into $tool..." \
 				"pipx inject $tool rich --force" || true
 		fi
 	done
 
 	log_info "Installing Ansible collections..."
-	log_warn "⏱  Downloading Ansible collections (60+ MB) - this may take 10-15 minutes on slow connections"
-	log_info "   Progress is logged to: /var/log/vps-setup-ansible.log"
-	log_info "   You can monitor with: tail -f /var/log/vps-setup-ansible.log"
 	# Install into local ./collections dir to match ansible.cfg configuration
 	mkdir -p "${SCRIPT_DIR}/collections"
 	export ANSIBLE_COLLECTIONS_PATH="${SCRIPT_DIR}/collections"
@@ -283,16 +144,6 @@ setup_ansible() {
 
 get_credentials() {
 	log_info "Configuring credentials..."
-	if [[ "${VERBOSE:-false}" == "true" ]]; then
-		log_info "DEBUG: HOME=$HOME"
-		log_info "DEBUG: PATH=$PATH"
-		if command -v ansible-navigator; then
-			log_info "DEBUG: ansible-navigator found at $(command -v ansible-navigator)"
-		else
-			log_error "DEBUG: ansible-navigator NOT found in PATH"
-			ls -la "$HOME/.local/bin" || true
-		fi
-	fi
 
 	# Username
 	if [[ -z "${VPS_USERNAME:-}" ]]; then
@@ -301,19 +152,15 @@ get_credentials() {
 
 	# Password (Secure)
 	if [[ -n "${VPS_SECRETS_FILE:-}" ]] && [[ -f "$VPS_SECRETS_FILE" ]]; then
-		# Read from file (expected format: password=...)
-		# shellcheck disable=SC2002
-		VPS_PASSWORD=$(cat "$VPS_SECRETS_FILE" | grep "^password=" | cut -d= -f2-)
+		VPS_PASSWORD=$(grep "^password=" "$VPS_SECRETS_FILE" | cut -d= -f2-)
 	fi
 
 	if [[ -z "${VPS_PASSWORD:-}" ]]; then
-		# In CI mode, fail if password is missing
 		if [[ "${CI_MODE:-false}" == "true" ]]; then
 			log_error "CI_MODE is enabled but VPS_PASSWORD is not set."
 			exit 1
 		fi
 
-		# Interactive prompt
 		stty -echo
 		read -rp "Enter password: " VPS_PASSWORD
 		echo
@@ -342,7 +189,6 @@ run_playbook() {
 	# Export Configs
 	export VPS_LOG_LEVEL="$LOG_LEVEL"
 	export ANSIBLE_DEPRECATION_WARNINGS=False
-	# Ensure absolute path for callback plugins and python path
 	export ANSIBLE_CALLBACK_PLUGINS="${SCRIPT_DIR}/plugins/callback"
 	export ANSIBLE_COLLECTIONS_PATH="${SCRIPT_DIR}/collections"
 	export PYTHONPATH="${SCRIPT_DIR}:${PYTHONPATH:-}"
@@ -352,11 +198,9 @@ run_playbook() {
 		export ANSIBLE_STDOUT_CALLBACK="default"
 		mode="stdout"
 	else
-		# Prevent TUI conflict: ansible-navigator has its own UI.
-		# Do NOT use rich_tui when running inside navigator.
+		# Use our new Rich TUI callback
 		export ANSIBLE_STDOUT_CALLBACK="rich_tui"
-		export ANSIBLE_NAVIGATOR_MODE="1" # Explicitly signal navigator mode to callback
-		export VPS_FORCE_TUI="true"       # Force TUI output even in navigator mode (fixes silent execution)
+		export VPS_FORCE_TUI="true"
 	fi
 
 	# Build Args
@@ -377,9 +221,6 @@ run_playbook() {
 	fi
 
 	args+=("${ANSIBLE_ARGS[@]}")
-
-	# Clean TUI before handover
-	cleanup_tui
 
 	# Execute
 	if ansible-navigator run "$playbook" "${args[@]}"; then
@@ -435,13 +276,11 @@ main() {
 	done
 
 	# Initialization
-	trap 'cleanup_tui; unset VPS_USER_PASSWORD_HASH' EXIT
-	if [[ "$CI_MODE" != "true" ]]; then trap 'handle_resize' WINCH; fi
-
+	trap 'unset VPS_USER_PASSWORD_HASH' EXIT
 	mkdir -p "$LOG_DIR" "$STATE_DIR"
 
-	# Start TUI
-	init_tui
+	# Banner
+	run_rich banner "$SCRIPT_VERSION"
 
 	# Workflow
 	validate_system
@@ -451,7 +290,6 @@ main() {
 	if [[ "$ROLLBACK_MODE" == "true" ]]; then
 		run_playbook "playbooks/rollback.yml"
 	else
-		# Always use stdout mode for better visibility and to avoid TUI conflicts
 		run_playbook "playbooks/main.yml" "stdout"
 	fi
 }

@@ -145,11 +145,12 @@ init_tui() {
 	tput rc
 
 	# Draw Footer (Fixed bottom)
-	local footer_row=$((rows - FOOTER_HEIGHT))
-	tput sc
-	tput cup "$footer_row" 0
-	echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
-	tput rc
+	# Footer box removed as per request
+	# local footer_row=$((rows - FOOTER_HEIGHT))
+	# tput sc
+	# tput cup "$footer_row" 0
+	# echo -e "${CYAN}━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━${NC}"
+	# tput rc
 
 	# Set Scroll Region (Middle)
 	echo -ne "\033[$((HEADER_HEIGHT + 2));$((rows - FOOTER_HEIGHT))r"

@@ -30,11 +30,15 @@ readonly WARN="⚠"
 readonly INFO="ℹ"
 
 # Banner Art
-readonly BANNER_ART="${CYAN}
+readonly BANNER_ART_FULL="${CYAN}
 ╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
 ╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
  ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝${NC}
 ${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}"
+
+readonly BANNER_ART_COMPACT="${CYAN}
+  VPS RDP WORKSTATION v${SCRIPT_VERSION}${NC}
+${DIM} Security-Hardened | Debian 13${NC}"
 
 # Defaults
 LOG_LEVEL="minimal"
@@ -122,10 +126,16 @@ run_with_spinner() {
 
 # TUI Functions
 HEADER_HEIGHT=5
-FOOTER_HEIGHT=3
+FOOTER_HEIGHT=1
 
 draw_banner() {
-	echo -e "$BANNER_ART"
+	local cols
+	cols=$(tput cols)
+	if [[ $cols -ge 100 ]]; then
+		echo -e "$BANNER_ART_FULL"
+	else
+		echo -e "$BANNER_ART_COMPACT"
+	fi
 }
 
 init_tui() {
@@ -137,6 +147,9 @@ init_tui() {
 	rows=$(tput lines)
 
 	# Draw Header (Fixed top)
+	# Clear screen explicitly first
+	clear
+
 	tput sc
 	tput cup 0 0
 	echo -e "${CYAN}${BOLD}"

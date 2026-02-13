@@ -102,15 +102,15 @@ run_with_spinner() {
 
 	# Run command and capture output
 	if eval "$cmd" </dev/null >"$temp_log" 2>&1; then
-		kill "$pid" 2>/dev/null
-		wait "$pid" 2>/dev/null
+		kill "$pid" 2>/dev/null || true
+		wait "$pid" 2>/dev/null || true
 		echo -e "\b${GREEN}${CHECK}${NC}"
 		rm -f "$temp_log"
 		return 0
 	else
 		local ret=$?
-		kill "$pid" 2>/dev/null
-		wait "$pid" 2>/dev/null
+		kill "$pid" 2>/dev/null || true
+		wait "$pid" 2>/dev/null || true
 		echo -e "\b${RED}${CROSS}${NC}"
 		log_error "Command failed: $cmd"
 		echo -e "${RED}Error output:${NC}"

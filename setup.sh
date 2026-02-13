@@ -36,6 +36,7 @@ VERBOSE=false
 ROLLBACK_MODE=false
 CI_MODE=false
 K8S_MODE=false
+ANSIBLE_ARGS=()
 
 # --- Logging & UI ---
 
@@ -257,6 +258,8 @@ run_playbook() {
 		args+=("--check")
 	fi
 
+	args+=("${ANSIBLE_ARGS[@]}")
+
 	# Clean TUI before handover
 	cleanup_tui
 
@@ -273,8 +276,13 @@ main() {
 	# Argument Parsing
 	while [[ $# -gt 0 ]]; do
 		case "$1" in
+		--)
+			shift
+			ANSIBLE_ARGS=("$@")
+			break
+			;;
 		--help)
-			echo "Usage: $0 [--dry-run] [--verbose] [--ci] [--k8s]"
+			echo "Usage: $0 [--dry-run] [--verbose] [--ci] [--k8s] [-- <ansible-args>]"
 			exit 0
 			;;
 		--dry-run)

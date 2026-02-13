@@ -20,7 +20,7 @@
   Desktop:   KDE Plasma
   Theme:     {{ vps_theme_variant | default('nordic') | capitalize }}
   Accent:    {{ vps_theme_accent | default('blue') | capitalize }}
-  Icons:     {{ vps_icon_theme }}
+  Icons:     {{ vps_icon_theme | default('Papirus-Dark') }}
   Display:   SDDM
 
 🔌 Remote Access

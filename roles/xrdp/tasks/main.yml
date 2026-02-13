@@ -7,7 +7,9 @@
         name:
           - xrdp
           - xorgxrdp
+          - xserver-xorg-legacy
           - ssl-cert
+          - dbus-x11
         state: present
       tags: [xrdp, packages]
 
@@ -48,6 +50,35 @@
         mode: '0755'
       notify: Restart XRDP
       tags: [xrdp, config]
+
+    - name: Configure Xwrapper to allow remote Xorg sessions
+      ansible.builtin.template:
+        src: Xwrapper.config.j2
+        dest: /etc/X11/Xwrapper.config
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Restart XRDP
+      tags: [xrdp, config, fix]
+
+    - name: Deploy Polkit rule for color management (fix popup/black screen)
+      ansible.builtin.template:
+        src: 45-allow-colord.rules.j2
+        dest: /etc/polkit-1/rules.d/45-allow-colord.rules
+        owner: root
+        group: root
+        mode: '0644'
+      tags: [xrdp, config, fix]
+
+    - name: Deploy TCP tuning for XRDP performance
+      ansible.builtin.template:
+        src: 99-xrdp-tcp-tuning.conf.j2
+        dest: /etc/sysctl.d/99-xrdp-tcp-tuning.conf
+        owner: root
+        group: root
+        mode: '0644'
+      notify: Apply sysctl settings
+      tags: [xrdp, config, performance]
 
     - name: Enable and start XRDP service
       ansible.builtin.systemd:

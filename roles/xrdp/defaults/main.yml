@@ -3,5 +3,19 @@
 vps_install_xrdp: true
 vps_xrdp_port: 3389
 vps_xrdp_color_depth: 24
-vps_xrdp_encryption: "high"
+vps_xrdp_encryption: 'high'
 vps_xrdp_audio: true
+vps_xrdp_security_layer: 'tls'
+vps_xrdp_ssl_protocols: 'TLSv1.2, TLSv1.3'
+vps_xrdp_session_policy: 'Separate'
+vps_xrdp_max_sessions: 50
+vps_xrdp_x11_display_offset: 10
+vps_xrdp_kill_disconnected: 'false'
+vps_xrdp_idle_timeout: 0
+vps_xrdp_disconnected_timeout: 0
+vps_xrdp_allow_root: 'false'
+vps_xrdp_max_login_retry: 4
+vps_xrdp_log_level: 'INFO'
+vps_xrdp_syslog_level: 'INFO'
+vps_xrdp_sesman_log_level: 'INFO'
+vps_xrdp_sesman_syslog_level: 'INFO'

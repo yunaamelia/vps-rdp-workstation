@@ -1,30 +1,26 @@
-#!/bin/bash
-# XRDP Session Startup Script
+#!/bin/sh
+# XRDP Startup Script for Debian 13 (Trixie) with KDE Plasma 6
 # Managed by Ansible
 
-# Unset session manager variables from SSH/console
-unset SESSION_MANAGER
-unset DBUS_SESSION_BUS_ADDRESS
+if test -r /etc/profile; then
+    . /etc/profile
+fi
 
-# Set up environment for KDE Plasma
+if test -r ~/.profile; then
+    . ~/.profile
+fi
+
+# Set crucial environment variables for Plasma 6
 export XDG_SESSION_TYPE=x11
 export XDG_CURRENT_DESKTOP=KDE
 export XDG_CONFIG_DIRS=/etc/xdg
-export KDE_SESSION_VERSION=5
 export DESKTOP_SESSION=plasma
+export QT_QPA_PLATFORM=xcb
 
-# Set locale
-if [ -r /etc/default/locale ]; then
-    . /etc/default/locale
-    export LANG LANGUAGE
+# Fix: Prevent KDE Plasma 6 black screen by ensuring DBus session
+if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
+    eval $(dbus-launch --sh-syntax --exit-with-session)
 fi
 
-# Required for some KDE applications
-export QT_QPA_PLATFORMTHEME=kde
-
-# Disable GPU for RDP session
-export KWIN_COMPOSE=N
-export QT_GRAPHICSSYSTEM=native
-
-# Launch KDE Plasma
-exec startplasma-x11
+# Launch KDE Plasma 6 (Force X11 backend for XRDP compatibility)
+exec /usr/bin/startplasma-x11

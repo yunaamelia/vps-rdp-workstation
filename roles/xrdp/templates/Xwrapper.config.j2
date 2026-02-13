@@ -1,0 +1,4 @@
+# Xwrapper.config - Managed by Ansible
+# Allow XRDP (remote) users to start Xorg sessions
+allowed_users={{ vps_xrdp_xwrapper_allowed_users | default('anybody') }}
+needs_root_rights={{ vps_xrdp_xwrapper_needs_root | default('yes') }}

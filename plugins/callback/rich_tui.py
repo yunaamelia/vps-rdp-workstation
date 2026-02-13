@@ -206,6 +206,9 @@ class CallbackModule(CallbackBase):
              self._print_static_header()
              return
 
+        # Print the banner once before starting Live display to prevent flickering/stacking
+        self._print_static_header()
+
         self._init_layout()
         self._init_progress()
         self._start_live_display()
@@ -241,10 +244,9 @@ class CallbackModule(CallbackBase):
         self.console.print()
 
     def _init_layout(self):
-        """Initialize the Layout structure with Header, Body (Split), and Footer."""
+        """Initialize the Layout structure with Body (Split) and Footer. Header is static."""
         self.layout = Layout()
         self.layout.split(
-            Layout(name="header", size=6),
             Layout(name="body", ratio=1),
             Layout(name="footer", size=3)
         )
@@ -254,7 +256,6 @@ class CallbackModule(CallbackBase):
             Layout(name="right", ratio=3)
         )
         
-        self.layout["header"].update(self._create_header_table())
         self.layout["footer"].update(self._create_footer())
 
     def _init_progress(self):
@@ -355,7 +356,6 @@ class CallbackModule(CallbackBase):
         if not self.live or not self.layout:
             return
 
-        self.layout["header"].update(self._create_header_table())
         self.layout["left"].update(self._create_left_panel())
         self.layout["right"].update(self._create_right_panel())
         self.layout["footer"].update(self._create_footer())

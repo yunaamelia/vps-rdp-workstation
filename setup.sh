@@ -161,10 +161,8 @@ get_credentials() {
 			exit 1
 		fi
 
-		stty -echo
-		read -rp "Enter password: " VPS_PASSWORD
+		read -rsp "Enter password: " VPS_PASSWORD
 		echo
-		stty echo
 	fi
 
 	# Generate Hash

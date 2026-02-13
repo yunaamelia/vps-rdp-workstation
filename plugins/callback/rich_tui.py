@@ -279,9 +279,10 @@ class CallbackModule(CallbackBase):
 ╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
  ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/bold cyan]"""
         
-        banner_panel = Panel(banner_ascii, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
+        # Create a single unified panel for the header
+        content = Group(Text.from_markup(banner_ascii), Text(""), header_bar)
         
-        return Group(banner_panel, header_bar)
+        return Panel(content, box=box.ROUNDED, border_style=C_SURFACE0, expand=False, padding=(0, 2))
 
     def _init_layout(self):
         """Initialize the Layout structure with Header, Body (Split), and Footer."""

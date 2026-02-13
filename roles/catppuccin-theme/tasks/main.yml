@@ -66,12 +66,4 @@
   when: vps_theme_variant == 'catppuccin-mocha'
   tags: [catppuccin-theme, cleanup]
 
-- name: Apply KDE Globals Theme
-  ansible.builtin.template:
-    src: kdeglobals.j2
-    dest: "/home/{{ vps_username }}/.config/kdeglobals"
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  when: vps_theme_variant == 'catppuccin-mocha'
-  tags: [catppuccin-theme, kde]
+

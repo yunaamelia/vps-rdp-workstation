@@ -11,67 +11,29 @@
   when: vps_install_desktop | default(true)
   tags: [kde-opt, tools]
 
-- name: Check if balooctl exists
-  ansible.builtin.command: which balooctl
-  register: balooctl_check
-  changed_when: false
-  failed_when: false
-  tags: [kde-opt, performance]
-
-- name: Check Baloo status
-  ansible.builtin.command: balooctl status
-  register: baloo_status
-  changed_when: false
-  failed_when: false
-  when: balooctl_check.rc == 0
-  tags: [kde-opt, performance]
-
-- name: Disable Baloo file indexing (service)
-  ansible.builtin.command: balooctl disable
-  become: true
-  become_user: "{{ vps_username }}"
-  changed_when: "'Baloo is currently disabled' not in baloo_status.stdout"
-  when: balooctl_check.rc == 0 and 'Baloo is currently disabled' not in baloo_status.stdout
-  tags: [kde-opt, performance]
-
-- name: Configure Baloo config file
-  community.general.ini_file:
-    path: "/home/{{ vps_username }}/.config/baloofilerc"
-    section: "Basic Settings"
-    option: "Indexing-Enabled"
-    value: "false"
-    create: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  tags: [kde-opt, performance]
-
-- name: Configure KWin Compositor (Speed)
-  community.general.ini_file:
-    path: "/home/{{ vps_username }}/.config/kwinrc"
-    section: "Compositing"
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
-    create: true
+- name: Deploy Captured KDE Configuration
+  ansible.builtin.template:
+    src: "{{ item }}.j2"
+    dest: "/home/{{ vps_username }}/.config/{{ item }}"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0644'
   loop:
-    - { option: "AnimationSpeed", value: "0" }
-    - { option: "LatencyPolicy", value: "ForceLowestLatency" }
-  tags: [kde-opt, performance]
+    - kdeglobals
+    - kwinrc
+    - kglobalshortcutsrc
+    - kcminputrc
+    - plasmashellrc
+  tags: [kde-opt, config]
 
-- name: Configure KWin Compositor (Blur)
-  community.general.ini_file:
-    path: "/home/{{ vps_username }}/.config/kwinrc"
-    section: "Plugins"
-    option: "blurEnabled"
-    value: "false"
-    create: true
+- name: Deploy GTK3 Settings
+  ansible.builtin.template:
+    src: gtk3-settings.ini.j2
+    dest: "/home/{{ vps_username }}/.config/gtk-3.0/settings.ini"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0644'
-  tags: [kde-opt, performance]
+  tags: [kde-opt, gtk]
 
 - name: Configure Dolphin (General)
   community.general.ini_file:
@@ -87,32 +49,6 @@
     - { option: "ShowFullPath", value: "true" }
     - { option: "FilterBar", value: "true" }
   tags: [kde-opt, ux]
-
-- name: Set System Font to JetBrains Mono
-  community.general.ini_file:
-    path: "/home/{{ vps_username }}/.config/kdeglobals"
-    section: "General"
-    option: "{{ item.option }}"
-    value: "{{ item.value }}"
-    create: true
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  loop:
-    - { option: "font", value: "JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0,Regular" }
-    - { option: "fixed", value: "JetBrainsMono Nerd Font Mono,10,-1,5,50,0,0,0,0,0,Regular" }
-    - { option: "menuFont", value: "JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0,Regular" }
-    - { option: "toolBarFont", value: "JetBrainsMono Nerd Font,10,-1,5,50,0,0,0,0,0,Regular" }
-    - { option: "smallestReadableFont", value: "JetBrainsMono Nerd Font,8,-1,5,50,0,0,0,0,0,Regular" }
-  tags: [kde-opt, fonts]
-- name: Configure KDE Global Shortcuts
-  ansible.builtin.template:
-    src: kglobalshortcutsrc.j2
-    dest: "/home/{{ vps_username }}/.config/kglobalshortcutsrc"
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  tags: [kde-opt, keybindings]
 
 - name: Enable Autostart Applications
   ansible.builtin.file:

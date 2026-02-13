@@ -9,17 +9,6 @@
         name: konsave
         state: present
 
-    - name: Disable Baloo indexing
-      community.general.ini_file:
-        path: "/home/{{ vps_username }}/.config/baloofilerc"
-        section: "Basic Settings"
-        option: "Indexing-Enabled"
-        value: "false"
-        create: true
-        owner: "{{ vps_username }}"
-        group: "{{ vps_username }}"
-        mode: '0644'
-
     - name: Enable Dolphin previews
       community.general.ini_file:
         path: "/home/{{ vps_username }}/.config/dolphinrc"

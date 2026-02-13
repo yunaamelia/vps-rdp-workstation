@@ -72,12 +72,12 @@ Refactor the Ansible codebase to follow canonical best practices while preservin
 - Updated documentation (README.md, AGENTS.md, CLAUDE.md)
 
 ### Definition of Done
-- [ ] `yamllint . && ansible-lint playbooks/ roles/` → zero errors
-- [ ] `ansible-playbook playbooks/main.yml --syntax-check` → exit 0
-- [ ] `grep -rh 'name:' roles/*/handlers/main.yml | sort | uniq -d` → empty (no duplicate handlers)
-- [ ] All role defaults use `vps_<role>_` prefix
-- [ ] `molecule test` → passes
-- [ ] `./tests/validate.sh` → all criteria pass
+- [x] `yamllint . && ansible-lint playbooks/ roles/` → zero errors
+- [x] `ansible-playbook playbooks/main.yml --syntax-check` → exit 0
+- [x] `grep -rh 'name:' roles/*/handlers/main.yml | sort | uniq -d` → empty (no duplicate handlers)
+- [x] All role defaults use `vps_<role>_` prefix
+- [x] `molecule test` → passes
+- [x] `./tests/validate.sh` → all criteria pass
 
 ### Must Have
 - Role ordering preserves invariants: common first → security second → desktop before xrdp → fonts+theme before terminal → terminal before zsh-enhancements
@@ -787,7 +787,7 @@ These ordering invariants MUST survive the refactor:
 
 ---
 
-- [ ] 9. Update Documentation
+- [x] 9. Update Documentation
 
   **What to do**:
   - Update `README.md`: reflect new role ordering, mention Kitty as backup terminal, update project structure diagram
@@ -832,7 +832,7 @@ These ordering invariants MUST survive the refactor:
 
 ---
 
-- [ ] 10. Final Verification Gate
+- [x] 10. Final Verification Gate
 
   **What to do**:
   - Run the complete verification suite:
@@ -945,12 +945,12 @@ molecule test                                 # Expected: exit 0
 ```
 
 ### Final Checklist
-- [ ] All "Must Have" requirements present
-- [ ] All "Must NOT Have" guardrails respected
-- [ ] All 30+ validate.sh criteria pass
-- [ ] Kitty installed and configured
-- [ ] KDE manual config templates deployed
-- [ ] Role ordering matches target order
-- [ ] All variables use vps_ prefix
-- [ ] Zero duplicate handlers
-- [ ] All documentation updated
+- [x] All "Must Have" requirements present
+- [x] All "Must NOT Have" guardrails respected
+- [x] All 30+ validate.sh criteria pass
+- [x] Kitty installed and configured
+- [x] KDE manual config templates deployed
+- [x] Role ordering matches target order
+- [x] All variables use vps_ prefix
+- [x] Zero duplicate handlers
+- [x] All documentation updated

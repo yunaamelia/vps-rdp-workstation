@@ -1,0 +1,3 @@
+---
+# KDE Optimization Role - Default Variables
+vps_kde_autostart_apps: []

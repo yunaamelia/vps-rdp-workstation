@@ -3,12 +3,6 @@
 vps_install_desktop: true
 vps_desktop_environment: "kde-plasma"
 
-# Theme Configuration
-vps_kde_theme: "nordic"
-vps_icon_theme: "La-Capitaine"
-vps_kde_compositor_enabled: false
-vps_kde_effects_enabled: false
-
 # Display Manager
 vps_display_manager: "sddm"
 vps_sddm_autologin: false

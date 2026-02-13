@@ -38,52 +38,6 @@
       ignore_errors: "{{ ansible_check_mode }}"
       tags: [desktop, dependencies]
 
-    - name: Create local config directory
-      ansible.builtin.file:
-        path: "/home/{{ vps_username }}/.local/share/kde-config-files"
-        state: directory
-        owner: "{{ vps_username }}"
-        group: "{{ vps_username }}"
-        mode: '0755'
-      tags: [desktop, config]
-
-    - name: Clone Shalva97 KDE Configuration Files
-      ansible.builtin.git:
-        repo: https://github.com/shalva97/kde-configuration-files.git
-        dest: "/home/{{ vps_username }}/.local/share/kde-config-files"
-        version: master
-        force: true
-      become: true
-      become_user: "{{ vps_username }}"
-      ignore_errors: "{{ ansible_check_mode }}"
-      when: vps_kde_clone_config | default(true)
-      tags: [desktop, config]
-
-    - name: Detect kwriteconfig binary
-      ansible.builtin.shell: |
-        if command -v kwriteconfig6 >/dev/null; then echo "kwriteconfig6";
-        elif command -v kwriteconfig5 >/dev/null; then echo "kwriteconfig5";
-        else echo "kwriteconfig"; fi
-      register: kwriteconfig_bin
-      changed_when: false
-      tags: [desktop, config]
-
-    - name: Patch setupKDE.fish for correct kwriteconfig version
-      ansible.builtin.replace:
-        path: "/home/{{ vps_username }}/.local/share/kde-config-files/scripts/setupKDE.fish"
-        regexp: 'kwriteconfig5'
-        replace: "{{ kwriteconfig_bin.stdout }}"
-      ignore_errors: "{{ ansible_check_mode }}"
-      tags: [desktop, config]
-
-    - name: Make setup scripts executable
-      ansible.builtin.file:
-        path: "/home/{{ vps_username }}/.local/share/kde-config-files/scripts"
-        state: directory
-        mode: '0755'
-        recurse: true
-      tags: [desktop, config]
-
     - name: Ensure autostart directory exists
       ansible.builtin.file:
         path: "/home/{{ vps_username }}/.config/autostart"
@@ -91,31 +45,6 @@
         owner: "{{ vps_username }}"
         group: "{{ vps_username }}"
         mode: '0755'
-      tags: [desktop, config]
-
-    - name: Ensure qdbus alias exists if needed
-      ansible.builtin.shell: |
-        if ! command -v qdbus >/dev/null; then
-          if command -v qdbus-qt6 >/dev/null; then ln -sf $(which qdbus-qt6) /usr/local/bin/qdbus;
-          elif command -v qdbus6 >/dev/null; then ln -sf $(which qdbus6) /usr/local/bin/qdbus; fi
-        fi
-      changed_when: false
-      tags: [desktop, config]
-
-    - name: Create setup KDE desktop entry for first login
-      ansible.builtin.copy:
-        dest: "/home/{{ vps_username }}/.config/autostart/setup_kde.desktop"
-        content: |
-          [Desktop Entry]
-          Type=Application
-          Name=Setup KDE
-          Exec=/bin/bash -c "fish /home/{{ vps_username }}/.local/share/kde-config-files/scripts/setupKDE.fish && rm /home/{{ vps_username }}/.config/autostart/setup_kde.desktop"
-          Hidden=false
-          NoDisplay=false
-          X-GNOME-Autostart-enabled=true
-        owner: "{{ vps_username }}"
-        group: "{{ vps_username }}"
-        mode: '0644'
       tags: [desktop, config]
 
     - name: Create Kvantum config directory
@@ -139,17 +68,6 @@
         group: '{{ vps_username }}'
         mode: '0644'
       tags: [desktop, theme]
-
-    - name: Disable Baloo file indexing (config)
-      community.general.ini_file:
-        path: "/home/{{ vps_username }}/.config/baloofilerc"
-        section: "Basic Settings"
-        option: "Indexing-Enabled"
-        value: "false"
-        owner: "{{ vps_username }}"
-        group: "{{ vps_username }}"
-        mode: '0644'
-      tags: [desktop, performance]
 
     - name: Create fontconfig directory
       ansible.builtin.file:
@@ -178,17 +96,6 @@
         group: "{{ vps_username }}"
         mode: '0644'
       tags: [desktop, fonts]
-
-    - name: Set animation duration to zero
-      community.general.ini_file:
-        path: "/home/{{ vps_username }}/.config/kdeglobals"
-        section: "KDE"
-        option: "AnimationDurationFactor"
-        value: "0"
-        owner: "{{ vps_username }}"
-        group: "{{ vps_username }}"
-        mode: '0644'
-      tags: [desktop, performance]
 
     - name: Create Akonadi config directory
       ansible.builtin.file:

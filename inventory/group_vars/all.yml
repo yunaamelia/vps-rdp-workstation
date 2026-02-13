@@ -63,14 +63,7 @@ vps_install_desktop: true
 vps_desktop_environment: "kde-plasma"     # Desktop environment
 
 # Theme Configuration
-vps_kde_theme: "catppuccin-mocha"         # KDE theme: catppuccin-mocha
-vps_kde_lookandfeel: "org.kde.breezedark.desktop" # KDE Look and Feel package
-vps_icon_theme: "papirus-dark"            # Icon theme
-vps_kde_compositor_enabled: false         # Disable for RDP performance
-vps_kde_effects_enabled: false            # Disable heavy effects
-vps_kde_clone_config: true                # Clone Shalva97 config
 vps_kde_autostart_apps: []                # List of apps to autostart (e.g. "firefox.desktop")
-vps_system_font: "Noto Sans"              # System font family
 
 # Catppuccin Theme Configuration
 vps_theme_variant: "catppuccin-mocha"

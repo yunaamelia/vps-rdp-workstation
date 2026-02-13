@@ -238,8 +238,10 @@ setup_ansible() {
 	fi
 
 	log_info "Installing Ansible collections..."
+	# Install into local ./collections dir to match ansible.cfg configuration
+	mkdir -p "${SCRIPT_DIR}/collections"
 	run_with_spinner "Installing collections (community.general, ansible.posix)..." \
-		"ansible-galaxy collection install community.general ansible.posix"
+		"ansible-galaxy collection install community.general ansible.posix -p ${SCRIPT_DIR}/collections"
 }
 
 get_credentials() {

@@ -30,14 +30,11 @@ readonly WARN="⚠"
 readonly INFO="ℹ"
 
 # Banner Art
-readonly BANNER_ART="
-${CYAN}
+readonly BANNER_ART="${CYAN}
 ╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
 ╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
- ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝
-${NC}
-${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}
-"
+ ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝${NC}
+${DIM}Version ${SCRIPT_VERSION} | Security-Hardened | Debian 13${NC}"
 
 # Defaults
 LOG_LEVEL="minimal"
@@ -128,7 +125,7 @@ HEADER_HEIGHT=5
 FOOTER_HEIGHT=3
 
 draw_banner() {
-	echo "$BANNER_ART"
+	echo -e "$BANNER_ART"
 }
 
 init_tui() {
@@ -263,6 +260,12 @@ get_credentials() {
 	fi
 
 	if [[ -z "${VPS_PASSWORD:-}" ]]; then
+		# In CI mode, fail if password is missing
+		if [[ "${CI_MODE:-false}" == "true" ]]; then
+			log_error "CI_MODE is enabled but VPS_PASSWORD is not set."
+			exit 1
+		fi
+
 		# Interactive prompt
 		stty -echo
 		read -rp "Enter password: " VPS_PASSWORD

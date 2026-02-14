@@ -17,7 +17,8 @@ vps_keyboard_layout: "us"                 # Keyboard layout
 #  USER ACCOUNT (Credentials provided via secure input, not here)
 # =============================================================================
 
-vps_username: ""                          # Set via environment or secure input
+vps_username: "root"                          # Set via environment or secure input
+vps_user_password_hash: "$6$lklbB8acEbi7ljFv$siXGhz0U3o2oTBiUqTir0TKY2kH72qvVrLA3b/PRqt0kspSE1MZ5OiBJNgMxz9Viqe1bo1k9ZtAml7BcCckBf0"
 vps_user_shell: "/bin/zsh"                # Default shell for user
 vps_user_groups:                          # Groups for the user
   - sudo

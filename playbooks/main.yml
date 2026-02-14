@@ -137,21 +137,9 @@
       tags: [desktop, kde, apps]
       when: vps_install_desktop | default(true)
 
-    - role: catppuccin-theme
-      tags: [desktop, theme, catppuccin]
-      when: vps_theme_variant == 'catppuccin-mocha'
-
     - role: whitesur-theme
       tags: [desktop, theme, whitesur]
       when: vps_whitesur_install | default(true)
-
-    - role: whitesur-icons
-      tags: [desktop, theme, whitesur, icons]
-      when: vps_whitesur_icon_install | default(true)
-
-    - role: whitesur-cursors
-      tags: [desktop, theme, whitesur, cursors]
-      when: vps_whitesur_cursor_install | default(true)
 
     # =========================================================================
     #  PHASE 5: User Configuration

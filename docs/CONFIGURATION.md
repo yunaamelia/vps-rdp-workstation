@@ -68,12 +68,11 @@ vps_fonts_default_font_size: 10
 vps_install_desktop: true
 vps_install_xrdp: true
 
-# KDE Theme (via catppuccin-theme role)
-vps_catppuccin_enabled: true
-vps_catppuccin_theme_variant: "mocha"
-vps_kde_theme: "catppuccin-mocha"
-vps_kde_icon_theme: "Papirus-Dark"
-vps_kde_cursor_theme: "Bibata-Modern-Amber"
+# KDE Theme (via whitesur-theme role)
+vps_whitesur_install: true
+vps_theme_variant: "whitesur"
+vps_kde_icon_theme: "WhiteSur-dark"
+vps_kde_cursor_theme: "WhiteSur-cursors"
 
 # KDE Manual Configuration (hybrid approach)
 vps_kde_clone_config: true         # Clone shalva97/kde-configuration-files for panel layout
@@ -92,7 +91,7 @@ vps_xrdp_color_depth: 24
 
 # Kitty (backup terminal emulator)
 vps_terminal_install_kitty: true
-vps_terminal_kitty_theme: "catppuccin-mocha"
+vps_terminal_kitty_theme: "Nordic"
 vps_terminal_kitty_font_family: "JetBrainsMono"
 vps_terminal_kitty_font_size: 10
 ```
@@ -255,7 +254,7 @@ Run specific components using tags (format: `[phase, role, feature]`):
 
 The v3.0.0 release includes significant refactoring:
 
-1. **Role Reordering**: Desktop environment now comes before terminal to satisfy KDE/Catppuccin dependencies
+1. **Role Reordering**: Desktop environment now comes before terminal to satisfy KDE/WhiteSur dependencies
 2. **Variable Renaming**: All role variables now use `vps_<role>_` naming convention for consistency
 3. **New Features**: Kitty terminal emulator (backup), hybrid KDE config templates
 4. **Progress Tracking**: `--resume` from v2.x versions will NOT work. Use `--fresh` or remove progress file and restart

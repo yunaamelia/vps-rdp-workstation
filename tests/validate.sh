@@ -103,7 +103,7 @@ print_section "FUNCTIONAL REQUIREMENTS (FR-1 to FR-13)"
 
 check "FR-1" "Setup script exists and executable" "test -x ./setup.sh"
 check "FR-2" "XRDP service running" "systemctl is-active xrdp"
-check "FR-3" "Theme installed (Nordic/Catppuccin)" "test -d /usr/share/plasma/desktoptheme/Nordic || test -d /usr/share/themes/Nordic || test -d /home/*/.themes/Catppuccin-Mocha-Standard-Blue-Dark || test -d /usr/share/themes/Catppuccin-Mocha-Standard-Blue-Dark || find /home/*/.themes -name 'catppuccin-mocha-blue-standard+default' | grep -q ."
+check "FR-3" "Theme installed (Nordic/WhiteSur)" "test -d /usr/share/plasma/desktoptheme/Nordic || test -d /usr/share/themes/Nordic || test -d /home/*/.local/share/themes/WhiteSur* || test -d /usr/share/themes/WhiteSur* || find /home/*/.local/share/themes -name 'WhiteSur*' 2>/dev/null | grep -q ."
 check "FR-4" "Zsh shell available" "command -v zsh"
 check "FR-5" "Oh My Zsh installed" "test -d /home/*/\.oh-my-zsh || test -d ~/.oh-my-zsh"
 check "FR-6" "Node.js working" "node --version"

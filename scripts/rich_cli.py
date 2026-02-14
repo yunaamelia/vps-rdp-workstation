@@ -8,7 +8,7 @@ import subprocess
 import argparse
 from typing import Optional
 
-# Catppuccin Mocha Palette
+# UI Palette
 COLORS = {
     "rosewater": "#f5e0dc",
     "flamingo": "#f2cdcd",
@@ -52,6 +52,9 @@ def print_log(level: str, msg: str):
         return
 
     console = get_console()
+    if not console:
+        return
+
     if level == "info":
         console.print(f"[{COLORS['blue']}]ℹ[/]  {msg}")
     elif level == "success":
@@ -75,6 +78,9 @@ def run_spinner(msg: str, cmd: str):
         sys.exit(ret)
 
     console = get_console()
+    if not console:
+        return
+
     with Progress(
         SpinnerColumn(style=COLORS["mauve"]),
         TextColumn("[bold blue]{task.description}"),
@@ -108,6 +114,8 @@ def print_banner(version: str):
         return
 
     console = get_console()
+    if not console:
+        return
     
     # ASCII Art
     art = """

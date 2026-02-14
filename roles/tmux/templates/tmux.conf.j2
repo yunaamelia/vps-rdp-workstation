@@ -46,58 +46,9 @@ bind -n M-Up select-pane -U
 bind -n M-Down select-pane -D
 
 # ==============================================================================
-# Theme: Catppuccin (Mocha)
+# Theme: Nordic
 # ==============================================================================
-# Manual implementation to avoid plugin dependencies
-
-# Colors (Catppuccin Mocha)
-%hidden ROSEWATER="#f5e0dc"
-%hidden FLAMINGO="#f2cdcd"
-%hidden PINK="#f5c2e7"
-%hidden MAUVE="#cba6f7"
-%hidden RED="#f38ba8"
-%hidden MAROON="#eba0ac"
-%hidden PEACH="#fab387"
-%hidden YELLOW="#f9e2af"
-%hidden GREEN="#a6e3a1"
-%hidden TEAL="#94e2d5"
-%hidden SKY="#89dceb"
-%hidden SAPPHIRE="#74c7ec"
-%hidden BLUE="#89b4fa"
-%hidden LAVENDER="#b4befe"
-%hidden TEXT="#cdd6f4"
-%hidden SUBTEXT1="#bac2de"
-%hidden SUBTEXT0="#a6adc8"
-%hidden OVERLAY2="#9399b2"
-%hidden OVERLAY1="#7f849c"
-%hidden OVERLAY0="#6c7086"
-%hidden SURFACE2="#585b70"
-%hidden SURFACE1="#45475a"
-%hidden SURFACE0="#313244"
-%hidden BASE="#1e1e2e"
-%hidden MANTLE="#181825"
-%hidden CRUST="#11111b"
-
-# Status Bar
-set -g status-position top
-set -g status-justify left
-set -g status-style "bg=$BASE,fg=$TEXT"
-set -g status-left ""
-set -g status-right "#[fg=$BLUE,bg=$BASE]#[fg=$BASE,bg=$BLUE]  #H #[fg=$BLUE,bg=$SURFACE0] #[fg=$TEXT,bg=$SURFACE0] %Y-%m-%d %H:%M #[fg=$SURFACE0,bg=$BASE]"
-set -g status-right-length 100
-set -g status-left-length 100
-
-# Window format
-setw -g window-status-format "#[fg=$SURFACE2,bg=$BASE]#[fg=$TEXT,bg=$SURFACE2] #I  #W #[fg=$SURFACE2,bg=$BASE]"
-setw -g window-status-current-format "#[fg=$MAUVE,bg=$BASE]#[fg=$BASE,bg=$MAUVE] #I  #W #[fg=$MAUVE,bg=$BASE]"
-setw -g window-status-separator " "
-
-# Pane borders
-set -g pane-border-style "fg=$SURFACE0"
-set -g pane-active-border-style "fg=$MAUVE"
-
-# Message style
-set -g message-style "bg=$MAUVE,fg=$BASE"
+# Using nord-tmux plugin (configured below)
 # BEGIN VPS WORKSTATION ENHANCEMENTS
 # === Tmux Plugin Manager ===
 set -g @plugin 'tmux-plugins/tpm'
@@ -112,8 +63,8 @@ set -g @plugin 'tmux-plugins/tmux-yank'
 # FZF Integration
 set -g @plugin 'sainnhe/tmux-fzf'
 
-# Catppuccin Theme
-set -g @plugin 'catppuccin/tmux'
+# Nordic Theme
+set -g @plugin 'arcticicestudio/nord-tmux'
 
 # === Plugin Configuration ===
 
@@ -137,22 +88,8 @@ set -g @yank_action 'copy-pipe'
 set -g @tmux-fzf-launch-key 'F'
 TMUX_FZF_OPTIONS="-p -w 80% -h 70% -m"
 
-# === Catppuccin Theme Configuration ===
-set -g @catppuccin_flavour 'mocha'
-set -g @catppuccin_window_left_separator ""
-set -g @catppuccin_window_right_separator " "
-set -g @catppuccin_window_middle_separator " █"
-set -g @catppuccin_window_number_position "right"
-set -g @catppuccin_window_default_fill "number"
-set -g @catppuccin_window_default_text "#W"
-set -g @catppuccin_window_current_fill "number"
-set -g @catppuccin_window_current_text "#W"
-set -g @catppuccin_status_modules_right "directory user host session"
-set -g @catppuccin_status_left_separator  " "
-set -g @catppuccin_status_right_separator ""
-set -g @catppuccin_status_fill "icon"
-set -g @catppuccin_status_connect_separator "no"
-set -g @catppuccin_directory_text "#{pane_current_path}"
+# === Nordic Theme Configuration ===
+# (Nord theme is auto-configured by the plugin)
 
 # === General Settings ===
 set -g mouse on

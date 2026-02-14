@@ -1,7 +1,7 @@
 # Component: Desktop Role (KDE Plasma)
 
 ## OVERVIEW
-Installs KDE Plasma desktop environment with SDDM, Nordic/Catppuccin theming, and performance tuning for RDP latency. **XRDP is now a separate role** (`roles/xrdp/`).
+Installs KDE Plasma desktop environment with SDDM, Nordic/WhiteSur theming, and performance tuning for RDP latency. **XRDP is now a separate role** (`roles/xrdp/`).
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
@@ -14,7 +14,7 @@ Installs KDE Plasma desktop environment with SDDM, Nordic/Catppuccin theming, an
 *   **Performance First**: Compositor is DISABLED by default (`Enabled=false` in `kwinrc`) to prevent RDP lag.
 *   **Session Handling**: Manages `~/.xsession` explicitly. MUST export `XDG_SESSION_TYPE=x11`.
 *   **Theme Deployment**: Clones themes to `/tmp` first, then copies to `~/.local/share/`.
-*   **Idempotency**: Theme scripts (Catppuccin) use `creates` or version checks to avoid re-running.
+*   **Idempotency**: Theme scripts (WhiteSur) use `creates` or version checks to avoid re-running.
 
 ## ANTI-PATTERNS
 *   **GUI Installers**: Never rely on GUI wizards. All configs (Kvantum, Plasma) must be file-based (`.config/`).

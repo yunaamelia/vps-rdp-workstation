@@ -151,7 +151,7 @@ Roles execute in strict order to manage dependencies:
 - `xrdp` - XRDP service configuration and templates
 - `kde-optimization` - KDE fine-tuning via `ini_file`, keybindings configuration
 - `kde-apps` - KDE applications (Konsole, Spectacle, etc.)
-- `catppuccin-theme` - Catppuccin color scheme, KDE theme templates (kdeglobals)
+- `whitesur-theme` - WhiteSur theme, icons, and cursors
 
 **Phase 5: User Configuration** (runs AFTER desktop/fonts)
 

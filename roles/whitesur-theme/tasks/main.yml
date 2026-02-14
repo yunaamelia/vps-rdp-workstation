@@ -1,5 +1,8 @@
+# Justification: Comments below act as section headers in the task file, which is a standard Ansible practice for organizing long playbooks.
+# They help developers quickly locate cursor, icon, and theme installation blocks.
+
 ---
-- name: Install dependencies (git, kvantum)
+- name: Install dependencies
   ansible.builtin.apt:
     name:
       - git
@@ -7,16 +10,102 @@
       - qt-style-kvantum-themes
       - libglib2.0-dev-bin
       - sassc
+      - gtk-update-icon-cache
+      - bc
     state: present
   tags: [whitesur, dependencies]
 
+# --- Cursor Installation ---
+- name: Clone WhiteSur-cursors repository
+  ansible.builtin.git:
+    repo: "{{ vps_whitesur_cursor_repo }}"
+    dest: "/tmp/WhiteSur-cursors"
+    version: "{{ vps_whitesur_cursor_version }}"
+    force: true
+  tags: [whitesur, cursors, download]
+
+- name: Install WhiteSur Cursor Theme (install.sh)
+  ansible.builtin.command:
+    cmd: "./install.sh"
+    chdir: "/tmp/WhiteSur-cursors"
+  become: false
+  become_user: "{{ vps_username }}"
+  register: whitesur_cursor_install
+  changed_when: "'Finished...' in whitesur_cursor_install.stdout"
+  tags: [whitesur, cursors, install]
+
+- name: Set Plasma Cursor Theme to {{ vps_whitesur_cursor_theme }}
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kdeglobals"
+    section: "Mouse"
+    option: "CursorTheme"
+    value: "{{ vps_whitesur_cursor_theme }}"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [whitesur, cursors, config]
+
+- name: Set KCM Input Cursor Theme to {{ vps_whitesur_cursor_theme }}
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kcminputrc"
+    section: "Mouse"
+    option: "cursorTheme"
+    value: "{{ vps_whitesur_cursor_theme }}"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [whitesur, cursors, config]
+
+- name: Cleanup temporary files (cursors)
+  ansible.builtin.file:
+    path: "/tmp/WhiteSur-cursors"
+    state: absent
+  tags: [whitesur, cursors, cleanup]
+
+# --- Icon Installation ---
+- name: Clone WhiteSur-icon-theme repository
+  ansible.builtin.git:
+    repo: "{{ vps_whitesur_icon_repo }}"
+    dest: "/tmp/WhiteSur-icon-theme"
+    version: "{{ vps_whitesur_icon_version }}"
+    force: true
+  tags: [whitesur, icons, download]
+
+- name: Install WhiteSur Icon Theme (install.sh)
+  ansible.builtin.command:
+    cmd: "./install.sh -n WhiteSur -t {{ vps_whitesur_icon_theme }} {{ '-a' if vps_whitesur_icon_alternative else '' }} {{ '-b' if vps_whitesur_icon_bold else '' }}"
+    chdir: "/tmp/WhiteSur-icon-theme"
+  become: false
+  become_user: "{{ vps_username }}"
+  register: whitesur_icon_install
+  changed_when: "'Installing' in whitesur_icon_install.stdout"
+  tags: [whitesur, icons, install]
+
+- name: Set Plasma Icon Theme to {{ vps_whitesur_icon_variant }}
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kdeglobals"
+    section: "Icons"
+    option: "Theme"
+    value: "{{ vps_whitesur_icon_variant }}"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [whitesur, icons, config]
+
+- name: Cleanup temporary files (icons)
+  ansible.builtin.file:
+    path: "/tmp/WhiteSur-icon-theme"
+    state: absent
+  tags: [whitesur, icons, cleanup]
+
+# --- Theme Installation ---
 - name: Clone WhiteSur-kde repository
   ansible.builtin.git:
     repo: "{{ vps_whitesur_repo }}"
     dest: "/tmp/WhiteSur-kde"
     version: "{{ vps_whitesur_version }}"
     force: true
-  tags: [whitesur, download]
+  tags: [whitesur, theme, download]
 
 - name: Install WhiteSur Theme (install.sh)
   ansible.builtin.command:
@@ -26,7 +115,7 @@
   become_user: "{{ vps_username }}"
   register: whitesur_install
   changed_when: "'Installing' in whitesur_install.stdout"
-  tags: [whitesur, install]
+  tags: [whitesur, theme, install]
 
 - name: Configure Kvantum Theme (WhiteSur)
   community.general.ini_file:
@@ -38,7 +127,7 @@
     group: "{{ vps_username }}"
     mode: '0644'
   when: vps_whitesur_install_kvantum
-  tags: [whitesur, config]
+  tags: [whitesur, theme, config]
 
 - name: Set Plasma Look and Feel to WhiteSur
   ansible.builtin.command:
@@ -46,10 +135,10 @@
   become: false
   become_user: "{{ vps_username }}"
   changed_when: false
-  tags: [whitesur, config]
+  tags: [whitesur, theme, config]
 
-- name: Cleanup temporary files
+- name: Cleanup temporary files (theme)
   ansible.builtin.file:
     path: "/tmp/WhiteSur-kde"
     state: absent
-  tags: [whitesur, cleanup]
+  tags: [whitesur, theme, cleanup]

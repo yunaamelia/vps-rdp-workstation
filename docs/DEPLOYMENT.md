@@ -53,7 +53,7 @@ Security and connectivity (XRDP) are prioritized before developer tools.
 5.  **xrdp**: Remote Desktop Protocol server with audio support and TLS security.
 6.  **kde-optimization**: Disabling animations/indexing, power settings, wallpaper.
 7.  **kde-apps**: Essential GUI apps (Firefox, Dolphin, Ark).
-8.  **catppuccin-theme**: Global dark theme application.
+8.  **whitesur-theme**: WhiteSur theme, icons, and cursors.
 
 ### Phase 3: Developer Environment
 9.  **terminal**: Kitty terminal emulator config.

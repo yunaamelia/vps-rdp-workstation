@@ -24,7 +24,7 @@ Single-purpose automation: transforms a fresh Debian 13 (Trixie) VPS into a full
 ## EXECUTION ORDER (CRITICAL)
 ```
 1. common → 2. security → 3. fonts → 4. desktop → 5. xrdp → 6. kde-optimization → 7. kde-apps → 
-8. catppuccin-theme → 9. terminal → 10. shell-styling → 11. zsh-enhancements → 12. development → 
+8. whitesur-theme → 9. terminal → 10. shell-styling → 11. zsh-enhancements → 12. development → 
 13. docker → 14. editors → 15-25. tool roles (tui-tools, network-tools, system-performance, 
 text-processing, file-management, dev-debugging, code-quality, productivity, log-visualization, 
 ai-devtools, cloud-native)

@@ -23,7 +23,7 @@ This Ansible automation transforms a Debian 13 VPS into an RDP developer worksta
 
 **10-Phase Execution Order** (CRITICAL - security before services):
 
-1. `common` → 2. `security` → 3. `fonts` → 4. `desktop` → 5. `xrdp` → 6. `kde-optimization` → 7. `kde-apps` → 8. `catppuccin-theme` → 9. `terminal` → 10. `shell-styling` → 11. `zsh-enhancements` → 12. `development` → 13. `docker` → 14. `editors` → 15-25. tool roles
+1. `common` → 2. `security` → 3. `fonts` → 4. `desktop` → 5. `xrdp` → 6. `kde-optimization` → 7. `kde-apps` → 8. `whitesur-theme` → 9. `terminal` → 10. `shell-styling` → 11. `zsh-enhancements` → 12. `development` → 13. `docker` → 14. `editors` → 15-25. tool roles
 
 **Variable Hierarchy**: Role defaults → [group_vars/all.yml](../inventory/group_vars/all.yml) → playbook vars → CLI extra vars
 

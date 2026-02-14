@@ -17,7 +17,7 @@ playbooks/
 | 1. Foundation | `common` | Always |
 | 2. Security | `security` | Always |
 | 3. Desktop | `desktop`, `xrdp`, `kde-optimization`, `kde-apps` | `vps_install_desktop`, `vps_install_xrdp` |
-| 4. Visual | `fonts`, `catppuccin-theme`, `terminal`, `shell-styling`, `zsh-enhancements` | `vps_install_zsh_external_plugins` |
+| 4. Visual | `fonts`, `terminal`, `shell-styling`, `zsh-enhancements` | `vps_install_zsh_external_plugins` |
 | 5. Dev Languages | `development` | Always |
 | 6. Containers | `docker` | `install_docker` |
 | 7. Editors | `editors` | Always |

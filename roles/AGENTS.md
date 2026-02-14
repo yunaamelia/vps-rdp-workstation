@@ -12,7 +12,7 @@
 |-------|-------|-------|
 | Foundation | common | Creates user, state dir, base packages |
 | Security | security | UFW, fail2ban, SSH hardening |
-| Visual | fonts, terminal, shell-styling, zsh-enhancements, catppuccin-theme | Shell + font stack |
+| Visual | fonts, terminal, shell-styling, zsh-enhancements | Shell + font stack |
 | Desktop | desktop, kde-optimization, kde-apps | KDE Plasma + XRDP |
 | Dev | development, docker, editors | Languages, containers, IDEs |
 | Tools | ai-devtools, cloud-native, code-quality, dev-debugging, file-management, log-visualization, network-tools, productivity, system-performance, text-processing, tui-tools, xrdp | Package-install roles |

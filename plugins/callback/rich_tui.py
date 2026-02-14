@@ -3,7 +3,7 @@
 """
 Ansible Callback Plugin: Rich TUI
 Modern, beautiful TUI output for Ansible using the Rich library.
-Features: Catppuccin theme, live layout, progress tracking, and structured logging.
+Features: Modern TUI theme, live layout, progress tracking, and structured logging.
 """
 
 from __future__ import absolute_import, division, print_function
@@ -135,14 +135,14 @@ DOCUMENTATION = """
     short_description: Modern TUI output with Rich library
     description:
         - Beautiful terminal UI for Ansible execution.
-        - Uses Catppuccin Mocha palette.
+        - Uses modern TUI palette.
         - Live progress tracking and layout.
     requirements:
         - rich>=13.0.0
     version_added: "3.2.0"
 """
 
-# Catppuccin Mocha Theme
+# UI Theme
 THEME_COLORS = {
     "rosewater": "#f5e0dc",
     "flamingo": "#f2cdcd",
@@ -181,7 +181,7 @@ ROLE_PHASE_MAP = {
     "kde-optimization": "Desktop Environment",
     "kde-apps": "Desktop Environment",
     "fonts": "Visual Foundation",
-    "catppuccin-theme": "Visual Foundation",
+    "whitesur-theme": "Desktop Environment",
     "terminal": "Visual Foundation",
     "shell-styling": "Visual Foundation",
     "zsh-enhancements": "Visual Foundation",
@@ -501,11 +501,16 @@ class CallbackModule(CallbackBase):
         self.current_task_start = time.time()
         if self.ui:
             # Update Role/Phase
-            if hasattr(task, '_role') and task._role:
-                self.ui.set_phase(task._role.get_name())
+            # Use getattr for internal Ansible attributes to satisfy type checkers
+            task_role = getattr(task, '_role', None)
+            if task_role:
+                self.ui.set_phase(task_role.get_name())
             
             # Update Task Spinner
-            self.ui.update_task(task.get_name())
+            # Safe access to get_name
+            task_name_method = getattr(task, 'get_name', None)
+            task_name = task_name_method() if callable(task_name_method) else "Unknown Task"
+            self.ui.update_task(task_name)
             
             if self.live:
                 update_method = getattr(self.live, "update", None)
@@ -525,7 +530,9 @@ class CallbackModule(CallbackBase):
         # Log update
         msg = task_name
         if status == "failed":
-            msg += f" - {result._result.get('msg', 'Unknown Error')}"
+            # Access _result safely
+            res = getattr(result, '_result', {})
+            msg += f" - {res.get('msg', 'Unknown Error')}"
             
         self.ui.add_log(status, msg, duration)
         
@@ -535,7 +542,9 @@ class CallbackModule(CallbackBase):
                 update_method(self.ui.get_renderable())
 
     def v2_runner_on_ok(self, result):
-        status = "changed" if result._result.get("changed", False) else "ok"
+        # Safe access to _result
+        res = getattr(result, '_result', {})
+        status = "changed" if res.get("changed", False) else "ok"
         self._handle_result(result, status)
 
     def v2_runner_on_failed(self, result, ignore_errors=False):
@@ -543,7 +552,12 @@ class CallbackModule(CallbackBase):
         self._handle_result(result, status)
 
     def v2_runner_on_skipped(self, result):
-        self._handle_result(result, "skipped")
+        # Safe access to _result
+        res = getattr(result, '_result', {})
+        if res.get('changed', False):
+             self._handle_result(result, "changed")
+        else:
+             self._handle_result(result, "skipped")
 
     def v2_runner_on_unreachable(self, result):
         self._handle_result(result, "failed")

@@ -1,21 +1,35 @@
 # WhiteSur Theme Role - Default Variables
+# Justification: These comments document user-facing configuration variables derived from the GitHub repo READMEs.
+# They are necessary for the user to understand how to customize the theme installation (sharpness, opacity, icon variants).
+
 ---
 # Main Toggle
 vps_whitesur_install: true
 
-# Options (corresponds to install.sh flags)
+# Source Repos
+vps_whitesur_repo: "https://github.com/vinceliuice/WhiteSur-kde.git"
+vps_whitesur_version: "master"
+vps_whitesur_icon_repo: "https://github.com/vinceliuice/WhiteSur-icon-theme.git"
+vps_whitesur_icon_version: "master"
+vps_whitesur_cursor_repo: "https://github.com/vinceliuice/WhiteSur-cursors.git"
+vps_whitesur_cursor_version: "master"
+
+# Theme Options (corresponds to install.sh flags)
 # --sharp: install sharp aurorae theme
 vps_whitesur_sharp: false
-
 # --opaque: install opaque theme version
 vps_whitesur_opaque: false
-
 # --round: install round theme version
 vps_whitesur_round: false
 
 # Kvantum (Required for best look)
 vps_whitesur_install_kvantum: true
 
-# Source Repo
-vps_whitesur_repo: "https://github.com/vinceliuice/WhiteSur-kde.git"
-vps_whitesur_version: "master"
+# Icon Options
+vps_whitesur_icon_theme: "default"     # [default/purple/pink/red/orange/yellow/green/grey/all]
+vps_whitesur_icon_alternative: false    # Install alternative icons
+vps_whitesur_icon_bold: false           # Install bold panel icons
+vps_whitesur_icon_variant: "WhiteSur-dark" # Icon variant to apply
+
+# Cursor Options
+vps_whitesur_cursor_theme: "WhiteSur-cursors"

@@ -66,12 +66,11 @@ vps_desktop_environment: "kde-plasma"     # Desktop environment
 # Theme Configuration
 vps_kde_autostart_apps: []                # List of apps to autostart (e.g. "firefox.desktop")
 
-# Catppuccin Theme Configuration
-vps_theme_variant: "catppuccin-mocha"
-vps_theme_accent: "blue"
+# Theme Configuration
+vps_theme_variant: "whitesur"
 vps_install_starship: true
 vps_terminal_font: "Hack Nerd Font Mono"
-vps_cursor_theme: "catppuccin-mocha-blue-cursors"
+vps_cursor_theme: "WhiteSur-cursors"
 
 # Display Manager
 vps_display_manager: "sddm"

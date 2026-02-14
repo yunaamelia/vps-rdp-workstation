@@ -23,7 +23,7 @@
     # - role: xrdp # Disabled for CI
     - role: kde-optimization
     # - role: kde-apps # Disabled for CI
-    - role: catppuccin-theme
+    - role: whitesur-theme
 
     # Phase 4: User Configuration
     - role: terminal

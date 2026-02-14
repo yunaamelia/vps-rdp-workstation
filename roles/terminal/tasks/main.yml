@@ -131,16 +131,6 @@
     mode: '0755'
   tags: [terminal, konsole]
 
-- name: Copy Konsole Catppuccin Mocha colorscheme
-  ansible.builtin.copy:
-    src: ../roles/catppuccin-theme/files/konsole/catppuccin-mocha.colorscheme
-    dest: "/home/{{ vps_username }}/.local/share/konsole/catppuccin-mocha.colorscheme"
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0644'
-  when: vps_theme_variant == 'catppuccin-mocha'
-  tags: [terminal, konsole]
-
 - name: Configure Konsole Nordic profile
   ansible.builtin.template:
     src: konsole-profile.j2

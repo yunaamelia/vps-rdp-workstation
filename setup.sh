@@ -180,7 +180,6 @@ get_credentials() {
 
 run_playbook() {
 	local playbook="$1"
-	local mode="${2:-stdout}"
 
 	log_info "Launching Ansible ($playbook)..."
 
@@ -194,18 +193,15 @@ run_playbook() {
 	# UI Mode Selection
 	if [[ "$VERBOSE" == "true" ]]; then
 		export ANSIBLE_STDOUT_CALLBACK="default"
-		mode="stdout"
 	else
 		# Use our new Rich TUI callback
 		export ANSIBLE_STDOUT_CALLBACK="rich_tui"
 		export VPS_FORCE_TUI="true"
 	fi
 
-	# Build Args
+	# Build Args for ansible-playbook
 	local args=(
 		"--inventory" "inventory/hosts.yml"
-		"--mode" "$mode"
-		"--ee" "false"
 		"-e" "vps_username=$VPS_USERNAME"
 		"-e" "vps_user_password_hash=$VPS_USER_PASSWORD_HASH"
 	)
@@ -218,10 +214,14 @@ run_playbook() {
 		args+=("--check")
 	fi
 
+	if [[ "$VERBOSE" == "true" ]]; then
+		args+=("-v")
+	fi
+
 	args+=("${ANSIBLE_ARGS[@]}")
 
-	# Execute
-	if ansible-navigator run "$playbook" "${args[@]}"; then
+	# Execute using ansible-playbook directly to avoid TUI/buffer conflicts with navigator
+	if ansible-playbook "$playbook" "${args[@]}"; then
 		log_success "Playbook finished successfully."
 	else
 		log_error "Playbook failed."

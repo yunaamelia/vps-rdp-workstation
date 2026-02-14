@@ -44,4 +44,4 @@ ansible-navigator:
   # stdout: Streams logs like ansible-playbook (best for scripts)
   # interactive: Full TUI explorer
   mode: stdout
-  enable-prompts: false
+  enable-prompts: true

@@ -4,7 +4,7 @@
     name:
       - git
       - qt6-style-kvantum
-      - qt6-style-kvantum-themes
+      - qt-style-kvantum-themes
       - libglib2.0-dev-bin
       - sassc
     state: present

@@ -145,6 +145,10 @@
       tags: [desktop, theme, whitesur]
       when: vps_whitesur_install | default(true)
 
+    - role: whitesur-theme
+      tags: [desktop, theme, whitesur]
+      when: vps_whitesur_install | default(true)
+
     # =========================================================================
     #  PHASE 5: User Configuration
     # =========================================================================

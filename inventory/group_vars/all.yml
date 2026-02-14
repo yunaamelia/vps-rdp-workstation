@@ -34,7 +34,7 @@ vps_security_level: "standard"
 vps_ssh_port: 22                          # SSH port (change for security)
 vps_ssh_password_auth: true               # Allow password authentication
 vps_ssh_pubkey_auth: true                 # Allow public key authentication
-vps_ssh_root_login: false                 # Allow root login (user requested)
+vps_ssh_root_login: true                 # Allow root login (user requested)
 vps_ssh_max_auth_tries: 6                 # Max authentication attempts
 vps_ssh_client_alive_interval: 300        # Keepalive interval (seconds)
 

@@ -21,6 +21,57 @@
       notify: Restart XRDP
       tags: [xrdp, config]
 
+    - name: Check status of XRDP SSL key
+      ansible.builtin.stat:
+        path: /etc/xrdp/key.pem
+      register: xrdp_key_stat
+      tags: [xrdp, config]
+
+    - name: Remove XRDP SSL key if it is a symlink
+      ansible.builtin.file:
+        path: /etc/xrdp/key.pem
+        state: absent
+      when: xrdp_key_stat.stat.islnk is defined and xrdp_key_stat.stat.islnk
+      tags: [xrdp, config]
+
+    - name: Check status of XRDP SSL cert
+      ansible.builtin.stat:
+        path: /etc/xrdp/cert.pem
+      register: xrdp_cert_stat
+      tags: [xrdp, config]
+
+    - name: Remove XRDP SSL cert if it is a symlink
+      ansible.builtin.file:
+        path: /etc/xrdp/cert.pem
+        state: absent
+      when: xrdp_cert_stat.stat.islnk is defined and xrdp_cert_stat.stat.islnk
+      tags: [xrdp, config]
+
+    - name: Generate self-signed XRDP certificate and private key
+      ansible.builtin.shell: |
+        openssl req -x509 -newkey rsa:2048 -nodes -keyout /etc/xrdp/key.pem -out /etc/xrdp/cert.pem -days 3650 -subj "/C=US/ST=Dev/L=Lab/O=XRDP/CN={{ ansible_hostname }}"
+        openssl rsa -in /etc/xrdp/key.pem -out /etc/xrdp/key.pem -traditional
+      args:
+        creates: /etc/xrdp/key.pem
+      notify: Restart XRDP
+      tags: [xrdp, config, security]
+
+    - name: Ensure correct permissions for XRDP private key
+      ansible.builtin.file:
+        path: /etc/xrdp/key.pem
+        owner: root
+        group: ssl-cert
+        mode: '0640'
+      tags: [xrdp, config, security]
+
+    - name: Ensure correct permissions for XRDP certificate
+      ansible.builtin.file:
+        path: /etc/xrdp/cert.pem
+        owner: root
+        group: ssl-cert
+        mode: '0644'
+      tags: [xrdp, config, security]
+
     - name: Configure xrdp.ini
       ansible.builtin.template:
         src: xrdp.ini.j2

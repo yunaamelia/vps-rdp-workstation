@@ -34,6 +34,10 @@
           - sassc
           - libglib2.0-dev-bin
           - sddm
+          - kde-config-gtk-style
+          - xsettingsd
+          - gtk3-engines-breeze
+          - gtk2-engines-breeze
         state: present
       ignore_errors: "{{ ansible_check_mode }}"
       tags: [desktop, dependencies]

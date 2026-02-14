@@ -1,0 +1,55 @@
+---
+- name: Install dependencies (git, kvantum)
+  ansible.builtin.apt:
+    name:
+      - git
+      - qt6-style-kvantum
+      - qt6-style-kvantum-themes
+      - libglib2.0-dev-bin
+      - sassc
+    state: present
+  tags: [whitesur, dependencies]
+
+- name: Clone WhiteSur-kde repository
+  ansible.builtin.git:
+    repo: "{{ vps_whitesur_repo }}"
+    dest: "/tmp/WhiteSur-kde"
+    version: "{{ vps_whitesur_version }}"
+    force: true
+  tags: [whitesur, download]
+
+- name: Install WhiteSur Theme (install.sh)
+  ansible.builtin.command:
+    cmd: "./install.sh {{ '--sharp' if vps_whitesur_sharp else '' }} {{ '--opaque' if vps_whitesur_opaque else '' }} {{ '--round' if vps_whitesur_round else '' }}"
+    chdir: "/tmp/WhiteSur-kde"
+  become: false
+  become_user: "{{ vps_username }}"
+  register: whitesur_install
+  changed_when: "'Installing' in whitesur_install.stdout"
+  tags: [whitesur, install]
+
+- name: Configure Kvantum Theme (WhiteSur)
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/Kvantum/kvantum.kvconfig"
+    section: "General"
+    option: "theme"
+    value: "WhiteSur"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  when: vps_whitesur_install_kvantum
+  tags: [whitesur, config]
+
+- name: Set Plasma Look and Feel to WhiteSur
+  ansible.builtin.command:
+    cmd: "lookandfeeltool -a WhiteSur"
+  become: false
+  become_user: "{{ vps_username }}"
+  changed_when: false
+  tags: [whitesur, config]
+
+- name: Cleanup temporary files
+  ansible.builtin.file:
+    path: "/tmp/WhiteSur-kde"
+    state: absent
+  tags: [whitesur, cleanup]

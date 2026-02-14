@@ -109,7 +109,7 @@
 
 - name: Install WhiteSur Theme (install.sh)
   ansible.builtin.command:
-    cmd: "./install.sh {{ '--sharp' if vps_whitesur_sharp else '' }} {{ '--opaque' if vps_whitesur_opaque else '' }} {{ '--round' if vps_whitesur_round else '' }}"
+    cmd: "./install.sh -c {{ vps_whitesur_color }} {{ '--sharp' if vps_whitesur_sharp else '' }} {{ '--opaque' if vps_whitesur_opaque else '' }} {{ '--round' if vps_whitesur_round else '' }}"
     chdir: "/tmp/WhiteSur-kde"
   become: false
   become_user: "{{ vps_username }}"
@@ -122,7 +122,7 @@
     path: "/home/{{ vps_username }}/.config/Kvantum/kvantum.kvconfig"
     section: "General"
     option: "theme"
-    value: "WhiteSur"
+    value: "WhiteSurDark"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0644'
@@ -131,7 +131,15 @@
 
 - name: Set Plasma Look and Feel to WhiteSur
   ansible.builtin.command:
-    cmd: "lookandfeeltool -a WhiteSur"
+    cmd: "lookandfeeltool -a WhiteSur-dark"
+  become: false
+  become_user: "{{ vps_username }}"
+  changed_when: false
+  tags: [whitesur, theme, config]
+
+- name: Set Plasma Color Scheme to WhiteSurDark
+  ansible.builtin.command:
+    cmd: "kwriteconfig6 --file kdeglobals --group General --key ColorScheme WhiteSurDark"
   become: false
   become_user: "{{ vps_username }}"
   changed_when: false

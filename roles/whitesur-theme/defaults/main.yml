@@ -15,6 +15,8 @@ vps_whitesur_cursor_repo: "https://github.com/vinceliuice/WhiteSur-cursors.git"
 vps_whitesur_cursor_version: "master"
 
 # Theme Options (corresponds to install.sh flags)
+# --color: install specific color variant [light|alt|dark] (Justification: Documents available color options for user configuration)
+vps_whitesur_color: "dark"
 # --sharp: install sharp aurorae theme
 vps_whitesur_sharp: false
 # --opaque: install opaque theme version

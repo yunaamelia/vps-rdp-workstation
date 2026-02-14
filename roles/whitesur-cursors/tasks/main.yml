@@ -1,0 +1,54 @@
+---
+- name: Install dependencies (git, bc)
+  ansible.builtin.apt:
+    name:
+      - git
+      - bc
+    state: present
+  tags: [whitesur-cursors, dependencies]
+
+- name: Clone WhiteSur-cursors repository
+  ansible.builtin.git:
+    repo: "{{ vps_whitesur_cursor_repo }}"
+    dest: "/tmp/WhiteSur-cursors"
+    version: "{{ vps_whitesur_cursor_version }}"
+    force: true
+  tags: [whitesur-cursors, download]
+
+- name: Install WhiteSur Cursor Theme (install.sh)
+  ansible.builtin.command:
+    cmd: "./install.sh"
+    chdir: "/tmp/WhiteSur-cursors"
+  become: false
+  become_user: "{{ vps_username }}"
+  register: whitesur_cursor_install
+  changed_when: "'Finished...' in whitesur_cursor_install.stdout"
+  tags: [whitesur-cursors, install]
+
+- name: Set Plasma Cursor Theme to {{ vps_whitesur_cursor_theme }}
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kdeglobals"
+    section: "Mouse"
+    option: "CursorTheme"
+    value: "{{ vps_whitesur_cursor_theme }}"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [whitesur-cursors, config]
+
+- name: Set KCM Input Cursor Theme to {{ vps_whitesur_cursor_theme }}
+  community.general.ini_file:
+    path: "/home/{{ vps_username }}/.config/kcminputrc"
+    section: "Mouse"
+    option: "cursorTheme"
+    value: "{{ vps_whitesur_cursor_theme }}"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [whitesur-cursors, config]
+
+- name: Cleanup temporary files
+  ansible.builtin.file:
+    path: "/tmp/WhiteSur-cursors"
+    state: absent
+  tags: [whitesur-cursors, cleanup]

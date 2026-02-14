@@ -13,7 +13,7 @@ __metaclass__ = type
 import os
 import time
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Set, Union, cast
+from typing import Any, Dict, List, Optional, Set, Union, cast, TYPE_CHECKING
 
 try:
     from rich.console import Console, Group
@@ -113,15 +113,18 @@ except ImportError:
     SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = TaskID = Text = box = Dummy  # type: ignore
 
 
-# Ansible import outside try/except block to allow module execution without Ansible
-try:
+
+if TYPE_CHECKING:
     from ansible.plugins.callback import CallbackBase
-except ImportError:
-    class CallbackBase:
-        """Mock class for pylint when ansible is not installed"""
-        CALLBACK_VERSION = 2.0
-        CALLBACK_TYPE = "stdout"
-        CALLBACK_NAME = "rich_tui"
+else:
+    try:
+        from ansible.plugins.callback import CallbackBase
+    except ImportError:
+        class CallbackBase:
+            """Mock class for pylint when ansible is not installed"""
+            CALLBACK_VERSION = 2.0
+            CALLBACK_TYPE = "stdout"
+            CALLBACK_NAME = "rich_tui"
 
 
 # --- Configuration & Constants ---
@@ -204,10 +207,13 @@ PHASE_ORDER = sorted(list(set(ROLE_PHASE_MAP.values())), key=list(ROLE_PHASE_MAP
 class RichInterface:
     """Handles all Rich rendering logic."""
 
-    def __init__(self, console: Union["Console", "Dummy"]):
+    def __init__(self, console: Any):
         self.console = console
         self.log_level = os.environ.get("VPS_LOG_LEVEL", "minimal").lower()
-        self.layout: Union["Layout", "Dummy"] = Layout()
+        if RICH_AVAILABLE:
+            self.layout = Layout()
+        else:
+            self.layout = Dummy()
         self.log_messages: List[Dict[str, Any]] = []
         self.max_log_items = 15
         
@@ -233,22 +239,24 @@ class RichInterface:
             expand=True,
         )
         
-        self.overall_task_id = self.overall_progress.add_task("Total Progress", total=100)
-        self.current_task_id: Optional[TaskID] = None
+        # Explicit type annotation to satisfy static analysis
+        # Using cast to Any to avoid "variable not allowed in type expression"
+        self.overall_task_id: Any = cast(Any, self.overall_progress).add_task("Total Progress", total=100)
+        self.current_task_id: Any = None
 
         self._init_layout()
 
     def _init_layout(self):
         """Define the TUI grid layout."""
-        if not isinstance(self.layout, Layout):
+        if not hasattr(self.layout, "split"):
              return
 
-        cast(Any, self.layout).split(
+        self.layout.split(
             Layout(name="header", size=3),
             Layout(name="main", ratio=1),
             Layout(name="footer", size=3),
         )
-        cast(Any, self.layout["main"]).split_row(
+        self.layout["main"].split_row(
             Layout(name="logs", ratio=6),
             Layout(name="status", ratio=4),
         )
@@ -280,74 +288,6 @@ class RichInterface:
         
         grid.add_row(title, version)
         return Panel(grid, style="on #1e1e2e", box=box.SQUARE, padding=(0, 1), border_style="blue")
-
-    def _make_logs_panel(self):
-        """Create the scrolling log table."""
-        table = Table.grid(expand=True, padding=(0, 1))
-        table.add_column(width=3)  # Icon
-        table.add_column(ratio=1)  # Message
-        table.add_column(width=10, justify="right")  # Duration
-
-        if not self.log_messages:
-            table.add_row("", "[dim]Initializing...[/dim]", "")
-        
-        for msg in self.log_messages[-self.max_log_items:]:
-            icon = msg.get("icon", "•")
-            text = msg.get("text", "")
-            style = msg.get("style", "white")
-            duration = msg.get("duration", "")
-            
-            table.add_row(
-                Text(icon, style=style),
-                Text(text, style=style),
-                Text(duration, style="dim")
-            )
-
-        return Panel(
-            table,
-            title="[bold blue]Activity Log[/]",
-            border_style="surface0",
-            box=box.ROUNDED,
-            padding=(0, 0),
-        )
-
-    def _make_status_panel(self):
-        """Create the right-side status panel."""
-        stats_table = Table.grid(expand=True, padding=(0, 1))
-        stats_table.add_column(ratio=1)
-        stats_table.add_column(justify="right")
-        
-        stats_table.add_row("[green]✓ OK[/]", str(self.stats["ok"]))
-        stats_table.add_row("[yellow]~ Changed[/]", str(self.stats["changed"]))
-        stats_table.add_row("[red]✗ Failed[/]", str(self.stats["failed"]))
-        stats_table.add_row("[dim]- Skipped[/]", str(self.stats["skipped"]))
-
-        content = Group(
-            Panel(self.overall_progress, box=box.MINIMAL, title="Overall", border_style="blue"),
-            Panel(self.task_progress, box=box.MINIMAL, title="Current Task", border_style="mauve"),
-            Panel(stats_table, box=box.MINIMAL, title="Statistics", border_style="surface1"),
-        )
-        
-        return Panel(
-            content,
-            title="[bold mauve]Status[/]",
-            border_style="surface0",
-            box=box.ROUNDED,
-        )
-
-    def _make_error_details(self, msg):
-        """Create a collapsible panel for error details."""
-        if not msg.get("error_details"):
-            return None
-            
-        error_text = Text(msg["error_details"], style="red")
-        return Panel(
-            error_text,
-            title="[bold red]Error Details[/]",
-            border_style="red",
-            box=box.ROUNDED,
-            expand=True
-        )
 
     def _make_logs_panel(self):
         """Create the scrolling log table."""
@@ -396,6 +336,43 @@ class RichInterface:
             padding=(0, 0),
         )
 
+    def _make_error_details(self, msg):
+        """Create a collapsible panel for error details."""
+        if not msg.get("error_details"):
+            return None
+            
+        error_text = Text(msg["error_details"], style="red")
+        return Panel(
+            error_text,
+            title="[bold red]Error Details[/]",
+            border_style="red",
+            box=box.ROUNDED,
+            expand=True
+        )
+
+    def _make_status_panel(self):
+        """Create the right-side status panel."""
+        stats_table = Table.grid(expand=True, padding=(0, 1))
+        stats_table.add_column(ratio=1)
+        stats_table.add_column(justify="right")
+        
+        stats_table.add_row("[green]✓ OK[/]", str(self.stats["ok"]))
+        stats_table.add_row("[yellow]~ Changed[/]", str(self.stats["changed"]))
+        stats_table.add_row("[red]✗ Failed[/]", str(self.stats["failed"]))
+        stats_table.add_row("[dim]- Skipped[/]", str(self.stats["skipped"]))
+
+        content = Group(
+            Panel(self.overall_progress, box=box.MINIMAL, title="Overall", border_style="blue"),
+            Panel(self.task_progress, box=box.MINIMAL, title="Current Task", border_style="mauve"),
+            Panel(stats_table, box=box.MINIMAL, title="Statistics", border_style="surface1"),
+        )
+        
+        return Panel(
+            content,
+            title="[bold mauve]Status[/]",
+            border_style="surface0",
+            box=box.ROUNDED,
+        )
 
     def _make_footer(self):
         """Create the milestone tracker footer."""
@@ -500,14 +477,15 @@ class CallbackModule(CallbackBase):
         if not RICH_AVAILABLE or not self.is_tty:
             return
 
-        console = Console(theme=self.theme, force_terminal=True)
+        # Explicitly cast Theme to Any to bypass type checking against Dummy
+        console = Console(theme=cast(Any, self.theme), force_terminal=True)
         self.ui = RichInterface(console)
         
         # Use Live context for automatic refreshing
         # In navigator, we might need to be careful with stdout redirection
         self.live = Live(
             self.ui.get_renderable(),
-            console=console,
+            console=cast(Any, console),
             refresh_per_second=4,
             auto_refresh=True,
             redirect_stdout=False,

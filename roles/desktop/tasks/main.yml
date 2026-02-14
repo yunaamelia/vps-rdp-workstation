@@ -2,7 +2,7 @@
 # Full desktop environment for RDP access
 ---
 - name: Desktop Role Tasks
-  when: vps_desktop_install
+  when: vps_install_desktop
   block:
     - name: Install desktop dependencies (Fish, Git, Python DBus)
       ansible.builtin.apt:

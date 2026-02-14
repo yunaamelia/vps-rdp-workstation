@@ -1,0 +1,14 @@
+# WhiteSur Icon Theme Role - Default Variables
+---
+# Main Toggle
+vps_whitesur_icon_install: true
+
+# Source Repo
+vps_whitesur_icon_repo: "https://github.com/vinceliuice/WhiteSur-icon-theme.git"
+vps_whitesur_icon_version: "master"
+
+# Options (corresponds to install.sh flags)
+vps_whitesur_icon_theme: "default"     # [default/purple/pink/red/orange/yellow/green/grey/all]
+vps_whitesur_icon_alternative: false    # Install alternative icons
+vps_whitesur_icon_bold: false           # Install bold panel icons
+vps_whitesur_icon_variant: "WhiteSur-dark" # Icon variant to apply (WhiteSur, WhiteSur-dark, WhiteSur-light)

@@ -239,7 +239,7 @@ main() {
 			break
 			;;
 		--help)
-			echo "Usage: $0 [--dry-run] [--verbose] [--ci] [--k8s] [-- <ansible-args>]"
+			echo "Usage: $0 [--dry-run] [--verbose] [--ci] [--k8s] [--full] [-- <ansible-args>]"
 			exit 0
 			;;
 		--dry-run)
@@ -248,6 +248,10 @@ main() {
 			;;
 		--verbose)
 			VERBOSE=true
+			shift
+			;;
+		--full)
+			LOG_LEVEL="full"
 			shift
 			;;
 		--ci)

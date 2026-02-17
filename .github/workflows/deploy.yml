@@ -23,7 +23,7 @@ jobs:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
       - name: Configure Inventory
-        if: secrets.VPS_HOST != ''
+        if: ${{ secrets.VPS_HOST }}
         run: |
           sed -i "s/ansible_connection: local/ansible_connection: ssh/" inventory/hosts.yml
           sed -i "s/# ansible_host: your-vps-ip/ansible_host: ${{ secrets.VPS_HOST }}/" inventory/hosts.yml
@@ -38,7 +38,7 @@ jobs:
           VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         run: |
           # Securely write secrets file using Python to avoid shell injection
-          python3 -c "import os; open('./secrets', 'w').write(f'password={os.environ[\"VPS_PASSWORD\"]}\n')"
+          python3 -c "import os; open('./secrets', 'w').write(f\"password={os.environ.get('VPS_PASSWORD', '')}\\n\")"
           chmod 600 ./secrets
           ./setup.sh --ci
           # Cleanup

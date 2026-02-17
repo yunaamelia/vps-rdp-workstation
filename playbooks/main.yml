@@ -7,7 +7,7 @@
   gather_facts: true
 
   vars:
-    installation_start_time: "{{ ansible_date_time.iso8601 }}"
+    installation_start_time: "{{ ansible_facts.date_time.iso8601 }}"
 
   # NOTE: Role order has been refactored in v3.0.0.
   # Using --resume with a progress.json from a previous version will NOT work correctly.
@@ -232,7 +232,7 @@
           {
             "version": "3.0.0",
             "started_at": "{{ installation_start_time }}",
-            "completed_at": "{{ ansible_date_time.iso8601 }}",
+            "completed_at": "{{ ansible_facts.date_time.iso8601 }}",
             "status": "completed",
             "completed_roles": ["all"],
             "current_role": null,
@@ -255,7 +255,7 @@
           ╔══════════════════════════════════════════════════════════╗
           ║  ✓ Installation Complete!                                ║
           ╠══════════════════════════════════════════════════════════╣
-          ║  RDP Server: {{ ansible_default_ipv4.address | default('localhost') }}:3389
+          ║  RDP Server: {{ ansible_facts.default_ipv4.address | default('localhost') }}:3389
           ║  Username:   {{ vps_username }}
           ║  Theme:      {{ vps_theme_variant | default('nordic') | capitalize }}
           ╠══════════════════════════════════════════════════════════╣

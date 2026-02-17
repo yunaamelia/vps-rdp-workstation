@@ -9,7 +9,14 @@
   ansible.builtin.systemd:
     name: fail2ban
     state: restarted
-  ignore_errors: true
+  failed_when: false
+  register: fail2ban_restart
+  changed_when: fail2ban_restart.rc is defined and fail2ban_restart.rc == 0
+
+- name: Warn if Fail2ban not available
+  ansible.builtin.debug:
+    msg: "⚠ fail2ban service not found — skipping restart (install fail2ban first)"
+  when: fail2ban_restart is defined and fail2ban_restart is failed
 
 - name: Reload UFW
   community.general.ufw:

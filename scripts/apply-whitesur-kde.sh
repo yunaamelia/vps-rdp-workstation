@@ -103,7 +103,7 @@ fi
 # 7. GTK Theme — ensure consistency across GTK2/3/4
 # ──────────────────────────────────────────────
 echo "[7/9] GTK theme consistency..."
-THEME="WhiteSur-Dark-solid-alt"
+THEME="WhiteSur-Dark-alt-nord"
 
 gsettings set org.gnome.desktop.interface gtk-theme "$THEME" 2>/dev/null || true
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark' 2>/dev/null || true

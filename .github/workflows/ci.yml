@@ -100,4 +100,5 @@ jobs:
         env:
           PY_COLORS: '1'
           ANSIBLE_FORCE_COLOR: '1'
-          ANSIBLE_COLLECTIONS_PATH: collections
+          ANSIBLE_COLLECTIONS_PATH: ${{ github.workspace }}/collections
+          ANSIBLE_ROLES_PATH: ${{ github.workspace }}/roles

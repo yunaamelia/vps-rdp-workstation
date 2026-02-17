@@ -5,7 +5,7 @@
 #  UFW Firewall Configuration
 # =============================================================================
 
-- name: Security Role Tasks
+- name: Execute security role tasks
   block:
     - name: Install UFW firewall
       ansible.builtin.apt:

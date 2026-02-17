@@ -140,14 +140,14 @@
         - /var/log/vps-setup.log
         - /var/log/vps-setup-error.log
         - /var/log/vps-setup-summary.log
-      register: log_files_check
+      register: vps_rollback_log_files_check
       when: remove_logs | default(false)
 
     - name: Remove installation logs (optional)
       ansible.builtin.file:
         path: "{{ item.item }}"
         state: absent
-      loop: "{{ log_files_check.results }}"
+      loop: "{{ vps_rollback_log_files_check.results }}"
       when: (remove_logs | default(false)) and item.stat.exists
 
     - name: Check state directory

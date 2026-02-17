@@ -155,7 +155,7 @@
     paths: "/home/{{ vps_username }}/.mozilla/firefox"
     patterns: "*.default*"
     file_type: directory
-  register: firefox_profiles
+  register: vps_kde_firefox_profiles
   failed_when: false
   when: vps_install_desktop | default(true)
   tags: [kde-opt, firefox]
@@ -167,8 +167,8 @@
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0644'
-  loop: "{{ firefox_profiles.files | default([]) }}"
-  when: (firefox_profiles.matched | default(0) > 0) and (vps_install_desktop | default(true))
+  loop: "{{ vps_kde_firefox_profiles.files | default([]) }}"
+  when: (vps_kde_firefox_profiles.matched | default(0) > 0) and (vps_install_desktop | default(true))
   tags: [kde-opt, firefox]
 
 - name: Configure Dolphin (General)

@@ -51,7 +51,7 @@
   ignore_errors: true
   tags: [tools, tui]
 
-- name: Fallback - Get lazygit latest release (if versioned failed)
+- name: Get lazygit latest release as fallback (if versioned failed)
   ansible.builtin.uri:
     url: https://api.github.com/repos/jesseduffield/lazygit/releases/latest
     return_content: true
@@ -59,7 +59,7 @@
   when: lazygit_download is failed
   tags: [tools, tui]
 
-- name: Fallback - Download lazygit latest
+- name: Download lazygit latest as fallback
   ansible.builtin.get_url:
     url: >-
       https://github.com/jesseduffield/lazygit/releases/download/{{ lazygit_release.json.tag_name }}/

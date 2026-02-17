@@ -1,7 +1,7 @@
 # Common Role - System Foundation
 # Installs essential packages, configures system basics
 ---
-- name: Common Role Tasks
+- name: Execute common role tasks
   block:
     - name: Update apt cache
       ansible.builtin.apt:

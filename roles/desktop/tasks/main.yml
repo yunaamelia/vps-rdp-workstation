@@ -1,7 +1,7 @@
 # Desktop Role - KDE Plasma + XRDP + Nordic Theme
 # Full desktop environment for RDP access
 ---
-- name: Desktop Role Tasks
+- name: Execute desktop role tasks
   when: vps_install_desktop
   block:
     - name: Install desktop dependencies (Fish, Git, Python DBus)

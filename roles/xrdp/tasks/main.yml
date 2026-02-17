@@ -1,6 +1,6 @@
 # XRDP Role - Remote Desktop Protocol Server
 ---
-- name: XRDP Role Tasks
+- name: Execute XRDP role tasks
   block:
     - name: Install XRDP and dependencies
       ansible.builtin.apt:

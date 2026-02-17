@@ -19,10 +19,10 @@ import argparse
 import re
 import sys
 from pathlib import Path
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 try:
-    import yaml
+    import yaml  # type: ignore[import-not-found]
 except ImportError:
     print("ERROR: PyYAML is required. Install with: pip install PyYAML", file=sys.stderr)
     sys.exit(2)
@@ -31,7 +31,7 @@ except ImportError:
 class ValidationError:
     """Represents a validation error with severity and context."""
 
-    def __init__(self, severity: str, file_path: str, line: int, rule: str, message: str, suggestion: str = None):
+    def __init__(self, severity: str, file_path: str, line: int, rule: str, message: str, suggestion: Optional[str] = None):
         self.severity = severity  # 'ERROR', 'WARNING', 'INFO'
         self.file_path = file_path
         self.line = line
@@ -206,9 +206,10 @@ class PlaybookValidator:
         if 'mode' in task:
             mode_value = task['mode']
             if isinstance(mode_value, int):
+                octal_str = oct(mode_value)[2:].zfill(4)
                 self.add_error('ERROR', file_path, line_num, 'MODE_MUST_BE_STRING',
                               f"{context}: File mode must be quoted string, not integer: {mode_value}",
-                              f"Use 'mode: \"{oct(mode_value)[2:].zfill(4)}\"' instead")
+                              f"Use 'mode: \"{octal_str}\"' instead")
             elif isinstance(mode_value, str):
                 # Check for proper octal format
                 if not re.match(r'^["\']?0[0-7]{3,4}["\']?$', str(mode_value)):
@@ -229,7 +230,7 @@ class PlaybookValidator:
                                           f"{context}: Variable '{var_name}' should use 'vps_<role>_' prefix",
                                           "Follow convention: vps_<role>_<variable_name>")
 
-    def extract_module_name(self, task: dict) -> str:
+    def extract_module_name(self, task: dict) -> Optional[str]:
         """Extract the module name from a task."""
         for key in task.keys():
             # Skip Ansible task keywords
@@ -285,7 +286,11 @@ class PlaybookValidator:
             'set', 'enable', 'disable', 'start', 'stop', 'restart', 'reload', 'add',
             'copy', 'download', 'upload', 'generate', 'verify', 'check', 'test',
             'deploy', 'run', 'execute', 'apply', 'register', 'unregister', 'mount',
-            'unmount', 'clone', 'pull', 'push', 'sync', 'backup', 'restore', 'clean'
+            'unmount', 'clone', 'pull', 'push', 'sync', 'backup', 'restore', 'clean',
+            'extract', 'fix', 'log', 'move', 'cleanup', 'get', 'warn', 'fail', 'find',
+            'display', 'collect', 'detect', 'patch', 'symlink', 'trigger', 'reconfigure',
+            'optimize', 'unarchive', 'archive', 'bootstrap', 'initialize', 'wait',
+            'print', 'gather', 'flush', 'include', 'import', 'load', 'validate',
         ]
 
         first_word = name.strip().lower().split()[0] if name.strip() else ''
@@ -362,7 +367,7 @@ class PlaybookValidator:
                     return idx
         return 0  # Unknown
 
-    def add_error(self, severity: str, file_path: Path, line: int, rule: str, message: str, suggestion: str = None):
+    def add_error(self, severity: str, file_path: Path, line: int, rule: str, message: str, suggestion: Optional[str] = None):
         """Add a validation error."""
         error = ValidationError(severity, str(file_path), line, rule, message, suggestion)
 
@@ -420,7 +425,7 @@ def find_yaml_files(base_path: Path) -> List[Path]:
     yaml_files = []
 
     # Excluded paths from .yamllint
-    excluded_patterns = ['collections/', '.github/workflows/', 'venv/', '.venv/', '.git/', 'gitops-repo/']
+    excluded_patterns = ['collections/', '.github/workflows/', 'venv/', '.venv/', '.git/', 'gitops-repo/', 'plugins/']
 
     for pattern in ['**/*.yml', '**/*.yaml']:
         for file_path in base_path.glob(pattern):

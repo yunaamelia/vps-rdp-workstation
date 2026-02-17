@@ -170,7 +170,7 @@
   tags: [fonts]
 
 - name: Verify fonts installed
-  ansible.builtin.command: fc-list | grep -i "JetBrains"
+  ansible.builtin.shell: fc-list | grep -i "JetBrains"
   register: font_check
   changed_when: false
   failed_when: false

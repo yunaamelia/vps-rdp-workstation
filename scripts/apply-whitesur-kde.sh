@@ -138,7 +138,18 @@ if [[ -f ~/.gtkrc-2.0 ]]; then
     sed -i "s/gtk-theme-name=.*/gtk-theme-name=\"$THEME\"/" ~/.gtkrc-2.0
 fi
 
-echo "  ✓ GTK2/3/4 all set to $THEME (dark mode)"
+# xsettingsd — X11 source-of-truth for GTK apps (used by kde-gtk-config daemon)
+if [[ -f ~/.config/xsettingsd/xsettingsd.conf ]]; then
+    sed -i "s|Net/ThemeName .*|Net/ThemeName \"$THEME\"|" ~/.config/xsettingsd/xsettingsd.conf
+    # Restart xsettingsd to apply
+    killall xsettingsd 2>/dev/null || true
+    sleep 1
+    nohup xsettingsd > /dev/null 2>&1 &
+    disown
+    echo "  ✓ xsettingsd synced and restarted"
+fi
+
+echo "  ✓ GTK2/3/4 + xsettingsd all set to $THEME (dark mode)"
 
 # ──────────────────────────────────────────────
 # 8. Kvantum — Qt app theming

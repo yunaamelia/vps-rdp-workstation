@@ -183,7 +183,7 @@ get_credentials() {
 			exit 1
 		fi
 
-		read -rsp "Enter password: " VPS_PASSWORD
+		read -rsp "Enter password for $VPS_USERNAME: " VPS_PASSWORD
 		echo
 	fi
 

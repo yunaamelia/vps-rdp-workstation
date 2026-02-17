@@ -167,21 +167,47 @@
     - { option: "FilterBar", value: "true" }
   tags: [kde-opt, ux]
 
-- name: Configure Panel via Plasma Scripting API
-  ansible.builtin.command:
-    cmd: >
-      su - {{ vps_username }} -c "qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
+- name: Create panel configuration script
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.local/bin/configure-panel.sh"
+    mode: '0755'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    content: |
+      #!/bin/bash
+      # Wait for Plasma to be ready
+      until qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript 'print("ready")' &>/dev/null; do
+          sleep 2
+      done
+
+      # Run the config script
+      qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
       var p = panels();
       for (var i = 0; i < p.length; i++) {
-          if (p[i].location == \"bottom\") {
+          if (p[i].location == "bottom") {
               p[i].height = 52;
-              p[i].alignment = \"center\";
+              p[i].alignment = "center";
               p[i].floating = true;
-              p[i].lengthMode = \"fit\";
+              p[i].lengthMode = "fit";
           }
-      }'"
-  changed_when: false
-  failed_when: false
+      }'
+
+      # Remove self from autostart to run only once
+      rm -f "$HOME/.config/autostart/configure-panel.desktop"
+  tags: [kde-opt, panel]
+
+- name: Create autostart entry for panel configuration
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.config/autostart/configure-panel.desktop"
+    mode: '0644'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Configure Panel
+      Exec=/home/{{ vps_username }}/.local/bin/configure-panel.sh
+      X-KDE-autostart-phase=2
   tags: [kde-opt, panel]
 
 - name: Enable Autostart Applications

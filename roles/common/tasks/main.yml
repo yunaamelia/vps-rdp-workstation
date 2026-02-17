@@ -63,13 +63,19 @@
         regexp: '^127\.0\.1\.1'
         line: "127.0.1.1 {{ vps_hostname }}"
         state: present
-      when: ansible_virtualization_type != "docker"
+      when: ansible_facts['virtualization_type'] != "docker"
       tags: [common, system]
 
     - name: Configure system timezone
       community.general.timezone:
         name: "{{ vps_timezone }}"
-      when: ansible_virtualization_type != "docker"
+      when: ansible_facts['virtualization_type'] != "docker"
+      tags: [common, system]
+
+    - name: Configure system timezone
+      community.general.timezone:
+        name: "{{ vps_timezone }}"
+      when: ansible_facts['virtualization_type'] != "docker"
       tags: [common, system]
 
     - name: Generate locale

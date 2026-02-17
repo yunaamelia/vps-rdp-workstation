@@ -50,7 +50,7 @@
     reload: true
   failed_when:
     - result.failed
-    - ansible_virtualization_type != 'docker'
+    - ansible_facts['virtualization_type'] != 'docker'
   register: result
   tags: [tools, performance]
 

@@ -88,7 +88,7 @@
         name: docker
         enabled: true
         state: started
-      when: vps_docker_install and ansible_virtualization_type != "docker"
+      when: vps_docker_install and ansible_facts['virtualization_type'] != "docker"
       tags: [docker]
 
     - name: Get lazydocker latest release info

@@ -1,0 +1,100 @@
+---
+name: Validate Playbooks
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - '**.yml'
+      - '**.yaml'
+      - 'ansible.cfg'
+      - '.yamllint'
+      - 'scripts/validate-playbook.py'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - '**.yml'
+      - '**.yaml'
+      - 'ansible.cfg'
+      - '.yamllint'
+      - 'scripts/validate-playbook.py'
+
+jobs:
+  yamllint:
+    name: YAML Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install yamllint
+        run: pip install yamllint
+
+      - name: Run yamllint
+        run: yamllint .
+
+  ansible-lint:
+    name: Ansible Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install ansible-lint
+        run: |
+          pip install ansible-core ansible-lint
+
+      - name: Run ansible-lint
+        run: ansible-lint --force-color
+
+  custom-validation:
+    name: Custom Convention Checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install PyYAML
+
+      - name: Run custom validation script
+        run: python3 scripts/validate-playbook.py --all --strict
+
+  syntax-check:
+    name: Ansible Syntax Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Ansible
+        run: |
+          pip install ansible-core
+          ansible-galaxy collection install -r requirements.yml
+
+      - name: Check playbook syntax
+        run: ansible-playbook --syntax-check site.yml

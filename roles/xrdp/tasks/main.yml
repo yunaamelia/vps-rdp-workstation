@@ -49,8 +49,7 @@
 
     - name: Generate self-signed XRDP certificate and private key
       ansible.builtin.shell: |
-        openssl req -x509 -newkey rsa:2048 -nodes -keyout /etc/xrdp/key.pem -out /etc/xrdp/cert.pem -days 3650 -subj "/C=US/ST=Dev/L=Lab/O=XRDP/CN={{ ansible_hostname }}"
-        openssl rsa -in /etc/xrdp/key.pem -out /etc/xrdp/key.pem -traditional
+        openssl req -x509 -newkey rsa:4096 -nodes -keyout /etc/xrdp/key.pem -out /etc/xrdp/cert.pem -days 3650 -subj "/C=US/ST=Dev/L=Lab/O=XRDP/CN={{ ansible_hostname }}"
       args:
         creates: /etc/xrdp/key.pem
       notify: Restart XRDP
@@ -60,52 +59,45 @@
       ansible.builtin.file:
         path: /etc/xrdp/key.pem
         owner: root
-        group: ssl-cert
-        mode: '0640'
+        group: xrdp
+        mode: '0440'
       tags: [xrdp, config, security]
 
     - name: Ensure correct permissions for XRDP certificate
       ansible.builtin.file:
         path: /etc/xrdp/cert.pem
         owner: root
-        group: ssl-cert
+        group: xrdp
         mode: '0644'
       tags: [xrdp, config, security]
 
     - name: Enable UDP in xrdp.ini
-      community.general.ini_file:
-        path: /etc/xrdp/xrdp.ini
-        section: globals
-        option: use_udp
-        value: "1"
+      ansible.builtin.template:
+        src: xrdp.ini.j2
+        dest: /etc/xrdp/xrdp.ini
+        owner: root
+        group: root
         mode: '0644'
       notify: Restart XRDP
       tags: [xrdp, config, network]
 
     - name: Configure startwm.sh to launch KDE Plasma
-      ansible.builtin.blockinfile:
-        path: /etc/xrdp/startwm.sh
-        marker: "# {mark} ANSIBLE MANAGED BLOCK - KDE PLASMA"
-        insertbefore: BOF
-        content: |
-          #!/bin/sh
-          if [ -r /etc/profile ]; then
-            . /etc/profile
-          fi
-          test -x /etc/X11/Xsession && exec /etc/X11/Xsession
-          exec dbus-launch --exit-with-session startplasma-x11
+      ansible.builtin.template:
+        src: startwm.sh.j2
+        dest: /etc/xrdp/startwm.sh
+        owner: root
+        group: root
+        mode: '0755'
       notify: Restart XRDP
       tags: [xrdp, config, session]
 
     - name: Allow any user to login (Disable group checks)
-      community.general.ini_file:
-        path: /etc/xrdp/sesman.ini
-        section: Security
-        option: "{{ item }}"
-        state: absent
-      loop:
-        - TerminalServerUsers
-        - TerminalServerAdmins
+      ansible.builtin.template:
+        src: sesman.ini.j2
+        dest: /etc/xrdp/sesman.ini
+        owner: root
+        group: root
+        mode: '0644'
       notify: Restart XRDP
       tags: [xrdp, config, security]
 

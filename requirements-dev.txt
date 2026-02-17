@@ -1,0 +1,22 @@
+# Development and validation dependencies for VPS RDP Workstation project
+
+# YAML validation
+PyYAML>=6.0.1
+
+# Linting tools
+yamllint>=1.35.1
+ansible-lint>=24.2.0
+
+# Pre-commit framework
+pre-commit>=3.6.0
+
+# Ansible core (for syntax checking)
+ansible-core>=2.16.0
+
+# Performance optimization (optional but recommended)
+# mitogen>=0.3.7  # Uncomment for 2-7x performance boost
+
+# Testing tools (future enhancement)
+# pytest>=8.0.0
+# pytest-ansible>=4.1.0
+# molecule>=6.0.0

@@ -1,5 +1,9 @@
 # PROJECT KNOWLEDGE BASE
 
+**Generated:** Tue Feb 17 07:10:09 PM UTC 2026
+**Commit:** 211a454
+**Branch:** main
+
 **Scope**: Ansible IaC — Debian 13 VPS → security-hardened RDP developer workstation.
 
 ## STRUCTURE

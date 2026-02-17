@@ -1,0 +1,23 @@
+---
+galaxy_info:
+  author: racoondev
+  description: tmux role for automated workstation configuration
+  license: MIT
+  min_ansible_version: "2.9"
+
+  platforms:
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+
+  galaxy_tags:
+    - system
+    - workstation
+    - configuration
+
+dependencies: []

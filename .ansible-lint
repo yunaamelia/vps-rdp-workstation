@@ -12,6 +12,7 @@ exclude_paths:
   - collections/
   - .git/
   - .ansible/
+  - .github/workflows/validate-playbooks.yml
 
 # Guidelines to skip
 skip_list:

@@ -229,6 +229,10 @@ run_playbook() {
 		"-e" "vps_user_password_hash=$VPS_USER_PASSWORD_HASH"
 	)
 
+	# STRICT ERROR HANDLING: Force execution stop on ANY task failure
+	# This ensures immediate failure detection for CI/CD and production safety
+	export ANSIBLE_ANY_ERRORS_FATAL=true
+
 	if [[ "$K8S_MODE" == "true" ]]; then
 		args+=("-e" "install_cloud_native_tools=true")
 	fi

@@ -5,6 +5,7 @@
   hosts: all
   become: true
   gather_facts: true
+  any_errors_fatal: true  # Abort entire playbook if ANY task fails on ANY host
 
   vars:
     installation_start_time: "{{ ansible_facts.date_time.iso8601 }}"

@@ -105,7 +105,7 @@
 - name: Install Powerline fonts
   ansible.builtin.shell: |
     cd /tmp/powerline-fonts
-    ./install.sh
+    bash install.sh
   become: true
   become_user: "{{ vps_username }}"
   args:

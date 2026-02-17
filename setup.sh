@@ -100,6 +100,30 @@ setup_ansible() {
 			"apt-get install -y -qq pipx python3-venv"
 		pipx ensurepath >/dev/null 2>&1
 	fi
+
+	# Upgrade pipx if version < 1.7.0 (Required for Ansible community.general.pipx module)
+	# Ubuntu 24.04 ships with 1.4.3 which causes "The pipx tool must be at least at version 1.7.0"
+	local pipx_version
+	pipx_version=$(pipx --version 2>/dev/null || echo "0.0.0")
+
+	if dpkg --compare-versions "$pipx_version" "lt" "1.7.0"; then
+		log_warn "Pipx version $pipx_version is too old (<1.7.0). Upgrading via dedicated venv..."
+
+		# Ensure python3-venv is present
+		run_with_spinner "Ensuring python3-venv is installed..." \
+			"apt-get install -y -qq python3-venv python3-pip"
+
+		# Remove apt version to prevent conflicts
+		run_with_spinner "Removing outdated system pipx..." \
+			"apt-get remove -y pipx || true"
+
+		# Install fresh pipx into /opt/pipx-venv
+		run_with_spinner "Installing latest pipx into /opt/pipx-venv..." \
+			"rm -rf /opt/pipx-venv && python3 -m venv /opt/pipx-venv && /opt/pipx-venv/bin/pip install pipx && ln -sf /opt/pipx-venv/bin/pipx /usr/local/bin/pipx"
+
+		log_success "Pipx upgraded to $(pipx --version)"
+	fi
+
 	export PATH="$PATH:$HOME/.local/bin"
 
 	# Install core tools via pipx

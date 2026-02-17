@@ -9,6 +9,7 @@
   ansible.builtin.systemd:
     name: fail2ban
     state: restarted
+  ignore_errors: true
 
 - name: Reload UFW
   community.general.ufw:

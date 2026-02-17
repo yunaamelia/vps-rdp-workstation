@@ -1,13 +1,13 @@
 # Terminal Role - Default Variables
 ---
 vps_shell: "zsh"
-vps_zsh_theme: "agnoster"
+vps_terminal_zsh_theme: "agnoster"
 vps_terminal_emulator: "konsole"
 vps_terminal_install_kitty: true
 vps_terminal_kitty_theme: "Nordic"
-vps_install_omz: true
+vps_terminal_install_omz: true
 
-vps_omz_builtin_plugins:
+vps_terminal_omz_builtin_plugins:
   - git
   - docker
   - npm

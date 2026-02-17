@@ -17,7 +17,7 @@
     deb: /tmp/fastfetch.deb
     state: present
   become: true
-  when: fastfetch_download is success
+  when: fastfetch_download is success and not ansible_check_mode
   tags: [shell, visual, fastfetch]
 
 - name: Create fastfetch config directory

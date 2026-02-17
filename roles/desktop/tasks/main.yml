@@ -21,8 +21,8 @@
           - xsettingsd
           # gtk3-engines-breeze removed in Debian 13, use breeze-gtk-theme
           - breeze-gtk-theme
-          # gtk2-engines-breeze removed in Ubuntu 24.04, replace with breeze-gtk-theme
-          - "{{ 'breeze-gtk-theme' if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '24' else 'gtk2-engines-breeze' }}"
+          # gtk2-engines-breeze removed in Debian 13 and Ubuntu 24.04, replaced with breeze-gtk-theme
+          - "{{ 'breeze-gtk-theme' if (ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '24') or (ansible_distribution == 'Debian' and ansible_distribution_major_version == '13') else 'gtk2-engines-breeze' }}"
           - libglib2.0-dev-bin
 
         state: present

@@ -311,6 +311,12 @@ main() {
 	# Banner
 	run_rich banner "$SCRIPT_VERSION"
 
+	if ! python3 -c "import rich" &>/dev/null; then
+		if command -v apt-get &>/dev/null; then
+			apt-get update -qq && apt-get install -y -qq python3-rich &>/dev/null || true
+		fi
+	fi
+
 	# Workflow
 	validate_system
 	setup_ansible

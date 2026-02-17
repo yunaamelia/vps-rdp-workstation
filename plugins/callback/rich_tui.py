@@ -287,7 +287,7 @@ class RichInterface:
         version = Text(" v3.0.0 ", style="white on #313244")
 
         grid.add_row(title, version)
-        return Panel(grid, style="on #1e1e2e", box=box.SQUARE, padding=(0, 1), border_style="blue")
+        return Panel(grid, style="on #1e1e2e", box=box.ROUNDED, padding=(0, 1), border_style="blue")
 
     def _make_logs_panel(self):
         """Create the scrolling log table."""
@@ -393,7 +393,7 @@ class RichInterface:
         return Panel(
             Text.assemble(*phases),
             style="on #1e1e2e",
-            box=box.SQUARE,
+            box=box.ROUNDED,
             padding=(0, 1),
             border_style="surface0"
         )

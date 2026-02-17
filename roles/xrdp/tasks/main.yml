@@ -72,64 +72,55 @@
         mode: '0644'
       tags: [xrdp, config, security]
 
-    - name: Configure xrdp.ini
-      ansible.builtin.template:
-        src: xrdp.ini.j2
-        dest: /etc/xrdp/xrdp.ini
-        owner: root
-        group: root
+    - name: Enable UDP in xrdp.ini
+      community.general.ini_file:
+        path: /etc/xrdp/xrdp.ini
+        section: globals
+        option: use_udp
+        value: "1"
         mode: '0644'
       notify: Restart XRDP
-      tags: [xrdp, config]
+      tags: [xrdp, config, network]
 
-    - name: Configure sesman.ini
-      ansible.builtin.template:
-        src: sesman.ini.j2
-        dest: /etc/xrdp/sesman.ini
-        owner: root
-        group: root
-        mode: '0644'
+    - name: Configure startwm.sh to launch KDE Plasma
+      ansible.builtin.blockinfile:
+        path: /etc/xrdp/startwm.sh
+        marker: "# {mark} ANSIBLE MANAGED BLOCK - KDE PLASMA"
+        insertbefore: BOF
+        content: |
+          #!/bin/sh
+          if [ -r /etc/profile ]; then
+            . /etc/profile
+          fi
+          test -x /etc/X11/Xsession && exec /etc/X11/Xsession
+          exec dbus-launch --exit-with-session startplasma-x11
       notify: Restart XRDP
-      tags: [xrdp, config]
+      tags: [xrdp, config, session]
 
-    - name: Configure startwm.sh
-      ansible.builtin.template:
-        src: startwm.sh.j2
-        dest: /etc/xrdp/startwm.sh
-        owner: root
-        group: root
-        mode: '0755'
+    - name: Allow any user to login (Disable group checks)
+      community.general.ini_file:
+        path: /etc/xrdp/sesman.ini
+        section: Security
+        option: "{{ item }}"
+        state: absent
+      loop:
+        - TerminalServerUsers
+        - TerminalServerAdmins
       notify: Restart XRDP
-      tags: [xrdp, config]
+      tags: [xrdp, config, security]
 
-    - name: Configure Xwrapper to allow remote Xorg sessions
-      ansible.builtin.template:
-        src: Xwrapper.config.j2
-        dest: /etc/X11/Xwrapper.config
-        owner: root
-        group: root
+    - name: Allow non-root users to start Xorg (Xwrapper)
+      ansible.builtin.lineinfile:
+        path: /etc/X11/Xwrapper.config
+        regexp: "^{{ item.key }}="
+        line: "{{ item.key }}={{ item.value }}"
+        create: true
         mode: '0644'
+      loop:
+        - { key: 'allowed_users', value: 'anybody' }
+        - { key: 'needs_root_rights', value: 'no' }
       notify: Restart XRDP
-      tags: [xrdp, config, fix]
-
-    - name: Deploy Polkit rule for color management (fix popup/black screen)
-      ansible.builtin.template:
-        src: 45-allow-colord.rules.j2
-        dest: /etc/polkit-1/rules.d/45-allow-colord.rules
-        owner: root
-        group: root
-        mode: '0644'
-      tags: [xrdp, config, fix]
-
-    - name: Deploy TCP tuning for XRDP performance
-      ansible.builtin.template:
-        src: 99-xrdp-tcp-tuning.conf.j2
-        dest: /etc/sysctl.d/99-xrdp-tcp-tuning.conf
-        owner: root
-        group: root
-        mode: '0644'
-      notify: Apply sysctl settings
-      tags: [xrdp, config, performance]
+      tags: [xrdp, config, permissions]
 
     - name: Enable and start XRDP service
       ansible.builtin.systemd:

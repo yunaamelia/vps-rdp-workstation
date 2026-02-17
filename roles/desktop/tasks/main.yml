@@ -21,8 +21,13 @@
           # gtk3-engines-breeze removed in Debian 13, use breeze-gtk-theme
           - breeze-gtk-theme
           # gtk2-engines-breeze removed in Debian 13 and Ubuntu 24.04, replaced with breeze-gtk-theme
-          - "{{ 'breeze-gtk-theme' if (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_major_version'] == '24') or (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '13') else 'gtk2-engines-breeze' }}"
+          - "{{ 'breeze-gtk-theme'
+                if (ansible_facts['distribution'] == 'Ubuntu' and ansible_facts['distribution_major_version'] == '24')
+                or (ansible_facts['distribution'] == 'Debian' and ansible_facts['distribution_major_version'] == '13')
+                else 'gtk2-engines-breeze' }}"
           - libglib2.0-dev-bin
+          - pipewire-pulse
+          - pipewire-module-xrdp
 
         state: present
       ignore_errors: "{{ ansible_check_mode }}"

@@ -39,18 +39,23 @@ jobs:
       - name: AI Review
         uses: actions/github-script@v7
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }} # pragma: allowlist secret
+          PR_DIFF: ${{ steps.diff.outputs.diff }}
+          CHANGED_FILES: ${{ steps.changed.outputs.files }}
         with:
           script: |
             const Anthropic = require('@anthropic-ai/sdk');
-            const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
+            // Check for API key presence
             if (!process.env.ANTHROPIC_API_KEY) {
               console.log('No API key found, skipping review.');
               return;
             }
 
-            const diff = `${{ steps.diff.outputs.diff }}`;
+            const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+            const diff = process.env.PR_DIFF;
+            const changedFiles = process.env.CHANGED_FILES;
+
             if (diff.length > 100000) {
               console.log('Diff too large for review.');
               return;
@@ -64,7 +69,7 @@ jobs:
                   role: "user",
                   content: `Review this PR diff and provide feedback:
 
-                  Changed files: ${{ steps.changed.outputs.files }}
+                  Changed files: ${changedFiles}
 
                   Diff:
                   ${diff}

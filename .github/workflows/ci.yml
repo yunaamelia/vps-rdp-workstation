@@ -41,7 +41,7 @@ jobs:
           extra_args: --all-files
 
       - name: Run ShellCheck
-        uses: ludeeus/action-shellcheck@2.0.0
+        uses: ludeeus/action-shellcheck@master
         with:
           scandir: '.'
           ignore_paths: 'collections'

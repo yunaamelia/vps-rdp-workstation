@@ -35,7 +35,11 @@ jobs:
         env:
           VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
           VPS_SECRETS_FILE: ./secrets
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         run: |
-          echo "password=${{ secrets.VPS_PASSWORD }}" > ./secrets
+          # Securely write secrets file using Python to avoid shell injection
+          python3 -c "import os; open('./secrets', 'w').write(f'password={os.environ[\"VPS_PASSWORD\"]}\n')"
           chmod 600 ./secrets
           ./setup.sh --ci
+          # Cleanup
+          rm ./secrets

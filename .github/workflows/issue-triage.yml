@@ -18,24 +18,28 @@ jobs:
       - name: Analyze issue
         uses: actions/github-script@v7
         env:
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }} # pragma: allowlist secret
+          ISSUE_TITLE: ${{ context.payload.issue.title }}
+          ISSUE_BODY: ${{ context.payload.issue.body }}
         with:
           script: |
             const Anthropic = require('@anthropic-ai/sdk');
-            const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
             if (!process.env.ANTHROPIC_API_KEY) {
               console.log('No API key found, skipping triage.');
               return;
             }
 
-            const issue = context.payload.issue;
+            const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+            const title = process.env.ISSUE_TITLE;
+            const body = process.env.ISSUE_BODY;
+            const issueNumber = context.payload.issue.number;
 
             const prompt = `
             Analyze this GitHub issue and classify it:
 
-            Title: ${issue.title}
-            Body: ${issue.body}
+            Title: ${title}
+            Body: ${body}
 
             Return JSON with:
             {
@@ -60,9 +64,19 @@ jobs:
               // Parse JSON from response (naive parsing, robust would be better)
               const text = response.content[0].text;
               const jsonMatch = text.match(/\{[\s\S]*\}/);
-              if (!jsonMatch) return;
+              if (!jsonMatch) {
+                console.log('No JSON found in response');
+                return;
+              }
 
-              const analysis = JSON.parse(jsonMatch[0]);
+              let analysis;
+              try {
+                analysis = JSON.parse(jsonMatch[0]);
+              } catch (e) {
+                console.error('Failed to parse JSON:', e);
+                return;
+              }
+
               const labels = [];
 
               if (analysis.type === 'bug') {
@@ -82,7 +96,7 @@ jobs:
                 await github.rest.issues.addLabels({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  issue_number: issue.number,
+                  issue_number: issueNumber,
                   labels: labels
                 });
               }
@@ -92,7 +106,7 @@ jobs:
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  issue_number: issue.number,
+                  issue_number: issueNumber,
                   body: "Thanks for reporting this issue!\\n\\n" +
                         "To help us investigate, could you please provide:\\n" +
                         "- Steps to reproduce the issue\\n" +

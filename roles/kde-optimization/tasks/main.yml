@@ -132,6 +132,24 @@
   failed_when: false
   tags: [kde-opt, gtk, trigger]
 
+- name: Ensure Mozilla config directory exists (for system-wide)
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.mozilla"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [kde-opt, firefox]
+
+- name: Ensure Firefox profiles directory exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.mozilla/firefox"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [kde-opt, firefox]
+
 - name: Find Firefox profiles
   ansible.builtin.find:
     paths: "/home/{{ vps_username }}/.mozilla/firefox"
@@ -139,6 +157,7 @@
     file_type: directory
   register: firefox_profiles
   failed_when: false
+  when: vps_install_desktop | default(true)
   tags: [kde-opt, firefox]
 
 - name: Deploy Firefox dark mode preferences
@@ -149,16 +168,7 @@
     group: "{{ vps_username }}"
     mode: '0644'
   loop: "{{ firefox_profiles.files | default([]) }}"
-  when: firefox_profiles.matched | default(0) > 0
-  tags: [kde-opt, firefox]
-
-- name: Ensure Mozilla config directory exists (for system-wide)
-  ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.mozilla"
-    state: directory
-    owner: "{{ vps_username }}"
-    group: "{{ vps_username }}"
-    mode: '0755'
+  when: (firefox_profiles.matched | default(0) > 0) and (vps_install_desktop | default(true))
   tags: [kde-opt, firefox]
 
 - name: Configure Dolphin (General)

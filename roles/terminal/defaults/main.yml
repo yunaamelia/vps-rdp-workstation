@@ -26,3 +26,4 @@ vps_terminal_omz_builtin_plugins:
   - vscode
 
 vps_fonts_default_font_size: 11
+vps_terminal_font: "JetBrainsMono Nerd Font"

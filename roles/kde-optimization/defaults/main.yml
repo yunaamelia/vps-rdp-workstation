@@ -6,8 +6,9 @@
 vps_kde_autostart_apps: []
 
 # Theme variables (WhiteSur ecosystem)
-vps_gtk_theme: "WhiteSur-Dark-alt-nord"
-vps_gtk_font: "Inter,  10"
+# Theme variables (WhiteSur ecosystem)
+vps_gtk_theme: "WhiteSur-Dark"
+vps_gtk_font: "JetBrainsMono Nerd Font,10"
 
 # KDE accent color (macOS Blue: 0,122,255)
 vps_kde_accent_color: "0,122,255"
@@ -15,7 +16,7 @@ vps_kde_color_scheme: "BreezeDark"
 vps_kde_animation_factor: "0.5"
 
 # KDE font configuration
-vps_kde_font: "Inter,10,-1,5,400,0,0,0,0,0,Regular"
-vps_kde_active_font: "Inter,10,-1,5,600,0,0,0,0,0,Semi-Bold"
-vps_kde_fixed_font: "JetBrains Mono,10,-1,5,400,0,0,0,0,0,Regular"
-vps_kde_small_font: "Inter,8,-1,5,400,0,0,0,0,0,Regular"
+vps_kde_font: "JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,Regular"
+vps_kde_active_font: "JetBrainsMono Nerd Font,10,-1,5,600,0,0,0,0,0,Semi-Bold"
+vps_kde_fixed_font: "FiraCode Nerd Font,10,-1,5,400,0,0,0,0,0,Regular"
+vps_kde_small_font: "JetBrainsMono Nerd Font,8,-1,5,400,0,0,0,0,0,Regular"

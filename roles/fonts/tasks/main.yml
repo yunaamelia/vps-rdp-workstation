@@ -96,9 +96,11 @@
 - name: Install Powerline fonts
   ansible.builtin.shell: |
     cd /tmp/powerline-fonts
-    bash install.sh
+    ./install.sh
+  become: true
+  become_user: "{{ vps_username }}"
   args:
-    creates: /usr/share/fonts/truetype/powerline/DejaVu*
+    creates: "/home/{{ vps_username }}/.local/share/fonts/PowerlineSymbols.otf"
   when: vps_fonts_install_powerline_fonts and not ansible_check_mode
   tags: [fonts]
 

@@ -18,12 +18,25 @@ echo ""
 # ──────────────────────────────────────────────
 echo "[0/9] Window decorations..."
 
-# Remove any exception that hides title bars
-kwriteconfig6 --file breezerc --group "Windeco Exception 0" --key "Enabled" "false"
-kwriteconfig6 --file breezerc --group "Windeco Exception 0" --key "HideTitleBar" "false"
+# Clean breezerc — remove ALL window decoration exceptions that hide title bars
+# Write a clean breezerc without any exceptions
+cat > "$HOME/.config/breezerc" << 'BREEZERC'
+[Common]
+OutlineCloseButton=false
+
+[Windeco]
+DrawBackgroundGradient=false
+BREEZERC
+
+# Disable Polonium tiling WM — it strips window decorations from tiled windows
+kwriteconfig6 --file kwinrc --group "Plugins" --key "poloniumEnabled" "false"
 
 # Keep title bar on maximized windows
 kwriteconfig6 --file kwinrc --group "Windows" --key "BorderlessMaximizedWindows" "false"
+
+# Ensure Breeze decoration is loaded
+kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "library" "org.kde.breeze"
+kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "theme" "Breeze"
 
 # Window buttons: left side macOS style (X=Close, I=Minimize, A=Maximize)
 kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "ButtonsOnLeft" "XIA"
@@ -32,7 +45,7 @@ kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "BorderSize" "N
 kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "CloseOnDoubleClickOnMenu" "false"
 kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "ShowToolTips" "false"
 
-echo "  ✓ Title bars enabled, buttons on left (XIA)"
+echo "  ✓ Title bars enabled, Polonium disabled, buttons on left (XIA)"
 
 # ──────────────────────────────────────────────
 # 1. Plasma Desktop Theme

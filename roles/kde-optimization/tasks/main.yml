@@ -60,6 +60,15 @@
   notify: Reconfigure KWin
   tags: [kde-opt, config]
 
+- name: Ensure GTK3 config directory exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/gtk-3.0"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [kde-opt, gtk]
+
 - name: Deploy GTK3 Settings
   ansible.builtin.template:
     src: gtk3-settings.ini.j2

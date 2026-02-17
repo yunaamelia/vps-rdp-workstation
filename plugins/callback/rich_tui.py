@@ -43,7 +43,7 @@ except ImportError:
         ROUNDED: Any = None
         SQUARE: Any = None
         MINIMAL: Any = None
-        
+
         # Static assemble method for Text
         @staticmethod
         def assemble(*args: Any, **kwargs: Any) -> Any:
@@ -52,7 +52,7 @@ except ImportError:
         # Add start/stop for Live
         def start(self, *args: Any, **kwargs: Any) -> None:
             pass
-            
+
         def stop(self, *args: Any, **kwargs: Any) -> None:
             pass
 
@@ -67,7 +67,7 @@ except ImportError:
 
         def __getitem__(self, _: Any) -> Any:
             return self
-            
+
         def __or__(self, other: Any) -> Any:
             return self
 
@@ -80,10 +80,10 @@ except ImportError:
 
         def split_row(self, *args: Any, **kwargs: Any) -> None:
             pass
-            
+
         def update(self, *args: Any, **kwargs: Any) -> None:
             pass
-            
+
         def add_column(self, *args: Any, **kwargs: Any) -> None:
             pass
 
@@ -92,14 +92,14 @@ except ImportError:
 
         def add_task(self, *args: Any, **kwargs: Any) -> Any:
             return None
-            
+
         def advance(self, *args: Any, **kwargs: Any) -> None:
             pass
-            
+
         # Add special methods required by Rich protocols
         def __rich_console__(self, console: Any, options: Any) -> Any:
             return []
-            
+
         def __rich__(self) -> Any:
             return str(self)
 
@@ -107,7 +107,7 @@ except ImportError:
     Dummy.ROUNDED = Dummy()
     Dummy.SQUARE = Dummy()
     Dummy.MINIMAL = Dummy()
-    
+
     # Allow dummy classes to be used in type unions by registering them
     Console = Group = Live = Layout = Table = Panel = Progress = Theme = Style = Dummy  # type: ignore
     SpinnerColumn = TextColumn = BarColumn = TimeElapsedColumn = TaskID = Text = box = Dummy  # type: ignore
@@ -216,7 +216,7 @@ class RichInterface:
             self.layout = Dummy()
         self.log_messages: List[Dict[str, Any]] = []
         self.max_log_items = 15
-        
+
         # State
         self.current_phase: Optional[str] = None
         self.completed_phases: Set[str] = set()
@@ -238,7 +238,7 @@ class RichInterface:
             cast(Any, TextColumn("[progress.percentage]{task.percentage:>3.0f}%")),
             expand=True,
         )
-        
+
         # Explicit type annotation to satisfy static analysis
         # Using cast to Any to avoid "variable not allowed in type expression"
         self.overall_task_id: Any = cast(Any, self.overall_progress).add_task("Total Progress", total=100)
@@ -265,16 +265,16 @@ class RichInterface:
         """Update and return the main layout."""
         # Header
         self.layout["header"].update(self._make_header())
-        
+
         # Logs Panel
         self.layout["logs"].update(self._make_logs_panel())
-        
+
         # Status Panel (Progress + Stats)
         self.layout["status"].update(self._make_status_panel())
-        
+
         # Footer (Milestones)
         self.layout["footer"].update(self._make_footer())
-        
+
         return self.layout
 
     def _make_header(self):
@@ -282,10 +282,10 @@ class RichInterface:
         grid = Table.grid(expand=True)
         grid.add_column(justify="left", ratio=1)
         grid.add_column(justify="right")
-        
+
         title = Text("  VPS RDP WORKSTATION ", style="bold white on blue")
         version = Text(" v3.0.0 ", style="white on #313244")
-        
+
         grid.add_row(title, version)
         return Panel(grid, style="on #1e1e2e", box=box.SQUARE, padding=(0, 1), border_style="blue")
 
@@ -293,7 +293,7 @@ class RichInterface:
         """Create the scrolling log table."""
         # Use a Group to stack the table and potential error details
         renderables = []
-        
+
         table = Table.grid(expand=True, padding=(0, 1))
         table.add_column(width=3)  # Icon
         table.add_column(ratio=1)  # Message
@@ -301,17 +301,17 @@ class RichInterface:
 
         if not self.log_messages:
             table.add_row("", "[dim]Initializing...[/dim]", "")
-        
+
         # Calculate start index to show last N items
         # If we have expanded errors, we might show fewer items to keep layout stable
         visible_msgs = self.log_messages[-self.max_log_items:]
-        
+
         for msg in visible_msgs:
             icon = msg.get("icon", "•")
             text = msg.get("text", "")
             style = msg.get("style", "white")
             duration = msg.get("duration", "")
-            
+
             table.add_row(
                 Text(icon, style=style),
                 Text(text, style=style),
@@ -340,7 +340,7 @@ class RichInterface:
         """Create a collapsible panel for error details."""
         if not msg.get("error_details"):
             return None
-            
+
         error_text = Text(msg["error_details"], style="red")
         return Panel(
             error_text,
@@ -355,7 +355,7 @@ class RichInterface:
         stats_table = Table.grid(expand=True, padding=(0, 1))
         stats_table.add_column(ratio=1)
         stats_table.add_column(justify="right")
-        
+
         stats_table.add_row("[green]✓ OK[/]", str(self.stats["ok"]))
         stats_table.add_row("[yellow]~ Changed[/]", str(self.stats["changed"]))
         stats_table.add_row("[red]✗ Failed[/]", str(self.stats["failed"]))
@@ -366,7 +366,7 @@ class RichInterface:
             Panel(self.task_progress, box=box.MINIMAL, title="Current Task", border_style="mauve"),
             Panel(stats_table, box=box.MINIMAL, title="Statistics", border_style="surface1"),
         )
-        
+
         return Panel(
             content,
             title="[bold mauve]Status[/]",
@@ -414,9 +414,9 @@ class RichInterface:
             "skipped": "dim",
             "info": "blue"
         }
-        
+
         dur_str = f"{duration:.1f}s" if duration > 0 else ""
-        
+
         # Only add error details if log level is full
         error_details = None
         if status == "failed" and self.log_level == "full":
@@ -447,7 +447,7 @@ class RichInterface:
             self.current_task_id = self.task_progress.add_task(description, total=None)
         else:
             self.task_progress.update(self.current_task_id, description=description)
-        
+
         # Advance overall progress slightly
         self.overall_progress.advance(self.overall_task_id, 0.5)
 
@@ -465,10 +465,10 @@ class CallbackModule(CallbackBase):
         self.ui: Any = None
         self.live: Any = None
         self.current_task_start = 0.0
-        
+
         # Theme setup
         self.theme = Theme(THEME_COLORS)
-        
+
         # Detect environment
         self.is_tty = os.isatty(1) or os.environ.get("VPS_FORCE_TUI") == "true"
         self.is_navigator = "ansible-navigator" in os.environ.get("ansible_cmdline", "")
@@ -480,7 +480,7 @@ class CallbackModule(CallbackBase):
         # Explicitly cast Theme to Any to bypass type checking against Dummy
         console = Console(theme=cast(Any, self.theme), force_terminal=True)
         self.ui = RichInterface(console)
-        
+
         # Use Live context for automatic refreshing
         # In navigator, we might need to be careful with stdout redirection
         self.live = Live(
@@ -505,13 +505,13 @@ class CallbackModule(CallbackBase):
             task_role = getattr(task, '_role', None)
             if task_role:
                 self.ui.set_phase(task_role.get_name())
-            
+
             # Update Task Spinner
             # Safe access to get_name
             task_name_method = getattr(task, 'get_name', None)
             task_name = task_name_method() if callable(task_name_method) else "Unknown Task"
             self.ui.update_task(task_name)
-            
+
             if self.live:
                 update_method = getattr(self.live, "update", None)
                 if callable(update_method):
@@ -523,19 +523,19 @@ class CallbackModule(CallbackBase):
 
         duration = time.time() - self.current_task_start
         task_name = result._task.get_name()
-        
+
         # Stats update
         self.ui.stats[status] += 1
-        
+
         # Log update
         msg = task_name
         if status == "failed":
             # Access _result safely
             res = getattr(result, '_result', {})
             msg += f" - {res.get('msg', 'Unknown Error')}"
-            
+
         self.ui.add_log(status, msg, duration)
-        
+
         if self.live:
              update_method = getattr(self.live, "update", None)
              if callable(update_method):
@@ -567,7 +567,7 @@ class CallbackModule(CallbackBase):
             stop_method = getattr(self.live, "stop", None)
             if callable(stop_method):
                 stop_method()
-        
+
         # Print final summary if needed
         if self.ui and self.ui.console:
             self.ui.console.print(self.ui._make_status_panel())

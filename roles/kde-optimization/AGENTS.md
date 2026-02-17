@@ -3,18 +3,19 @@
 **Context**: Performance tuning and UX polish for KDE Plasma, optimized for RDP usage.
 
 ## OVERVIEW
-Disables Baloo file indexing, tunes KWin compositor for lowest latency (animations off, blur off), configures Dolphin defaults, sets system font to JetBrainsMono Nerd Font. All config via `community.general.ini_file`.
+Disables Baloo file indexing, tunes KWin compositor for lowest latency (animations off, blur off), installs Polonium tiling window manager, configures Dolphin defaults, sets system font to JetBrainsMono Nerd Font. All config via `community.general.ini_file`.
 
 ## STRUCTURE
 ```
 roles/kde-optimization/
 ├── handlers/       # EMPTY (1 line `---`)
-└── tasks/          # Baloo → KWin → Dolphin → fonts
+└── tasks/          # Polonium → Baloo → KWin → Dolphin → fonts
 ```
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
+| **Polonium install** | `tasks/main.yml` | Download release → `kpackagetool6 -i` |
 | **Baloo disable** | `tasks/main.yml:14-47` | `balooctl disable` + `baloofilerc` config |
 | **KWin tuning** | `tasks/main.yml:49-74` | `kwinrc` — AnimationSpeed=0, LatencyPolicy=ForceLowestLatency, blur disabled |
 | **Dolphin config** | `tasks/main.yml:76-89` | `dolphinrc` — ShowFullPath, FilterBar |

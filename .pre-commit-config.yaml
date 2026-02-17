@@ -5,15 +5,19 @@
 # Usage:
 #   1. Install pre-commit: pip install pre-commit
 #   2. Install hooks: pre-commit install
-#   3. Run manually: pre-commit run --all-files
+#   3. Install pre-push hooks: pre-commit install --hook-type pre-push
+#   4. Run manually: pre-commit run --all-files
 
 # Exclude vendored collections and roles tests from all hooks
 exclude: ^(collections/|roles/.*/tests/|.*\.git/)
 
+# Default stages (commit). Push stage must be explicitly enabled for hooks.
+default_stages: [pre-commit]
+
 repos:
-  # Standard Hooks - Basic file hygiene
+  # 1. Standard File Hygiene
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.5.0
+    rev: v5.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -23,16 +27,31 @@ repos:
       - id: check-merge-conflict
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
-        exclude: \.j2$  # Jinja2 templates are not meant to be executed directly
+        exclude: \.j2$
 
-  # Shell Scripting - Statistical analysis for shell scripts
+  # 2. Secret Detection
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package.lock.json
+
+  # 3. Shell Scripting
   - repo: https://github.com/shellcheck-py/shellcheck-py
-    rev: v0.9.0.6
+    rev: v0.10.0.1
     hooks:
       - id: shellcheck
         args: ["--severity=warning", "--exclude=SC1091"]
 
-  # Ansible Linting - Best practices for playbooks and roles
+  # 4. YAML Linting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.35.1
+    hooks:
+      - id: yamllint
+        args: ["-c=.yamllint"]
+
+  # 5. Ansible Linting
   - repo: https://github.com/ansible/ansible-lint
     rev: v24.2.0
     hooks:
@@ -41,15 +60,12 @@ repos:
         additional_dependencies:
           - ansible-core>=2.16,<2.17
           - yamllint
+        args: ["--force-color"]
+        # Fix log path permission issue
+        environment:
+          ANSIBLE_LOG_PATH: /tmp/vps-setup-ansible-lint.log
 
-  # YAML Linting - Strict YAML syntax checking
-  - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.35.1
-    hooks:
-      - id: yamllint
-        args: ["-c=.yamllint"]
-
-  # Python Linting - Code quality for custom plugins/scripts
+  # 6. Python Linting (Local)
   - repo: local
     hooks:
       - id: pylint
@@ -59,3 +75,15 @@ repos:
         types: [python]
         files: ^plugins/callback/clean_progress\.py$
         args: ["--disable=C0114,C0115,C0116,R0903", "--exit-zero"]
+
+  # 7. Pre-Push: Syntax Check & Dry Run
+  # These hooks only run during 'git push' to prevent broken code in remote
+  - repo: local
+    hooks:
+      - id: ansible-syntax-check
+        name: Ansible syntax check
+        entry: ansible-playbook playbooks/main.yml --syntax-check
+        language: system
+        files: ^playbooks/.*\.yml$
+        pass_filenames: false
+        stages: [pre-push]

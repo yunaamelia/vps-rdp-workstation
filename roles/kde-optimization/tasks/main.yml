@@ -33,6 +33,7 @@
   become: true
   become_user: "{{ vps_username }}"
   when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
+  changed_when: true
   tags: [kde-opt, polonium]
 
 - name: Cleanup Polonium Installer
@@ -119,7 +120,7 @@
     cmd: "su - {{ vps_username }} -c 'qdbus6 org.kde.kded6 /kded org.kde.kded6.loadModule gtkconfig || true'"
   when: vps_install_desktop | default(true)
   changed_when: false
-  ignore_errors: true
+  failed_when: false
   tags: [kde-opt, gtk, trigger]
 
 - name: Find Firefox profiles
@@ -128,7 +129,7 @@
     patterns: "*.default*"
     file_type: directory
   register: firefox_profiles
-  ignore_errors: true
+  failed_when: false
   tags: [kde-opt, firefox]
 
 - name: Deploy Firefox dark mode preferences
@@ -171,7 +172,7 @@
           }
       }'"
   changed_when: false
-  ignore_errors: true
+  failed_when: false
   tags: [kde-opt, panel]
 
 - name: Enable Autostart Applications

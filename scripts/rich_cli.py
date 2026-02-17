@@ -88,7 +88,7 @@ def run_spinner(msg: str, cmd: str):
         console=console
     ) as progress:
         task = progress.add_task(msg, total=None)
-        
+
         # Run command
         process = subprocess.Popen(
             cmd,
@@ -97,9 +97,9 @@ def run_spinner(msg: str, cmd: str):
             stderr=subprocess.PIPE,
             text=True
         )
-        
+
         stdout, stderr = process.communicate()
-        
+
         if process.returncode == 0:
             console.print(f"[{COLORS['green']}]✓[/]  {msg}")
         else:
@@ -116,14 +116,14 @@ def print_banner(version: str):
     console = get_console()
     if not console:
         return
-    
+
     # ASCII Art
     art = """
 [bold cyan]╦  ╦╔═╗╔═╗  ╦═╗╔╦╗╔═╗  ╦ ╦╔═╗╦═╗╦╔═╔═╗╔╦╗╔═╗╔╦╗╦╔═╗╔╗╔
 ╚╗╔╝╠═╝╚═╗  ╠╦╝ ║║╠═╝  ║║║║ ║╠╦╝╠╩╗╚═╗ ║ ╠═╣ ║ ║║ ║║║║
  ╚╝ ╩  ╚═╝  ╩╚══╩╝╩    ╚╩╝╚═╝╩╚═╩ ╩╚═╝ ╩ ╩ ╩ ╩ ╩╚═╝╝╚╝[/]
     """
-    
+
     panel = Panel(
         Text.from_markup(art.strip() + f"\n\n[dim]Version {version} | Security-Hardened | Debian 13[/]"),
         box=box.ROUNDED,

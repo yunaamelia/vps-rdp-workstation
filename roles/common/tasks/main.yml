@@ -61,7 +61,7 @@
       ansible.builtin.lineinfile:
         path: /etc/hosts
         regexp: '^127\.0\.1\.1'
-        line: "127.0.1.1\t{{ vps_hostname }}"
+        line: "127.0.1.1 {{ vps_hostname }}"
         state: present
       when: ansible_virtualization_type != "docker"
       tags: [common, system]

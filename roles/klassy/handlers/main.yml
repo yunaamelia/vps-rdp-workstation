@@ -1,7 +1,0 @@
----
-- name: Reconfigure KWin
-  ansible.builtin.command:
-    cmd: "su - {{ vps_username }} -c 'qdbus6 org.kde.KWin /KWin reconfigure || true'"
-  listen: "Reconfigure KWin"
-  changed_when: false
-  ignore_errors: true

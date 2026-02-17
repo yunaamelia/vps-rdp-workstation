@@ -107,6 +107,7 @@ setup_ansible() {
 		["ansible-core"]="ansible"
 		["ansible-navigator"]="ansible-navigator"
 		["ara"]="ara-manage"
+		["pre-commit"]="pre-commit"
 	)
 
 	for package in "${!tools[@]}"; do
@@ -188,6 +189,7 @@ run_playbook() {
 	export ANSIBLE_DEPRECATION_WARNINGS=False
 	export ANSIBLE_CALLBACK_PLUGINS="${SCRIPT_DIR}/plugins/callback"
 	export ANSIBLE_COLLECTIONS_PATH="${SCRIPT_DIR}/collections"
+	export ANSIBLE_LOG_PATH="/var/log/vps-setup-ansible.log"
 	export PYTHONPATH="${SCRIPT_DIR}:${PYTHONPATH:-}"
 
 	# UI Mode Selection

@@ -4,11 +4,11 @@
     cmd: "su - {{ vps_username }} -c 'qdbus6 org.kde.KWin /KWin reconfigure || true'"
   listen: "Reconfigure KWin"
   changed_when: false
-  ignore_errors: true
+  failed_when: false
 
 - name: Restart xsettingsd
   ansible.builtin.shell: |
     su - {{ vps_username }} -c 'killall xsettingsd 2>/dev/null; nohup xsettingsd &'
   listen: "Restart xsettingsd"
   changed_when: false
-  ignore_errors: true
+  failed_when: false

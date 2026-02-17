@@ -4,6 +4,9 @@
 
 profile: production
 
+# Use offline mode to prevent checking for updates/installing
+offline: true
+
 # Exclude vendored collections from linting
 exclude_paths:
   - collections/

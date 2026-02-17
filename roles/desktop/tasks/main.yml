@@ -118,6 +118,12 @@
       ignore_errors: "{{ ansible_check_mode }}"
       tags: [desktop, sddm]
 
+    - name: Verify user exists before optimizations
+      ansible.builtin.getent:
+        database: passwd
+        key: "{{ vps_username }}"
+      tags: [desktop, user_check]
+
     - name: Run desktop optimizations
       ansible.builtin.include_tasks: optimizations.yml
       tags: [desktop, optimization]

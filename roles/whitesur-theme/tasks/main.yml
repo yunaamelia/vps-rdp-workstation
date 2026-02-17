@@ -129,15 +129,44 @@
   when: vps_whitesur_install_kvantum
   tags: [whitesur, theme, config]
 
-- name: Set Plasma Look and Feel to WhiteSur
-  ansible.builtin.command:
-    cmd: "lookandfeeltool -a WhiteSur-dark"
-  become: false
-  become_user: "{{ vps_username }}"
-  changed_when: false
+- name: Create theme application script
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.local/bin/apply-whitesur-theme.sh"
+    mode: '0755'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    content: |
+      #!/bin/bash
+      # Wait for Plasma to be ready
+      until qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript 'print("ready")' &>/dev/null; do
+          sleep 2
+      done
+
+      # Apply Look and Feel
+      lookandfeeltool -a WhiteSur-dark
+
+      # Ensure color scheme is set
+      kwriteconfig6 --file kdeglobals --group General --key ColorScheme WhiteSurDark
+
+      # Remove self from autostart to run only once
+      rm -f "$HOME/.config/autostart/apply-whitesur-theme.desktop"
   tags: [whitesur, theme, config]
 
-- name: Set Plasma Color Scheme to WhiteSurDark
+- name: Create autostart entry for theme application
+  ansible.builtin.copy:
+    dest: "/home/{{ vps_username }}/.config/autostart/apply-whitesur-theme.desktop"
+    mode: '0644'
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    content: |
+      [Desktop Entry]
+      Type=Application
+      Name=Apply WhiteSur Theme
+      Exec=/home/{{ vps_username }}/.local/bin/apply-whitesur-theme.sh
+      X-KDE-autostart-phase=2
+  tags: [whitesur, theme, config]
+
+- name: Set Plasma Color Scheme to WhiteSurDark (Config Only)
   ansible.builtin.command:
     cmd: "kwriteconfig6 --file kdeglobals --group General --key ColorScheme WhiteSurDark"
   become: false

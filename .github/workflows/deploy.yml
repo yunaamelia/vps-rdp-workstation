@@ -17,14 +17,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Check Secrets
+        id: check_secrets
+        shell: bash
+        env:
+          SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          HOST: ${{ secrets.VPS_HOST }}
+        run: |
+          if [[ -n "$SSH_KEY" && -n "$HOST" ]]; then
+            echo "has_secrets=true" >> $GITHUB_OUTPUT
+          else
+            echo "Secrets missing, skipping deployment."
+            echo "has_secrets=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Setup SSH
-        if: ${{ secrets.VPS_SSH_KEY != '' }}
+        if: steps.check_secrets.outputs.has_secrets == 'true'
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
       - name: Configure Inventory
-        if: ${{ secrets.VPS_SSH_KEY != '' && secrets.VPS_HOST != '' }}
+        if: steps.check_secrets.outputs.has_secrets == 'true'
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
@@ -38,7 +52,7 @@ jobs:
           fi
 
       - name: Deploy to VPS
-        if: ${{ secrets.VPS_SSH_KEY != '' && secrets.VPS_HOST != '' }}
+        if: steps.check_secrets.outputs.has_secrets == 'true'
         env:
           VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
           VPS_SECRETS_FILE: ./secrets

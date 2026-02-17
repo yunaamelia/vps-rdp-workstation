@@ -8,6 +8,7 @@
       community.general.pipx:
         name: konsave
         state: present
+        executable: pipx
 
     - name: Enable Dolphin previews
       community.general.ini_file:

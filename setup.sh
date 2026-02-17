@@ -109,15 +109,12 @@ setup_ansible() {
 	if dpkg --compare-versions "$pipx_version" "lt" "1.7.0"; then
 		log_warn "Pipx version $pipx_version is too old (<1.7.0). Upgrading via dedicated venv..."
 
-		# Ensure python3-venv is present
 		run_with_spinner "Ensuring python3-venv is installed..." \
 			"apt-get install -y -qq python3-venv python3-pip"
 
-		# Remove apt version to prevent conflicts
 		run_with_spinner "Removing outdated system pipx..." \
 			"apt-get remove -y pipx || true"
 
-		# Install fresh pipx into /opt/pipx-venv
 		run_with_spinner "Installing latest pipx into /opt/pipx-venv..." \
 			"rm -rf /opt/pipx-venv && python3 -m venv /opt/pipx-venv && /opt/pipx-venv/bin/pip install pipx && ln -sf /opt/pipx-venv/bin/pipx /usr/local/bin/pipx"
 

@@ -13,14 +13,15 @@
           - python-is-python3
           - xdg-user-dirs
           - qdbus-qt6
-          # libkf6config-bin is not available on Ubuntu 24.04 (Noble), use libkf5config-bin or skip
+          # libkf6config-bin is not available on Ubuntu 24.04 (Noble), use libkf5config-bin
           - "{{ 'libkf5config-bin' if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '24' else 'libkf6config-bin' }}"
           - plasma-workspace
           - sddm
           - kde-config-gtk-style
           - xsettingsd
           - gtk3-engines-breeze
-          - gtk2-engines-breeze
+          # gtk2-engines-breeze removed in Ubuntu 24.04, replace with breeze-gtk-theme
+          - "{{ 'breeze-gtk-theme' if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '24' else 'gtk2-engines-breeze' }}"
           - libglib2.0-dev-bin
 
         state: present

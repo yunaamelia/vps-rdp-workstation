@@ -23,13 +23,17 @@ jobs:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
       - name: Configure Inventory
-        if: ${{ secrets.VPS_HOST }}
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
         run: |
-          sed -i "s/ansible_connection: local/ansible_connection: ssh/" inventory/hosts.yml
-          sed -i "s/# ansible_host: your-vps-ip/ansible_host: ${{ secrets.VPS_HOST }}/" inventory/hosts.yml
-          sed -i "s/# ansible_user: root/ansible_user: ${{ secrets.VPS_USERNAME }}/" inventory/hosts.yml
-          mkdir -p ~/.ssh
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts
+          if [[ -n "$VPS_HOST" ]]; then
+            sed -i "s/ansible_connection: local/ansible_connection: ssh/" inventory/hosts.yml
+            sed -i "s/# ansible_host: your-vps-ip/ansible_host: $VPS_HOST/" inventory/hosts.yml
+            sed -i "s/# ansible_user: root/ansible_user: $VPS_USERNAME/" inventory/hosts.yml
+            mkdir -p ~/.ssh
+            ssh-keyscan -H "$VPS_HOST" >> ~/.ssh/known_hosts
+          fi
 
       - name: Deploy to VPS
         env:
@@ -37,8 +41,8 @@ jobs:
           VPS_SECRETS_FILE: ./secrets
           VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
         run: |
-          # Securely write secrets file using Python to avoid shell injection
-          python3 -c "import os; open('./secrets', 'w').write(f\"password={os.environ.get('VPS_PASSWORD', '')}\\n\")"
+          # Securely write secrets file using helper script
+          python3 .github/scripts/create_secret_file.py
           chmod 600 ./secrets
           ./setup.sh --ci
           # Cleanup

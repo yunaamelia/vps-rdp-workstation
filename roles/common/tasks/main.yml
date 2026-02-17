@@ -72,12 +72,6 @@
       when: ansible_facts['virtualization_type'] != "docker"
       tags: [common, system]
 
-    - name: Configure system timezone
-      community.general.timezone:
-        name: "{{ vps_timezone }}"
-      when: ansible_facts['virtualization_type'] != "docker"
-      tags: [common, system]
-
     - name: Generate locale
       community.general.locale_gen:
         name: "{{ vps_locale }}"

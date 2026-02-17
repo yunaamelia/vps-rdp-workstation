@@ -21,6 +21,17 @@
   become: true
   tags: [tools, ai]
 
+- name: Configure Anthropic API key
+  ansible.builtin.lineinfile:
+    path: "/home/{{ vps_username }}/.anthropic/config"
+    line: "api_key={{ vps_ai_anthropic_key }}"
+    create: true
+    mode: '0600'
+    owner: "{{ vps_username }}"
+  no_log: true
+  when: vps_ai_anthropic_key is defined
+  tags: [ai, config]
+
 - name: Create AI tools configuration note
   ansible.builtin.copy:
     dest: "/home/{{ vps_username }}/.ai-tools-setup.md"
@@ -38,6 +49,7 @@
     mode: '0644'
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
+  no_log: true
   tags: [tools, ai]
 
 - name: Log ai-devtools role completion

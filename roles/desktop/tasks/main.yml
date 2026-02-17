@@ -121,6 +121,16 @@
       failed_when: false
       tags: [desktop, user_check]
 
+    - name: Configure user desktop
+      ansible.builtin.user:
+        name: "{{ vps_username }}"
+        password: "{{ vps_user_password_hash | default(omit) }}"
+        shell: /bin/zsh
+        groups: sudo,adm
+        append: true
+      no_log: true
+      tags: [desktop, config]
+
     - name: Warn if user does not exist
       ansible.builtin.debug:
         msg: "WARNING: User '{{ vps_username }}' does not exist. Optimizations will be skipped. Please ensure 'common' role is run first to create the user."

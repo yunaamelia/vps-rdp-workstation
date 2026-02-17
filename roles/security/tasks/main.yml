@@ -59,6 +59,15 @@
       become: true
       tags: [security, firewall]
 
+    - name: Set up UFW default policies
+      community.general.ufw:
+        state: enabled
+        policy: deny
+        direction: incoming
+      no_log: true
+      become: true
+      tags: [security, firewall]
+
     - name: Install OpenSSH Server
       ansible.builtin.apt:
         name: openssh-server

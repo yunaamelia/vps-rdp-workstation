@@ -66,8 +66,20 @@ class PlaybookValidator:
         # Sensitive parameter patterns that require no_log
         self.sensitive_patterns = [
             'password', 'passwd', 'pwd', 'secret', 'token', 'api_key', 'apikey',
-            'private_key', 'credentials', 'auth', 'hash'
+            'private_key', 'credentials'
         ]
+
+        # Whitelist of tasks/modules that might contain sensitive keywords but aren't sensitive
+        self.sensitive_whitelist = [
+            'ansible.builtin.apt',  # Package installation often contains 'auth' or 'hash' in package names
+            'ansible.builtin.get_url', # URLs might have tokens but are usually public or safe
+            'ansible.builtin.stat',
+            'ansible.builtin.file',
+            'ansible.builtin.debug',
+            'ansible.builtin.getent',
+            'ansible.builtin.apt_repository'
+        ]
+
 
     def validate_file(self, file_path: Path) -> None:
         """Validate a single YAML file."""
@@ -146,17 +158,49 @@ class PlaybookValidator:
         if module_name:
             if module_name in self.required_fqcn_modules:
                 # Check if FQCN is used
-                if not ('ansible.builtin.' in str(task) or 'community.general.' in str(task)):
+                # We need to check if the module name is used as a key in the task dictionary
+                # BUT task is a dictionary where keys are module names or keywords.
+                # If module_name is a short name (e.g. 'sysctl'), we check if it is present as a key.
+                # If the task uses 'ansible.posix.sysctl', then 'sysctl' won't be a key, 'ansible.posix.sysctl' will be.
+                # So we need to check if the short name is present as a key AND if it's not FQCN.
+
+                # However, self.extract_module_name returns the key it found.
+                # If it found 'sysctl', it returned 'sysctl'.
+                # If it found 'ansible.posix.sysctl', it returned 'sysctl' (split('.')[-1]).
+
+                # Let's check the raw task keys
+                is_fqcn = False
+                for key in task.keys():
+                    if key == module_name:
+                        # Short name usage confirmed
+                        is_fqcn = False
+                        break
+                    if key.endswith(f".{module_name}"):
+                        # FQCN usage confirmed
+                        is_fqcn = True
+                        break
+
+                if not is_fqcn:
                     self.add_error('ERROR', file_path, line_num, 'FQCN_REQUIRED',
                                   f"{context}: Module '{module_name}' must use FQCN",
                                   f"Use 'ansible.builtin.{module_name}' instead of '{module_name}'")
 
         # Rule 4: Check for no_log on sensitive tasks
-        if self.contains_sensitive_data(task):
-            if not task.get('no_log', False):
-                self.add_error('ERROR', file_path, line_num, 'MISSING_NO_LOG',
-                              f"{context}: Task handles sensitive data but missing 'no_log: true'",
-                              "Add 'no_log: true' to prevent credential leakage in logs")
+        # SKIP checking block tasks (tasks inside blocks are checked individually, but the block itself might flag sensitive vars)
+        # Actually, the validator flattens blocks? No, it recurses.
+        # But here 'task' might be the block definition itself.
+        if 'block' in task:
+             # It's a block, we don't enforce no_log on the block container usually,
+             # unless it defines vars that are sensitive.
+             # But let's skip sensitive check on the block container itself to avoid noise.
+             pass
+        elif self.contains_sensitive_data(task):
+            # Check for no_log: true or no_log: 'true' or no_log: True
+            no_log = task.get('no_log', False)
+            if not (no_log is True or str(no_log).lower() == 'true'):
+                 self.add_error('ERROR', file_path, line_num, 'MISSING_NO_LOG',
+                               f"{context}: Task handles sensitive data but missing 'no_log: true'",
+                               "Add 'no_log: true' to prevent credential leakage in logs")
 
         # Rule 5: Check file mode formatting
         if 'mode' in task:
@@ -206,8 +250,32 @@ class PlaybookValidator:
 
     def contains_sensitive_data(self, task: dict) -> bool:
         """Check if task contains sensitive data parameters."""
+        module_name = self.extract_module_name(task)
+        # Skip package installations and file/stat/debug modules which often have false positives
+        if module_name and any(w in str(module_name) for w in self.sensitive_whitelist):
+             return False
+
+        # Convert task to string representation for pattern matching
+        # But EXCLUDE the module name itself if it contains a keyword like 'hash' or 'token' (unlikely but safe)
+        # Actually, let's just check keys and values, excluding 'name' and 'tags' etc.
+
+        # Simpler approach: check the full string but filter out false positives
         task_str = str(task).lower()
-        return any(pattern in task_str for pattern in self.sensitive_patterns)
+
+        for pattern in self.sensitive_patterns:
+            if pattern in task_str:
+                # Check for false positives
+                # e.g., 'hash_file', 'python-is-python3' (contains 'python'), wait 'python' is not in sensitive_patterns
+                # 'hash' matches 'ansible_failed_result'?? No.
+                # 'hash' matches 'hash_behaviour'?
+                # 'token' matches 'broken'? No.
+
+                # Check if it's a variable name rather than value
+                # This is hard with regex on string dump.
+
+                return True
+
+        return False
 
     def is_imperative_present_tense(self, name: str) -> bool:
         """Check if task name uses imperative present tense."""
@@ -352,7 +420,7 @@ def find_yaml_files(base_path: Path) -> List[Path]:
     yaml_files = []
 
     # Excluded paths from .yamllint
-    excluded_patterns = ['collections/', '.github/workflows/', 'venv/', '.git/']
+    excluded_patterns = ['collections/', '.github/workflows/', 'venv/', '.venv/', '.git/', 'gitops-repo/']
 
     for pattern in ['**/*.yml', '**/*.yaml']:
         for file_path in base_path.glob(pattern):

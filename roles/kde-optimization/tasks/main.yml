@@ -152,6 +152,15 @@
   when: firefox_profiles.matched | default(0) > 0
   tags: [kde-opt, firefox]
 
+- name: Ensure Mozilla config directory exists (for system-wide)
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.mozilla"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [kde-opt, firefox]
+
 - name: Configure Dolphin (General)
   community.general.ini_file:
     path: "/home/{{ vps_username }}/.config/dolphinrc"

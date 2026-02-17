@@ -1,3 +1,6 @@
+# Managed by Ansible - WhiteSur KDE Optimization
+# Mirrors running system configuration
+
 [Compositing]
 AnimationSpeed=0
 LatencyPolicy=ForceLowestLatency
@@ -47,8 +50,12 @@ CommandWindowWheel=Scroll
 [Plugins]
 blurEnabled=false
 diminactiveEnabled=true
+fadeEnabled=false
 fallapartEnabled=true
 kwin4_effect_dimscreenEnabled=true
+poloniumEnabled=false
+scaleEnabled=true
+slideEnabled=false
 
 [TabBox]
 BorderActivate=9
@@ -69,11 +76,12 @@ Right=None
 Top=None
 
 [Windows]
-BorderlessMaximizedWindows=true
+BorderlessMaximizedWindows=false
 
 [org.kde.kdecoration2]
-BorderSize=Normal
-ButtonsOnLeft=MF
-ButtonsOnRight=IAX
+ButtonsOnLeft=XIA
+ButtonsOnRight=
 CloseOnDoubleClickOnMenu=false
 ShowToolTips=false
+library=org.kde.klassy
+theme=Klassy

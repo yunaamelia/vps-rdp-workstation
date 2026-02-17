@@ -1,3 +1,6 @@
+# Managed by Ansible - WhiteSur KDE Global Settings
+# Mirrors running system configuration
+
 [ColorEffects:Disabled]
 ChangeSelectionColor=
 Color=112,111,110
@@ -91,19 +94,25 @@ ForegroundPositive=128,255,128
 ForegroundVisited=255,102,102
 
 [General]
+AccentColor={{ vps_kde_accent_color | default('0,122,255') }}
+ColorScheme={{ vps_kde_color_scheme | default('BreezeDark') }}
 ColorSchemeHash=17da5ffd3d15ad6714bbc248b6545564fcc8ebfd
 XftAntialias=true
 XftHintStyle=
 XftSubPixel=rgb
-fixed=Monospace,9,-1,5,50,0,0,0,0,0
-font=Cantarell,10,-1,5,50,0,0,0,0,0,Regular
-menuFont=Cantarell,10,-1,5,50,0,0,0,0,0,Regular
+activeFont={{ vps_kde_active_font | default('Inter,10,-1,5,600,0,0,0,0,0,Semi-Bold') }}
+fixed={{ vps_kde_fixed_font | default('JetBrains Mono,10,-1,5,400,0,0,0,0,0,Regular') }}
+font={{ vps_kde_font | default('Inter,10,-1,5,400,0,0,0,0,0,Regular') }}
+menuFont={{ vps_kde_font | default('Inter,10,-1,5,400,0,0,0,0,0,Regular') }}
 shadeSortColumn=true
-smallestReadableFont=Cantarell,10,-1,5,50,0,0,0,0,0,Regular
-toolBarFont=Cantarell,10,-1,5,50,0,0,0,0,0,Regular
+smallestReadableFont={{ vps_kde_small_font | default('Inter,8,-1,5,400,0,0,0,0,0,Regular') }}
+toolBarFont={{ vps_kde_font | default('Inter,10,-1,5,400,0,0,0,0,0,Regular') }}
+
+[Icons]
+Theme={{ vps_whitesur_icon_variant | default('WhiteSur-dark') }}
 
 [KDE]
-AnimationDurationFactor=0
+AnimationDurationFactor={{ vps_kde_animation_factor | default('0.5') }}
 
 [WM]
 activeBackground=61,62,67

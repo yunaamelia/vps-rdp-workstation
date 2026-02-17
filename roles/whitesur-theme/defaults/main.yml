@@ -28,10 +28,11 @@ vps_whitesur_round: false
 vps_whitesur_install_kvantum: true
 
 # Icon Options
-vps_whitesur_icon_theme: "default"     # [default/purple/pink/red/orange/yellow/green/grey/all]
+vps_whitesur_icon_theme: "red"          # [default/purple/pink/red/orange/yellow/green/grey/all]
 vps_whitesur_icon_alternative: false    # Install alternative icons
-vps_whitesur_icon_bold: false           # Install bold panel icons
-vps_whitesur_icon_variant: "WhiteSur-dark" # Icon variant to apply
+vps_whitesur_icon_bold: true            # Install bold panel icons
+vps_whitesur_icon_plasma_logo: true     # Use KDE Plasma logo instead of GNOME
+vps_whitesur_icon_variant: "WhiteSur-red-dark" # Icon variant to apply
 
 # Cursor Options
 vps_whitesur_cursor_theme: "WhiteSur-cursors"

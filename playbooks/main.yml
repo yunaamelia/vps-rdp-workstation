@@ -141,6 +141,10 @@
       tags: [desktop, theme, whitesur]
       when: vps_whitesur_install | default(true)
 
+    - role: klassy
+      tags: [desktop, theme, klassy]
+      when: vps_klassy_install | default(true)
+
     # =========================================================================
     #  PHASE 5: User Configuration
     # =========================================================================

@@ -73,7 +73,7 @@
 
 - name: Install WhiteSur Icon Theme (install.sh)
   ansible.builtin.command:
-    cmd: "./install.sh -n WhiteSur -t {{ vps_whitesur_icon_theme }} {{ '-a' if vps_whitesur_icon_alternative else '' }} {{ '-b' if vps_whitesur_icon_bold else '' }}"
+    cmd: "./install.sh -n WhiteSur -t {{ vps_whitesur_icon_theme }} {{ '-a' if vps_whitesur_icon_alternative else '' }} {{ '-b' if vps_whitesur_icon_bold else '' }} {{ '-p' if vps_whitesur_icon_plasma_logo | default(false) else '' }}"
     chdir: "/tmp/WhiteSur-icon-theme"
   become: false
   become_user: "{{ vps_username }}"

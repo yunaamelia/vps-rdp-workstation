@@ -1,17 +1,13 @@
-# Managed by Ansible - GTK3 Settings (synced with KDE WhiteSur theme)
+# Managed by Ansible - GTK4 Settings (synced with KDE WhiteSur theme)
 [Settings]
 gtk-application-prefer-dark-theme=true
-gtk-button-images=true
 gtk-cursor-theme-name={{ vps_whitesur_cursor_theme | default('WhiteSur-cursors') }}
 gtk-cursor-theme-size=24
 gtk-decoration-layout=close,minimize,maximize:icon
 gtk-enable-animations=false
 gtk-font-name={{ vps_gtk_font | default('Inter,  10') }}
 gtk-icon-theme-name={{ vps_whitesur_icon_variant | default('WhiteSur-dark') }}
-gtk-menu-images=true
-gtk-modules=colorreload-gtk-module:window-decorations-gtk-module
 gtk-primary-button-warps-slider=true
 gtk-sound-theme-name=ocean
 gtk-theme-name={{ vps_gtk_theme | default('WhiteSur-Dark-alt-nord') }}
-gtk-toolbar-style=3
 gtk-xft-dpi=98304

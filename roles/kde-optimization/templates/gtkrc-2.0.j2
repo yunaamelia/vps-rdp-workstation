@@ -1,0 +1,14 @@
+# Managed by Ansible - GTK2 Settings (synced with KDE WhiteSur theme)
+gtk-theme-name="{{ vps_gtk_theme | default('WhiteSur-Dark-alt-nord') }}"
+gtk-icon-theme-name="{{ vps_whitesur_icon_variant | default('WhiteSur-dark') }}"
+gtk-font-name="{{ vps_gtk_font | default('Inter, 10') }}"
+gtk-cursor-theme-name="{{ vps_whitesur_cursor_theme | default('WhiteSur-cursors') }}"
+gtk-cursor-theme-size=24
+gtk-toolbar-style=GTK_TOOLBAR_BOTH_HORIZ
+gtk-toolbar-icon-size=GTK_ICON_SIZE_LARGE_TOOLBAR
+gtk-button-images=1
+gtk-menu-images=1
+gtk-xft-antialias=1
+gtk-xft-hinting=1
+gtk-xft-hintstyle="hintslight"
+gtk-xft-rgba="rgb"

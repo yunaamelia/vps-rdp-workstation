@@ -12,6 +12,36 @@
   when: vps_install_desktop | default(true)
   tags: [kde-opt, tools]
 
+- name: Check if Polonium is installed
+  ansible.builtin.stat:
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/polonium"
+  register: polonium_dir
+  when: vps_install_desktop | default(true)
+  tags: [kde-opt, polonium]
+
+- name: Download Polonium KWin Script
+  ansible.builtin.get_url:
+    url: "https://github.com/zeroxoneafour/polonium/releases/download/v0.6.0/polonium.kwinscript"
+    dest: "/tmp/polonium.kwinscript"
+    mode: '0644'
+  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
+  tags: [kde-opt, polonium]
+
+- name: Install Polonium KWin Script
+  ansible.builtin.command:
+    cmd: "kpackagetool6 -t KWin/Script -i /tmp/polonium.kwinscript"
+  become: true
+  become_user: "{{ vps_username }}"
+  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
+  tags: [kde-opt, polonium]
+
+- name: Cleanup Polonium Installer
+  ansible.builtin.file:
+    path: "/tmp/polonium.kwinscript"
+    state: absent
+  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
+  tags: [kde-opt, polonium]
+
 - name: Deploy Captured KDE Configuration
   ansible.builtin.template:
     src: "{{ item }}.j2"
@@ -25,6 +55,8 @@
     - kglobalshortcutsrc
     - kcminputrc
     - plasmashellrc
+    - breezerc
+  notify: Reconfigure KWin
   tags: [kde-opt, config]
 
 - name: Deploy GTK3 Settings
@@ -36,6 +68,52 @@
     mode: '0644'
   tags: [kde-opt, gtk]
 
+- name: Ensure GTK4 config directory exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/gtk-4.0"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [kde-opt, gtk]
+
+- name: Deploy GTK4 Settings
+  ansible.builtin.template:
+    src: gtk4-settings.ini.j2
+    dest: "/home/{{ vps_username }}/.config/gtk-4.0/settings.ini"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [kde-opt, gtk]
+
+- name: Deploy GTK2 Settings
+  ansible.builtin.template:
+    src: gtkrc-2.0.j2
+    dest: "/home/{{ vps_username }}/.gtkrc-2.0"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  tags: [kde-opt, gtk]
+
+- name: Ensure xsettingsd config directory exists
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/xsettingsd"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [kde-opt, gtk]
+
+- name: Deploy xsettingsd configuration
+  ansible.builtin.template:
+    src: xsettingsd.conf.j2
+    dest: "/home/{{ vps_username }}/.config/xsettingsd/xsettingsd.conf"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  notify: Restart xsettingsd
+  tags: [kde-opt, gtk]
+
 - name: Trigger GTK Config Reload (DBus)
   ansible.builtin.command:
     cmd: "su - {{ vps_username }} -c 'qdbus6 org.kde.kded6 /kded org.kde.kded6.loadModule gtkconfig || true'"
@@ -43,6 +121,26 @@
   changed_when: false
   ignore_errors: true
   tags: [kde-opt, gtk, trigger]
+
+- name: Find Firefox profiles
+  ansible.builtin.find:
+    paths: "/home/{{ vps_username }}/.mozilla/firefox"
+    patterns: "*.default*"
+    file_type: directory
+  register: firefox_profiles
+  ignore_errors: true
+  tags: [kde-opt, firefox]
+
+- name: Deploy Firefox dark mode preferences
+  ansible.builtin.template:
+    src: firefox-user.js.j2
+    dest: "{{ item.path }}/user.js"
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0644'
+  loop: "{{ firefox_profiles.files | default([]) }}"
+  when: firefox_profiles.matched | default(0) > 0
+  tags: [kde-opt, firefox]
 
 - name: Configure Dolphin (General)
   community.general.ini_file:
@@ -58,6 +156,23 @@
     - { option: "ShowFullPath", value: "true" }
     - { option: "FilterBar", value: "true" }
   tags: [kde-opt, ux]
+
+- name: Configure Panel via Plasma Scripting API
+  ansible.builtin.command:
+    cmd: >
+      su - {{ vps_username }} -c "qdbus6 org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript '
+      var p = panels();
+      for (var i = 0; i < p.length; i++) {
+          if (p[i].location == \"bottom\") {
+              p[i].height = 52;
+              p[i].alignment = \"center\";
+              p[i].floating = true;
+              p[i].lengthMode = \"fit\";
+          }
+      }'"
+  changed_when: false
+  ignore_errors: true
+  tags: [kde-opt, panel]
 
 - name: Enable Autostart Applications
   ansible.builtin.file:

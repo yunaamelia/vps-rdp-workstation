@@ -16,7 +16,7 @@
           # libkf6config-bin is not available on Ubuntu 24.04 (Noble), use libkf5config-bin or skip
           - "{{ 'libkf5config-bin' if ansible_distribution == 'Ubuntu' and ansible_distribution_major_version == '24' else 'libkf6config-bin' }}"
           - plasma-workspace
-          # Build dependencies for SierraBreezeEnhanced
+          # Build dependencies for Klassy window decoration
           - build-essential
           - cmake
           - extra-cmake-modules

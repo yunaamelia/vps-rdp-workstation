@@ -5,10 +5,3 @@
   listen: "Reconfigure KWin"
   changed_when: false
   ignore_errors: true
-
-- name: Restart xsettingsd
-  ansible.builtin.shell: |
-    su - {{ vps_username }} -c 'killall xsettingsd 2>/dev/null; nohup xsettingsd &'
-  listen: "Restart xsettingsd"
-  changed_when: false
-  ignore_errors: true

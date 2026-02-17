@@ -1,0 +1,18 @@
+{% extends "!layout.html" %}
+{% set css_files = css_files + ['_static/style.css'] %}
+
+{# We don't support Sphinx search, so don't let its JS either. #}
+{% block scripts %}
+{% endblock %}
+
+{# Alabaster ships a completely useless custom.css, suppress it. #}
+{%- block extrahead %}
+    <meta name="referrer" content="strict-origin">
+    <meta name="google-site-verification" content="oq5hNxRYo25tcfjfs3l6pPxfNgY3JzDYSpskc9q4TYI" />
+    <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+{% endblock %}
+
+{% block footer %}
+    {{ super() }}
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+{% endblock %}

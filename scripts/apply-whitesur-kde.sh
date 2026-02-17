@@ -14,38 +14,36 @@ echo "============================================"
 echo ""
 
 # ──────────────────────────────────────────────
-# 0. Window Decorations — title bar & buttons
+# 0. Window Decorations — Klassy (macOS style)
 # ──────────────────────────────────────────────
-echo "[0/9] Window decorations..."
+echo "[0/9] Window decorations (Klassy)..."
 
-# Clean breezerc — remove ALL window decoration exceptions that hide title bars
-# Write a clean breezerc without any exceptions
-cat > "$HOME/.config/breezerc" << 'BREEZERC'
-[Common]
-OutlineCloseButton=false
+# Ensure Klassy decoration is loaded
+# Library name found: org.kde.klassy.so -> org.kde.klassy
+kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "library" "org.kde.klassy"
+kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "theme" "Klassy"
 
-[Windeco]
-DrawBackgroundGradient=false
-BREEZERC
-
-# Disable Polonium tiling WM — it strips window decorations from tiled windows
+# Disable Polonium tiling WM (strips decorations)
 kwriteconfig6 --file kwinrc --group "Plugins" --key "poloniumEnabled" "false"
 
 # Keep title bar on maximized windows
 kwriteconfig6 --file kwinrc --group "Windows" --key "BorderlessMaximizedWindows" "false"
 
-# Ensure Breeze decoration is loaded
-kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "library" "org.kde.breeze"
-kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "theme" "Breeze"
+# Configure Klassy manually (since preset load failed/is unreliable via CLI)
+mkdir -p "$HOME/.config/klassy"
+cat > "$HOME/.config/klassy/klassyrc" << 'KLASSYRC'
+[Windeco]
+ButtonSize=Tiny
+ButtonType=TrafficLights
+KLASSYRC
 
 # Window buttons: left side macOS style (X=Close, I=Minimize, A=Maximize)
 kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "ButtonsOnLeft" "XIA"
 kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "ButtonsOnRight" ""
-kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "BorderSize" "Normal"
 kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "CloseOnDoubleClickOnMenu" "false"
 kwriteconfig6 --file kwinrc --group "org.kde.kdecoration2" --key "ShowToolTips" "false"
 
-echo "  ✓ Title bars enabled, Polonium disabled, buttons on left (XIA)"
+echo "  ✓ Klassy decoration set (Traffic Lights, Tiny buttons)"
 
 # ──────────────────────────────────────────────
 # 1. Plasma Desktop Theme
@@ -252,6 +250,6 @@ echo "  Icons:           WhiteSur-dark"
 echo "  Cursor:          WhiteSur-cursors"
 echo "  Wallpaper:       Monterey-dark"
 echo "  Panel:           Bottom dock (floating, centered, 52px)"
-echo "  Window buttons:  Left (Close, Min, Max)"
+echo "  Window decoration: Klassy (Traffic lights, Tiny)"
 echo "  Firefox:         Dark mode + WhiteSur theme"
 echo ""

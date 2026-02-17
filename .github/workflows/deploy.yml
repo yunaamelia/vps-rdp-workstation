@@ -18,11 +18,13 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Setup SSH
+        if: ${{ secrets.VPS_SSH_KEY != '' }}
         uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.VPS_SSH_KEY }}
 
       - name: Configure Inventory
+        if: ${{ secrets.VPS_SSH_KEY != '' && secrets.VPS_HOST != '' }}
         env:
           VPS_HOST: ${{ secrets.VPS_HOST }}
           VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
@@ -36,6 +38,7 @@ jobs:
           fi
 
       - name: Deploy to VPS
+        if: ${{ secrets.VPS_SSH_KEY != '' && secrets.VPS_HOST != '' }}
         env:
           VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
           VPS_SECRETS_FILE: ./secrets

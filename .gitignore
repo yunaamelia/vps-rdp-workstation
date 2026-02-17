@@ -20,6 +20,7 @@ id_rsa*
 .ansible/
 ansible_facts_cache/
 collections/
+plugins/mitogen/
 
 # Python
 __pycache__/

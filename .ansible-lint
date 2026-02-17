@@ -13,6 +13,7 @@ exclude_paths:
   - .git/
   - .ansible/
   - .github/workflows/validate-playbooks.yml
+  - plugins/mitogen/
 
 # Guidelines to skip
 skip_list:

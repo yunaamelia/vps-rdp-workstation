@@ -162,6 +162,14 @@ setup_ansible() {
 	export ANSIBLE_COLLECTIONS_PATH="${SCRIPT_DIR}/collections"
 	run_with_spinner "Installing collections (community.general, ansible.posix)..." \
 		"ansible-galaxy collection install community.general ansible.posix -p ${SCRIPT_DIR}/collections --force"
+
+	# Install Mitogen for performance
+	if [[ ! -d "${SCRIPT_DIR}/plugins/mitogen/ansible_mitogen" ]]; then
+		log_info "Installing Mitogen..."
+		mkdir -p "${SCRIPT_DIR}/plugins/mitogen"
+		run_with_spinner "Downloading Mitogen v0.3.21..." \
+			"curl -L https://github.com/mitogen-hq/mitogen/archive/refs/tags/v0.3.21.tar.gz | tar xz --strip-components=1 -C ${SCRIPT_DIR}/plugins/mitogen"
+	fi
 }
 
 get_credentials() {

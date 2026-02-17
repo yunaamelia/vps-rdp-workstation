@@ -12,36 +12,36 @@
   when: vps_install_desktop | default(true)
   tags: [kde-opt, tools]
 
-- name: Check if Polonium is installed
+- name: Check if Krohnkite is installed
   ansible.builtin.stat:
-    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/polonium"
-  register: polonium_dir
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/krohnkite"
+  register: krohnkite_dir
   when: vps_install_desktop | default(true)
-  tags: [kde-opt, polonium]
+  tags: [kde-opt, tiling]
 
-- name: Download Polonium KWin Script
+- name: Download Krohnkite KWin Script (KDE 6 Compatible)
   ansible.builtin.get_url:
-    url: "https://github.com/zeroxoneafour/polonium/releases/download/v0.6.0/polonium.kwinscript"
-    dest: "/tmp/polonium.kwinscript"
+    url: "https://github.com/anametologin/krohnkite/releases/download/0.9.9.2/krohnkite.kwinscript"
+    dest: "/tmp/krohnkite.kwinscript"
     mode: '0644'
-  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
-  tags: [kde-opt, polonium]
+  when: (vps_install_desktop | default(true)) and (not krohnkite_dir.stat.exists)
+  tags: [kde-opt, tiling]
 
-- name: Install Polonium KWin Script
+- name: Install Krohnkite KWin Script
   ansible.builtin.command:
-    cmd: "kpackagetool6 -t KWin/Script -i /tmp/polonium.kwinscript"
+    cmd: "kpackagetool6 -t KWin/Script -i /tmp/krohnkite.kwinscript"
   become: true
   become_user: "{{ vps_username }}"
-  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
+  when: (vps_install_desktop | default(true)) and (not krohnkite_dir.stat.exists)
   changed_when: true
-  tags: [kde-opt, polonium]
+  tags: [kde-opt, tiling]
 
-- name: Cleanup Polonium Installer
+- name: Cleanup Krohnkite Installer
   ansible.builtin.file:
-    path: "/tmp/polonium.kwinscript"
+    path: "/tmp/krohnkite.kwinscript"
     state: absent
-  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
-  tags: [kde-opt, polonium]
+  when: (vps_install_desktop | default(true)) and (not krohnkite_dir.stat.exists)
+  tags: [kde-opt, tiling]
 
 - name: Deploy Captured KDE Configuration
   ansible.builtin.template:

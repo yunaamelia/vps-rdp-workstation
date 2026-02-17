@@ -93,6 +93,15 @@
   when: vps_fonts_install_powerline_fonts and not ansible_check_mode
   tags: [fonts]
 
+- name: Ensure target user's local bin directory exists (for pipx/fonts)
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/fonts"
+    state: directory
+    owner: "{{ vps_username }}"
+    group: "{{ vps_username }}"
+    mode: '0755'
+  tags: [fonts]
+
 - name: Install Powerline fonts
   ansible.builtin.shell: |
     cd /tmp/powerline-fonts

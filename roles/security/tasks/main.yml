@@ -88,6 +88,7 @@
         dest: "{{ vps_backup_dir | default('/var/backups/vps-setup') }}/sshd_config.backup"
         remote_src: true
         mode: '0600'
+        force: false
       tags: [security, ssh]
 
     - name: Configure SSH - Disable root login

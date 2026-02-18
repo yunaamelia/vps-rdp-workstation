@@ -1,11 +1,21 @@
 # XRDP Role - Handlers
 ---
+- name: Check systemd availability
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: _systemd_check
+  listen:
+    - Restart XRDP
+    - Apply sysctl settings
+
 - name: Restart XRDP
   ansible.builtin.systemd:
     name: xrdp
     state: restarted
+  when: _systemd_check.stat.exists | default(false)
 
 - name: Apply sysctl settings
   ansible.builtin.command:
     cmd: sysctl --system
   changed_when: true
+  when: _systemd_check.stat.exists | default(false)

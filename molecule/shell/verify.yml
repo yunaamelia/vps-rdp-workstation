@@ -1,0 +1,78 @@
+---
+# Molecule verify: Shell assertions
+
+- name: Verify - Shell Configuration
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    # =========================================================================
+    #  Terminal / Zsh Assertions
+    # =========================================================================
+
+    - name: Verify Zsh installed
+      ansible.builtin.command: zsh --version
+      register: zsh_check
+      changed_when: false
+      failed_when: zsh_check.rc != 0
+
+    - name: Verify Oh My Zsh installed
+      ansible.builtin.stat:
+        path: /home/testuser/.oh-my-zsh
+      register: omz_check
+
+    - name: Assert OMZ exists
+      ansible.builtin.assert:
+        that: omz_check.stat.exists and omz_check.stat.isdir
+        fail_msg: "Oh My Zsh directory not found"
+
+    - name: Verify .zshrc exists
+      ansible.builtin.stat:
+        path: /home/testuser/.zshrc
+      register: zshrc_check
+
+    - name: Assert .zshrc created
+      ansible.builtin.assert:
+        that: zshrc_check.stat.exists
+        fail_msg: ".zshrc does not exist"
+
+    - name: Check Zsh theme configuration
+      ansible.builtin.command: grep 'ZSH_THEME="agnoster"' /home/testuser/.zshrc
+      register: theme_check
+      changed_when: false
+      failed_when: theme_check.rc != 0
+
+    # =========================================================================
+    #  Tmux Assertions
+    # =========================================================================
+
+    - name: Verify Tmux installed
+      ansible.builtin.command: tmux -V
+      register: tmux_check
+      changed_when: false
+      failed_when: tmux_check.rc != 0
+
+    - name: Verify .tmux.conf exists
+      ansible.builtin.stat:
+        path: /home/testuser/.tmux.conf
+      register: tmuxconf_check
+
+    - name: Assert .tmux.conf exists
+      ansible.builtin.assert:
+        that: tmuxconf_check.stat.exists
+        fail_msg: ".tmux.conf not found"
+
+    # =========================================================================
+    #  Starship/Styling Assertions
+    # =========================================================================
+
+    - name: Verify Starship config exists (if shell-styling ran)
+      ansible.builtin.stat:
+        path: /home/testuser/.config/starship.toml
+      register: starship_check
+
+    - name: Assert Starship config (optional based on role)
+      ansible.builtin.assert:
+        that: starship_check.stat.exists
+        fail_msg: "Starship config not found"

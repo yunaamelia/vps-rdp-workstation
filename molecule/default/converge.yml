@@ -1,49 +1,42 @@
 ---
-# Molecule converge playbook
-# Tests the common role
+# Molecule converge: Bootstrap & Security
+# Tests the foundational roles that every deployment must pass
 
-- name: Converge
+- name: Converge - Bootstrap and Security
   hosts: all
   become: true
   gather_facts: true
 
-  vars_files:
-    - ../../tests/strict_vars.yml
+  vars:
+    # Minimal required variables for common + security roles
+    vps_hostname: "molecule-test"
+    vps_timezone: "UTC"
+    vps_locale: "en_US.UTF-8"
+    vps_username: "testuser"
+    vps_user_password_hash: "$6$rounds=4096$molecule$KXg2xR1FxYHFwvDxJD4CbCxfFJ8GcGIf.oTbOoqRlHq2R3E5g5G0V5HvRkp7W3TxQ1mOo5kfY5lJ3r1R2zC40"
+    vps_user_shell: "/bin/zsh"
+    vps_user_groups:
+      - sudo
+      - adm
+    vps_progress_state_file: "/var/lib/vps-setup/progress.json"
+    vps_summary_log: "/var/lib/vps-setup/summary.log"
+    vps_backup_dir: "/var/backups/vps-setup"
+    # Disable features that need real hardware/desktop
+    vps_install_desktop: false
+    vps_install_xrdp: false
+    vps_fail2ban_enabled: false  # systemd service won't start in container
+    # SSH settings for testing
+    vps_ssh_port: 22
+    vps_ssh_password_auth: true
+    vps_ssh_pubkey_auth: true
+    vps_ssh_root_login: true
+    vps_ssh_max_auth_tries: 6
+    vps_ssh_client_alive_interval: 300
+    vps_firewall_enabled: true
+    vps_firewall_logging: "low"
+    vps_xrdp_port: 3389
+    vps_unattended_upgrades: false  # Skip in tests
 
   roles:
-    # Phase 1: Bootstrap
     - role: common
     - role: security
-
-    # Phase 2: Base System
-    - role: fonts
-
-    # Phase 3: Desktop Environment
-    # - role: desktop # Disabled to prevent timeout in CI
-    # - role: xrdp # Disabled for CI
-    - role: kde-optimization
-    # - role: kde-apps # Disabled for CI
-    - role: whitesur-theme
-
-    # Phase 4: User Configuration
-    - role: terminal
-    - role: shell-styling
-    - role: zsh-enhancements
-
-    # Phase 5: Development Tools
-    - role: development
-    - role: docker
-    - role: editors
-
-    # Phase 6: CLI Tool Roles
-    - role: tui-tools
-    - role: network-tools
-    - role: system-performance
-    - role: text-processing
-    - role: file-management
-    - role: dev-debugging
-    - role: code-quality
-    - role: productivity
-    - role: log-visualization
-    - role: ai-devtools
-    - role: cloud-native

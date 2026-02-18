@@ -1,9 +1,19 @@
 # Security Role - Handlers
 ---
+- name: Check systemd availability
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: _systemd_check
+  listen:
+    - Restart SSH
+    - Restart Fail2ban
+    - Reload UFW
+
 - name: Restart SSH
   ansible.builtin.systemd:
     name: sshd
     state: restarted
+  when: _systemd_check.stat.exists | default(false)
 
 - name: Restart Fail2ban
   ansible.builtin.systemd:
@@ -12,6 +22,7 @@
   failed_when: false
   register: fail2ban_restart
   changed_when: fail2ban_restart.rc is defined and fail2ban_restart.rc == 0
+  when: _systemd_check.stat.exists | default(false)
 
 - name: Warn if Fail2ban not available
   ansible.builtin.debug:
@@ -21,3 +32,4 @@
 - name: Reload UFW
   community.general.ufw:
     state: reloaded
+  when: _systemd_check.stat.exists | default(false)

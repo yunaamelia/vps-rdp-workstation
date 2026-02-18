@@ -1,7 +1,6 @@
 ---
-# Molecule Scenario: default (common + security roles)
-# Tests core system bootstrap and security hardening in a Debian container
-# Run: molecule test
+# Molecule Scenario: devtools (development + docker + editors)
+# Tests package installation and development tool configuration
 
 dependency:
   name: galaxy
@@ -13,7 +12,7 @@ driver:
   name: docker
 
 platforms:
-  - name: debian-trixie
+  - name: debian-devtools
     image: debian:trixie
     pre_build_image: true
     privileged: true
@@ -39,12 +38,9 @@ provisioner:
       remote_tmp: /tmp/.ansible/tmp
       allow_world_readable_tmpfiles: true
       pipelining: true
-  playbooks:
-    converge: converge.yml
-    verify: verify.yml
   inventory:
     host_vars:
-      debian-trixie:
+      debian-devtools:
         ansible_user: root
       localhost:
         ansible_connection: local
@@ -54,7 +50,7 @@ verifier:
   name: ansible
 
 scenario:
-  name: default
+  name: devtools
   test_sequence:
     - dependency
     - syntax

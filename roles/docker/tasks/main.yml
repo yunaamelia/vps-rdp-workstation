@@ -91,12 +91,19 @@
       when: vps_docker_install and ansible_facts['virtualization_type'] != "docker"
       tags: [docker]
 
+    - name: Check if lazydocker is already installed
+      ansible.builtin.stat:
+        path: /usr/local/bin/lazydocker
+      register: lazydocker_installed
+      when: vps_docker_install
+      tags: [docker, tui]
+
     - name: Get lazydocker latest release info
       ansible.builtin.uri:
         url: https://api.github.com/repos/jesseduffield/lazydocker/releases/latest
         return_content: true
       register: lazydocker_release
-      when: vps_docker_install
+      when: vps_docker_install and not lazydocker_installed.stat.exists
       check_mode: false
       tags: [docker, tui]
 
@@ -108,7 +115,7 @@
         url: "https://github.com/jesseduffield/lazydocker/releases/download/{{ ld_tag }}/lazydocker_{{ ld_ver }}_Linux_x86_64.tar.gz"
         dest: /tmp/lazydocker.tar.gz
         mode: '0644'
-      when: vps_docker_install and not ansible_check_mode
+      when: vps_docker_install and not lazydocker_installed.stat.exists and not ansible_check_mode
       tags: [docker, tui]
 
     - name: Create temporary extraction directory for lazydocker
@@ -116,7 +123,7 @@
         path: /tmp/lazydocker_extract
         state: directory
         mode: '0755'
-      when: vps_docker_install
+      when: vps_docker_install and not lazydocker_installed.stat.exists
       tags: [docker, tui]
 
     - name: Extract lazydocker archive
@@ -124,7 +131,7 @@
         src: /tmp/lazydocker.tar.gz
         dest: /tmp/lazydocker_extract
         remote_src: true
-      when: vps_docker_install and not ansible_check_mode
+      when: vps_docker_install and not lazydocker_installed.stat.exists and not ansible_check_mode
       tags: [docker, tui]
 
     - name: Install lazydocker binary
@@ -133,7 +140,7 @@
         dest: /usr/local/bin/lazydocker
         mode: '0755'
         remote_src: true
-      when: vps_docker_install and not ansible_check_mode
+      when: vps_docker_install and not lazydocker_installed.stat.exists and not ansible_check_mode
       tags: [docker, tui]
 
     - name: Clean up lazydocker artifacts
@@ -143,7 +150,7 @@
       loop:
         - /tmp/lazydocker.tar.gz
         - /tmp/lazydocker_extract
-      when: vps_docker_install
+      when: vps_docker_install and not lazydocker_installed.stat.exists
       tags: [docker, tui]
 
     - name: Log docker role completion

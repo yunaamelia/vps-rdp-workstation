@@ -70,14 +70,21 @@
   when: vps_development_install_nodejs and npm_prefix_check.stdout != '/home/' + vps_username + '/.npm-global'
   tags: [development, nodejs]
 
+- name: Check if npm package is installed
+  ansible.builtin.command: "sudo -u {{ vps_username }} npm list -g {{ item }} --depth=0"
+  loop: "{{ vps_development_npm_global_packages }}"
+  register: npm_pkg_check
+  changed_when: false
+  failed_when: false
+  when: vps_development_install_nodejs
+  tags: [development, nodejs]
+
 - name: Install global npm packages
   ansible.builtin.shell: |
-    sudo -u {{ vps_username }} npm install -g {{ item }}
-  args:
-    creates: "/home/{{ vps_username }}/.npm-global/bin/{{ item.split('@')[0] }}"
-  loop: "{{ vps_development_npm_global_packages }}"
+    sudo -u {{ vps_username }} npm install -g {{ item.item }}
+  loop: "{{ npm_pkg_check.results | default([]) }}"
+  when: vps_development_install_nodejs and item.rc != 0
   become: true
-  when: vps_development_install_nodejs
   tags: [development, nodejs]
 
 # =============================================================================
@@ -116,7 +123,8 @@
 - name: Ensure pipx is in PATH for user
   ansible.builtin.command: |
     sudo -u {{ vps_username }} pipx ensurepath
-  changed_when: true
+  register: pipx_ensurepath_result
+  changed_when: "'is already in PATH' not in (pipx_ensurepath_result.stderr | default(''))"
   when: vps_development_install_python and pipx_path_check.rc != 0
   tags: [development, python]
 

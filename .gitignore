@@ -76,3 +76,6 @@ build/
 # Local tool state
 .opencode/
 .sisyphus/drafts/
+# Molecule
+molecule/*/molecule/.cache/
+molecule/*/.molecule/

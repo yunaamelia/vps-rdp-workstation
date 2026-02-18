@@ -1,0 +1,91 @@
+---
+# Molecule converge: Development Tools
+# Tests development language setup, Docker config, and editors
+
+- name: Converge - Development Tools
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    # Bootstrap prerequisites (common role provides these in production)
+    vps_hostname: "molecule-devtools"
+    vps_timezone: "UTC"
+    vps_locale: "en_US.UTF-8"
+    vps_username: "testuser"
+    vps_user_password_hash: "$6$rounds=4096$molecule$KXg2xR1FxYHFwvDxJD4CbCxfFJ8GcGIf.oTbOoqRlHq2R3E5g5G0V5HvRkp7W3TxQ1mOo5kfY5lJ3r1R2zC40"
+    vps_user_shell: "/bin/bash"
+    vps_user_groups:
+      - sudo
+    vps_progress_state_file: "/var/lib/vps-setup/progress.json"
+    vps_summary_log: "/var/lib/vps-setup/summary.log"
+    vps_backup_dir: "/var/backups/vps-setup"
+    # Disable desktop/GUI features
+    vps_install_desktop: false
+    vps_install_xrdp: false
+    vps_fail2ban_enabled: false
+    vps_firewall_enabled: false
+    # Development settings
+    vps_development_install_nodejs: true
+    vps_development_nodejs_version: "lts"
+    vps_development_npm_global_packages:
+      - yarn
+      - typescript
+    vps_development_install_python: true
+    vps_development_python_pipx_packages:
+      - black
+      - pylint
+    vps_development_install_php: false  # Skip PHP in CI for speed
+    vps_development_install_composer: false  # Requires PHP
+    vps_development_php_extensions: []
+    # Docker
+    vps_docker_install: true
+    vps_docker_log_max_size: "10m"
+    vps_docker_log_max_file: "3"
+    vps_docker_storage_driver: "overlay2"
+    # Editors (minimal for CI)
+    vps_editors_install_vscode: false  # Requires GUI
+    vps_editors_install_opencode: false
+    vps_editors_install_antigravity: false
+    vps_editors_vscode_extensions: []
+
+  pre_tasks:
+    - name: Bootstrap common role prerequisites
+      ansible.builtin.apt:
+        name:
+          - sudo
+          - curl
+          - wget
+          - git
+          - ca-certificates
+          - gnupg
+          - lsb-release
+          - apt-transport-https
+          - acl
+          - procps
+          - python3-pip
+        state: present
+        update_cache: true
+
+    - name: Create user for development roles
+      ansible.builtin.user:
+        name: "{{ vps_username }}"
+        password: "{{ vps_user_password_hash }}"
+        shell: "{{ vps_user_shell }}"
+        groups: "{{ vps_user_groups }}"
+        append: true
+        create_home: true
+      no_log: true
+
+    - name: Create state directories
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+        mode: '0755'
+      loop:
+        - /var/lib/vps-setup
+        - /var/backups/vps-setup
+
+  roles:
+    - role: development
+    - role: docker

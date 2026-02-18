@@ -22,6 +22,7 @@
 - name: Disable Baloo File Indexing
   ansible.builtin.command: balooctl6 disable
   when: "'Baloo is currently disabled' not in baloo_status.stdout"
+  changed_when: true
   tags: [kde-opt, performance]
 
 - name: Check if Polonium is installed

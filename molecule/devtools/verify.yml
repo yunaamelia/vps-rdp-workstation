@@ -1,0 +1,66 @@
+---
+# Molecule verify: Development Tools assertions
+
+- name: Verify - Development Tools
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    # =========================================================================
+    #  Development Role Assertions
+    # =========================================================================
+
+    - name: Verify Node.js is installed
+      ansible.builtin.command: node --version
+      register: node_check
+      changed_when: false
+      failed_when: node_check.rc != 0
+
+    - name: Assert Node.js version output
+      ansible.builtin.assert:
+        that: "'v' in node_check.stdout"
+        fail_msg: "Node.js not properly installed"
+
+    - name: Verify npm is available
+      ansible.builtin.command: npm --version
+      register: npm_check
+      changed_when: false
+      failed_when: npm_check.rc != 0
+
+    - name: Verify Python3 is installed
+      ansible.builtin.command: python3 --version
+      register: python_check
+      changed_when: false
+      failed_when: python_check.rc != 0
+
+    - name: Verify pip/pipx is available
+      ansible.builtin.command: which pipx
+      register: pipx_check
+      changed_when: false
+      failed_when: pipx_check.rc != 0
+
+    # =========================================================================
+    #  Docker Role Assertions
+    # =========================================================================
+
+    - name: Verify Docker is installed
+      ansible.builtin.command: docker --version
+      register: docker_check
+      changed_when: false
+      failed_when: docker_check.rc != 0
+
+    - name: Assert Docker version output
+      ansible.builtin.assert:
+        that: "'Docker version' in docker_check.stdout"
+        fail_msg: "Docker not properly installed"
+
+    - name: Verify Docker daemon config exists
+      ansible.builtin.stat:
+        path: /etc/docker/daemon.json
+      register: docker_config
+
+    - name: Assert Docker config created
+      ansible.builtin.assert:
+        that: docker_config.stat.exists
+        fail_msg: "Docker daemon.json not created"

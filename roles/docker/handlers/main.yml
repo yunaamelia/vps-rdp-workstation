@@ -1,7 +1,14 @@
 # Docker Role - Handlers
 ---
+- name: Check systemd availability
+  ansible.builtin.stat:
+    path: /run/systemd/system
+  register: _systemd_check
+  listen: Restart Docker
+
 - name: Restart Docker
   ansible.builtin.systemd:
     name: docker
     state: restarted
     daemon_reload: true
+  when: _systemd_check.stat.exists | default(false)

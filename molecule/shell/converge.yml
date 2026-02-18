@@ -1,0 +1,59 @@
+---
+# Molecule converge: Shell Configuration
+# Tests terminal, tmux, and shell customizations
+
+- name: Converge - Shell Configuration
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    # Bootstrap variables
+    vps_hostname: "molecule-shell"
+    vps_username: "testuser"
+    vps_user_password_hash: "$6$rounds=4096$molecule$KXg2xR1FxYHFwvDxJD4CbCxfFJ8GcGIf.oTbOoqRlHq2R3E5g5G0V5HvRkp7W3TxQ1mOo5kfY5lJ3r1R2zC40"
+    vps_user_shell: "/bin/zsh"
+    vps_user_groups: [sudo]
+    vps_progress_state_file: "/var/lib/vps-setup/progress.json"
+
+    # Feature flags
+    vps_install_desktop: false
+    vps_install_xrdp: false
+    vps_fail2ban_enabled: false
+
+    # Terminal / Shell settings
+    vps_shell: "zsh"
+    vps_install_omz: true
+    vps_zsh_theme: "agnoster"
+    vps_terminal_emulator: "konsole"
+    vps_terminal_install_kitty: true # Test kitty config generation
+    vps_install_zsh_external_plugins: true
+    vps_omz_builtin_plugins: [git, sudo]
+    vps_omz_external_plugins:
+      - name: zsh-autosuggestions
+        repo: https://github.com/zsh-users/zsh-autosuggestions
+      - name: zsh-syntax-highlighting
+        repo: https://github.com/zsh-users/zsh-syntax-highlighting
+
+  pre_tasks:
+    - name: Bootstrap prerequisites
+      ansible.builtin.apt:
+        name: [sudo, git, curl, wget, zsh, acl, procps, python3-pip]
+        state: present
+        update_cache: true
+
+    - name: Create test user
+      ansible.builtin.user:
+        name: "{{ vps_username }}"
+        password: "{{ vps_user_password_hash }}"
+        shell: /bin/bash # Will be changed to zsh by role
+        groups: "{{ vps_user_groups }}"
+        append: true
+        create_home: true
+      no_log: true
+
+  roles:
+    - role: terminal
+    - role: tmux
+    - role: shell-styling
+    - role: zsh-enhancements

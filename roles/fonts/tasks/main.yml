@@ -205,7 +205,7 @@
   tags: [fonts]
 
 - name: Verify fonts installed
-  ansible.builtin.shell: fc-list | grep -i "JetBrains"
+  ansible.builtin.shell: set -o pipefail && fc-list | grep -i "JetBrains"
   register: font_check
   changed_when: false
   failed_when: false

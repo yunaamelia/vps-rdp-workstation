@@ -16,7 +16,7 @@ ansible-core>=2.16.0
 # Performance optimization (optional but recommended)
 # mitogen>=0.3.7  # Uncomment for 2-7x performance boost
 
-# Testing tools (future enhancement)
-# pytest>=8.0.0
-# pytest-ansible>=4.1.0
-# molecule>=6.0.0
+# Testing tools
+molecule>=25.0.0
+molecule-plugins[docker]>=23.0.0
+pytest-testinfra>=10.0.0

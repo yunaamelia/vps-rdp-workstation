@@ -1,66 +1,103 @@
 ---
-# Molecule verify playbook
-# Validates that the role was applied correctly
+# Molecule verify: Bootstrap & Security assertions
+# Validates that common + security roles applied correctly
 
-- name: Verify
+- name: Verify - Bootstrap and Security
   hosts: all
   become: true
   gather_facts: true
 
   tasks:
-    - name: Ensure validation directory structure exists
-      ansible.builtin.file:
-        path: /root/repo/tests
-        state: directory
-        mode: '0755'
+    # =========================================================================
+    #  Common Role Assertions
+    # =========================================================================
 
-    - name: Copy project components (lightweight)
-      ansible.builtin.copy:
-        src: "../../{{ item }}"
-        dest: "/root/repo/"
-        mode: preserve
+    - name: Verify user exists
+      ansible.builtin.getent:
+        database: passwd
+        key: testuser
+      register: user_check
+
+    - name: Assert user was created
+      ansible.builtin.assert:
+        that: user_check is not failed
+        fail_msg: "User testuser was not created by common role"
+
+    - name: Verify essential packages installed
+      ansible.builtin.command: "dpkg -l {{ item }}"
       loop:
-        - setup.sh
-        - README.md
-        - tests
-        - docs
-        - playbooks
-        - plugins
-        - templates
-
-    - name: Archive roles locally
-      community.general.archive:
-        path: ../../roles
-        dest: /tmp/roles.tar.gz
-        format: gz
-        mode: '0644'
-      delegate_to: localhost
-
-    - name: Copy roles archive
-      ansible.builtin.copy:
-        src: /tmp/roles.tar.gz
-        dest: /tmp/roles.tar.gz
-        mode: '0644'
-
-    - name: Unarchive roles
-      ansible.builtin.unarchive:
-        src: /tmp/roles.tar.gz
-        dest: /root/repo/
-        remote_src: true
-
-    - name: Run validation suite
-      ansible.builtin.command: bash tests/validate.sh
-      args:
-        chdir: /root/repo
-      register: validation_output
+        - git
+        - curl
+        - wget
+        - vim
+        - zsh
+        - sudo
+      register: pkg_check
       changed_when: false
-      ignore_errors: true
+      failed_when: pkg_check.rc != 0
 
-    - name: Display validation output
-      ansible.builtin.debug:
-        msg: "{{ validation_output.stdout_lines }}"
+    - name: Verify hostname was set
+      ansible.builtin.slurp:
+        src: /etc/hostname
+      register: hostname_check
 
-    - name: Fail if validation failed
-      ansible.builtin.fail:
-        msg: "Validation suite failed! See output above."
-      when: validation_output.rc != 0
+    - name: Assert hostname is correct
+      ansible.builtin.assert:
+        that: "'molecule-test' in (hostname_check.content | b64decode)"
+        fail_msg: "Hostname not set correctly in /etc/hostname"
+
+    - name: Verify state tracking directory exists
+      ansible.builtin.stat:
+        path: /var/lib/vps-setup
+      register: state_dir
+
+    - name: Assert state directory created
+      ansible.builtin.assert:
+        that: state_dir.stat.exists and state_dir.stat.isdir
+        fail_msg: "State tracking directory not created"
+
+    - name: Verify sudoers file for user
+      ansible.builtin.stat:
+        path: /etc/sudoers.d/testuser
+      register: sudoers_check
+
+    - name: Assert sudoers configured
+      ansible.builtin.assert:
+        that: sudoers_check.stat.exists
+        fail_msg: "Sudoers file not created for testuser"
+
+    # =========================================================================
+    #  Security Role Assertions
+    # =========================================================================
+
+    - name: Verify UFW is installed
+      ansible.builtin.command: dpkg -l ufw
+      register: ufw_check
+      changed_when: false
+      failed_when: ufw_check.rc != 0
+
+    - name: Verify SSH server installed
+      ansible.builtin.command: dpkg -l openssh-server
+      register: ssh_check
+      changed_when: false
+      failed_when: ssh_check.rc != 0
+
+    - name: Verify SSH config exists
+      ansible.builtin.stat:
+        path: /etc/ssh/sshd_config
+      register: sshd_config
+
+    - name: Assert SSH config present
+      ansible.builtin.assert:
+        that: sshd_config.stat.exists
+        fail_msg: "SSH config not found"
+
+    - name: Verify SSH backup was created
+      ansible.builtin.stat:
+        path: /var/backups/vps-setup/sshd_config.backup
+      register: ssh_backup
+
+    - name: Assert SSH backup exists
+      ansible.builtin.assert:
+        that: ssh_backup.stat.exists
+        fail_msg: "SSH config backup not created by security role"

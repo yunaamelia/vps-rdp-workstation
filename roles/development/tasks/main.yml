@@ -113,7 +113,9 @@
 
 - name: Check if pipx needs to modify PATH
   ansible.builtin.shell: |
-    sudo -u {{ vps_username }} grep -q "Created by pipx" /home/{{ vps_username }}/.bashrc || sudo -u {{ vps_username }} grep -q "Created by pipx" /home/{{ vps_username }}/.zshrc
+    # Check for presence of .local/bin in PATH configuration
+    sudo -u {{ vps_username }} grep -q "\.local/bin" /home/{{ vps_username }}/.bashrc || \
+    ([ -f /home/{{ vps_username }}/.zshrc ] && sudo -u {{ vps_username }} grep -q "\.local/bin" /home/{{ vps_username }}/.zshrc)
   register: pipx_path_check
   changed_when: false
   failed_when: false
@@ -124,7 +126,9 @@
   ansible.builtin.command: |
     sudo -u {{ vps_username }} pipx ensurepath
   register: pipx_ensurepath_result
-  changed_when: "'is already in PATH' not in (pipx_ensurepath_result.stderr | default(''))"
+  changed_when: >
+    'is already in PATH' not in (pipx_ensurepath_result.stdout | default(''))
+    and 'is already in PATH' not in (pipx_ensurepath_result.stderr | default(''))
   when: vps_development_install_python and pipx_path_check.rc != 0
   tags: [development, python]
 

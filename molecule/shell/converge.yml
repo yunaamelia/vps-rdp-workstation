@@ -27,6 +27,7 @@
     vps_zsh_theme: "agnoster"
     vps_terminal_emulator: "konsole"
     vps_terminal_install_kitty: true # Test kitty config generation
+    vps_terminal_configure_zshrc: false # Let shell-styling handle .zshrc
     vps_install_zsh_external_plugins: true
     vps_omz_builtin_plugins: [git, sudo]
     vps_omz_external_plugins:
@@ -46,7 +47,7 @@
       ansible.builtin.user:
         name: "{{ vps_username }}"
         password: "{{ vps_user_password_hash }}"
-        shell: /bin/bash # Will be changed to zsh by role
+        shell: /bin/zsh
         groups: "{{ vps_user_groups }}"
         append: true
         create_home: true

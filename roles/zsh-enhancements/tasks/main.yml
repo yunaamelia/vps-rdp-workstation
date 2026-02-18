@@ -27,6 +27,7 @@
     version: "{{ item.version | default('HEAD') }}"
     update: true
   become: true
+  become_user: "{{ vps_username }}"
   loop: "{{ vps_omz_external_plugins }}"
   tags: [zsh-plugins]
 

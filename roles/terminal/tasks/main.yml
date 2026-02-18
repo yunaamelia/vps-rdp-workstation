@@ -35,6 +35,7 @@
     depth: 1
     version: master
   become: true
+  become_user: "{{ vps_username }}"
   when: vps_terminal_install_omz
   tags: [terminal, zsh]
 
@@ -87,6 +88,7 @@
     line: 'ZSH_THEME="{{ vps_terminal_zsh_theme }}"'
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
+  when: vps_terminal_configure_zshrc
   tags: [terminal, zsh]
 
 - name: Configure Oh My Zsh plugins
@@ -96,6 +98,7 @@
     line: 'plugins=({{ vps_terminal_omz_builtin_plugins | join(" ") }})'
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
+  when: vps_terminal_configure_zshrc
   tags: [terminal, zsh]
 
 - name: Add PATH configuration to zshrc
@@ -113,6 +116,7 @@
       export PATH="$HOME/.local/bin:$PATH"
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
+  when: vps_terminal_configure_zshrc
   tags: [terminal, zsh]
 
 - name: Install Konsole terminal emulator

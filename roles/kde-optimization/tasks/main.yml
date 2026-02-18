@@ -12,16 +12,26 @@
   when: vps_install_desktop | default(true)
   tags: [kde-opt, tools]
 
+- name: Check if balooctl6 is available
+  ansible.builtin.command: which balooctl6
+  register: baloo_available
+  changed_when: false
+  failed_when: false
+  tags: [kde-opt, performance]
+
 - name: Check if Baloo is disabled
   ansible.builtin.command: balooctl6 status
   register: baloo_status
   changed_when: false
   failed_when: false
+  when: baloo_available.rc == 0
   tags: [kde-opt, performance]
 
 - name: Disable Baloo File Indexing
   ansible.builtin.command: balooctl6 disable
-  when: "'Baloo is currently disabled' not in baloo_status.stdout"
+  when:
+    - baloo_available.rc == 0
+    - "'Baloo is currently disabled' not in (baloo_status.stdout | default(''))"
   changed_when: true
   tags: [kde-opt, performance]
 

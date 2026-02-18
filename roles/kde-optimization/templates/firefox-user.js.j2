@@ -1,12 +1,23 @@
-// Managed by Ansible - Firefox dark mode + WhiteSur theme preferences
+// Managed by Ansible - WhiteSur Firefox Theme (Balanced Beauty)
+// Prefs sourced from vinceliuice/WhiteSur-firefox-theme install.sh
+
+// Enable custom CSS stylesheets (required for WhiteSur theme)
 user_pref("toolkit.legacyUserProfileCustomizations.stylesheets", true);
+
+// Titlebar integration
 user_pref("browser.tabs.drawInTitlebar", true);
-user_pref("browser.tabs.inTitlebar", 1);
+
+// UI Density (Normal = 0)
 user_pref("browser.uidensity", 0);
+
+// Hardware acceleration
 user_pref("layers.acceleration.force-enabled", true);
+
+// ARGB visuals for transparency
 user_pref("mozilla.widget.use-argb-visuals", true);
+
+// GTK rounded corners integration
 user_pref("widget.gtk.rounded-bottom-corners.enabled", true);
+
+// SVG context properties for icon theming
 user_pref("svg.context-properties.content.enabled", true);
-user_pref("browser.theme.dark-private-windows", true);
-user_pref("ui.systemUsesDarkTheme", 1);
-user_pref("browser.in-content.dark-mode", true);

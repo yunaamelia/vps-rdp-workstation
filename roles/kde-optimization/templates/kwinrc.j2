@@ -1,9 +1,14 @@
-# Managed by Ansible - WhiteSur KDE Optimization
-# Mirrors running system configuration
+# Managed by Ansible - WhiteSur KDE Window Manager (Balanced Beauty)
+# Aurorae theme: WhiteSur-dark (from vinceliuice/WhiteSur-kde)
 
 [Compositing]
-AnimationSpeed=0
-LatencyPolicy=ForceLowestLatency
+AnimationSpeed=3
+Backend=OpenGL
+GLCore=true
+LatencyPolicy=Low
+MaxFPS=60
+RefreshRate=60
+WindowsBlockCompositing=true
 
 [Desktops]
 Id_1=b5e2f95d-47a3-4f67-9903-1264a28be281
@@ -48,14 +53,16 @@ CommandWindow3=Activate, raise and pass click
 CommandWindowWheel=Scroll
 
 [Plugins]
-blurEnabled=false
+blurEnabled=true
+contrastEnabled=true
 diminactiveEnabled=true
-fadeEnabled=false
+fadeEnabled=true
 fallapartEnabled=true
 kwin4_effect_dimscreenEnabled=true
-poloniumEnabled=false
+poloniumEnabled=true
 scaleEnabled=true
 slideEnabled=false
+wobblywindowsEnabled=false
 
 [TabBox]
 BorderActivate=9
@@ -76,7 +83,7 @@ Right=None
 Top=None
 
 [Windows]
-BorderlessMaximizedWindows=false
+BorderlessMaximizedWindows=true
 
 [org.kde.kdecoration2]
 ButtonsOnLeft=XIA
@@ -84,4 +91,4 @@ ButtonsOnRight=
 CloseOnDoubleClickOnMenu=false
 ShowToolTips=false
 library=org.kde.kwin.aurorae
-theme=__aurorae__svg__WhiteSur-Dark
+theme=__aurorae__svg__WhiteSur-dark

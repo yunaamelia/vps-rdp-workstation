@@ -1,22 +1,25 @@
 ---
 # KDE Optimization Role - Default Variables
-# Mirrors running system WhiteSur + Klassy configuration
+# Official WhiteSur Dark + Nerd Fonts (Balanced Beauty)
 
 # KDE autostart applications
 vps_kde_autostart_apps: []
 
-# Theme variables (WhiteSur ecosystem)
-# Theme variables (WhiteSur ecosystem)
+# GTK Theme (WhiteSur Dark only)
 vps_gtk_theme: "WhiteSur-Dark"
-vps_gtk_font: "JetBrainsMono Nerd Font,10"
+vps_gtk_font: "SauceCodePro Nerd Font 10"
 
-# KDE accent color (macOS Blue: 0,122,255)
+# KDE Color Scheme (WhiteSurDark, accent synced to user's macOS blue)
 vps_kde_accent_color: "0,122,255"
-vps_kde_color_scheme: "BreezeDark"
-vps_kde_animation_factor: "0.5"
+vps_kde_color_scheme: "WhiteSurDark"
+vps_kde_animation_factor: "0"
 
-# KDE font configuration
-vps_kde_font: "JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,Regular"
+# KDE Font Configuration (3-Font Nerd Combo)
+# UI (general): SauceCodePro Nerd Font — clean, wide, excellent readability
+vps_kde_font: "SauceCodePro Nerd Font,10,-1,5,400,0,0,0,0,0,Regular"
+# Titlebar (active window): JetBrainsMono Nerd Font — bold, distinctive headers
 vps_kde_active_font: "JetBrainsMono Nerd Font,10,-1,5,600,0,0,0,0,0,Semi-Bold"
+# Fixed/Terminal/Code: FiraCode Nerd Font — best ligatures for coding
 vps_kde_fixed_font: "FiraCode Nerd Font,10,-1,5,400,0,0,0,0,0,Regular"
-vps_kde_small_font: "JetBrainsMono Nerd Font,8,-1,5,400,0,0,0,0,0,Regular"
+# Small text: SauceCodePro Nerd Font — remains readable at small sizes
+vps_kde_small_font: "SauceCodePro Nerd Font,8,-1,5,400,0,0,0,0,0,Regular"

@@ -12,35 +12,49 @@
   when: vps_install_desktop | default(true)
   tags: [kde-opt, tools]
 
-- name: Check if Krohnkite is installed
+- name: Check if Baloo is disabled
+  ansible.builtin.command: balooctl6 status
+  register: baloo_status
+  changed_when: false
+  failed_when: false
+  tags: [kde-opt, performance]
+
+- name: Disable Baloo File Indexing
+  ansible.builtin.command: balooctl6 disable
+  when: "'Baloo is currently disabled' not in baloo_status.stdout"
+  tags: [kde-opt, performance]
+
+- name: Check if Polonium is installed
   ansible.builtin.stat:
-    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/krohnkite"
-  register: krohnkite_dir
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/polonium"
+  register: polonium_dir
   when: vps_install_desktop | default(true)
   tags: [kde-opt, tiling]
 
-- name: Download Krohnkite KWin Script (KDE 6 Compatible)
-  ansible.builtin.get_url:
-    url: "https://github.com/anametologin/krohnkite/releases/download/0.9.9.2/krohnkite.kwinscript"
-    dest: "/tmp/krohnkite.kwinscript"
-    mode: '0644'
-  when: (vps_install_desktop | default(true)) and (not krohnkite_dir.stat.exists)
+- name: Download Polonium Source (Master)
+  ansible.builtin.git:
+    repo: "https://github.com/zeroxoneafour/polonium.git"
+    dest: "/tmp/polonium-source"
+    version: master
+    depth: 1
+    force: true
+  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
   tags: [kde-opt, tiling]
 
-- name: Install Krohnkite KWin Script
+- name: Install Polonium KWin Script (from source)
   ansible.builtin.command:
-    cmd: "kpackagetool6 -t KWin/Script -i /tmp/krohnkite.kwinscript"
+    cmd: "kpackagetool6 -t KWin/Script -i /tmp/polonium-source"
   become: true
   become_user: "{{ vps_username }}"
-  when: (vps_install_desktop | default(true)) and (not krohnkite_dir.stat.exists)
+  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
   changed_when: true
   tags: [kde-opt, tiling]
 
-- name: Cleanup Krohnkite Installer
+- name: Cleanup Polonium Source
   ansible.builtin.file:
-    path: "/tmp/krohnkite.kwinscript"
+    path: "/tmp/polonium-source"
     state: absent
-  when: (vps_install_desktop | default(true)) and (not krohnkite_dir.stat.exists)
+  when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
   tags: [kde-opt, tiling]
 
 - name: Deploy Captured KDE Configuration
@@ -54,9 +68,16 @@
     - kdeglobals
     - kwinrc
     - kglobalshortcutsrc
+    - krunnerrc
+    - kded5rc
     - kcminputrc
     - plasmashellrc
+    - plasmarc
     - breezerc
+    - baloofilerc
+    - kscreenlockerrc
+    - ksplashrc
+    - klaunchrc
   notify: Reconfigure KWin
   tags: [kde-opt, config]
 

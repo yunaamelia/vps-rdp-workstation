@@ -3,23 +3,23 @@
 **Context**: Performance tuning and UX polish for KDE Plasma, optimized for RDP usage.
 
 ## OVERVIEW
-Disables Baloo file indexing, tunes KWin compositor for lowest latency (animations off, blur off), installs Polonium tiling window manager, configures Dolphin defaults, sets system font to JetBrainsMono Nerd Font. All config via `community.general.ini_file`.
+Disables Baloo file indexing (via balooctl6 and config), tunes KWin compositor for lowest latency (animations off, blur off), installs Polonium tiling window manager (from source for Plasma 6 support), configures Dolphin defaults, sets system font to JetBrainsMono Nerd Font. All config via `community.general.ini_file`.
 
 ## STRUCTURE
 ```
 roles/kde-optimization/
-├── handlers/       # EMPTY (1 line `---`)
-└── tasks/          # Polonium → Baloo → KWin → Dolphin → fonts
+├── handlers/       # Reconfigure KWin handler
+└── tasks/          # Baloo → Polonium → KWin → Dolphin → fonts
 ```
 
 ## WHERE TO LOOK
 | Task | Location | Notes |
 |------|----------|-------|
-| **Polonium install** | `tasks/main.yml` | Download release → `kpackagetool6 -i` |
-| **Baloo disable** | `tasks/main.yml:14-47` | `balooctl disable` + `baloofilerc` config |
-| **KWin tuning** | `tasks/main.yml:49-74` | `kwinrc` — AnimationSpeed=0, LatencyPolicy=ForceLowestLatency, blur disabled |
-| **Dolphin config** | `tasks/main.yml:76-89` | `dolphinrc` — ShowFullPath, FilterBar |
-| **System font** | `tasks/main.yml:91-107` | `kdeglobals` — 5 font entries (regular, fixed, menu, toolbar, smallest) |
+| **Baloo disable** | `tasks/main.yml` | `balooctl6 disable` + `baloofilerc` config |
+| **Polonium install** | `tasks/main.yml` | Git clone master → `kpackagetool6 -i` |
+| **KWin tuning** | `tasks/main.yml` | `kwinrc` — AnimationSpeed=0, LatencyPolicy=ForceLowestLatency |
+| **Dolphin config** | `tasks/main.yml` | `dolphinrc` — ShowFullPath, FilterBar |
+| **System font** | `tasks/main.yml` | `kdeglobals` — 5 font entries (regular, fixed, menu, toolbar, smallest) |
 
 ## CONVENTIONS
 *   **ini_file everywhere**: All KDE config changes use `community.general.ini_file` with `create: true` — safe for fresh installs.

@@ -22,6 +22,13 @@
     mode: '0755'
   tags: [fonts]
 
+- name: Create Source Code Pro Nerd Font directory
+  ansible.builtin.file:
+    path: /usr/share/fonts/truetype/source-code-pro-nerd
+    state: directory
+    mode: '0755'
+  tags: [fonts]
+
 - name: Create powerline fonts directory
   ansible.builtin.file:
     path: /usr/share/fonts/truetype/powerline
@@ -53,6 +60,14 @@
   when: vps_fonts_install_nerd_fonts and not ansible_check_mode
   tags: [fonts]
 
+- name: Download Source Code Pro Nerd Font
+  ansible.builtin.get_url:
+    url: https://github.com/ryanoasis/nerd-fonts/releases/latest/download/SourceCodePro.tar.xz
+    dest: /tmp/SourceCodePro.tar.xz
+    mode: '0644'
+  when: vps_fonts_install_nerd_fonts and not ansible_check_mode
+  tags: [fonts]
+
 - name: Extract JetBrains Mono Nerd Font
   ansible.builtin.unarchive:
     src: /tmp/JetBrainsMono.tar.xz
@@ -73,6 +88,14 @@
   ansible.builtin.unarchive:
     src: /tmp/FiraCode.tar.xz
     dest: /usr/share/fonts/truetype/firacode-nerd
+    remote_src: true
+  when: vps_fonts_install_nerd_fonts and not ansible_check_mode
+  tags: [fonts]
+
+- name: Extract Source Code Pro Nerd Font
+  ansible.builtin.unarchive:
+    src: /tmp/SourceCodePro.tar.xz
+    dest: /usr/share/fonts/truetype/source-code-pro-nerd
     remote_src: true
   when: vps_fonts_install_nerd_fonts and not ansible_check_mode
   tags: [fonts]
@@ -176,6 +199,7 @@
     - /tmp/Hack.tar.xz
     - /tmp/Hack.tar.xz
     - /tmp/FiraCode.tar.xz
+    - /tmp/SourceCodePro.tar.xz
     - /tmp/powerline-fonts
   when: not ansible_check_mode
   tags: [fonts]
@@ -190,5 +214,5 @@
 
 - name: Log fonts role completion
   ansible.builtin.debug:
-    msg: "✓ Fonts role completed - JetBrains Mono Nerd Font and Powerline installed"
+    msg: "✓ Fonts role completed - JetBrains, FiraCode, SourceCodePro, and Powerline installed"
   tags: [fonts]

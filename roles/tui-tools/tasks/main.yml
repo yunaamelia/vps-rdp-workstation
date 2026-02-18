@@ -1,5 +1,5 @@
 # TUI Tools Role - Terminal User Interface Tools
-# Version: 3.0.0
+# Version: 4.0.0
 ---
 - name: Install TUI tools from apt
   ansible.builtin.apt:
@@ -16,6 +16,14 @@
       - bat
       - fd-find
       - ripgrep
+      # System monitors
+      - btop
+      - htop
+      - ncdu
+      # CLI productivity
+      - hyperfine
+      - tokei
+      - thefuck
       # Yazi dependencies
       - 7zip
       - poppler-utils
@@ -57,6 +65,7 @@
     return_content: true
   register: lazygit_release
   when: lazygit_download is failed
+  ignore_errors: true
   tags: [tools, tui]
 
 - name: Download lazygit latest as fallback
@@ -66,7 +75,10 @@
       lazygit_{{ lazygit_release.json.tag_name | regex_replace('v', '') }}_Linux_x86_64.tar.gz
     dest: /tmp/lazygit.tar.gz
     mode: '0644'
-  when: lazygit_download is failed
+  when:
+    - lazygit_download is failed
+    - lazygit_release is success
+    - lazygit_release.json is defined
   tags: [tools, tui]
 
 - name: Extract lazygit
@@ -75,6 +87,7 @@
     dest: /usr/local/bin
     remote_src: true
     creates: /usr/local/bin/lazygit
+  when: (lazygit_download is success) or (lazygit_release is defined and lazygit_release is success)
   tags: [tools, tui]
 
 - name: Verify lazygit installation
@@ -96,15 +109,152 @@
     return_content: true
   register: yazi_release
   check_mode: false
+  ignore_errors: true
   tags: [tools, tui, yazi]
 
 - name: Download and install yazi .deb
   ansible.builtin.apt:
     deb: "https://github.com/sxyazi/yazi/releases/download/{{ yazi_release.json.tag_name }}/yazi-x86_64-unknown-linux-gnu.deb"
-  when: yazi_release is success
+  when:
+    - yazi_release is success
+    - yazi_release.json is defined
   tags: [tools, tui, yazi]
+
+# ==============================================================================
+# Glow - Terminal Markdown Renderer
+# ==============================================================================
+
+- name: Get glow latest release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/charmbracelet/glow/releases/latest
+    return_content: true
+  register: glow_release
+  check_mode: false
+  ignore_errors: true
+  tags: [tools, tui, glow]
+
+- name: Download and install glow .deb
+  ansible.builtin.apt:
+    deb: >-
+      https://github.com/charmbracelet/glow/releases/download/{{ glow_release.json.tag_name }}/glow_{{ glow_release.json.tag_name | regex_replace('v', '') }}_amd64.deb
+  when:
+    - glow_release is success
+    - glow_release.json is defined
+  tags: [tools, tui, glow]
+
+# ==============================================================================
+# Navi - Interactive Cheatsheet Tool
+# ==============================================================================
+
+- name: Check if navi is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/navi
+  register: navi_bin
+  tags: [tools, tui, navi]
+
+- name: Get navi latest release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/denisidoro/navi/releases/latest
+    return_content: true
+  register: navi_release
+  check_mode: false
+  ignore_errors: true
+  when: not navi_bin.stat.exists
+  tags: [tools, tui, navi]
+
+- name: Download navi
+  ansible.builtin.get_url:
+    url: >-
+      https://github.com/denisidoro/navi/releases/download/{{ navi_release.json.tag_name }}/navi-{{ navi_release.json.tag_name }}-x86_64-unknown-linux-musl.tar.gz
+    dest: /tmp/navi.tar.gz
+    mode: '0644'
+  when:
+    - not navi_bin.stat.exists
+    - navi_release is success
+    - navi_release.json is defined
+  tags: [tools, tui, navi]
+
+- name: Extract navi
+  ansible.builtin.unarchive:
+    src: /tmp/navi.tar.gz
+    dest: /usr/local/bin
+    remote_src: true
+    creates: /usr/local/bin/navi
+  when:
+    - not navi_bin.stat.exists
+    - navi_release is defined
+    - navi_release is success
+  tags: [tools, tui, navi]
+
+- name: Clean up navi archive
+  ansible.builtin.file:
+    path: /tmp/navi.tar.gz
+    state: absent
+  tags: [tools, tui, navi]
+
+# ==============================================================================
+# Atuin - Magical Shell History
+# ==============================================================================
+
+- name: Check if atuin is installed
+  ansible.builtin.stat:
+    path: /usr/bin/atuin
+  register: atuin_bin
+  tags: [tools, tui, atuin]
+
+- name: Get atuin latest release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/atuinsh/atuin/releases/latest
+    return_content: true
+  register: atuin_release
+  check_mode: false
+  ignore_errors: true
+  when: not atuin_bin.stat.exists
+  tags: [tools, tui, atuin]
+
+- name: Download and install atuin .deb
+  ansible.builtin.apt:
+    deb: >-
+      https://github.com/atuinsh/atuin/releases/download/{{ atuin_release.json.tag_name }}/atuin_{{ atuin_release.json.tag_name | regex_replace('v', '') }}_amd64.deb
+  when:
+    - not atuin_bin.stat.exists
+    - atuin_release is success
+    - atuin_release.json is defined
+  tags: [tools, tui, atuin]
+
+# ==============================================================================
+# Tealdeer (tldr) - Simplified Man Pages
+# ==============================================================================
+
+- name: Check if tldr is installed
+  ansible.builtin.stat:
+    path: /usr/local/bin/tldr
+  register: tldr_bin
+  tags: [tools, tui, tldr]
+
+- name: Get tealdeer latest release info
+  ansible.builtin.uri:
+    url: https://api.github.com/repos/tealdeer-rs/tealdeer/releases/latest
+    return_content: true
+  register: tldr_release
+  check_mode: false
+  ignore_errors: true
+  when: not tldr_bin.stat.exists
+  tags: [tools, tui, tldr]
+
+- name: Download tealdeer binary
+  ansible.builtin.get_url:
+    url: >-
+      https://github.com/tealdeer-rs/tealdeer/releases/download/{{ tldr_release.json.tag_name }}/tealdeer-linux-x86_64-musl
+    dest: /usr/local/bin/tldr
+    mode: '0755'
+  when:
+    - not tldr_bin.stat.exists
+    - tldr_release is success
+    - tldr_release.json is defined
+  tags: [tools, tui, tldr]
 
 - name: Log tui-tools role completion
   ansible.builtin.debug:
-    msg: "✓ TUI Tools role completed - lazygit, yazi, bat, fd, duf installed"
+    msg: "✓ TUI Tools role completed - all CLI tools installed"
   tags: [tools, tui]

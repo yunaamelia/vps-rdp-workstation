@@ -213,6 +213,13 @@ alias d='docker'
 alias dps='docker ps'
 alias dc='docker compose'
 
+# Productivity tools
+(( $+commands[glow] )) && alias md='glow'
+(( $+commands[tokei] )) && alias loc='tokei'
+(( $+commands[hyperfine] )) && alias bench='hyperfine'
+(( $+commands[btop] )) && alias top='btop'
+(( $+commands[tldr] )) && alias help='tldr'
+
 alias update='sudo apt update && sudo apt upgrade -y'
 alias zshrc='$EDITOR /home/{{ vps_username }}/.zshrc'
 alias reload='source /home/{{ vps_username }}/.zshrc'

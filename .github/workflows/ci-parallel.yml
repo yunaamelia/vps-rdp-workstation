@@ -119,6 +119,7 @@ jobs:
           - default
           - devtools
           - shell
+          - rollback
 
     steps:
       - uses: actions/checkout@v4

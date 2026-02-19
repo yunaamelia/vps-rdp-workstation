@@ -76,3 +76,47 @@
       ansible.builtin.assert:
         that: starship_check.stat.exists
         fail_msg: "Starship config not found"
+
+    # =========================================================================
+    #  Shell Enhancement Health Checks
+    # =========================================================================
+
+    - name: Verify zsh-autosuggestions plugin installed
+      ansible.builtin.stat:
+        path: /home/testuser/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+      register: autosuggestions_check
+
+    - name: Assert zsh-autosuggestions exists
+      ansible.builtin.assert:
+        that: autosuggestions_check.stat.exists and autosuggestions_check.stat.isdir
+        fail_msg: "zsh-autosuggestions plugin not installed"
+
+    - name: Verify zsh-syntax-highlighting plugin installed
+      ansible.builtin.stat:
+        path: /home/testuser/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+      register: syntax_highlighting_check
+
+    - name: Assert zsh-syntax-highlighting exists
+      ansible.builtin.assert:
+        that: syntax_highlighting_check.stat.exists and syntax_highlighting_check.stat.isdir
+        fail_msg: "zsh-syntax-highlighting plugin not installed"
+
+    - name: Verify fzf is installed
+      ansible.builtin.command: which fzf
+      register: fzf_check
+      changed_when: false
+      failed_when: false
+
+    - name: Report fzf status
+      ansible.builtin.debug:
+        msg: "fzf: {{ 'installed at ' + fzf_check.stdout if fzf_check.rc == 0 else 'not installed (may require manual setup)' }}"
+
+    - name: Verify zoxide is installed
+      ansible.builtin.command: which zoxide
+      register: zoxide_check
+      changed_when: false
+      failed_when: false
+
+    - name: Report zoxide status
+      ansible.builtin.debug:
+        msg: "zoxide: {{ 'installed at ' + zoxide_check.stdout if zoxide_check.rc == 0 else 'not installed (external installer may not run in container)' }}"

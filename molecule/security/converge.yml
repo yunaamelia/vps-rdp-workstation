@@ -1,0 +1,23 @@
+---
+- name: Converge - Security Focus
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    # Security-focused variables for testing
+    vps_username: "sectestuser"
+    vps_user_password_hash: "$6$rounds=656000$YourSaltValueHere$YourHashValueHere"
+    vps_timezone: "Etc/UTC"
+    vps_locale: "en_US.UTF-8"
+    vps_ssh_port: 22
+    # Ensure UFW is enabled
+    vps_firewall_enabled: true
+    # Fail2ban settings
+    fail2ban_bantime: "10m"
+    fail2ban_findtime: "10m"
+    fail2ban_maxretry: 3
+
+  roles:
+    - role: common
+    - role: security

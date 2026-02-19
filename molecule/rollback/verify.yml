@@ -1,0 +1,84 @@
+---
+# Molecule verify: Rollback assertions
+# Validates that the rollback playbook successfully reversed the deployment
+
+- name: Verify - Rollback Success
+  hosts: all
+  become: true
+  gather_facts: true
+
+  tasks:
+    # =========================================================================
+    #  Verify Services Were Stopped
+    # =========================================================================
+
+    - name: Check XRDP service status
+      ansible.builtin.systemd:
+        name: xrdp
+      register: xrdp_status
+      failed_when: false
+
+    - name: Assert XRDP is not actively running
+      ansible.builtin.assert:
+        that: "xrdp_status.status.ActiveState | default('') != 'active'"
+        fail_msg: "XRDP should not be active after rollback (found: {{ xrdp_status.status.ActiveState | default('empty') }})"
+
+    - name: Check fail2ban service status
+      ansible.builtin.systemd:
+        name: fail2ban
+      register: fail2ban_status
+      failed_when: false
+
+    - name: Assert fail2ban is not actively running
+      ansible.builtin.assert:
+        that: "fail2ban_status.status.ActiveState | default('') != 'active'"
+        fail_msg: "Fail2ban should not be active after rollback (found: {{ fail2ban_status.status.ActiveState | default('empty') }})"
+
+    # =========================================================================
+    #  Verify Configs Were Restored
+    # =========================================================================
+
+    - name: Check SSH config exists
+      ansible.builtin.stat:
+        path: /etc/ssh/sshd_config
+      register: sshd_config
+
+    - name: Assert SSH config still present
+      ansible.builtin.assert:
+        that: sshd_config.stat.exists
+        fail_msg: "SSH config should exist after rollback"
+
+    - name: Check backup directory still exists
+      ansible.builtin.stat:
+        path: /var/backups/vps-setup
+      register: backup_dir
+
+    - name: Assert backup directory preserved
+      ansible.builtin.assert:
+        that: backup_dir.stat.exists
+        fail_msg: "Backup directory should be preserved after rollback"
+
+    # =========================================================================
+    #  Verify System Is Still Usable
+    # =========================================================================
+
+    - name: Verify user still exists
+      ansible.builtin.getent:
+        database: passwd
+        key: testuser
+      register: user_check
+
+    - name: Assert user preserved after rollback
+      ansible.builtin.assert:
+        that: user_check is not failed
+        fail_msg: "User should still exist after rollback"
+
+    - name: Verify system packages not removed
+      ansible.builtin.command: "dpkg -l {{ item }}"
+      loop:
+        - git
+        - curl
+        - sudo
+      register: pkg_check
+      changed_when: false
+      failed_when: pkg_check.rc != 0

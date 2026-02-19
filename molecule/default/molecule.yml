@@ -15,7 +15,7 @@ driver:
 platforms:
   - name: debian-trixie
     image: debian:trixie
-    pre_build_image: true
+    pre_build_image: false
     privileged: true
     tty: true
     volumes:

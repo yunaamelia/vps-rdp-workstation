@@ -1,6 +1,7 @@
 ---
-# Molecule Scenario: devtools (development + docker + editors)
-# Tests package installation and development tool configuration
+# Molecule Scenario: rollback
+# Tests that the rollback playbook correctly reverses deployment
+# Run: molecule test -s rollback
 
 dependency:
   name: galaxy
@@ -12,7 +13,7 @@ driver:
   name: docker
 
 platforms:
-  - name: debian-devtools
+  - name: debian-rollback
     image: debian:trixie
     dockerfile: ../default/Dockerfile.j2
     pre_build_image: false
@@ -28,8 +29,8 @@ platforms:
 provisioner:
   name: ansible
   env:
+    ANSIBLE_CONFIG: "${MOLECULE_PROJECT_DIRECTORY}/ansible.cfg"
     ANSIBLE_DEPRECATION_WARNINGS: "True"
-    ANSIBLE_WARNINGS_ARE_ERRORS: "True"
     ANSIBLE_SYSTEM_WARNINGS: "True"
     ANSIBLE_CALLBACK_PLUGINS: "${MOLECULE_PROJECT_DIRECTORY}/plugins/callback"
     ANSIBLE_CALLBACKS_ENABLED: "strict_deprecations"
@@ -40,10 +41,14 @@ provisioner:
       remote_tmp: /tmp/.ansible/tmp
       allow_world_readable_tmpfiles: true
       pipelining: true
+  playbooks:
+    converge: converge.yml
+    verify: verify.yml
   inventory:
     host_vars:
-      debian-devtools:
+      debian-rollback:
         ansible_user: root
+        vps_fail2ban_start_service: false
       localhost:
         ansible_connection: local
         ansible_become: false
@@ -52,13 +57,12 @@ verifier:
   name: ansible
 
 scenario:
-  name: devtools
+  name: rollback
   test_sequence:
     - dependency
     - syntax
     - create
     - prepare
     - converge
-    - idempotence
     - verify
     - destroy

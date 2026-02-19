@@ -64,3 +64,39 @@
       ansible.builtin.assert:
         that: docker_config.stat.exists
         fail_msg: "Docker daemon.json not created"
+
+    # =========================================================================
+    #  Service Health Checks
+    # =========================================================================
+
+    - name: Check Docker daemon status (informational)
+      ansible.builtin.command: docker info
+      register: docker_info_check
+      changed_when: false
+      failed_when: false
+
+    - name: Report Docker daemon status
+      ansible.builtin.debug:
+        msg: >-
+          Docker daemon: {{ 'running' if docker_info_check.rc == 0 else 'not running (expected in container)' }}
+
+    - name: Check Docker Compose availability
+      ansible.builtin.command: docker compose version
+      register: compose_check
+      changed_when: false
+      failed_when: false
+
+    - name: Report Docker Compose status
+      ansible.builtin.debug:
+        msg: >-
+          Docker Compose: {{ compose_check.stdout | default('not available') }}
+
+    - name: Check pipx tools (informational)
+      ansible.builtin.command: "sudo -u testuser pipx list"
+      register: pipx_list_check
+      changed_when: false
+      failed_when: false
+
+    - name: Report pipx tools status
+      ansible.builtin.debug:
+        msg: "pipx tools: {{ pipx_list_check.stdout_lines | default(['none found']) }}"

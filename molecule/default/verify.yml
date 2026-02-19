@@ -145,3 +145,37 @@
       ansible.builtin.assert:
         that: user_info.shell in ['/usr/bin/zsh', '/bin/zsh']
         fail_msg: "User shell is not set to zsh (found {{ user_info.shell }})"
+
+    # =========================================================================
+    #  Service Health Checks
+    # =========================================================================
+
+    - name: Verify XRDP service status
+      ansible.builtin.systemd:
+        name: xrdp
+      register: xrdp_service_check
+      failed_when: false
+
+    - name: Report XRDP service status
+      ansible.builtin.debug:
+        msg: "XRDP service status: {{ xrdp_service_check.status.ActiveState | default('unknown') }}"
+
+    - name: Verify XRDP configuration is valid
+      ansible.builtin.stat:
+        path: /etc/xrdp/xrdp.ini
+      register: xrdp_config_check
+
+    - name: Assert XRDP configuration exists
+      ansible.builtin.assert:
+        that: xrdp_config_check.stat.exists
+        fail_msg: "XRDP configuration file not found"
+
+    - name: Verify fail2ban configuration exists
+      ansible.builtin.stat:
+        path: /etc/fail2ban/jail.local
+      register: fail2ban_config_check
+
+    - name: Assert fail2ban is configured
+      ansible.builtin.assert:
+        that: fail2ban_config_check.stat.exists
+        fail_msg: "Fail2ban jail.local configuration not found"

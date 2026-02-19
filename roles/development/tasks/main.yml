@@ -48,11 +48,14 @@
 
 - name: Configure npm global directory for user
   ansible.builtin.file:
-    path: "/home/{{ vps_username }}/.npm-global"
+    path: "/home/{{ vps_username }}/.npm-global/{{ item }}"
     state: directory
     owner: "{{ vps_username }}"
     group: "{{ vps_username }}"
     mode: '0755'
+  loop:
+    - ''
+    - lib
   when: vps_development_install_nodejs
   tags: [development, nodejs]
 

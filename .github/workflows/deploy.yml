@@ -64,3 +64,23 @@ jobs:
           ./setup.sh --ci
           # Cleanup
           rm ./secrets
+
+      - name: Run Smoke Tests
+        id: smoke
+        if: steps.check_secrets.outputs.has_secrets == 'true'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
+        run: |
+          chmod +x ./tests/smoke-test.sh
+          ./tests/smoke-test.sh "$VPS_HOST" "$VPS_USERNAME"
+
+      - name: Rollback on Failure
+        if: steps.check_secrets.outputs.has_secrets == 'true' && steps.smoke.outcome == 'failure'
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USERNAME: ${{ secrets.VPS_USERNAME }}
+        run: |
+          echo "⚠️ Smoke tests failed! Initiating rollback..."
+          ansible-playbook playbooks/rollback.yml -e confirm_rollback=yes \
+            -i "$VPS_HOST," -u "$VPS_USERNAME"

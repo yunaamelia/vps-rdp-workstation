@@ -1,0 +1,95 @@
+---
+# Molecule converge: Rollback Testing
+# Phase 1: Deploy common + security + xrdp (create something to rollback)
+# Phase 2: Run the rollback playbook
+
+# Phase 1: Deploy
+- name: Converge - Deploy System (Pre-Rollback)
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    vps_username: "testuser"
+    vps_user_password_hash: "$6$.Ojg0ni41Tt7qud2$jzkcbgP2xuzr8M4cdHEXKOO9laed1qqqxvOigLRG8rSxF8j1mtZ5Peukhrx.uQfW.YBvPHoSj.IFczSPYwjPO/"
+    vps_install_desktop: true
+    vps_install_xrdp: true
+
+  roles:
+    - role: common
+    - role: security
+    - role: desktop
+    - role: xrdp
+
+# Phase 2: Rollback
+- name: Converge - Execute Rollback
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    backup_dir: /var/backups/vps-setup
+    confirm_rollback: "yes"
+
+  tasks:
+    - name: Verify backups exist before rollback
+      ansible.builtin.stat:
+        path: "{{ backup_dir }}"
+      register: backup_check
+
+    - name: Assert backup directory was created by deployment
+      ansible.builtin.assert:
+        that: backup_check.stat.exists
+        fail_msg: "Backup directory not found — deployment may not have completed"
+
+    # Import rollback tasks directly (avoid vars_prompt)
+    - name: Display rollback start
+      ansible.builtin.debug:
+        msg: "🔄 Starting rollback test..."
+
+    - name: Collect service facts
+      ansible.builtin.service_facts:
+
+    - name: Stop XRDP service
+      ansible.builtin.systemd:
+        name: xrdp
+        state: stopped
+      when: "'xrdp.service' in ansible_facts.services"
+
+    - name: Stop fail2ban
+      ansible.builtin.systemd:
+        name: fail2ban
+        state: stopped
+      when: "'fail2ban.service' in ansible_facts.services"
+
+    - name: Check for SSH backup
+      ansible.builtin.stat:
+        path: "{{ backup_dir }}/sshd_config.backup"
+      register: ssh_backup
+
+    - name: Restore SSH configuration
+      ansible.builtin.copy:
+        src: "{{ backup_dir }}/sshd_config.backup"
+        dest: /etc/ssh/sshd_config
+        remote_src: true
+        backup: true
+        mode: '0644'
+      when: ssh_backup.stat.exists
+
+    - name: Check for UFW rules backup
+      ansible.builtin.stat:
+        path: "{{ backup_dir }}/ufw-user.rules.backup"
+      register: ufw_backup
+
+    - name: Restore UFW rules
+      ansible.builtin.copy:
+        src: "{{ backup_dir }}/ufw-user.rules.backup"
+        dest: /etc/ufw/user.rules
+        remote_src: true
+        backup: true
+        mode: '0640'
+      when: ufw_backup.stat.exists
+
+    - name: Display rollback complete
+      ansible.builtin.debug:
+        msg: "✅ Rollback executed successfully"

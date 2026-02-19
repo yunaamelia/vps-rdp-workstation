@@ -1,4 +1,10 @@
-FROM {{ item.image }}
+# =============================================================================
+# Custom Molecule Test Image - Debian Trixie
+# Pre-installs common dependencies to speed up molecule test runs
+# Usage: Referenced by molecule.yml configs via Dockerfile.j2
+# =============================================================================
+FROM debian:trixie
+
 ENV container=docker
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -19,7 +25,7 @@ RUN apt-get update \
        procps \
        lsb-release \
        dbus \
-    && rm -rf /tmp/* /var/tmp/* \
-    && mkdir -p /run/sshd
+    && rm -rf /tmp/* /var/tmp/*
 
+VOLUME ["/sys/fs/cgroup"]
 CMD ["/lib/systemd/systemd"]

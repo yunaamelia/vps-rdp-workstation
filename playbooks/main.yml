@@ -224,6 +224,12 @@
       when: vps_cloud_native_tools_install | default(false)
 
   post_tasks:
+    - name: Refresh facts for completion timestamp
+      ansible.builtin.setup:
+        gather_subset:
+          - date_time
+      tags: always
+
     - name: Update progress tracking - completed
       ansible.builtin.copy:
         dest: "{{ vps_progress_state_file }}"

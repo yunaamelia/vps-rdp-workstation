@@ -6,7 +6,7 @@
 📅 Installation Details
 ━━━━━━━━━━━━━━━━━━━━━━━━
   Started:   {{ installation_start_time }}
-  Completed: {{ ansible_date_time.iso8601 }}
+  Completed: {{ ansible_facts.date_time.iso8601 | default('Unknown') }}
   Host:      {{ vps_hostname }}
 
 👤 User Account

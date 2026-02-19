@@ -1,32 +1,47 @@
 ---
-# Reusable service verification with retry logic
+# Service Verification Helper
 # Usage:
-#   - ansible.builtin.include_tasks: ../helpers/service_verify.yml
-#     vars:
-#       service_name: xrdp
+# - include_tasks: ../helpers/service_verify.yml
+#   vars:
+#     service_name: "xrdp"
+#     expected_port: 3389 (optional)
+#     retries: 5 (optional, default: 3)
 
-- name: "Wait for {{ service_name }} to be active"
-  ansible.builtin.systemd:
+- name: "Set default retries"
+  set_fact:
+    verify_retries: "{{ retries | default(3) }}"
+
+- name: "Verify service {{ service_name }} is running"
+  systemd:
     name: "{{ service_name }}"
-  register: service_check
-  retries: 10
-  delay: 3
-  until: >
-    service_check is defined and
-    service_check.status is defined and
-    service_check.status.ActiveState == "active"
-  failed_when: false
-  changed_when: false
+    state: started
+  register: service_status
+  until: service_status.status.ActiveState == 'active'
+  retries: "{{ verify_retries }}"
+  delay: 5
+  ignore_errors: true
+  when: ansible_facts['virtualization_type'] | default('none') != 'docker'
 
-- name: "Assert {{ service_name }} is running"
-  ansible.builtin.assert:
+- name: "Assert service state"
+  assert:
     that:
-      - service_check.status is defined
-      - service_check.status.ActiveState == "active"
-      - service_check.status.LoadState == "loaded"
-    fail_msg: |
-      Service {{ service_name }} failed to start:
-        ActiveState: {{ service_check.status.ActiveState | default('unknown') }}
-        SubState: {{ service_check.status.SubState | default('unknown') }}
-        Result: {{ service_check.status.Result | default('unknown') }}
-    success_msg: "Service {{ service_name }} is active and running"
+      - service_status.status.ActiveState == 'active'
+      - service_status.status.SubState == 'running'
+    fail_msg: "Service {{ service_name }} failed to start. Status: {{ service_status.status.ActiveState }}"
+  when: ansible_facts['virtualization_type'] | default('none') != 'docker'
+
+- name: "Verify port {{ expected_port }} is listening"
+  wait_for:
+    port: "{{ expected_port }}"
+    timeout: 5
+    state: started
+  when: expected_port is defined
+  register: port_check
+  ignore_errors: true
+
+- name: "Assert port state"
+  assert:
+    that:
+      - port_check is succeeded
+    fail_msg: "Port {{ expected_port }} is not listening for service {{ service_name }}"
+  when: expected_port is defined

@@ -30,7 +30,7 @@
   vars:
     backup_dir: /var/backups/vps-setup
     confirm_rollback: "yes"
-
+    vps_username: root
   tasks:
     - name: Verify backups exist before rollback
       ansible.builtin.stat:

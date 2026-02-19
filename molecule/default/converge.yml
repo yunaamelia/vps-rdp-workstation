@@ -13,7 +13,6 @@
     vps_user_password_hash: "$6$.Ojg0ni41Tt7qud2$jzkcbgP2xuzr8M4cdHEXKOO9laed1qqqxvOigLRG8rSxF8j1mtZ5Peukhrx.uQfW.YBvPHoSj.IFczSPYwjPO/"
     vps_install_desktop: true
     vps_install_xrdp: true
-
   pre_tasks:
     - name: Debug Ansible Configuration
       ansible.builtin.debug:

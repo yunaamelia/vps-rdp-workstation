@@ -21,6 +21,7 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
     cgroupns_mode: host
+    command: /lib/systemd/systemd
     tmpfs:
       - /run
       - /tmp
@@ -40,8 +41,6 @@ provisioner:
       remote_tmp: /tmp/.ansible/tmp
       allow_world_readable_tmpfiles: true
       pipelining: true
-  inventory:
-    host_vars:
       debian-shell:
         ansible_user: root
       localhost:

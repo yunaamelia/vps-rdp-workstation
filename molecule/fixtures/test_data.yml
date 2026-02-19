@@ -1,190 +1,35 @@
 ---
-# Test data factory for Molecule scenarios
-# Usage in converge.yml:
-#   vars_files:
-#     - ../fixtures/test_data.yml
-#   vars:
-#     vps_username: "{{ test_users.standard.name }}"
+# Centralized Test Data Factory
+# Use this file to drive your tests with consistent data
 
 test_users:
-  standard:
-    name: testuser
-    password_hash: "$6$.Ojg0ni41Tt7qud2$jzkcbgP2xuzr8M4cdHEXKOO9laed1qqqxvOigLRG8rSxF8j1mtZ5Peukhrx.uQfW.YBvPHoSj.IFczSPYwjPO/"
-    shell: /bin/zsh
-    groups: [sudo, docker]
-    comment: "Standard test user with full permissions"
+  - username: "test_admin"
+    groups: "sudo"
+    shell: "/bin/bash"
+    state: "present"
+  - username: "test_user_ro"
+    groups: ""
+    shell: "/bin/sh"
+    state: "present"
 
-  minimal:
-    name: minuser
-    password_hash: "$6$rounds=4096$minimal$KXg2xR1FxYHFwvDxJD4CbCxfFJ8GcGIf.oTbOoqRlHq2R3E5g5G0V5HvRkp7W3TxQ1mOo5kfY5lJ3r1R2zC40"
-    shell: /bin/bash
-    groups: []
-    comment: "Minimal user with no special permissions"
+test_packages:
+  - name: "curl"
+    state: "present"
+  - name: "git"
+    state: "present"
+  - name: "vim"
+    state: "present"
 
-  admin:
-    name: admintest
-    password_hash: "$6$rounds=4096$admin$aB3dEfGh1JkLmN0pQrStUvWxYz234567890AbCdEfGh1JkLmN0pQrStUvWxYz234567890"
-    shell: /bin/zsh
-    groups: [sudo, adm, systemd-journal]
-    comment: "Admin user with elevated permissions"
+# Network configs for testing
+test_network:
+  - port: 22
+    proto: "tcp"
+  - port: 3389
+    proto: "tcp"
 
-  # Invalid test data for chaos testing
-  invalid_username:
-    name: "../../etc/passwd"  # Path traversal attempt
-    password_hash: "not-a-hash"  # pragma: allowlist secret
-    shell: /bin/bash
-    groups: []
-    comment: "Invalid user for security testing"
-
-  command_injection:
-    name: "$(whoami)"  # Command injection attempt
-    password_hash: "'; DROP TABLE users; --"
-    shell: "$(rm -rf /)"
-    groups: ["$(id)"]
-    comment: "Malicious input for injection testing"
-
-hostnames:
-  valid:
-    - dev-workstation
-    - test-server-01
-    - my-vps-host
-    - ansible-test
-    - molecule-debian
-
-  invalid:
-    - "$(whoami)"  # Command injection
-    - "host name with spaces"
-    - "host.with..double.dots"
-    - "UPPER_CASE_HOST"  # Should be lowercase
-    - "host-with-trailing-"
-    - "-host-with-leading"
-    - "host@with#special!chars"
-
-ssh_configs:
-  secure:
-    PermitRootLogin: no
-    PasswordAuthentication: no
-    PubkeyAuthentication: yes
-    X11Forwarding: no
-    AllowTcpForwarding: no
-    PermitEmptyPasswords: no
-    MaxAuthTries: 3
-    LoginGraceTime: 60
-    Protocol: 2
-
-  moderate:
-    PermitRootLogin: no
-    PasswordAuthentication: yes
-    PubkeyAuthentication: yes
-    X11Forwarding: yes
-    AllowTcpForwarding: yes
-    MaxAuthTries: 5
-
-  insecure:
-    PermitRootLogin: yes
-    PasswordAuthentication: yes
-    PubkeyAuthentication: yes
-    PermitEmptyPasswords: yes
-    MaxAuthTries: 10
-    X11Forwarding: yes
-
-docker_configs:
-  production:
-    log_driver: json-file
-    log_max_size: "10m"
-    log_max_file: "3"
-    storage_driver: overlay2
-    userland_proxy: false
-    live_restore: true
-
-  development:
-    log_driver: json-file
-    log_max_size: "50m"
-    log_max_file: "5"
-    storage_driver: overlay2
-    debug: true
-
-  testing:
-    log_driver: local
-    log_max_size: "1m"
-    log_max_file: "1"
-    storage_driver: vfs  # Slower but no kernel requirements
-
-package_lists:
-  essential:
-    - git
-    - curl
-    - wget
-    - vim
-    - sudo
-    - ca-certificates
-
-  development:
-    - build-essential
-    - python3-dev
-    - python3-pip
-    - nodejs
-    - npm
-
-  desktop:
-    - kde-plasma-desktop
-    - plasma-workspace
-    - xserver-xorg
-    - xorgxrdp
-
-  minimal:
-    - bash
-    - coreutils
-
-test_scenarios:
-  happy_path:
-    description: "Normal installation with all features"
-    install_desktop: true
-    install_xrdp: true
-    install_docker: true
-    install_devtools: true
-
-  minimal_install:
-    description: "Bare minimum installation"
-    install_desktop: false
-    install_xrdp: false
-    install_docker: false
-    install_devtools: false
-
-  server_only:
-    description: "Server setup without GUI"
-    install_desktop: false
-    install_xrdp: false
-    install_docker: true
-    install_devtools: true
-
-  desktop_only:
-    description: "Desktop environment without dev tools"
-    install_desktop: true
-    install_xrdp: true
-    install_docker: false
-    install_devtools: false
-
-timeouts:
-  service_start: 30
-  apt_update: 120
-  docker_install: 300
-  desktop_install: 600
-  package_download: 180
-  systemd_reload: 10
-
-network_configs:
-  localhost:
-    address: 127.0.0.1
-    netmask: 255.0.0.0
-    gateway: 127.0.0.1
-
-  test_network:
-    address: 192.168.56.10
-    netmask: 255.255.255.0
-    gateway: 192.168.56.1
-
-  slow_network:
-    latency_ms: 500
-    bandwidth_kbps: 128
-    packet_loss_percent: 10
+# Invalid data for negative testing
+test_invalid_inputs:
+  - username: "root" # Should fail if creation attempted
+    description: "Root user creation should be blocked"
+  - username: "Invalid User"
+    description: "Space in username shoud fail"

@@ -1,0 +1,9 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: "Verify service ai-devtools"
+      include_tasks: ../helpers/service_verify.yml
+      vars:
+        service_name: "ai-devtools"
+        # expected_port: 80 # Uncomment and set if applicable

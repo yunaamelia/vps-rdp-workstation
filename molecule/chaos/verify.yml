@@ -1,0 +1,21 @@
+---
+- name: Verify Resilience
+  hosts: all
+  tasks:
+    - name: "Attempt to restart Nginx after kill"
+      service:
+        name: nginx
+        state: started
+      register: nginx_restart
+
+    - name: "Assert Nginx recovered"
+      assert:
+        that:
+          - nginx_restart is succeeded
+          - nginx_restart.state == 'started'
+        fail_msg: "System failed to recover service after chaos injection"
+
+    - name: "Cleanup chaos artifacts"
+      file:
+        path: /tmp/junk_file
+        state: absent

@@ -1,0 +1,33 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: "Verify docker service"
+      include_tasks: ../helpers/service_verify.yml
+      vars:
+        service_name: "docker"
+
+    - name: "Check if docker is functional"
+      command: docker run --rm hello-world
+      register: docker_hello
+      changed_when: false
+      when: ansible_facts['virtualization_type'] | default('none') != 'docker'
+
+    - name: "Assert docker functionality"
+      assert:
+        that:
+          - "'Hello from Docker!' in docker_hello.stdout"
+        fail_msg: "Docker hello-world failed to run"
+      when: ansible_facts['virtualization_type'] | default('none') != 'docker'
+
+    - name: "Check docker compose version"
+      command: docker compose version
+      register: docker_compose_check
+      changed_when: false
+      ignore_errors: true
+
+    - name: "Assert docker compose"
+      assert:
+        that:
+          - docker_compose_check.rc == 0
+        fail_msg: "Docker Compose V2 is not installed or working"

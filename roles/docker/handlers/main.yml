@@ -11,4 +11,4 @@
     name: docker
     state: restarted
     daemon_reload: true
-  when: _systemd_check.stat.exists | default(false)
+  when: _systemd_check.stat.exists | default(false) and ansible_facts['virtualization_type'] | default('none') != "docker"

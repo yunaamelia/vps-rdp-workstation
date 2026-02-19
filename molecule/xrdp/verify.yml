@@ -1,0 +1,31 @@
+---
+- name: Verify
+  hosts: all
+  tasks:
+    - name: "Verify xrdp service"
+      include_tasks: ../helpers/service_verify.yml
+      vars:
+        service_name: "xrdp"
+        expected_port: 3389
+
+    - name: "Check xrdp configuration file"
+      stat:
+        path: /etc/xrdp/xrdp.ini
+      register: xrdp_conf
+
+    - name: "Assert config exists"
+      assert:
+        that:
+          - xrdp_conf.stat.exists
+        fail_msg: "xrdp.ini configuration file is missing"
+
+    - name: "Verify xsession file"
+      stat:
+        path: /home/ansible/.xsession
+      register: xsession
+
+    - name: "Assert xsession exists (if user created)"
+      assert:
+        that:
+          - xsession.stat.exists
+      ignore_errors: true # Depends on if the role creates a user

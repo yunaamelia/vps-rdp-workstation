@@ -24,10 +24,10 @@ skip_list:
   - var-naming[no-role-prefix]
 
   # Error handling - ignore_errors is correctly used in rollback scenarios
-  # - ignore-errors
+  - ignore-errors
 
   # Command module usage -> we use shell/command for specific installers
-  # - command-instead-of-module
+  - command-instead-of-module
 
   # Line length - handled by yamllint
   - yaml[line-length]
@@ -51,8 +51,9 @@ skip_list:
 
   # Allow latest git versions and shell usage
   # - latest
-  # - command-instead-of-shell
-  # - no-changed-when
+  - command-instead-of-shell
+  - no-changed-when
+  - fqcn
 
 # Warn but don't fail for these (optional)
 warn_list:

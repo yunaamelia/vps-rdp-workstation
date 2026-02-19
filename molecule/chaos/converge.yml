@@ -1,0 +1,24 @@
+---
+- name: Converge
+  hosts: all
+  vars:
+    vps_username: root
+  tasks:
+    - name: "Install vital service (nginx)"
+      apt:
+        name: nginx
+        state: present
+        update_cache: true
+
+    - name: "Start nginx"
+      service:
+        name: nginx
+        state: started
+
+    - name: "🔥 CHAOS: Kill Nginx process"
+      shell: "pkill -9 nginx"
+      ignore_errors: true
+
+    - name: "🔥 CHAOS: Fill disk (simulation)"
+      command: "fallocate -l 10M /tmp/junk_file"
+      changed_when: false

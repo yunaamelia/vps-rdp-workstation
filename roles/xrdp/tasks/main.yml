@@ -11,6 +11,7 @@
           - ssl-cert
           - dbus-x11
         state: present
+        update_cache: true
       tags: [xrdp, packages]
 
     - name: Add xrdp user to ssl-cert group
@@ -49,7 +50,9 @@
 
     - name: Generate self-signed XRDP certificate and private key
       ansible.builtin.shell: |
-        openssl req -x509 -newkey rsa:4096 -nodes -keyout /etc/xrdp/key.pem -out /etc/xrdp/cert.pem -days 3650 -subj "/C=US/ST=Dev/L=Lab/O=XRDP/CN={{ vps_hostname | default(ansible_hostname) }}"
+        openssl req -x509 -newkey rsa:4096 -nodes -keyout /etc/xrdp/key.pem \
+        -out /etc/xrdp/cert.pem -days 3650 \
+        -subj "/C=US/ST=Dev/L=Lab/O=XRDP/CN={{ vps_hostname | default(ansible_hostname) }}"
       args:
         creates: /etc/xrdp/key.pem
       notify: Restart XRDP

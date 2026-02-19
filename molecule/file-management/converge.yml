@@ -1,0 +1,11 @@
+---
+- name: Converge
+  hosts: all
+  vars_files:
+    - ../fixtures/test_data.yml
+  vars:
+    vps_username: root
+  tasks:
+    - name: "Include role file-management"
+      include_role:
+        name: file-management

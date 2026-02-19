@@ -1,7 +1,7 @@
 ---
 name: Staging Deployment
 
-on:
+"on":
   push:
     branches: [staging]
   workflow_dispatch:

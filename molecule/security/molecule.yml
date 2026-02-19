@@ -9,12 +9,12 @@ platforms:
     pre_build_image: false
     privileged: true
     cgroupns_mode: host
+    command: /lib/systemd/systemd
     tmpfs:
       - /run
       - /tmp
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    command: /sbin/init
     stop_signal: SIGRTMIN+3
     capabilities:
       - SYS_ADMIN
@@ -24,6 +24,9 @@ platforms:
       - security_group
 provisioner:
   name: ansible
+  env:
+    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/collections
+    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/roles
   config_options:
     defaults:
       interpreter_python: auto_silent
@@ -32,8 +35,5 @@ provisioner:
       callbacks_enabled: profile_tasks, timer
     ssh_connection:
       pipelining: false
-  env:
-    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/collections
-    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/roles
 verifier:
   name: ansible

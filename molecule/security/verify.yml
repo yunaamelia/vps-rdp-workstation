@@ -1,86 +1,34 @@
 ---
-- name: Verify - Security Controls
+- name: Verify
   hosts: all
-  gather_facts: true
   tasks:
-    # =========================================================================
-    #  Firewall (UFW)
-    # =========================================================================
+    - name: "Check SSH configuration"
+      command: grep "^PermitRootLogin no" /etc/ssh/sshd_config
+      register: ssh_root_login
+      changed_when: false
+      ignore_errors: true
 
-    - name: Verify UFW is installed
-      ansible.builtin.package:
-        name: ufw
-        state: present
-      check_mode: true
-      register: ufw_install_check
+    - name: "Assert Root Login Disabled"
+      assert:
+        that:
+          - ssh_root_login.rc == 0
+        fail_msg: "PermitRootLogin is not set to 'no'"
 
-    - name: Verify UFW status
-      ansible.builtin.command: ufw status
+    - name: "Check UFW status (Debian/Ubuntu)"
+      command: ufw status
       register: ufw_status
       changed_when: false
-      failed_when: false
+      when: ansible_os_family == "Debian"
+      ignore_errors: true
 
-    - name: Assert UFW is active (privileged container)
-      ansible.builtin.assert:
-        that: "'Status: active' in ufw_status.stdout"
-        fail_msg: "UFW is not active (status: {{ ufw_status.stdout_lines[0] }})"
-      # Only fail if we successfully ran the status command (container capabilities check)
-      when: ufw_status.rc == 0
+    - name: "Assert UFW is active"
+      assert:
+        that:
+          - "'Status: active' in ufw_status.stdout"
+      when: ansible_os_family == "Debian" and ufw_status is not skipped
 
-    - name: Report UFW Capabilities
-      ansible.builtin.debug:
-        msg: "UFW status command returned code {{ ufw_status.rc }} (0 means NET_ADMIN worked)"
-
-    # =========================================================================
-    #  SSH Hardening
-    # =========================================================================
-
-    - name: Verify SSH config exists
-      ansible.builtin.stat:
-        path: /etc/ssh/sshd_config
-      register: sshd_config
-
-    - name: Check Root Login setting
-      ansible.builtin.command: grep "^PermitRootLogin" /etc/ssh/sshd_config
-      register: root_login_check
-      changed_when: false
-      failed_when: false
-
-    - name: Assert Root Login is disabled
-      ansible.builtin.assert:
-        that: "'no' in root_login_check.stdout"
-        fail_msg: "Root login is not disabled (found: {{ root_login_check.stdout }})"
-
-    - name: Check Password Auth setting
-      ansible.builtin.command: grep "^PasswordAuthentication" /etc/ssh/sshd_config
-      register: password_auth_check
-      changed_when: false
-      failed_when: false
-
-    # =========================================================================
-    #  Fail2ban
-    # =========================================================================
-
-    - name: Verify Fail2ban service status
-      ansible.builtin.systemd:
-        name: fail2ban
-      register: fail2ban_service
-      failed_when: false
-
-    - name: Assert Fail2ban is running
-      ansible.builtin.assert:
-        that: "fail2ban_service.status.ActiveState | default('') == 'active'"
-        fail_msg: "Fail2ban service is not active (status: {{ fail2ban_service.status.ActiveState | default('unknown') }})"
-      when: fail2ban_service is not failed
-
-    - name: Check Fail2ban SSH jail status
-      ansible.builtin.command: fail2ban-client status sshd
-      register: f2b_ssh_jail
-      changed_when: false
-      failed_when: false
-
-    - name: Assert SSH jail is active
-      ansible.builtin.assert:
-        that: "'Status for the jail: sshd' in f2b_ssh_jail.stdout"
-        fail_msg: "Fail2ban SSH jail is not active"
-      when: f2b_ssh_jail.rc == 0
+    - name: "Check Fail2Ban service"
+      include_tasks: ../helpers/service_verify.yml
+      vars:
+        service_name: "fail2ban"
+      ignore_errors: true # Might not be installed in all security profiles

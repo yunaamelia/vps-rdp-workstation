@@ -1,0 +1,32 @@
+
+============================================================
+[LINT RUNNER] Unified Linting
+============================================================
+Project: /home/racoondev/vps-rdp-workstation
+Time: 2026-02-19 02:03:21
+Type: python
+Linters: 1
+------------------------------------------------------------
+
+Running: ruff...
+  [FAIL] ruff
+
+============================================================
+SUMMARY
+============================================================
+[FAIL] ruff
+
+{
+  "script": "lint_runner",
+  "project": "/home/racoondev/vps-rdp-workstation",
+  "type": "python",
+  "checks": [
+    {
+      "name": "ruff",
+      "passed": false,
+      "output": "E722 Do not use bare `except`\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:310:17\n    |\n308 |                 try:\n309 |                     weight_values.append(int(val))\n310 |                 except: pass\n    |                 ^^^^^^\n311 |\n312 |         # Check for adjacent weights (400/500, 500/600, etc.)\n    |\n\nE701 Multiple statements on one line (colon)\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:310:23\n    |\n308 |                 try:\n309 |                     weight_values.append(int(val))\n310 |                 except: pass\n    |                       ^\n311 |\n312 |         # Check for adjacent weights (400/500, 500/600, etc.)\n    |\n\nE701 Multiple statements on one line (colon)\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:694:25\n    |\n693 | def main():\n694 |     if len(sys.argv) < 2: sys.exit(1)\n    |                         ^\n695 |\n696 |     path = sys.argv[1]\n    |\n\nE701 Multiple statements on one line (colon)\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:700:28\n    |\n699 |     auditor = UXAuditor()\n700 |     if os.path.isfile(path): auditor.audit_file(path)\n    |                            ^\n701 |     else: auditor.audit_directory(path)\n    |\n\nE701 Multiple statements on one line (colon)\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:701:9\n    |\n699 |     auditor = UXAuditor()\n700 |     if os.path.isfile(path): auditor.audit_file(path)\n701 |     else: auditor.audit_directory(path)\n    |         ^\n702 |\n703 |     report = auditor.get_report()\n    |\n\nE701 Multiple statements on one line (colon)\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:713:43\n    |\n711 |         if report['issues']:\n712 |             print(f\"[!] ISSUES ({len(report['issues'])}):\")\n713 |             for i in report['issues'][:10]: print(f\"  - {i}\")\n    |                                           ^\n714 |         if report['warnings']:\n715 |             print(f\"[*] WARNINGS ({len(report['warnings'])}):\")\n    |\n\nE701 Multip",
+      "error": ""
+    }
+  ],
+  "passed": false
+}

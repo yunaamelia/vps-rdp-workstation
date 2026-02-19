@@ -1,0 +1,32 @@
+
+============================================================
+[LINT RUNNER] Unified Linting
+============================================================
+Project: /home/racoondev/vps-rdp-workstation
+Time: 2026-02-19 02:02:10
+Type: python
+Linters: 1
+------------------------------------------------------------
+
+Running: ruff...
+  [FAIL] ruff
+
+============================================================
+SUMMARY
+============================================================
+[FAIL] ruff
+
+{
+  "script": "lint_runner",
+  "project": "/home/racoondev/vps-rdp-workstation",
+  "type": "python",
+  "checks": [
+    {
+      "name": "ruff",
+      "passed": false,
+      "output": "E701 Multiple statements on one line (colon)\n  --> .agent/scripts/session_manager.py:49:37\n   |\n47 |             stack.append(\"NestJS\")\n48 |\n49 |         if \"tailwindcss\" in all_deps: stack.append(\"Tailwind CSS\")\n   |                                     ^\n50 |         if \"prisma\" in all_deps: stack.append(\"Prisma\")\n51 |         if \"typescript\" in all_deps: stack.append(\"TypeScript\")\n   |\n\nE701 Multiple statements on one line (colon)\n  --> .agent/scripts/session_manager.py:50:32\n   |\n49 |         if \"tailwindcss\" in all_deps: stack.append(\"Tailwind CSS\")\n50 |         if \"prisma\" in all_deps: stack.append(\"Prisma\")\n   |                                ^\n51 |         if \"typescript\" in all_deps: stack.append(\"TypeScript\")\n   |\n\nE701 Multiple statements on one line (colon)\n  --> .agent/scripts/session_manager.py:51:36\n   |\n49 |         if \"tailwindcss\" in all_deps: stack.append(\"Tailwind CSS\")\n50 |         if \"prisma\" in all_deps: stack.append(\"Prisma\")\n51 |         if \"typescript\" in all_deps: stack.append(\"TypeScript\")\n   |                                    ^\n52 |\n53 |         return {\n   |\n\nF541 [*] f-string without any placeholders\n  --> .agent/scripts/session_manager.py:97:11\n   |\n95 |     print(f\"\ud83d\udcc2 Path: {root}\")\n96 |     print(f\"\ud83c\udff7\ufe0f  Type: {', '.join(info.get('stack', ['Generic']))}\")\n97 |     print(f\"\ud83d\udcca Status: Active\")\n   |           ^^^^^^^^^^^^^^^^^^^^\n98 |\n99 |     print(\"\\n\ud83d\udd27 Tech Stack:\")\n   |\nhelp: Remove extraneous `f` prefix\n\nF401 [*] `typing.Dict` imported but unused\n  --> .agent/scripts/verify_all.py:29:26\n   |\n27 | import argparse\n28 | from pathlib import Path\n29 | from typing import List, Dict, Optional\n   |                          ^^^^\n30 | from datetime import datetime\n   |\nhelp: Remove unused import: `typing.Dict`\n\nE722 Do not use bare `except`\n  --> .agent/skills/database-design/scripts/schema_validator.py:25:1\n   |\n23 | try:\n24 |     sys.stdout.reconfigure(encoding='utf-8', errors='replace')\n25 | except:\n   | ^^^^^^\n26 |     pass\n   |\n\nF541 [*] f",
+      "error": ""
+    }
+  ],
+  "passed": false
+}

@@ -1,0 +1,32 @@
+
+============================================================
+[LINT RUNNER] Unified Linting
+============================================================
+Project: /home/racoondev/vps-rdp-workstation
+Time: 2026-02-19 02:02:45
+Type: python
+Linters: 1
+------------------------------------------------------------
+
+Running: ruff...
+  [FAIL] ruff
+
+============================================================
+SUMMARY
+============================================================
+[FAIL] ruff
+
+{
+  "script": "lint_runner",
+  "project": "/home/racoondev/vps-rdp-workstation",
+  "type": "python",
+  "checks": [
+    {
+      "name": "ruff",
+      "passed": false,
+      "output": "F541 [*] f-string without any placeholders\n   --> .agent/skills/database-design/scripts/schema_validator.py:98:11\n    |\n 97 |     print(f\"\\n{'='*60}\")\n 98 |     print(f\"[SCHEMA VALIDATOR] Database Schema Validation\")\n    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n 99 |     print(f\"{'='*60}\")\n100 |     print(f\"Project: {project_path}\")\n    |\nhelp: Remove extraneous `f` prefix\n\nE722 Do not use bare `except`\n  --> .agent/skills/frontend-design/scripts/accessibility_checker.py:26:1\n   |\n24 | try:\n25 |     sys.stdout.reconfigure(encoding='utf-8', errors='replace')\n26 | except:\n   | ^^^^^^\n27 |     pass\n   |\n\nF541 [*] f-string without any placeholders\n   --> .agent/skills/frontend-design/scripts/accessibility_checker.py:115:11\n    |\n114 |     print(f\"\\n{'='*60}\")\n115 |     print(f\"[ACCESSIBILITY CHECKER] WCAG Compliance Audit\")\n    |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n116 |     print(f\"{'='*60}\")\n117 |     print(f\"Project: {project_path}\")\n    |\nhelp: Remove extraneous `f` prefix\n\nE722 Do not use bare `except`\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:109:9\n    |\n107 |             with open(filepath, 'r', encoding='utf-8', errors='replace') as f:\n108 |                 content = f.read()\n109 |         except: return\n    |         ^^^^^^\n110 |\n111 |         self.files_checked += 1\n    |\n\nE701 Multiple statements on one line (colon)\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:109:15\n    |\n107 |             with open(filepath, 'r', encoding='utf-8', errors='replace') as f:\n108 |                 content = f.read()\n109 |         except: return\n    |               ^\n110 |\n111 |         self.files_checked += 1\n    |\n\nE701 Multiple statements on one line (colon)\n   --> .agent/skills/frontend-design/scripts/ux_audit.py:253:31\n    |\n251 |         font_family_css = re.findall(r'font-family:\\s*([^;]+)', content, re.IGNORECASE)\n252 |\n253 |         for font in font_faces: font_families.add(font.strip().lower())\n    | ",
+      "error": ""
+    }
+  ],
+  "passed": false
+}

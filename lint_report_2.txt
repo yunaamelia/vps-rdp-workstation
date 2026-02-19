@@ -1,0 +1,32 @@
+
+============================================================
+[LINT RUNNER] Unified Linting
+============================================================
+Project: /home/racoondev/vps-rdp-workstation
+Time: 2026-02-19 01:55:44
+Type: python
+Linters: 1
+------------------------------------------------------------
+
+Running: ruff...
+  [FAIL] ruff
+
+============================================================
+SUMMARY
+============================================================
+[FAIL] ruff
+
+{
+  "script": "lint_runner",
+  "project": "/home/racoondev/vps-rdp-workstation",
+  "type": "python",
+  "checks": [
+    {
+      "name": "ruff",
+      "passed": false,
+      "output": "F541 [*] f-string without any placeholders\n   --> .agent/.shared/ui-ux-pro-max/scripts/design_system.py:430:22\n    |\n428 |         lines.append(\"```css\")\n429 |         lines.append(f\"{typography.get('css_import', '')}\")\n430 |         lines.append(f\"```\")\n    |                      ^^^^^^\n431 |     lines.append(\"\")\n    |\nhelp: Remove extraneous `f` prefix\n\nF541 [*] f-string without any placeholders\n   --> .agent/.shared/ui-ux-pro-max/scripts/design_system.py:660:18\n    |\n658 |     lines.append(\"/* Secondary Button */\")\n659 |     lines.append(\".btn-secondary {\")\n660 |     lines.append(f\"  background: transparent;\")\n    |                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n661 |     lines.append(f\"  color: {colors.get('primary', '#2563EB')};\")\n662 |     lines.append(f\"  border: 2px solid {colors.get('primary', '#2563EB')};\")\n    |\nhelp: Remove extraneous `f` prefix\n\nF841 Local variable `style_name` is assigned to but never used\n   --> .agent/.shared/ui-ux-pro-max/scripts/design_system.py:951:9\n    |\n949 |     if style_results:\n950 |         style = style_results[0]\n951 |         style_name = style.get(\"Style Category\", \"\")\n    |         ^^^^^^^^^^\n952 |         keywords = style.get(\"Keywords\", \"\")\n953 |         best_for = style.get(\"Best For\", \"\")\n    |\nhelp: Remove assignment to unused variable `style_name`\n\nF841 Local variable `best_for` is assigned to but never used\n   --> .agent/.shared/ui-ux-pro-max/scripts/design_system.py:953:9\n    |\n951 |         style_name = style.get(\"Style Category\", \"\")\n952 |         keywords = style.get(\"Keywords\", \"\")\n953 |         best_for = style.get(\"Best For\", \"\")\n    |         ^^^^^^^^\n954 |         effects = style.get(\"Effects & Animation\", \"\")\n    |\nhelp: Remove assignment to unused variable `best_for`\n\nF841 Local variable `style_name` is assigned to but never used\n    --> .agent/.shared/ui-ux-pro-max/scripts/design_system.py:1043:9\n     |\n1041 |     # Fallback: try to infer from style results\n1042 |     if style_results:\n1043 |        ",
+      "error": ""
+    }
+  ],
+  "passed": false
+}

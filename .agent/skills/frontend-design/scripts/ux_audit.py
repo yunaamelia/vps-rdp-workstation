@@ -106,7 +106,8 @@ class UXAuditor:
         try:
             with open(filepath, 'r', encoding='utf-8', errors='replace') as f:
                 content = f.read()
-        except: return
+        except Exception:
+            return
 
         self.files_checked += 1
         filename = os.path.basename(filepath)
@@ -250,7 +251,8 @@ class UXAuditor:
         google_fonts = re.findall(r'fonts\.googleapis\.com[^"\']*family=([^"&]+)', content, re.IGNORECASE)
         font_family_css = re.findall(r'font-family:\s*([^;]+)', content, re.IGNORECASE)
 
-        for font in font_faces: font_families.add(font.strip().lower())
+        for font in font_faces:
+            font_families.add(font.strip().lower())
         for font in google_fonts:
             for f in font.replace('+', ' ').split('|'):
                 font_families.add(f.split(':')[0].strip().lower())
@@ -305,7 +307,8 @@ class UXAuditor:
                 val = weight_map.get(val.lower(), val)
                 try:
                     weight_values.append(int(val))
-                except: pass
+                except Exception:
+                    pass
 
         # Check for adjacent weights (400/500, 500/600, etc.)
         for i in range(len(weight_values) - 1):
@@ -689,14 +692,17 @@ class UXAuditor:
         }
 
 def main():
-    if len(sys.argv) < 2: sys.exit(1)
+    if len(sys.argv) < 2:
+        sys.exit(1)
 
     path = sys.argv[1]
     is_json = "--json" in sys.argv
 
     auditor = UXAuditor()
-    if os.path.isfile(path): auditor.audit_file(path)
-    else: auditor.audit_directory(path)
+    if os.path.isfile(path):
+        auditor.audit_file(path)
+    else:
+        auditor.audit_directory(path)
 
     report = auditor.get_report()
 
@@ -708,10 +714,12 @@ def main():
         print("-" * 50)
         if report['issues']:
             print(f"[!] ISSUES ({len(report['issues'])}):")
-            for i in report['issues'][:10]: print(f"  - {i}")
+            for i in report['issues'][:10]:
+                print(f"  - {i}")
         if report['warnings']:
             print(f"[*] WARNINGS ({len(report['warnings'])}):")
-            for w in report['warnings'][:15]: print(f"  - {w}")
+            for w in report['warnings'][:15]:
+                print(f"  - {w}")
         print(f"[+] PASSED CHECKS: {report['passed_checks']}")
         status = "PASS" if report['compliant'] else "FAIL"
         print(f"STATUS: {status}")

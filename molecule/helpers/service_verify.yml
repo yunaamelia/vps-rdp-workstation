@@ -1,0 +1,32 @@
+---
+# Reusable service verification with retry logic
+# Usage:
+#   - ansible.builtin.include_tasks: ../helpers/service_verify.yml
+#     vars:
+#       service_name: xrdp
+
+- name: "Wait for {{ service_name }} to be active"
+  ansible.builtin.systemd:
+    name: "{{ service_name }}"
+  register: service_check
+  retries: 10
+  delay: 3
+  until: >
+    service_check is defined and
+    service_check.status is defined and
+    service_check.status.ActiveState == "active"
+  failed_when: false
+  changed_when: false
+
+- name: "Assert {{ service_name }} is running"
+  ansible.builtin.assert:
+    that:
+      - service_check.status is defined
+      - service_check.status.ActiveState == "active"
+      - service_check.status.LoadState == "loaded"
+    fail_msg: |
+      Service {{ service_name }} failed to start:
+        ActiveState: {{ service_check.status.ActiveState | default('unknown') }}
+        SubState: {{ service_check.status.SubState | default('unknown') }}
+        Result: {{ service_check.status.Result | default('unknown') }}
+    success_msg: "Service {{ service_name }} is active and running"

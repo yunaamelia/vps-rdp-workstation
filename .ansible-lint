@@ -14,6 +14,8 @@ exclude_paths:
   - .ansible/
   - .github/workflows/validate-playbooks.yml
   - plugins/mitogen/
+  - molecule/fixtures/
+  - molecule/helpers/
 
 # Guidelines to skip
 skip_list:

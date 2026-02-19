@@ -1,0 +1,83 @@
+# VPS RDP Workstation - Staging Environment Inventory
+# Purpose: Production-like testing environment before deploying to live VPS
+---
+all:
+  hosts:
+    staging:
+      # Replace with your actual staging VPS IP or hostname
+      ansible_host: staging.vps.example.com  # CHANGE THIS
+      ansible_user: root
+      ansible_port: 22
+      ansible_python_interpreter: /usr/bin/python3
+
+      # SSH Configuration
+      # ansible_ssh_private_key_file: ~/.ssh/staging_rsa
+      # ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+
+  vars:
+    # Environment Identifier
+    environment: staging
+
+    # Basic Configuration
+    vps_hostname: "staging-workstation"
+    vps_timezone: "UTC"
+    vps_locale: "en_US.UTF-8"
+
+    # User Configuration
+    vps_username: "testuser"  # Use test user in staging
+    vps_user_shell: "/bin/zsh"
+    vps_user_groups:
+      - sudo
+      - docker
+
+    # Feature Flags (Enable all for production parity)
+    vps_install_desktop: true
+    vps_install_xrdp: true
+
+    # Security Configuration (Enable all for testing)
+    vps_fail2ban_enabled: true
+    vps_fail2ban_start_service: true  # Actually start it
+    vps_firewall_enabled: true
+    vps_ssh_password_auth: false      # Test SSH key-only auth
+    vps_ssh_root_login: false         # Test hardening
+    vps_unattended_upgrades: true
+
+    # Ports
+    vps_ssh_port: 22
+    vps_xrdp_port: 3389
+
+    # Development Stack
+    vps_development_install_nodejs: true
+    vps_development_nodejs_version: "lts"
+    vps_development_install_python: true
+    vps_development_install_php: true
+    vps_development_install_composer: true
+
+    # Docker
+    vps_docker_install: true
+    vps_docker_log_max_size: "10m"
+    vps_docker_log_max_file: "3"
+
+    # Editors
+    vps_editors_install_vscode: true
+    vps_editors_install_opencode: true
+
+    # Shell
+    vps_shell: "zsh"
+    vps_install_omz: true
+    vps_zsh_theme: "agnoster"
+
+    # Paths
+    vps_progress_state_file: "/var/lib/vps-setup/progress.json"
+    vps_summary_log: "/var/log/vps-setup-summary.log"
+    vps_backup_dir: "/var/backups/vps-setup"
+
+    # Logging (Verbose for staging)
+    ansible_verbosity: 1
+
+    # Performance (Staging can be slower, prioritize testing)
+    ansible_forks: 5
+
+    # Staging-Specific Flags
+    staging_mode: true
+    skip_production_checks: false

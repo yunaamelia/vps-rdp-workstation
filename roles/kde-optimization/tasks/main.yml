@@ -45,10 +45,16 @@
   when: vps_install_desktop | default(true)
   tags: [kde-opt, tiling]
 
+- name: Cleanup incorrect Polonium installation (polonium-source)
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/polonium-source"
+    state: absent
+  tags: [kde-opt, tiling]
+
 - name: Download Polonium Source (Master)
   ansible.builtin.git:
     repo: "https://github.com/zeroxoneafour/polonium.git"
-    dest: "/tmp/polonium-source"
+    dest: "/tmp/polonium"
     version: master
     depth: 1
     force: true
@@ -57,7 +63,7 @@
 
 - name: Install Polonium KWin Script (from source)
   ansible.builtin.command:
-    cmd: "kpackagetool6 -t KWin/Script -i /tmp/polonium-source"
+    cmd: "kpackagetool6 -t KWin/Script -i /tmp/polonium"
   become: true
   become_user: "{{ vps_username }}"
   when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
@@ -66,7 +72,7 @@
 
 - name: Cleanup Polonium Source
   ansible.builtin.file:
-    path: "/tmp/polonium-source"
+    path: "/tmp/polonium"
     state: absent
   when: (vps_install_desktop | default(true)) and (not polonium_dir.stat.exists)
   tags: [kde-opt, tiling]

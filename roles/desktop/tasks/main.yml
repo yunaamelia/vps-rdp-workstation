@@ -11,6 +11,7 @@
           - git
           - python3-dbus
           - python-is-python3
+          - pipx
           - xdg-user-dirs
           - qdbus-qt6
           # libkf6config-bin is not available on Ubuntu 24.04 (Noble), use libkf5config-bin

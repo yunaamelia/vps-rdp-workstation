@@ -21,9 +21,6 @@ platforms:
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
     cgroupns_mode: host
-    command: >-
-      /bin/sh -c "if [ -x /lib/systemd/systemd ]; then exec /lib/systemd/systemd;
-      else echo 'Systemd not found, sleeping' && while true; do sleep 1000; done; fi"
     tmpfs:
       - /run
       - /tmp
@@ -31,7 +28,12 @@ platforms:
 provisioner:
   name: ansible
   env:
-    ANSIBLE_DEPRECATION_WARNINGS: "False"
+    ANSIBLE_CONFIG: "${MOLECULE_PROJECT_DIRECTORY}/ansible.cfg"
+    ANSIBLE_DEPRECATION_WARNINGS: "True"
+    ANSIBLE_WARNINGS_ARE_ERRORS: "True"
+    ANSIBLE_SYSTEM_WARNINGS: "True"
+    ANSIBLE_CALLBACK_PLUGINS: "${MOLECULE_PROJECT_DIRECTORY}/plugins/callback"
+    ANSIBLE_CALLBACKS_ENABLED: "strict_deprecations"
   config_options:
     defaults:
       roles_path: ${MOLECULE_PROJECT_DIRECTORY}/roles
@@ -46,6 +48,7 @@ provisioner:
     host_vars:
       debian-trixie:
         ansible_user: root
+        vps_fail2ban_start_service: false
       localhost:
         ansible_connection: local
         ansible_become: false

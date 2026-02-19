@@ -72,10 +72,29 @@
       when: ansible_facts['virtualization_type'] != "docker"
       tags: [common, system]
 
-    - name: Generate locale
-      community.general.locale_gen:
-        name: "{{ vps_locale }}"
+    - name: Enable locale in /etc/locale.gen
+      ansible.builtin.lineinfile:
+        path: /etc/locale.gen
+        regexp: '^{{ vps_locale }} '
+        line: "{{ vps_locale }} UTF-8"
         state: present
+      tags: [common, system]
+
+    - name: Check if locale is generated
+      ansible.builtin.command: locale -a
+      register: locale_check
+      changed_when: false
+      check_mode: false
+      tags: [common, system]
+
+    - name: Generate locale
+      ansible.builtin.command:
+        cmd: "locale-gen"
+      register: locale_gen_result
+      changed_when: "'Generation complete' in locale_gen_result.stdout"
+      when:
+        - vps_locale not in locale_check.stdout
+        - (vps_locale | replace('-', '') | lower) not in (locale_check.stdout | replace('-', '') | lower)
       tags: [common, system]
 
     - name: Set default locale
@@ -86,6 +105,11 @@
           LC_ALL={{ vps_locale }}
         mode: '0644'
       tags: [common, system]
+
+    - name: Debug password hash
+      ansible.builtin.debug:
+        msg: "Hash starts with: {{ vps_user_password_hash | regex_search('^.{3}') }}..."
+      tags: [common, user]
 
     - name: Create primary user
       ansible.builtin.user:

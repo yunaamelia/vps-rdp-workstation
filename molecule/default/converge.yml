@@ -8,35 +8,24 @@
   gather_facts: true
 
   vars:
-    # Minimal required variables for common + security roles
-    vps_hostname: "molecule-test"
-    vps_timezone: "UTC"
-    vps_locale: "en_US.UTF-8"
     vps_username: "testuser"
-    vps_user_password_hash: "$6$rounds=4096$molecule$KXg2xR1FxYHFwvDxJD4CbCxfFJ8GcGIf.oTbOoqRlHq2R3E5g5G0V5HvRkp7W3TxQ1mOo5kfY5lJ3r1R2zC40"
-    vps_user_shell: "/bin/zsh"
-    vps_user_groups:
-      - sudo
-      - adm
-    vps_progress_state_file: "/var/lib/vps-setup/progress.json"
-    vps_summary_log: "/var/lib/vps-setup/summary.log"
-    vps_backup_dir: "/var/backups/vps-setup"
-    # Disable features that need real hardware/desktop
-    vps_install_desktop: false
-    vps_install_xrdp: false
-    vps_fail2ban_enabled: false  # systemd service won't start in container
-    # SSH settings for testing
-    vps_ssh_port: 22
-    vps_ssh_password_auth: true
-    vps_ssh_pubkey_auth: true
-    vps_ssh_root_login: true
-    vps_ssh_max_auth_tries: 6
-    vps_ssh_client_alive_interval: 300
-    vps_firewall_enabled: true
-    vps_firewall_logging: "low"
-    vps_xrdp_port: 3389
-    vps_unattended_upgrades: false  # Skip in tests
+    # Use a secure hash for testing (this is 'password')
+    vps_user_password_hash: "$6$.Ojg0ni41Tt7qud2$jzkcbgP2xuzr8M4cdHEXKOO9laed1qqqxvOigLRG8rSxF8j1mtZ5Peukhrx.uQfW.YBvPHoSj.IFczSPYwjPO/"
+    vps_install_desktop: true
+    vps_install_xrdp: true
+
+  pre_tasks:
+    - name: Debug Ansible Configuration
+      ansible.builtin.debug:
+        msg:
+          - "Config file magic var: {{ query('config', 'CONFIG_FILE') }}"
+          - "Callback plugins config: {{ query('config', 'DEFAULT_CALLBACK_PLUGIN_PATH') }}"
+          - "Callbacks enabled config: {{ query('config', 'CALLBACKS_ENABLED') }}"
+          - "Environment ANSIBLE_CONFIG: {{ ansible_env.ANSIBLE_CONFIG | default('NOT SET') }}"
+          - "Environment ANSIBLE_CALLBACK_PLUGINS: {{ ansible_env.ANSIBLE_CALLBACK_PLUGINS | default('NOT SET') }}"
 
   roles:
     - role: common
     - role: security
+    - role: desktop
+    - role: xrdp

@@ -84,6 +84,7 @@
     sudo -u {{ vps_username }} npm install -g {{ item.item }}
   loop: "{{ npm_pkg_check.results | default([]) }}"
   when: vps_development_install_nodejs and item.rc != 0
+  changed_when: true
   become: true
   tags: [development, nodejs]
 

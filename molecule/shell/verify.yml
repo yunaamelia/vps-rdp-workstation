@@ -38,7 +38,7 @@
         fail_msg: ".zshrc does not exist"
 
     - name: Check Zsh theme configuration
-      ansible.builtin.command: grep 'ZSH_THEME="agnoster"' /home/testuser/.zshrc
+      ansible.builtin.command: grep -E 'ZSH_THEME="agnoster"|source.*agnoster' /home/testuser/.zshrc
       register: theme_check
       changed_when: false
       failed_when: theme_check.rc != 0

@@ -43,7 +43,7 @@
 
     - name: Assert hostname is correct
       ansible.builtin.assert:
-        that: "'molecule-test' in (hostname_check.content | b64decode)"
+        that: "'dev-workstation' in (hostname_check.content | b64decode)"
         fail_msg: "Hostname not set correctly in /etc/hostname"
 
     - name: Verify state tracking directory exists
@@ -101,3 +101,47 @@
       ansible.builtin.assert:
         that: ssh_backup.stat.exists
         fail_msg: "SSH config backup not created by security role"
+
+    # =========================================================================
+    #  Desktop & XRDP Role Assertions
+    # =========================================================================
+
+    - name: Verify XRDP configuration exists
+      ansible.builtin.stat:
+        path: /etc/xrdp/xrdp.ini
+      register: xrdp_conf
+
+    - name: Assert XRDP configuration exists
+      ansible.builtin.assert:
+        that: xrdp_conf.stat.exists
+        fail_msg: "XRDP configuration file /etc/xrdp/xrdp.ini is missing"
+    - name: Verify xorgxrdp is installed
+      ansible.builtin.command: dpkg -l xorgxrdp
+      register: xorgxrdp_check
+      changed_when: false
+      failed_when: xorgxrdp_check.rc != 0
+
+    - name: Verify KDE Plasma session executable exists
+      ansible.builtin.stat:
+        path: /usr/bin/startplasma-x11
+      register: kde_session
+
+    - name: Assert KDE Plasma installed
+      ansible.builtin.assert:
+        that: kde_session.stat.exists
+        fail_msg: "KDE Plasma session executable not found"
+
+    # =========================================================================
+    #  Shell & User Role Assertions
+    # =========================================================================
+
+    - name: Verify testuser shell is Zsh
+      ansible.builtin.user:
+        name: testuser
+        state: present
+      register: user_info
+
+    - name: Assert user shell is zsh
+      ansible.builtin.assert:
+        that: user_info.shell in ['/usr/bin/zsh', '/bin/zsh']
+        fail_msg: "User shell is not set to zsh (found {{ user_info.shell }})"

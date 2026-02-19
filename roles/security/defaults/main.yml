@@ -16,6 +16,7 @@ vps_firewall_logging: "medium"
 
 # Fail2ban
 vps_fail2ban_enabled: true
+vps_fail2ban_start_service: true
 vps_fail2ban_bantime: 3600
 vps_fail2ban_findtime: 600
 vps_fail2ban_maxretry: 5

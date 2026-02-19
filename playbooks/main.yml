@@ -148,6 +148,8 @@
 
     - role: terminal
       tags: [userconfig, terminal]
+      vars:
+        vps_terminal_configure_zshrc: false # Let shell-styling handle .zshrc
 
     - role: tmux
       tags: [terminal, tmux, config]

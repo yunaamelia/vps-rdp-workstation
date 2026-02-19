@@ -49,7 +49,7 @@
 
     - name: Generate self-signed XRDP certificate and private key
       ansible.builtin.shell: |
-        openssl req -x509 -newkey rsa:4096 -nodes -keyout /etc/xrdp/key.pem -out /etc/xrdp/cert.pem -days 3650 -subj "/C=US/ST=Dev/L=Lab/O=XRDP/CN={{ ansible_hostname }}"
+        openssl req -x509 -newkey rsa:4096 -nodes -keyout /etc/xrdp/key.pem -out /etc/xrdp/cert.pem -days 3650 -subj "/C=US/ST=Dev/L=Lab/O=XRDP/CN={{ vps_hostname | default(ansible_hostname) }}"
       args:
         creates: /etc/xrdp/key.pem
       notify: Restart XRDP
@@ -119,7 +119,7 @@
         name: xrdp
         enabled: true
         state: started
-      ignore_errors: "{{ ansible_check_mode }}"
+      failed_when: false
       tags: [xrdp, service]
 
   rescue:

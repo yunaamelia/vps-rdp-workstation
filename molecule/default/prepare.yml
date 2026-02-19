@@ -8,3 +8,9 @@
         test -e /usr/bin/python3 || (apt-get -y update && apt-get install -y python3-minimal python3-apt sudo)
       register: bootstrap_python
       changed_when: "'Reading package lists' in bootstrap_python.stdout"
+
+    - name: Create remote_tmp directory
+      ansible.builtin.file:
+        path: "/tmp/.ansible/tmp"
+        state: directory
+        mode: '1777'

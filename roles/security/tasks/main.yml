@@ -177,7 +177,9 @@
         name: fail2ban
         enabled: true
         state: started
-      when: vps_fail2ban_enabled
+      when:
+        - vps_fail2ban_enabled
+        - vps_fail2ban_start_service | default(true)
       ignore_errors: "{{ ansible_check_mode }}"
       tags: [security, fail2ban]
 

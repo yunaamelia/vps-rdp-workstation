@@ -22,4 +22,4 @@ RUN apt-get update \
     && rm -rf /tmp/* /var/tmp/* \
     && mkdir -p /run/sshd
 
-CMD ["/lib/systemd/systemd"]
+CMD ["/sbin/init"]

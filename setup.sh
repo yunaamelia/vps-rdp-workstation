@@ -20,7 +20,9 @@ VERBOSE=false
 ROLLBACK_MODE=false
 FACTORY_RESET_MODE=false
 CI_MODE=false
+CI_MODE=false
 K8S_MODE=false
+STAGING_MODE=false
 ANSIBLE_ARGS=()
 
 # --- Logging & UI ---
@@ -232,8 +234,13 @@ run_playbook() {
 	fi
 
 	# Build Args for ansible-playbook
+	local inventory_file="inventory/hosts.yml"
+	if [[ "$STAGING_MODE" == "true" ]]; then
+		inventory_file="inventory/staging.yml"
+	fi
+
 	local args=(
-		"--inventory" "inventory/hosts.yml"
+		"--inventory" "$inventory_file"
 		"-e" "vps_username=$VPS_USERNAME"
 		"-e" "vps_user_password_hash=$VPS_USER_PASSWORD_HASH"
 	)
@@ -313,6 +320,10 @@ main() {
 			;;
 		--factory-reset)
 			FACTORY_RESET_MODE=true
+			shift
+			;;
+		--staging)
+			STAGING_MODE=true
 			shift
 			;;
 		*)

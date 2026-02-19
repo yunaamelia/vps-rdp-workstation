@@ -25,6 +25,7 @@
           - git
           - ca-certificates
           - gnupg
+          - rsyslog
           - lsb-release
           - apt-transport-https
           - vim
@@ -55,6 +56,7 @@
     - name: Set system hostname
       ansible.builtin.hostname:
         name: "{{ vps_hostname }}"
+      when: ansible_facts['virtualization_type'] != "docker"
       tags: [common, system]
 
     - name: Update /etc/hosts with hostname

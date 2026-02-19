@@ -120,6 +120,7 @@ jobs:
           - devtools
           - shell
           - rollback
+          - security
 
     steps:
       - uses: actions/checkout@v4

@@ -50,7 +50,6 @@
         owner: '{{ vps_username }}'
         group: '{{ vps_username }}'
         mode: '0755'
-        recurse: true
       tags: [desktop, theme]
 
     - name: Set Kvantum theme to WhiteSurDark

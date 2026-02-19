@@ -1,0 +1,29 @@
+# Uninstall: text-processing
+---
+- name: Purge text processing packages
+  ansible.builtin.apt:
+    name:
+      - ripgrep
+      - silversearcher-ag
+      - jq
+      - pandoc
+      - bat
+      - fd-find
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, text-processing]
+
+- name: Remove fd symlink
+  ansible.builtin.file:
+    path: /usr/local/bin/fd
+    state: absent
+  failed_when: false
+  tags: [factory-reset, text-processing]
+
+- name: Remove yq binary
+  ansible.builtin.file:
+    path: /usr/local/bin/yq
+    state: absent
+  failed_when: false
+  tags: [factory-reset, text-processing]

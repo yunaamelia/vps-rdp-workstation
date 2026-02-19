@@ -1,0 +1,37 @@
+# Uninstall: shell-styling
+---
+- name: Remove Starship binary
+  ansible.builtin.file:
+    path: /usr/local/bin/starship
+    state: absent
+  failed_when: false
+  tags: [factory-reset, shell-styling]
+
+- name: Remove Starship config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/starship.toml"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, shell-styling]
+
+- name: Purge fastfetch
+  ansible.builtin.apt:
+    name: fastfetch
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, shell-styling]
+
+- name: Remove fastfetch config directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/fastfetch"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, shell-styling]
+
+- name: Remove deployed .zshrc
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.zshrc"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, shell-styling]

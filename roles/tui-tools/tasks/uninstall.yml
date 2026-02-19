@@ -1,0 +1,57 @@
+# Uninstall: tui-tools
+---
+- name: Purge TUI apt packages
+  ansible.builtin.apt:
+    name:
+      - tig
+      - ranger
+      - mc
+      - vifm
+      - fzf
+      - eza
+      - git-delta
+      - duf
+      - bat
+      - fd-find
+      - ripgrep
+      - btop
+      - htop
+      - ncdu
+      - hyperfine
+      - tokei
+      - thefuck
+      - 7zip
+      - glow
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, tui-tools]
+
+- name: Remove yazi package
+  ansible.builtin.apt:
+    name: yazi
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, tui-tools]
+
+- name: Remove manually installed binaries
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/lazygit
+    - /usr/local/bin/navi
+    - /usr/local/bin/atuin
+    - /usr/local/bin/tldr
+    - /usr/local/bin/bat
+    - /usr/local/bin/fd
+  failed_when: false
+  tags: [factory-reset, tui-tools]
+
+- name: Remove atuin from /usr/bin
+  ansible.builtin.file:
+    path: /usr/bin/atuin
+    state: absent
+  failed_when: false
+  tags: [factory-reset, tui-tools]

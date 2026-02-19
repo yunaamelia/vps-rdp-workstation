@@ -1,0 +1,42 @@
+# Uninstall: fonts
+---
+- name: Remove Nerd Font directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/fonts/truetype/jetbrains-mono-nerd
+    - /usr/share/fonts/truetype/hack-nerd
+    - /usr/share/fonts/truetype/firacode-nerd
+    - /usr/share/fonts/truetype/source-code-pro-nerd
+    - /usr/share/fonts/truetype/powerline
+  failed_when: false
+  tags: [factory-reset, fonts]
+
+- name: Remove user Powerline fonts
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/fonts"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, fonts]
+
+- name: Remove fontconfig custom configs
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/fontconfig"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, fonts]
+
+- name: Purge fonts-powerline
+  ansible.builtin.apt:
+    name: fonts-powerline
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, fonts]
+
+- name: Update font cache after removal
+  ansible.builtin.command: fc-cache -fv
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, fonts]

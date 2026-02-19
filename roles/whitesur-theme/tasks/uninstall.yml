@@ -1,0 +1,70 @@
+# Uninstall: whitesur-theme
+---
+- name: Remove WhiteSur theme autostart entry
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/autostart/apply-whitesur-theme.desktop"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, whitesur-theme]
+
+- name: Remove WhiteSur theme application script
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/bin/apply-whitesur-theme.sh"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, whitesur-theme]
+
+- name: Remove WhiteSur KDE themes
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/home/{{ vps_username }}/.local/share/aurorae/themes/WhiteSur"
+    - "/home/{{ vps_username }}/.local/share/aurorae/themes/WhiteSur-dark"
+    - "/home/{{ vps_username }}/.local/share/color-schemes/WhiteSur.colors"
+    - "/home/{{ vps_username }}/.local/share/color-schemes/WhiteSurDark.colors"
+    - "/home/{{ vps_username }}/.local/share/plasma/desktoptheme/WhiteSur"
+    - "/home/{{ vps_username }}/.local/share/plasma/desktoptheme/WhiteSur-dark"
+    - "/home/{{ vps_username }}/.local/share/plasma/look-and-feel/WhiteSur"
+    - "/home/{{ vps_username }}/.local/share/plasma/look-and-feel/WhiteSur-dark"
+  failed_when: false
+  tags: [factory-reset, whitesur-theme]
+
+- name: Remove WhiteSur Kvantum themes
+  ansible.builtin.shell: |
+    rm -rf /home/{{ vps_username }}/.config/Kvantum/WhiteSur* 2>/dev/null || true
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, whitesur-theme]
+
+- name: Remove Kvantum config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/Kvantum/kvantum.kvconfig"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, whitesur-theme]
+
+- name: Remove WhiteSur icon themes
+  ansible.builtin.shell: |
+    rm -rf /home/{{ vps_username }}/.local/share/icons/WhiteSur* 2>/dev/null || true
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, whitesur-theme]
+
+- name: Remove WhiteSur cursor themes
+  ansible.builtin.shell: |
+    rm -rf /home/{{ vps_username }}/.local/share/icons/WhiteSur-cursors* 2>/dev/null || true
+    rm -rf /home/{{ vps_username }}/.icons/WhiteSur* 2>/dev/null || true
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, whitesur-theme]
+
+- name: Purge WhiteSur build dependencies
+  ansible.builtin.apt:
+    name:
+      - sassc
+      - qt-style-kvantum-themes
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, whitesur-theme]

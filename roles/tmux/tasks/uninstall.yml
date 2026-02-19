@@ -1,0 +1,23 @@
+# Uninstall: tmux
+---
+- name: Remove tmux configuration
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.tmux.conf"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, tmux]
+
+- name: Remove TPM and tmux plugins
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.tmux"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, tmux]
+
+- name: Purge tmux
+  ansible.builtin.apt:
+    name: tmux
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, tmux]

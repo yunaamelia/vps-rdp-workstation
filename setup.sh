@@ -18,6 +18,7 @@ LOG_LEVEL="minimal"
 DRY_RUN=false
 VERBOSE=false
 ROLLBACK_MODE=false
+FACTORY_RESET_MODE=false
 CI_MODE=false
 K8S_MODE=false
 ANSIBLE_ARGS=()
@@ -239,7 +240,12 @@ run_playbook() {
 
 	# STRICT ERROR HANDLING: Force execution stop on ANY task failure
 	# This ensures immediate failure detection for CI/CD and production safety
-	export ANSIBLE_ANY_ERRORS_FATAL=true
+	# Factory reset needs graceful error handling; normal runs fail fast
+	if [[ "$FACTORY_RESET_MODE" == "true" ]]; then
+		export ANSIBLE_ANY_ERRORS_FATAL=false
+	else
+		export ANSIBLE_ANY_ERRORS_FATAL=true
+	fi
 
 	if [[ "$K8S_MODE" == "true" ]]; then
 		args+=("-e" "install_cloud_native_tools=true")
@@ -274,7 +280,7 @@ main() {
 			break
 			;;
 		--help)
-			echo "Usage: $0 [--dry-run] [--verbose] [--ci] [--k8s] [--full] [-- <ansible-args>]"
+			echo "Usage: $0 [--dry-run] [--verbose] [--ci] [--k8s] [--full] [--rollback] [--factory-reset] [-- <ansible-args>]"
 			exit 0
 			;;
 		--dry-run)
@@ -305,6 +311,10 @@ main() {
 			ROLLBACK_MODE=true
 			shift
 			;;
+		--factory-reset)
+			FACTORY_RESET_MODE=true
+			shift
+			;;
 		*)
 			log_error "Unknown arg: $1"
 			exit 1
@@ -330,7 +340,9 @@ main() {
 	setup_ansible
 	get_credentials
 
-	if [[ "$ROLLBACK_MODE" == "true" ]]; then
+	if [[ "$FACTORY_RESET_MODE" == "true" ]]; then
+		run_playbook "playbooks/factory-reset.yml"
+	elif [[ "$ROLLBACK_MODE" == "true" ]]; then
 		run_playbook "playbooks/rollback.yml"
 	else
 		run_playbook "playbooks/main.yml" "stdout"

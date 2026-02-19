@@ -1,0 +1,53 @@
+# Uninstall: editors
+---
+- name: Remove VS Code user config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/Code"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, editors]
+
+- name: Remove VS Code extensions directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.vscode"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, editors]
+
+- name: Purge VS Code
+  ansible.builtin.apt:
+    name: code
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, editors]
+
+- name: Remove VS Code repository
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/apt/sources.list.d/vscode.list
+    - /etc/apt/sources.list.d/vscode.sources
+  failed_when: false
+  tags: [factory-reset, editors]
+
+- name: Remove Microsoft GPG key
+  ansible.builtin.file:
+    path: /usr/share/keyrings/microsoft.asc
+    state: absent
+  failed_when: false
+  tags: [factory-reset, editors]
+
+- name: Remove OpenCode via npm
+  ansible.builtin.shell: npm uninstall -g opencode-ai 2>/dev/null || true
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, editors]
+
+- name: Remove Antigravity installation note
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/ANTIGRAVITY_INSTALL.md"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, editors]

@@ -1,0 +1,18 @@
+# Uninstall: code-quality
+---
+- name: Purge code quality packages
+  ansible.builtin.apt:
+    name:
+      - shellcheck
+      - yamllint
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, code-quality]
+
+- name: Remove hadolint binary
+  ansible.builtin.file:
+    path: /usr/local/bin/hadolint
+    state: absent
+  failed_when: false
+  tags: [factory-reset, code-quality]

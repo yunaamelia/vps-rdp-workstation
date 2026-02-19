@@ -1,0 +1,8 @@
+# Uninstall: productivity
+# This role only verifies tools installed by other roles (tui-tools)
+# No direct uninstall actions needed
+---
+- name: Productivity role cleanup (no-op)
+  ansible.builtin.debug:
+    msg: "Productivity role has no direct installations to remove"
+  tags: [factory-reset, productivity]

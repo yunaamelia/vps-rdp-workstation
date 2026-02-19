@@ -1,0 +1,86 @@
+# Uninstall: docker
+---
+- name: Stop Docker service
+  ansible.builtin.systemd:
+    name: docker
+    state: stopped
+    enabled: false
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Stop containerd service
+  ansible.builtin.systemd:
+    name: containerd
+    state: stopped
+    enabled: false
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Purge Docker packages
+  ansible.builtin.apt:
+    name:
+      - docker-ce
+      - docker-ce-cli
+      - containerd.io
+      - docker-buildx-plugin
+      - docker-compose-plugin
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Remove Docker data directory
+  ansible.builtin.file:
+    path: /var/lib/docker
+    state: absent
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Remove containerd data directory
+  ansible.builtin.file:
+    path: /var/lib/containerd
+    state: absent
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Remove Docker config directory
+  ansible.builtin.file:
+    path: /etc/docker
+    state: absent
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Remove Docker apt repository
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/docker.list
+    state: absent
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Remove Docker GPG key
+  ansible.builtin.file:
+    path: /etc/apt/keyrings/docker.asc
+    state: absent
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Remove lazydocker binary
+  ansible.builtin.file:
+    path: /usr/local/bin/lazydocker
+    state: absent
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Remove user Docker config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.docker"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, docker]
+
+- name: Remove docker group
+  ansible.builtin.group:
+    name: docker
+    state: absent
+  failed_when: false
+  tags: [factory-reset, docker]

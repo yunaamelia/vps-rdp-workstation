@@ -1,0 +1,27 @@
+# Uninstall: file-management
+---
+- name: Purge file management packages
+  ansible.builtin.apt:
+    name:
+      - rsync
+      - p7zip-full
+      - tree
+      - rename
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, file-management]
+
+- name: Remove rclone binary
+  ansible.builtin.file:
+    path: /usr/bin/rclone
+    state: absent
+  failed_when: false
+  tags: [factory-reset, file-management]
+
+- name: Remove rclone man page
+  ansible.builtin.file:
+    path: /usr/local/share/man/man1/rclone.1
+    state: absent
+  failed_when: false
+  tags: [factory-reset, file-management]

@@ -1,0 +1,46 @@
+# Uninstall: terminal
+---
+- name: Remove Oh My Zsh
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.oh-my-zsh"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, terminal]
+
+- name: Remove .zshrc
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.zshrc"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, terminal]
+
+- name: Remove Konsole profile directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/konsole"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, terminal]
+
+- name: Remove Kitty config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/kitty"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, terminal]
+
+- name: Purge terminal packages
+  ansible.builtin.apt:
+    name:
+      - konsole
+      - kitty
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, terminal]
+
+- name: Reset user shell to bash
+  ansible.builtin.user:
+    name: "{{ vps_username }}"
+    shell: /bin/bash
+  failed_when: false
+  tags: [factory-reset, terminal]

@@ -1,0 +1,86 @@
+# Uninstall: kde-optimization
+---
+- name: Remove Polonium KWin Script
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/polonium"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, kde-optimization]
+
+- name: Remove Polonium source remnants
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/share/kwin/scripts/polonium-source"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, kde-optimization]
+
+- name: Remove KDE configuration files
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/{{ item }}"
+    state: absent
+  loop:
+    - kdeglobals
+    - kwinrc
+    - kglobalshortcutsrc
+    - krunnerrc
+    - kded5rc
+    - kcminputrc
+    - plasmashellrc
+    - plasmarc
+    - breezerc
+    - baloofilerc
+    - kscreenlockerrc
+    - ksplashrc
+    - klaunchrc
+    - dolphinrc
+  failed_when: false
+  tags: [factory-reset, kde-optimization]
+
+- name: Remove GTK config directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/home/{{ vps_username }}/.config/gtk-3.0"
+    - "/home/{{ vps_username }}/.config/gtk-4.0"
+    - "/home/{{ vps_username }}/.config/xsettingsd"
+    - "/home/{{ vps_username }}/.gtkrc-2.0"
+  failed_when: false
+  tags: [factory-reset, kde-optimization]
+
+- name: Remove panel configuration script
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/bin/configure-panel.sh"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, kde-optimization]
+
+- name: Remove autostart entries
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/autostart/{{ item }}"
+    state: absent
+  loop:
+    - configure-panel.desktop
+  failed_when: false
+  tags: [factory-reset, kde-optimization]
+
+- name: Remove Firefox profile customizations
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.mozilla"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, kde-optimization]
+
+- name: Purge KDE optimization packages
+  ansible.builtin.apt:
+    name:
+      - kde-config-gtk-style
+      - kde-config-gtk-style-preview
+      - kde-config-sddm
+      - kinfocenter
+      - partitionmanager
+      - ksystemlog
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, kde-optimization]

@@ -1,0 +1,50 @@
+# Uninstall: xrdp
+---
+- name: Stop XRDP service
+  ansible.builtin.systemd:
+    name: xrdp
+    state: stopped
+    enabled: false
+  failed_when: false
+  tags: [factory-reset, xrdp]
+
+- name: Stop xrdp-sesman service
+  ansible.builtin.systemd:
+    name: xrdp-sesman
+    state: stopped
+    enabled: false
+  failed_when: false
+  tags: [factory-reset, xrdp]
+
+- name: Purge XRDP packages
+  ansible.builtin.apt:
+    name:
+      - xrdp
+      - xorgxrdp
+      - xserver-xorg-legacy
+      - dbus-x11
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, xrdp]
+
+- name: Remove XRDP configuration directory
+  ansible.builtin.file:
+    path: /etc/xrdp
+    state: absent
+  failed_when: false
+  tags: [factory-reset, xrdp]
+
+- name: Remove Xwrapper config
+  ansible.builtin.file:
+    path: /etc/X11/Xwrapper.config
+    state: absent
+  failed_when: false
+  tags: [factory-reset, xrdp]
+
+- name: Remove XRDP log directory
+  ansible.builtin.file:
+    path: /var/log/xrdp
+    state: absent
+  failed_when: false
+  tags: [factory-reset, xrdp]

@@ -1,0 +1,46 @@
+# Uninstall: common
+---
+- name: Remove sudoers entry
+  ansible.builtin.file:
+    path: "/etc/sudoers.d/{{ vps_username }}"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, common]
+
+- name: Remove state tracking directory
+  ansible.builtin.file:
+    path: /var/lib/vps-setup
+    state: absent
+  failed_when: false
+  tags: [factory-reset, common]
+
+- name: Purge non-essential common packages
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - vim
+      - nano
+      - pv
+      - dialog
+      - fontconfig
+      - zsh
+      - acl
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, common]
+
+- name: Remove custom hostname from /etc/hosts
+  ansible.builtin.lineinfile:
+    path: /etc/hosts
+    regexp: '^127\.0\.1\.1'
+    state: absent
+  failed_when: false
+  tags: [factory-reset, common]
+
+- name: Remove git global config for user
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.gitconfig"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, common]

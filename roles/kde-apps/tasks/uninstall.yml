@@ -1,0 +1,31 @@
+# Uninstall: kde-apps
+---
+- name: Purge KDE apps packages
+  ansible.builtin.apt:
+    name:
+      - yakuake
+      - qt5-style-kvantum
+      - qt6-style-kvantum
+      - kompare
+      - filelight
+      - krdc
+      - smb4k
+      - sweeper
+      - kwalletmanager
+      - dolphin-plugins
+      - kcalc
+      - kdeconnect
+      - ffmpegthumbs
+      - kdegraphics-thumbnailers
+      - svgpart
+      - markdownpart
+      - krusader
+      - okteta
+      - ghostwriter
+      - ksystemlog
+      - kcolorchooser
+      - krename
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, kde-apps]

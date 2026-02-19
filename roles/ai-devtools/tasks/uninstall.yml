@@ -1,0 +1,29 @@
+# Uninstall: ai-devtools
+---
+- name: Remove aider binary and installation
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/aider
+    - /opt/aider
+  failed_when: false
+  tags: [factory-reset, ai-devtools]
+
+- name: Remove shell-gpt via pipx
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} pipx uninstall shell-gpt 2>/dev/null || true
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, ai-devtools]
+
+- name: Remove AI tools config files
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - "/home/{{ vps_username }}/.anthropic"
+    - "/home/{{ vps_username }}/.ai-tools-setup.md"
+    - "/home/{{ vps_username }}/.aider.conf.yml"
+  failed_when: false
+  tags: [factory-reset, ai-devtools]

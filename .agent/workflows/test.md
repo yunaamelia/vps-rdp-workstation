@@ -21,7 +21,6 @@ This command generates tests, runs existing tests, or checks test coverage.
 /test [file/feature] - Generate tests for specific target
 /test coverage       - Show test coverage report
 /test watch          - Run tests in watch mode
-/test ansible        - Run Ansible Molecule tests
 ```
 
 ---
@@ -47,41 +46,6 @@ When asked to test a file or feature:
    - Use project's test framework (Jest, Vitest, etc.)
    - Follow existing test patterns
    - Mock external dependencies
-
----
-
-## specialized Testing: Ansible Molecule
-
-This project uses **Molecule** for testing Ansible roles.
-
-### Run Molecule Tests
-
-```bash
-# Run default scenario (common + security)
-molecule test --scenario-name default
-
-# Run devtools scenario
-molecule test --scenario-name devtools
-
-# Run shell scenario
-molecule test --scenario-name shell
-```
-
-### Debugging with Molecule
-
-```bash
-# Create and converge without destroying
-molecule converge --scenario-name default
-
-# Login to the test instance
-molecule login --scenario-name default
-
-# Run verification only
-molecule verify --scenario-name default
-
-# Cleanup
-molecule destroy --scenario-name default
-```
 
 ---
 
@@ -136,5 +100,45 @@ Total: 15 tests (14 passed, 1 failed)
 /test user registration flow
 /test coverage
 /test fix failed tests
-/test ansible
 ```
+
+---
+
+## Test Patterns
+
+### Unit Test Structure
+
+```typescript
+describe('AuthService', () => {
+  describe('login', () => {
+    it('should return token for valid credentials', async () => {
+      // Arrange
+      const credentials = { email: 'test@test.com', password: 'pass123' }; // pragma: allowlist secret
+
+      // Act
+      const result = await authService.login(credentials);
+
+      // Assert
+      expect(result.token).toBeDefined();
+    });
+
+    it('should throw for invalid password', async () => {
+      // Arrange
+      const credentials = { email: 'test@test.com', password: 'wrong' }; // pragma: allowlist secret
+
+      // Act & Assert
+      await expect(authService.login(credentials)).rejects.toThrow('Invalid credentials');
+    });
+  });
+});
+```
+
+---
+
+## Key Principles
+
+- **Test behavior not implementation**
+- **One assertion per test** (when practical)
+- **Descriptive test names**
+- **Arrange-Act-Assert pattern**
+- **Mock external dependencies**

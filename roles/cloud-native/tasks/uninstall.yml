@@ -1,0 +1,45 @@
+# Uninstall: cloud-native
+---
+- name: Stop and disable K3s service
+  ansible.builtin.systemd:
+    name: k3s
+    state: stopped
+    enabled: false
+  failed_when: false
+  tags: [factory-reset, cloud-native]
+
+- name: Uninstall K3s
+  ansible.builtin.shell: /usr/local/bin/k3s-uninstall.sh 2>/dev/null || true
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, cloud-native]
+
+- name: Remove cloud-native binaries
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/local/bin/kubectl
+    - /usr/local/bin/helm
+    - /usr/local/bin/k9s
+    - /usr/local/bin/flux
+    - /usr/local/bin/k3s
+  failed_when: false
+  tags: [factory-reset, cloud-native]
+
+- name: Remove kubeconfig
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.kube"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, cloud-native]
+
+- name: Remove K3s data
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/rancher
+    - /var/lib/rancher
+  failed_when: false
+  tags: [factory-reset, cloud-native]

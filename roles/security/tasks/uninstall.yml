@@ -1,0 +1,66 @@
+# Uninstall: security
+---
+- name: Stop and disable fail2ban
+  ansible.builtin.systemd:
+    name: fail2ban
+    state: stopped
+    enabled: false
+  failed_when: false
+  tags: [factory-reset, security]
+
+- name: Disable UFW firewall
+  community.general.ufw:
+    state: disabled
+  failed_when: false
+  tags: [factory-reset, security]
+
+- name: Reset UFW to defaults
+  community.general.ufw:
+    state: reset
+  failed_when: false
+  tags: [factory-reset, security]
+
+- name: Purge security packages
+  ansible.builtin.apt:
+    name:
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+      - apt-listchanges
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, security]
+
+- name: Remove fail2ban config
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /etc/fail2ban/jail.local
+    - /etc/fail2ban/filter.d/xrdp.conf
+  failed_when: false
+  tags: [factory-reset, security]
+
+- name: Restore SSH defaults
+  ansible.builtin.shell: |
+    if [ -f "{{ vps_backup_dir | default('/var/backups/vps-setup') }}/sshd_config.backup" ]; then
+      cp "{{ vps_backup_dir | default('/var/backups/vps-setup') }}/sshd_config.backup" /etc/ssh/sshd_config
+    fi
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, security]
+
+- name: Remove auto-upgrades config
+  ansible.builtin.file:
+    path: /etc/apt/apt.conf.d/20auto-upgrades
+    state: absent
+  failed_when: false
+  tags: [factory-reset, security]
+
+- name: Restart SSH to apply restored config
+  ansible.builtin.systemd:
+    name: ssh
+    state: restarted
+  failed_when: false
+  tags: [factory-reset, security]

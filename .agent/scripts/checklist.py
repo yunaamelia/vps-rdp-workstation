@@ -24,7 +24,7 @@ import sys
 import subprocess
 import argparse
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Tuple, Optional
 
 # ANSI colors for terminal output
 class Colors:

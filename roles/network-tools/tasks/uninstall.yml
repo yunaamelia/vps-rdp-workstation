@@ -1,0 +1,18 @@
+# Uninstall: network-tools
+---
+- name: Purge network analysis packages
+  ansible.builtin.apt:
+    name:
+      - nmap
+      - mtr
+      - iftop
+      - nethogs
+      - tcpdump
+      - httpie
+      - netcat-openbsd
+      - traceroute
+      - whois
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, network-tools]

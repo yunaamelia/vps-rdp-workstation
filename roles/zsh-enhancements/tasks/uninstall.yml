@@ -1,0 +1,23 @@
+# Uninstall: zsh-enhancements
+---
+- name: Remove external Zsh plugins directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.oh-my-zsh/custom/plugins"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, zsh-enhancements]
+
+- name: Remove zoxide binary
+  ansible.builtin.file:
+    path: /usr/local/bin/zoxide
+    state: absent
+  failed_when: false
+  tags: [factory-reset, zsh-enhancements]
+
+- name: Purge fzf
+  ansible.builtin.apt:
+    name: fzf
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, zsh-enhancements]

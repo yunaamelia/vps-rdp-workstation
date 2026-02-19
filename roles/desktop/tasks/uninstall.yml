@@ -1,0 +1,76 @@
+# Uninstall: desktop
+---
+- name: Stop SDDM display manager
+  ansible.builtin.systemd:
+    name: sddm
+    state: stopped
+    enabled: false
+  failed_when: false
+  tags: [factory-reset, desktop]
+
+- name: Remove Akonadi config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/akonadi"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, desktop]
+
+- name: Remove Kvantum config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/Kvantum"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, desktop]
+
+- name: Remove autostart directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/autostart"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, desktop]
+
+- name: Remove RDP font rendering config
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.config/fontconfig/conf.d/10-rdp-rendering.conf"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, desktop]
+
+- name: Purge KDE Plasma and desktop packages
+  ansible.builtin.apt:
+    name:
+      - kde-plasma-desktop
+      - plasma-workspace
+      - plasma-desktop
+      - sddm
+      - kde-config-gtk-style
+      - xsettingsd
+      - breeze-gtk-theme
+      - libglib2.0-dev-bin
+      - pipewire-pulse
+      - pipewire-module-xrdp
+      - fish
+      - python3-dbus
+      - python-is-python3
+      - xdg-user-dirs
+      - qdbus-qt6
+      - libkf6config-bin
+      - libkf5config-bin
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, desktop]
+
+- name: Purge remaining KDE packages (wildcard) # noqa: command-instead-of-module
+  ansible.builtin.shell: |
+    apt-get purge -y 'kde*' 'plasma*' 'kwin*' 'kio*' 'kscreen*' 'kdecoration*' 2>/dev/null || true
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, desktop]
+
+- name: Remove SDDM configuration
+  ansible.builtin.file:
+    path: /etc/sddm.conf.d
+    state: absent
+  failed_when: false
+  tags: [factory-reset, desktop]

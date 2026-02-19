@@ -1,0 +1,31 @@
+# Uninstall: log-visualization
+---
+- name: Purge lnav
+  ansible.builtin.apt:
+    name: lnav
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, log-visualization]
+
+- name: Purge gum
+  ansible.builtin.apt:
+    name: gum
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, log-visualization]
+
+- name: Remove Charm apt repository
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/charm.list
+    state: absent
+  failed_when: false
+  tags: [factory-reset, log-visualization]
+
+- name: Remove Charm GPG key
+  ansible.builtin.file:
+    path: /usr/share/keyrings/charm.gpg
+    state: absent
+  failed_when: false
+  tags: [factory-reset, log-visualization]

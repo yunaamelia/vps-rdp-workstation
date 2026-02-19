@@ -1,0 +1,496 @@
+# Factory Reset - Complete System Restoration
+# Removes ALL installed software, configs, and user data
+# Returns system to clean Debian 13 state
+#
+# Usage: sudo ./setup.sh --factory-reset
+# WARNING: This is DESTRUCTIVE and IRREVERSIBLE
+---
+- name: VPS RDP Workstation - Factory Reset
+  hosts: all
+  become: true
+  gather_facts: true
+
+  vars:
+    vps_backup_dir: "/var/backups/vps-setup"
+    factory_reset_backup_dir: "/var/backups/factory-reset-{{ ansible_date_time.date }}"
+
+  vars_prompt:
+    - name: confirm_factory_reset
+      prompt: |
+
+        ╔══════════════════════════════════════════════════════════╗
+        ║  ⚠️  FACTORY RESET - DESTRUCTIVE OPERATION              ║
+        ╠══════════════════════════════════════════════════════════╣
+        ║                                                          ║
+        ║  This will PERMANENTLY remove:                           ║
+        ║    • All installed packages and tools                    ║
+        ║    • KDE Desktop, XRDP, Docker                           ║
+        ║    • User account and home directory                     ║
+        ║    • All configurations and customizations               ║
+        ║    • Firewall rules and SSH hardening                    ║
+        ║                                                          ║
+        ║  The system will return to a clean Debian 13 state.      ║
+        ║                                                          ║
+        ║  A backup archive will be created before proceeding.     ║
+        ║                                                          ║
+        ╚══════════════════════════════════════════════════════════╝
+
+        Type "FACTORY RESET" to confirm (case-sensitive)
+
+      private: false
+
+  pre_tasks:
+    - name: Validate confirmation
+      ansible.builtin.fail:
+        msg: "Factory reset cancelled. You must type 'FACTORY RESET' exactly."
+      when: confirm_factory_reset != "FACTORY RESET"
+      tags: always
+
+    - name: Display factory reset banner
+      ansible.builtin.debug:
+        msg: |
+          ╔══════════════════════════════════════════════════════════╗
+          ║  🔄 Factory Reset in Progress...                        ║
+          ║  DO NOT interrupt this process!                         ║
+          ╚══════════════════════════════════════════════════════════╝
+      tags: always
+
+    - name: Load group vars for vps_username
+      ansible.builtin.include_vars:
+        dir: "{{ playbook_dir }}/../group_vars"
+        extensions: ['yml', 'yaml']
+      failed_when: false
+      tags: always
+
+    - name: Set default username if not defined
+      ansible.builtin.set_fact:
+        vps_username: "{{ vps_username | default('apexdev') }}"
+      tags: always
+
+    # =========================================================================
+    #  Safety Backup
+    # =========================================================================
+
+    - name: Create factory reset backup directory
+      ansible.builtin.file:
+        path: "{{ factory_reset_backup_dir }}"
+        state: directory
+        mode: '0700'
+      tags: always
+
+    - name: Backup SSH config before reset
+      ansible.builtin.copy:
+        src: /etc/ssh/sshd_config
+        dest: "{{ factory_reset_backup_dir }}/sshd_config.backup"
+        remote_src: true
+        mode: '0600'
+      failed_when: false
+      tags: always
+
+    - name: Backup UFW rules before reset
+      ansible.builtin.shell: |
+        ufw status verbose > "{{ factory_reset_backup_dir }}/ufw-rules.backup" 2>/dev/null || true
+      changed_when: false
+      failed_when: false
+      tags: always
+
+    - name: Archive user home directory
+      community.general.archive:
+        path: "/home/{{ vps_username }}"
+        dest: "{{ factory_reset_backup_dir }}/home-{{ vps_username }}.tar.gz"
+        format: gz
+        mode: "0600"
+      failed_when: false
+      tags: always
+
+    - name: Log backup location
+      ansible.builtin.debug:
+        msg: "📦 Backup saved to {{ factory_reset_backup_dir }}"
+      tags: always
+
+  tasks:
+    # =========================================================================
+    #  PHASE 1: CLI Tools (Leaf roles - no dependents)
+    # =========================================================================
+
+    - name: "[1/8] Remove CLI Tools"
+      block:
+        - name: Uninstall cloud-native
+          ansible.builtin.include_role:
+            name: cloud-native
+            tasks_from: uninstall.yml
+          tags: [factory-reset, cloud-native]
+
+        - name: Uninstall ai-devtools
+          ansible.builtin.include_role:
+            name: ai-devtools
+            tasks_from: uninstall.yml
+          tags: [factory-reset, ai-devtools]
+
+        - name: Uninstall log-visualization
+          ansible.builtin.include_role:
+            name: log-visualization
+            tasks_from: uninstall.yml
+          tags: [factory-reset, log-visualization]
+
+        - name: Uninstall productivity
+          ansible.builtin.include_role:
+            name: productivity
+            tasks_from: uninstall.yml
+          tags: [factory-reset, productivity]
+
+        - name: Uninstall code-quality
+          ansible.builtin.include_role:
+            name: code-quality
+            tasks_from: uninstall.yml
+          tags: [factory-reset, code-quality]
+
+        - name: Uninstall dev-debugging
+          ansible.builtin.include_role:
+            name: dev-debugging
+            tasks_from: uninstall.yml
+          tags: [factory-reset, dev-debugging]
+
+        - name: Uninstall file-management
+          ansible.builtin.include_role:
+            name: file-management
+            tasks_from: uninstall.yml
+          tags: [factory-reset, file-management]
+
+        - name: Uninstall text-processing
+          ansible.builtin.include_role:
+            name: text-processing
+            tasks_from: uninstall.yml
+          tags: [factory-reset, text-processing]
+
+        - name: Uninstall system-performance
+          ansible.builtin.include_role:
+            name: system-performance
+            tasks_from: uninstall.yml
+          tags: [factory-reset, system-performance]
+
+        - name: Uninstall network-tools
+          ansible.builtin.include_role:
+            name: network-tools
+            tasks_from: uninstall.yml
+          tags: [factory-reset, network-tools]
+
+        - name: Uninstall tui-tools
+          ansible.builtin.include_role:
+            name: tui-tools
+            tasks_from: uninstall.yml
+          tags: [factory-reset, tui-tools]
+      rescue:
+        - name: Log Phase 1 errors (non-fatal)
+          ansible.builtin.debug:
+            msg: "⚠️ Some CLI tools could not be fully removed. Continuing..."
+
+    - name: "[1/8] Phase 1 complete"
+      ansible.builtin.debug:
+        msg: "✓ CLI Tools removed"
+
+    # =========================================================================
+    #  PHASE 2: Development Tools
+    # =========================================================================
+
+    - name: "[2/8] Remove Development Tools"
+      block:
+        - name: Uninstall editors
+          ansible.builtin.include_role:
+            name: editors
+            tasks_from: uninstall.yml
+          tags: [factory-reset, editors]
+
+        - name: Uninstall docker
+          ansible.builtin.include_role:
+            name: docker
+            tasks_from: uninstall.yml
+          tags: [factory-reset, docker]
+
+        - name: Uninstall development
+          ansible.builtin.include_role:
+            name: development
+            tasks_from: uninstall.yml
+          tags: [factory-reset, development]
+      rescue:
+        - name: Log Phase 2 errors (non-fatal)
+          ansible.builtin.debug:
+            msg: "⚠️ Some development tools could not be fully removed. Continuing..."
+
+    - name: "[2/8] Phase 2 complete"
+      ansible.builtin.debug:
+        msg: "✓ Development tools removed"
+
+    # =========================================================================
+    #  PHASE 3: User Configuration
+    # =========================================================================
+
+    - name: "[3/8] Remove User Configuration"
+      block:
+        - name: Uninstall zsh-enhancements
+          ansible.builtin.include_role:
+            name: zsh-enhancements
+            tasks_from: uninstall.yml
+          tags: [factory-reset, zsh-enhancements]
+
+        - name: Uninstall shell-styling
+          ansible.builtin.include_role:
+            name: shell-styling
+            tasks_from: uninstall.yml
+          tags: [factory-reset, shell-styling]
+
+        - name: Uninstall tmux
+          ansible.builtin.include_role:
+            name: tmux
+            tasks_from: uninstall.yml
+          tags: [factory-reset, tmux]
+
+        - name: Uninstall terminal
+          ansible.builtin.include_role:
+            name: terminal
+            tasks_from: uninstall.yml
+          tags: [factory-reset, terminal]
+      rescue:
+        - name: Log Phase 3 errors (non-fatal)
+          ansible.builtin.debug:
+            msg: "⚠️ Some user configs could not be fully removed. Continuing..."
+
+    - name: "[3/8] Phase 3 complete"
+      ansible.builtin.debug:
+        msg: "✓ User configuration removed"
+
+    # =========================================================================
+    #  PHASE 4: Desktop Environment
+    # =========================================================================
+
+    - name: "[4/8] Remove Desktop Environment"
+      block:
+        - name: Uninstall whitesur-theme
+          ansible.builtin.include_role:
+            name: whitesur-theme
+            tasks_from: uninstall.yml
+          tags: [factory-reset, whitesur-theme]
+
+        - name: Uninstall kde-optimization
+          ansible.builtin.include_role:
+            name: kde-optimization
+            tasks_from: uninstall.yml
+          tags: [factory-reset, kde-optimization]
+
+        - name: Uninstall kde-apps
+          ansible.builtin.include_role:
+            name: kde-apps
+            tasks_from: uninstall.yml
+          tags: [factory-reset, kde-apps]
+
+        - name: Uninstall xrdp
+          ansible.builtin.include_role:
+            name: xrdp
+            tasks_from: uninstall.yml
+          tags: [factory-reset, xrdp]
+
+        - name: Uninstall desktop
+          ansible.builtin.include_role:
+            name: desktop
+            tasks_from: uninstall.yml
+          tags: [factory-reset, desktop]
+
+        - name: Uninstall fonts
+          ansible.builtin.include_role:
+            name: fonts
+            tasks_from: uninstall.yml
+          tags: [factory-reset, fonts]
+      rescue:
+        - name: Log Phase 4 errors (non-fatal)
+          ansible.builtin.debug:
+            msg: "⚠️ Some desktop components could not be fully removed. Continuing..."
+
+    - name: "[4/8] Phase 4 complete"
+      ansible.builtin.debug:
+        msg: "✓ Desktop environment removed"
+
+    # =========================================================================
+    #  PHASE 5: Security
+    # =========================================================================
+
+    - name: "[5/8] Remove Security Configurations"
+      block:
+        - name: Uninstall security
+          ansible.builtin.include_role:
+            name: security
+            tasks_from: uninstall.yml
+          tags: [factory-reset, security]
+      rescue:
+        - name: Log Phase 5 errors (non-fatal)
+          ansible.builtin.debug:
+            msg: "⚠️ Some security configs could not be fully removed. Continuing..."
+
+    - name: "[5/8] Phase 5 complete"
+      ansible.builtin.debug:
+        msg: "✓ Security configurations removed"
+
+    # =========================================================================
+    #  PHASE 6: Bootstrap (common)
+    # =========================================================================
+
+    - name: "[6/8] Remove Bootstrap Packages"
+      block:
+        - name: Uninstall common
+          ansible.builtin.include_role:
+            name: common
+            tasks_from: uninstall.yml
+          tags: [factory-reset, common]
+      rescue:
+        - name: Log Phase 6 errors (non-fatal)
+          ansible.builtin.debug:
+            msg: "⚠️ Some base packages could not be fully removed. Continuing..."
+
+    - name: "[6/8] Phase 6 complete"
+      ansible.builtin.debug:
+        msg: "✓ Bootstrap packages removed"
+
+    # =========================================================================
+    #  PHASE 7: Final Cleanup
+    # =========================================================================
+
+    - name: "[7/8] Final System Cleanup"
+      block:
+        - name: Autoremove orphaned packages
+          ansible.builtin.apt:
+            autoremove: true
+            purge: true
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+        - name: Clean apt cache
+          ansible.builtin.apt:
+            autoclean: true
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+        - name: Remove state tracking directory
+          ansible.builtin.file:
+            path: /var/lib/vps-setup
+            state: absent
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+        - name: Remove third-party apt sources
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - /etc/apt/sources.list.d/docker.list
+            - /etc/apt/sources.list.d/vscode.list
+            - /etc/apt/sources.list.d/vscode.sources
+            - /etc/apt/sources.list.d/nodesource.list
+            - /etc/apt/sources.list.d/charm.list
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+        - name: Remove third-party GPG keys
+          ansible.builtin.file:
+            path: "{{ item }}"
+            state: absent
+          loop:
+            - /etc/apt/keyrings/docker.asc
+            - /usr/share/keyrings/nodesource.asc
+            - /usr/share/keyrings/nodesource.gpg
+            - /usr/share/keyrings/microsoft.asc
+            - /usr/share/keyrings/charm.gpg
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+        - name: Remove sysctl customizations
+          ansible.builtin.file:
+            path: /etc/sysctl.d/99-workstation.conf
+            state: absent
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+        - name: Remove udev rules customizations
+          ansible.builtin.file:
+            path: /etc/udev/rules.d/60-io-scheduler.rules
+            state: absent
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+        - name: Remove auto-upgrades config
+          ansible.builtin.file:
+            path: /etc/apt/apt.conf.d/20auto-upgrades
+            state: absent
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+        - name: Update apt cache after source removal
+          ansible.builtin.apt:
+            update_cache: true
+          failed_when: false
+          tags: [factory-reset, cleanup]
+
+    - name: "[7/8] Phase 7 complete"
+      ansible.builtin.debug:
+        msg: "✓ Final cleanup done"
+
+    # =========================================================================
+    #  PHASE 8: User Account Removal (LAST)
+    # =========================================================================
+
+    - name: "[8/8] Remove User Account"
+      block:
+        - name: Kill all processes owned by user
+          ansible.builtin.shell: "pkill -u {{ vps_username }} || true"
+          changed_when: false
+          failed_when: false
+          tags: [factory-reset, user]
+
+        - name: Wait for processes to terminate
+          ansible.builtin.pause:
+            seconds: 3
+          tags: [factory-reset, user]
+
+        - name: Remove user account and home directory
+          ansible.builtin.user:
+            name: "{{ vps_username }}"
+            state: absent
+            remove: true
+            force: true
+          failed_when: false
+          tags: [factory-reset, user]
+
+        - name: Remove sudoers entry
+          ansible.builtin.file:
+            path: "/etc/sudoers.d/{{ vps_username }}"
+            state: absent
+          failed_when: false
+          tags: [factory-reset, user]
+
+        - name: Remove lingering home directory
+          ansible.builtin.file:
+            path: "/home/{{ vps_username }}"
+            state: absent
+          failed_when: false
+          tags: [factory-reset, user]
+
+  post_tasks:
+    - name: Display completion message
+      ansible.builtin.debug:
+        msg: |
+          ╔══════════════════════════════════════════════════════════╗
+          ║  ✓ FACTORY RESET COMPLETE                               ║
+          ╠══════════════════════════════════════════════════════════╣
+          ║                                                          ║
+          ║  System has been restored to clean Debian 13 state.      ║
+          ║                                                          ║
+          ║  Backup location: {{ factory_reset_backup_dir }}
+          ║                                                          ║
+          ║  What's preserved:                                       ║
+          ║    • Root SSH access                                     ║
+          ║    • Network configuration                               ║
+          ║    • Backup archive                                      ║
+          ║                                                          ║
+          ║  You may want to reboot the system:                      ║
+          ║    sudo reboot                                           ║
+          ║                                                          ║
+          ╚══════════════════════════════════════════════════════════╝
+      tags: always

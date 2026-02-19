@@ -1,0 +1,28 @@
+# Uninstall: dev-debugging
+---
+- name: Purge debugging packages
+  ansible.builtin.apt:
+    name:
+      - gdb
+      - valgrind
+      - cmake
+      - make
+      - automake
+      - autoconf
+      - libtool
+      - pkg-config
+      - ltrace
+      - binutils
+      - kcachegrind
+      - heaptrack
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, dev-debugging]
+
+- name: Remove shfmt binary
+  ansible.builtin.file:
+    path: /usr/local/bin/shfmt
+    state: absent
+  failed_when: false
+  tags: [factory-reset, dev-debugging]

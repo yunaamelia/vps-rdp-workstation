@@ -1,0 +1,110 @@
+# Uninstall: development
+---
+# --- Remove npm global packages ---
+- name: Remove npm global packages
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} npm uninstall -g {{ item }} 2>/dev/null || true
+  loop:
+    - yarn
+    - pnpm
+    - typescript
+    - ts-node
+    - prettier
+    - eslint
+  failed_when: false
+  changed_when: false
+  tags: [factory-reset, development]
+
+- name: Remove npm global directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.npm-global"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, development]
+
+- name: Remove npm cache
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.npm"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, development]
+
+# --- Remove pipx packages ---
+- name: Remove pipx packages
+  ansible.builtin.shell: |
+    sudo -u {{ vps_username }} pipx uninstall {{ item }} 2>/dev/null || true
+  loop:
+    - black
+    - pylint
+    - pytest
+    - ipython
+    - poetry
+    - rich-cli
+    - tqdm
+  failed_when: false
+  changed_when: false
+  tags: [factory-reset, development]
+
+# --- Remove Composer ---
+- name: Remove Composer binary
+  ansible.builtin.file:
+    path: /usr/local/bin/composer
+    state: absent
+  failed_when: false
+  tags: [factory-reset, development]
+
+# --- Purge PHP packages ---
+- name: Purge PHP packages # noqa: command-instead-of-module
+  ansible.builtin.shell: |
+    apt-get purge -y 'php*' 2>/dev/null || true
+  changed_when: false
+  failed_when: false
+  tags: [factory-reset, development]
+
+# --- Purge Node.js ---
+- name: Purge Node.js
+  ansible.builtin.apt:
+    name: nodejs
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, development]
+
+- name: Remove NodeSource repository
+  ansible.builtin.file:
+    path: /etc/apt/sources.list.d/nodesource.list
+    state: absent
+  failed_when: false
+  tags: [factory-reset, development]
+
+- name: Remove NodeSource GPG key
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: absent
+  loop:
+    - /usr/share/keyrings/nodesource.asc
+    - /usr/share/keyrings/nodesource.gpg
+  failed_when: false
+  tags: [factory-reset, development]
+
+# --- Purge Python dev packages ---
+- name: Purge Python development packages
+  ansible.builtin.apt:
+    name:
+      - python3-dev
+      - python3-numpy
+      - python3-setuptools
+      - python3-wheel
+      - gfortran
+      - libopenblas-dev
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, development]
+
+- name: Remove user pipx directory
+  ansible.builtin.file:
+    path: "/home/{{ vps_username }}/.local/pipx"
+    state: absent
+  failed_when: false
+  tags: [factory-reset, development]

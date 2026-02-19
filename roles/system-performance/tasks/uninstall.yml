@@ -1,0 +1,58 @@
+# Uninstall: system-performance
+---
+- name: Stop and disable systemd-oomd
+  ansible.builtin.systemd:
+    name: systemd-oomd
+    state: stopped
+    enabled: false
+  failed_when: false
+  tags: [factory-reset, system-performance]
+
+- name: Purge performance monitoring packages
+  ansible.builtin.apt:
+    name:
+      - htop
+      - dstat
+      - sysstat
+      - iotop
+      - inxi
+      - lsof
+      - strace
+      - psmisc
+      - btop
+      - ncdu
+      - zram-tools
+      - systemd-oomd
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, system-performance]
+
+- name: Remove duf package
+  ansible.builtin.apt:
+    name: duf
+    state: absent
+    purge: true
+  failed_when: false
+  tags: [factory-reset, system-performance]
+
+- name: Remove sysctl customizations
+  ansible.builtin.file:
+    path: /etc/sysctl.d/99-workstation.conf
+    state: absent
+  failed_when: false
+  tags: [factory-reset, system-performance]
+
+- name: Remove udev I/O scheduler rules
+  ansible.builtin.file:
+    path: /etc/udev/rules.d/60-io-scheduler.rules
+    state: absent
+  failed_when: false
+  tags: [factory-reset, system-performance]
+
+- name: Remove zram configuration
+  ansible.builtin.file:
+    path: /etc/default/zramswap
+    state: absent
+  failed_when: false
+  tags: [factory-reset, system-performance]

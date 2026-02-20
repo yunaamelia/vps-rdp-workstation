@@ -44,9 +44,46 @@ _k_friendly_name=Session Management
 
 [kwin]
 Activate Window Demanding Attention=Meta+Ctrl+A,Meta+Ctrl+A,Activate Window Demanding Attention
+Cycle Overview=none,none,Cycle through Overview and Grid View
+Cycle Overview Opposite=none,none,Cycle through Grid View and Overview
 Decrease Opacity=none,,Decrease Opacity of Active Window by 5%
+Edit Tiles=Meta+T,Meta+T,Toggle Tiles Editor
+Expose=Ctrl+F9,Ctrl+F9,Toggle Present Windows (Current desktop)
+ExposeAll=Ctrl+F10\tLaunch (C),Ctrl+F10\tLaunch (C),Toggle Present Windows (All desktops)
+ExposeClass=Ctrl+F7,Ctrl+F7,Toggle Present Windows (Window class)
+ExposeClassCurrentDesktop=none,none,Toggle Present Windows (Window class on current desktop)
+Grid View=Meta+G,Meta+G,Toggle Grid View
 Increase Opacity=none,,Increase Opacity of Active Window by 5%
 Kill Window=Meta+Ctrl+Esc,Meta+Ctrl+Esc,Kill Window
+MinimizeAll=Meta+Shift+D,none,MinimizeAll
+MoveMouseToCenter=Meta+F6,Meta+F6,Move Mouse to Center
+MoveMouseToFocus=Meta+F5,Meta+F5,Move Mouse to Focus
+MoveZoomDown=none,none,Move Zoomed Area Downwards
+MoveZoomLeft=none,none,Move Zoomed Area to Left
+MoveZoomRight=none,none,Move Zoomed Area to Right
+MoveZoomUp=none,none,Move Zoomed Area Upwards
+Overview=Meta+W,Meta+W,Toggle Overview
+PoloniumCycleEngine=Meta+|,none,Polonium: Cycle Engine
+PoloniumFocusAbove=Meta+K,none,Polonium: Focus Above
+PoloniumFocusBelow=Meta+J,none,Polonium: Focus Below
+PoloniumFocusLeft=Meta+H,none,Polonium: Focus Left
+PoloniumFocusRight=none,none,Polonium: Focus Right
+PoloniumInsertAbove=Meta+Shift+K,none,Polonium: Insert Above
+PoloniumInsertBelow=Meta+Shift+J,none,Polonium: Insert Below
+PoloniumInsertLeft=Meta+Shift+H,none,Polonium: Insert Left
+PoloniumInsertRight=Meta+Shift+L,none,Polonium: Insert Right
+PoloniumOpenSettings=Meta+\\\\,none,Polonium: Open Settings Dialog
+PoloniumResizeAbove=Meta+Ctrl+K,none,Polonium: Resize Above
+PoloniumResizeBelow=Meta+Ctrl+J,none,Polonium: Resize Below
+PoloniumResizeLeft=Meta+Ctrl+H,none,Polonium: Resize Left
+PoloniumResizeRight=Meta+Ctrl+L,none,Polonium: Resize Right
+PoloniumRetileWindow=Meta+Shift+Space,none,Polonium: Retile Window
+PoloniumRotateLayout=none,none,Polonium: Rotate Layout
+PoloniumSwitchBTree=none,none,Polonium: Use Binary Tree Engine
+PoloniumSwitchHalf=none,none,Polonium: Use Half Engine
+PoloniumSwitchKwin=none,none,Polonium: Use KWin Engine
+PoloniumSwitchMonocle=none,none,Polonium: Use Monocle Engine
+PoloniumSwitchThreeColumn=none,none,Polonium: Use Three Column Engine
 Setup Window Shortcut=none,,Setup Window Shortcut
 Show Desktop=Meta+D,Meta+D,Peek at Desktop
 Suspend Compositing=Alt+Shift+F12,Alt+Shift+F12,Suspend Compositing
@@ -182,6 +219,9 @@ Window to Screen 5=none,,Move Window to Screen 5
 Window to Screen 6=none,,Move Window to Screen 6
 Window to Screen 7=none,,Move Window to Screen 7
 _k_friendly_name=KWin
+view_actual_size=Meta+0,Meta+0,Zoom to Actual Size
+view_zoom_in=Meta++\tMeta+=,Meta++\tMeta+=,Zoom In
+view_zoom_out=Meta+-,Meta+-,Zoom Out
 
 [mediacontrol]
 _k_friendly_name=Media Controller
@@ -193,6 +233,10 @@ playmedia=none,,Play media playback
 playpausemedia=Media Play,Media Play,Play/Pause media playback
 previousmedia=Media Previous,Media Previous,Media playback previous
 stopmedia=Media Stop,Media Stop,Stop media playback
+
+[org.kde.krunner]
+Show=Meta+Space\tAlt+Space\tSearch,Meta+Space\tAlt+Space\tSearch,Search
+_k_friendly_name=KRunner
 
 [org_kde_powerdevil]
 Decrease Keyboard Brightness=Keyboard Brightness Down,Keyboard Brightness Down,Decrease Keyboard Brightness
@@ -240,10 +284,9 @@ switch to next activity=none,,Switch to Next Activity
 switch to previous activity=none,,Switch to Previous Activity
 toggle do not disturb=none,,Toggle do not disturb
 
+[services][org.kde.krunner.desktop]
+_launch=Alt+F2
+
 [yakuake]
 _k_friendly_name=Yakuake
 toggle-window-state=F12,F12,Open/Retract Yakuake
-
-[org.kde.krunner]
-Show=Meta+Space\tAlt+Space\tSearch,Meta+Space\tAlt+Space\tSearch,Search
-_k_friendly_name=KRunner

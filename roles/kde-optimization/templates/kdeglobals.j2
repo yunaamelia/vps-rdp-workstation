@@ -1,12 +1,11 @@
-# Managed by Ansible - WhiteSur KDE Global Settings (Balanced Beauty)
-# Color values from WhiteSurDark.colors, accent synced to user's macOS blue (0,122,255)
-
 [ColorEffects:Disabled]
+ChangeSelectionColor=
 Color=56,56,56
 ColorAmount=0
 ColorEffect=0
 ContrastAmount=0.65
 ContrastEffect=1
+Enable=
 IntensityAmount=0.1
 IntensityEffect=2
 
@@ -66,11 +65,11 @@ ForegroundVisited=49,91,239
 [Colors:Header][Inactive]
 BackgroundAlternate=66,66,66
 BackgroundNormal=45,45,45
-DecorationFocus=0,122,255
-DecorationHover=0,122,255
-ForegroundActive=0,122,255,150
+DecorationFocus=49,91,239
+DecorationHover=49,91,239
+ForegroundActive=246,116,0,150
 ForegroundInactive=160,160,160,150
-ForegroundLink=186,202,255
+ForegroundLink=49,91,239
 ForegroundNegative=237,21,21
 ForegroundNeutral=201,206,59
 ForegroundNormal=252,252,252,150
@@ -78,13 +77,13 @@ ForegroundPositive=17,209,22
 ForegroundVisited=49,91,239
 
 [Colors:Selection]
-BackgroundAlternate=30,142,255
-BackgroundNormal=0,122,255
-DecorationFocus=255,255,255
-DecorationHover=255,255,255
-ForegroundActive=252,252,252
-ForegroundInactive=130,156,239
-ForegroundLink=253,188,75
+BackgroundAlternate=10,96,189
+BackgroundNormal=10,96,189
+DecorationFocus=0,122,255
+DecorationHover=0,122,255
+ForegroundActive=0,122,255
+ForegroundInactive=255,255,255
+ForegroundLink=186,202,255
 ForegroundNegative=218,68,83
 ForegroundNeutral=246,116,0
 ForegroundNormal=255,255,255
@@ -98,7 +97,7 @@ DecorationFocus=0,122,255
 DecorationHover=0,122,255
 ForegroundActive=0,122,255
 ForegroundInactive=189,195,199
-ForegroundLink=0,122,255
+ForegroundLink=186,202,255
 ForegroundNegative=218,68,83
 ForegroundNeutral=246,116,0
 ForegroundNormal=252,252,252
@@ -133,24 +132,29 @@ ForegroundNormal=252,252,252
 ForegroundPositive=39,174,96
 ForegroundVisited=120,120,120
 
+[DirSelect Dialog]
+DirSelectDialog Size=840,558
+History Items[$e]=file:$HOME/vps-rdp-workstation,file:$HOME/vps-rdp-workstation
+Splitter State=\x00\x00\x00\xff\x00\x00\x00\x01\x00\x00\x00\x02\x00\x00\x00\xa0\x00\x00\x02\xa8\x00\xff\xff\xff\xff\x01\x00\x00\x00\x01\x00
+
 [General]
 AccentColor=0,122,255
-ColorScheme=WhiteSurDark
-ColorSchemeHash=17da5ffd3d15ad6714bbc248b6545564fcc8ebfd
-Name=WhiteSurDark
+ColorScheme={{ vps_color_scheme_name | default('WhiteSurDark') }}
+ColorSchemeHash=697626961cd3018a86d5d1b6a546c7ac8b282d8c # pragma: allowlist secret
+Name={{ vps_color_scheme_name | default('WhiteSurDark') }}
 XftAntialias=true
 XftHintStyle=hintslight
-XftSubPixel=rgb
+XftSubPixel=none
 activeFont=JetBrainsMono Nerd Font,10,-1,5,600,0,0,0,0,0,Semi-Bold
 fixed=FiraCode Nerd Font,10,-1,5,400,0,0,0,0,0,Regular
-font=SauceCodePro Nerd Font,10,-1,5,400,0,0,0,0,0,Regular
-menuFont=SauceCodePro Nerd Font,10,-1,5,400,0,0,0,0,0,Regular
+font={{ vps_gtk_font | default('Source Code Pro Medium,10,-1,5,500,0,0,0,0,0,0,0,0,0,0,1,Regular') }}
+menuFont={{ vps_gtk_font | default('SauceCodePro Nerd Font,10,-1,5,400,0,0,0,0,0,Regular') }}
 shadeSortColumn=true
-smallestReadableFont=SauceCodePro Nerd Font,8,-1,5,400,0,0,0,0,0,Regular
+smallestReadableFont={{ vps_gtk_font | default('SauceCodePro Nerd Font,8,-1,5,400,0,0,0,0,0,Regular') }}
 toolBarFont=JetBrainsMono Nerd Font,10,-1,5,400,0,0,0,0,0,Regular
 
 [Icons]
-Theme=WhiteSur-dark
+Theme={{ vps_whitesur_icon_variant | default('WhiteSur-red-dark') }}
 
 [KDE]
 AnimationDurationFactor=0
@@ -170,13 +174,16 @@ Show Full Path=false
 Show Inline Previews=true
 Show Preview=false
 Show Speedbar=true
-Show hidden files=false
+Show hidden files=true
 Sort by=Name
 Sort directories first=true
 Sort hidden files last=false
 Sort reversed=false
 Speedbar Width=160
 View Style=DetailTree
+
+[Mouse]
+CursorTheme={{ vps_whitesur_cursor_theme | default('WhiteSur-cursors') }}
 
 [WM]
 activeBackground=51,51,51

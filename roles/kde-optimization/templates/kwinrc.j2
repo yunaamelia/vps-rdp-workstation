@@ -1,6 +1,3 @@
-# Managed by Ansible - WhiteSur KDE Window Manager (Balanced Beauty)
-# Aurorae theme: WhiteSur-dark (from vinceliuice/WhiteSur-kde)
-
 [Compositing]
 AnimationSpeed=3
 Backend=OpenGL
@@ -55,14 +52,21 @@ CommandWindowWheel=Scroll
 [Plugins]
 blurEnabled=true
 contrastEnabled=true
-diminactiveEnabled=true
+desktopchangeosdEnabled=true
 fadeEnabled=true
 fallapartEnabled=true
 kwin4_effect_dimscreenEnabled=true
-poloniumEnabled=true
+minimizeallEnabled=false
+poloniumEnabled=false
 scaleEnabled=true
 slideEnabled=false
 wobblywindowsEnabled=false
+
+[Script-polonium]
+Borders=2
+KeepTiledBelow=false
+MaximizeSingle=true
+TilePopups=true
 
 [TabBox]
 BorderActivate=9
@@ -74,7 +78,7 @@ TouchBorderAlternativeActivate=9
 padding=4
 
 [Tiling][7672d168-2ff3-5755-8864-62ce0326032c]
-tiles={"layoutDirection":"horizontal","tiles":[{"width":0.25},{"width":0.5},{"width":0.25}]}
+tiles={"layoutDirection":"horizontal","tiles":[]}
 
 [TouchEdges]
 Bottom=None

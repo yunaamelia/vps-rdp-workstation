@@ -163,8 +163,8 @@ setup_ansible() {
 	# Install into local ./collections dir to match ansible.cfg configuration
 	mkdir -p "${SCRIPT_DIR}/collections"
 	export ANSIBLE_COLLECTIONS_PATH="${SCRIPT_DIR}/collections"
-	run_with_spinner "Installing collections (community.general, ansible.posix)..." \
-		"ansible-galaxy collection install community.general ansible.posix -p ${SCRIPT_DIR}/collections --force"
+	run_with_spinner "Installing collections (community.general, ansible.posix, community.docker)..." \
+		"ansible-galaxy collection install community.general ansible.posix community.docker -p ${SCRIPT_DIR}/collections --force"
 
 	# Install Mitogen for performance
 	if [[ ! -d "${SCRIPT_DIR}/plugins/mitogen/ansible_mitogen" ]]; then

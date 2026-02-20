@@ -2,26 +2,11 @@
 dependency:
   name: galaxy
 driver:
-  name: docker
+  name: lxd
 platforms:
-  - name: debian-security
-    image: molecule_local/debian:trixie
-    pre_build_image: false
-    privileged: true
-    cgroupns_mode: host
-    command: /lib/systemd/systemd
-    tmpfs:
-      - /run
-      - /tmp
-    volumes:
-      - /sys/fs/cgroup:/sys/fs/cgroup:rw
-    stop_signal: SIGRTMIN+3
-    capabilities:
-      - SYS_ADMIN
-      - NET_ADMIN
-      - NET_RAW
-    groups:
-      - security_group
+  - name: security-instance
+    image: images:debian/12
+    type: container
 provisioner:
   name: ansible
   config_options:

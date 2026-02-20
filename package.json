@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "opencode-morph-fast-apply": "github:JRedeker/opencode-morph-fast-apply"
+  }
+}

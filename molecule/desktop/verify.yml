@@ -1,9 +1,54 @@
 ---
-- name: Verify
+- name: Verify Desktop Environment
   hosts: all
+  become: true
   tasks:
-    - name: "Verify service desktop"
-      include_tasks: ../helpers/service_verify.yml
-      vars:
-        service_name: "desktop"
-        # expected_port: 80 # Uncomment and set if applicable
+    - name: Ensure Xvfb is installed for headless testing
+      ansible.builtin.apt:
+        name: xvfb
+        state: present
+        update_cache: true
+
+    - name: Start Xvfb and test KDE Plasma startup
+      ansible.builtin.shell: |
+        Xvfb :99 -screen 0 1024x768x24 &
+        XVFB_PID=$!
+        export DISPLAY=:99
+        sleep 2
+        # Run startplasma-x11 for a few seconds to see if it initializes
+        # timeout exits with 124, which means it ran without crashing
+        timeout 5 startplasma-x11
+        RET=$?
+        kill $XVFB_PID
+        if [ $RET -eq 124 ] || [ $RET -eq 0 ]; then
+          exit 0
+        else
+          echo "startplasma-x11 failed with exit code $RET"
+          exit 1
+        fi
+      register: plasma_test
+      changed_when: false
+
+    - name: Verify SDDM configuration exists
+      ansible.builtin.stat:
+        path: /etc/sddm.conf.d/kde_settings.conf
+      register: sddm_config
+      ignore_errors: true
+
+    - name: Verify fallback SDDM configuration
+      ansible.builtin.stat:
+        path: /etc/sddm.conf
+      register: sddm_config_fallback
+
+    - name: Assert SDDM is configured
+      ansible.builtin.assert:
+        that: sddm_config.stat.exists or sddm_config_fallback.stat.exists
+
+    - name: Verify WhiteSur theme is installed
+      ansible.builtin.stat:
+        path: /usr/share/sddm/themes/WhiteSur
+      register: whitesur_theme
+
+    - name: Assert WhiteSur theme exists
+      ansible.builtin.assert:
+        that: whitesur_theme.stat.exists

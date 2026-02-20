@@ -1,0 +1,161 @@
+---
+name: Full Deployment Pipeline
+
+"on":
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  ANSIBLE_FORCE_COLOR: '1'
+
+jobs:
+  # =========================================================================
+  #  Staging Deployment
+  # =========================================================================
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    environment: staging
+    if: github.ref == 'refs/heads/main' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Secrets
+        id: secrets
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          HOST: ${{ secrets.STAGING_HOST }}
+        run: |
+          if [[ -n "$SSH_KEY" && -n "$HOST" ]]; then
+            echo "has_secrets=true" >> $GITHUB_OUTPUT
+          else
+            echo "Secrets missing, skipping staging deployment."
+            echo "has_secrets=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup SSH
+        if: steps.secrets.outputs.has_secrets == 'true'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.STAGING_SSH_KEY }}
+
+      - name: Configure Inventory
+        if: steps.secrets.outputs.has_secrets == 'true'
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.STAGING_HOST }}" >> ~/.ssh/known_hosts
+          sed -i "s/ansible_host: .*/ansible_host: ${{ secrets.STAGING_HOST }}/" inventory/staging.yml
+
+      - name: Deploy to Staging
+        if: steps.secrets.outputs.has_secrets == 'true'
+        run: |
+          ansible-playbook -i inventory/staging.yml playbooks/main.yml \
+            --extra-vars "vps_hostname=staging-workstation"
+
+      - name: Run Smoke Tests
+        id: smoke
+        if: steps.secrets.outputs.has_secrets == 'true'
+        run: |
+          chmod +x ./tests/smoke-test.sh
+          ./tests/smoke-test.sh "${{ secrets.STAGING_HOST }}" "${{ secrets.STAGING_USER }}"
+
+      - name: Run Integration Tests
+        id: integration
+        if: steps.secrets.outputs.has_secrets == 'true'
+        run: |
+          chmod +x ./tests/integration-test.sh
+          ./tests/integration-test.sh "${{ secrets.STAGING_HOST }}" "${{ secrets.STAGING_USER }}"
+
+      - name: Notify Discord (Success)
+        if: steps.secrets.outputs.has_secrets == 'true' && success()
+        run: |
+          if [[ -n "${{ secrets.DISCORD_WEBHOOK }}" ]]; then
+            curl -H "Content-Type: application/json" -X POST -d '{"content": "✅ Staging deployment successful!"}' ${{ secrets.DISCORD_WEBHOOK }}
+          fi
+
+      - name: Notify Discord (Failure)
+        if: steps.secrets.outputs.has_secrets == 'true' && failure()
+        run: |
+          if [[ -n "${{ secrets.DISCORD_WEBHOOK }}" ]]; then
+            curl -H "Content-Type: application/json" -X POST -d '{"content": "❌ Staging deployment FAILED!"}' ${{ secrets.DISCORD_WEBHOOK }}
+          fi
+
+  # =========================================================================
+  #  Production Deployment
+  # =========================================================================
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: deploy-staging
+    environment:
+      name: production
+      # This enables the manual approval gate if configured in GitHub repo settings
+      url: https://${{ secrets.PROD_HOST }}
+    # Run automatically on release, or manual dispatch, but not normal push unless it's a tag
+    if: github.event_name == 'release' || github.event_name == 'workflow_dispatch'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Secrets
+        id: secrets
+        env:
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
+          HOST: ${{ secrets.PROD_HOST }}
+        run: |
+          if [[ -n "$SSH_KEY" && -n "$HOST" ]]; then
+            echo "has_secrets=true" >> $GITHUB_OUTPUT
+          else
+            echo "Secrets missing, skipping production deployment."
+            echo "has_secrets=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Setup SSH
+        if: steps.secrets.outputs.has_secrets == 'true'
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_KEY }}
+
+      - name: Configure Inventory
+        if: steps.secrets.outputs.has_secrets == 'true'
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H "${{ secrets.PROD_HOST }}" >> ~/.ssh/known_hosts
+          echo "production_workstation ansible_host=${{ secrets.PROD_HOST }} ansible_user=${{ secrets.PROD_USER }}" > inventory/prod.ini
+
+      - name: Deploy to Production
+        if: steps.secrets.outputs.has_secrets == 'true'
+        run: |
+          ansible-playbook -i inventory/prod.ini playbooks/main.yml \
+            --extra-vars "vps_hostname=prod-workstation"
+
+      - name: Run Smoke Tests
+        id: smoke
+        if: steps.secrets.outputs.has_secrets == 'true'
+        run: |
+          chmod +x ./tests/smoke-test.sh
+          ./tests/smoke-test.sh "${{ secrets.PROD_HOST }}" "${{ secrets.PROD_USER }}"
+
+      - name: Automated Rollback on Failure
+        if: steps.secrets.outputs.has_secrets == 'true' && failure()
+        run: |
+          echo "⚠️ Production deployment failed! Initiating rollback..."
+          ansible-playbook -i inventory/prod.ini playbooks/rollback.yml -e confirm_rollback=yes
+
+      - name: Notify Discord (Production)
+        if: steps.secrets.outputs.has_secrets == 'true' && always()
+        run: |
+          if [[ -n "${{ secrets.DISCORD_WEBHOOK }}" ]]; then
+            status="✅ SUCCESS"
+            if [ "${{ job.status }}" != "success" ]; then
+              status="❌ FAILED (Rollback Initialized)"
+            fi
+            curl -H "Content-Type: application/json" -X POST -d "{\"content\": \"🚀 Production Deployment: $status\"}" ${{ secrets.DISCORD_WEBHOOK }}
+          fi

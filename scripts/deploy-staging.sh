@@ -117,6 +117,21 @@ run_smoke_tests() {
     log_success "Smoke tests passed"
 }
 
+run_integration_tests() {
+    log_info "Running integration tests on staging..."
+
+    if [[ -x "$PROJECT_ROOT/tests/integration-test.sh" ]]; then
+        if ! "$PROJECT_ROOT/tests/integration-test.sh" "$STAGING_HOST" "$STAGING_USER"; then
+            log_error "Integration tests failed"
+            return 1
+        fi
+    else
+        log_warn "Integration test script not found, skipping..."
+    fi
+
+    log_success "Integration tests passed"
+}
+
 generate_report() {
     log_info "Generating deployment report..."
 
@@ -155,21 +170,26 @@ main() {
     echo ""
 
     # Step 2: Molecule Tests
-    log_info "Step 1/3: Running Molecule Tests"
+    log_info "Step 1/4: Running Molecule Tests"
     run_molecule_tests
     echo ""
 
     # Step 3: Deploy to Staging
-    log_info "Step 2/3: Deploying to Staging"
+    log_info "Step 2/4: Deploying to Staging"
     deploy_to_staging
     echo ""
 
     # Step 4: Smoke Tests
-    log_info "Step 3/3: Running Smoke Tests"
+    log_info "Step 3/4: Running Smoke Tests"
     run_smoke_tests
     echo ""
 
-    # Step 5: Report
+    # Step 5: Integration Tests
+    log_info "Step 4/4: Running Integration Tests"
+    run_integration_tests
+    echo ""
+
+    # Step 6: Report
     generate_report
 
     log_success "Staging deployment completed successfully!"

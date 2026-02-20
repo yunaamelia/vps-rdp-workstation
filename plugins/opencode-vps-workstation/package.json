@@ -1,0 +1,45 @@
+{
+  "name": "opencode-vps-workstation",
+  "version": "1.0.0",
+  "description": "OpenCode plugin for VPS RDP Developer Workstation - Ansible automation for Debian 13",
+  "type": "module",
+  "main": "index.ts",
+  "author": "racoondev",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/racoondev/vps-rdp-workstation"
+  },
+  "keywords": [
+    "opencode",
+    "plugin",
+    "ansible",
+    "vps",
+    "rdp",
+    "debian",
+    "kde"
+  ],
+  "dependencies": {
+    "@opencode-ai/plugin": "^1.0.0"
+  },
+  "devDependencies": {
+    "bun-types": "^1.1.0",
+    "typescript": "^5.4.0"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "bun build index.ts --outdir dist --target node"
+  },
+  "opencode": {
+    "displayName": "VPS RDP Workstation",
+    "instructions": "VPS_INSTRUCTIONS.md",
+    "tools": [
+      "vps-setup",
+      "vps-validate",
+      "vps-status",
+      "vps-rollback",
+      "vps-role-run",
+      "vps-molecule-test"
+    ]
+  }
+}

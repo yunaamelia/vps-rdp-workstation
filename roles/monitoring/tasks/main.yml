@@ -1,0 +1,39 @@
+---
+- name: Ensure monitoring installation directory exists
+  ansible.builtin.file:
+    path: "{{ vps_monitoring_dir }}"
+    state: directory
+    mode: '0755'
+
+- name: Create prometheus configuration directory
+  ansible.builtin.file:
+    path: "{{ vps_monitoring_dir }}/prometheus"
+    state: directory
+    mode: '0755'
+
+- name: Deploy Prometheus configuration
+  ansible.builtin.template:
+    src: prometheus.yml.j2
+    dest: "{{ vps_monitoring_dir }}/prometheus/prometheus.yml"
+    mode: '0644'
+  notify: Restart monitoring
+
+- name: Deploy Alert rules
+  ansible.builtin.template:
+    src: alert.rules.j2
+    dest: "{{ vps_monitoring_dir }}/prometheus/alert.rules"
+    mode: '0644'
+  notify: Restart monitoring
+
+- name: Deploy docker-compose file
+  ansible.builtin.template:
+    src: docker-compose.yml.j2
+    dest: "{{ vps_monitoring_dir }}/docker-compose.yml"
+    mode: '0644'
+  notify: Restart monitoring
+
+- name: Start monitoring stack using Docker Compose
+  community.docker.docker_compose_v2:
+    project_src: "{{ vps_monitoring_dir }}"
+    state: present
+    pull: always

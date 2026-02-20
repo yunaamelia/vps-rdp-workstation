@@ -1,0 +1,29 @@
+groups:
+  - name: HostAlerts
+    rules:
+    - alert: HighCpuLoad
+      expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[2m])) * 100) > 80
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High CPU load on {{ $labels.instance }}"
+        description: "CPU load is > 80% for 5 minutes."
+
+    - alert: HighMemoryUsage
+      expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 85
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "High Memory usage on {{ $labels.instance }}"
+        description: "Memory usage is > 85% for 5 minutes."
+
+    - alert: HostOutOfDiskSpace
+      expr: (node_filesystem_avail_bytes{mountpoint="/"}  * 100) / node_filesystem_size_bytes{mountpoint="/"} < 10
+      for: 5m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Host out of disk space on {{ $labels.instance }}"
+        description: "Disk is almost full (< 10% left)."

@@ -223,6 +223,10 @@
       tags: [tools, cloud]
       when: vps_cloud_native_tools_install | default(false)
 
+    - role: monitoring
+      tags: [tools, monitoring]
+      when: vps_monitoring_install | default(true)
+
   post_tasks:
     - name: Refresh facts for completion timestamp
       ansible.builtin.setup:

@@ -1,0 +1,44 @@
+---
+name: Weekly Full Integration Tests
+
+"on":
+  schedule:
+    # Run every Sunday at 02:00 UTC
+    - cron: '0 2 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  full-integration-test:
+    name: Full Integration Validation (Vagrant/Libvirt)
+    runs-on: self-hosted # Requires self-hosted runner with nested virtualization
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils vagrant vagrant-libvirt
+          pip install ansible-core
+
+      - name: Vagrant Up
+        run: |
+          vagrant up --provider=libvirt
+
+      - name: Run Integration Tests
+        run: |
+          chmod +x ./tests/integration-test.sh
+          # Vagrant forwards port 22 automatically, we can use vagrant ssh-config
+          vagrant ssh-config > /tmp/vagrant-ssh-config
+
+          # Since the integration test connects over SSH, we pass localhost and rely on the config
+          # For a real run we might need a modified test to use vagrant user
+          export USER=vagrant
+          ./tests/integration-test.sh 127.0.0.1 vagrant
+
+      - name: Cleanup
+        if: always()
+        run: vagrant destroy -f

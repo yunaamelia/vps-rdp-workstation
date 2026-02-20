@@ -79,3 +79,6 @@ build/
 # Molecule
 molecule/*/molecule/.cache/
 molecule/*/.molecule/
+
+# Node
+node_modules/

@@ -1,0 +1,6 @@
+---
+vps_monitoring_install: true
+vps_monitoring_dir: "/opt/monitoring"
+vps_monitoring_grafana_port: 3000
+vps_monitoring_prometheus_port: 9090
+vps_monitoring_grafana_admin_password: "admin" # pragma: allowlist secret

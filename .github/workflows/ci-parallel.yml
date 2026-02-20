@@ -136,6 +136,14 @@ jobs:
           pip install -r requirements.txt
           ansible-galaxy collection install -r requirements.yml -p collections
 
+      - name: Initialize LXD for Security Scenario
+        if: matrix.scenario == 'security'
+        run: |
+          sudo snap install lxd || true
+          sudo lxd init --auto || true
+          sudo usermod -aG lxd $USER
+          sudo setfacl -m u:$USER:rwx /var/snap/lxd/common/lxd/unix.socket || true
+
       - name: Run Molecule Test
         run: molecule test -s ${{ matrix.scenario }}
         env:

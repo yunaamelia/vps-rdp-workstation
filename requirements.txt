@@ -24,6 +24,7 @@ rich>=13.0.0
 # https://molecule.readthedocs.io/
 molecule>=6.0.0
 molecule-plugins[docker]>=23.0.0
+molecule-plugins[lxd]>=23.0.0
 
 # Ansible Doctor - Auto-generate role documentation
 # https://github.com/thegeeklab/ansible-doctor

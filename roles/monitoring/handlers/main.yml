@@ -1,0 +1,5 @@
+---
+- name: Restart monitoring
+  community.docker.docker_compose_v2:
+    project_src: "{{ vps_monitoring_dir }}"
+    state: restarted

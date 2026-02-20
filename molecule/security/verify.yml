@@ -3,32 +3,31 @@
   hosts: all
   tasks:
     - name: "Check SSH configuration"
-      command: grep "^PermitRootLogin no" /etc/ssh/sshd_config
+      ansible.builtin.command:
+        cmd: grep "^PermitRootLogin no" /etc/ssh/sshd_config
       register: ssh_root_login
       changed_when: false
-      ignore_errors: true
 
     - name: "Assert Root Login Disabled"
-      assert:
+      ansible.builtin.assert:
         that:
           - ssh_root_login.rc == 0
         fail_msg: "PermitRootLogin is not set to 'no'"
 
     - name: "Check UFW status (Debian/Ubuntu)"
-      command: ufw status
+      ansible.builtin.command:
+        cmd: ufw status
       register: ufw_status
       changed_when: false
-      when: ansible_os_family == "Debian"
-      ignore_errors: true
+      when: ansible_facts['os_family'] == "Debian"
 
     - name: "Assert UFW is active"
-      assert:
+      ansible.builtin.assert:
         that:
           - "'Status: active' in ufw_status.stdout"
-      when: ansible_os_family == "Debian" and ufw_status is not skipped
+      when: ansible_facts['os_family'] == "Debian" and ufw_status is not skipped
 
     - name: "Check Fail2Ban service"
-      include_tasks: ../helpers/service_verify.yml
+      ansible.builtin.include_tasks: ../helpers/service_verify.yml
       vars:
         service_name: "fail2ban"
-      ignore_errors: true # Might not be installed in all security profiles

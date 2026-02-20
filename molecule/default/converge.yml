@@ -20,8 +20,8 @@
           - "Config file magic var: {{ query('config', 'CONFIG_FILE') }}"
           - "Callback plugins config: {{ query('config', 'DEFAULT_CALLBACK_PLUGIN_PATH') }}"
           - "Callbacks enabled config: {{ query('config', 'CALLBACKS_ENABLED') }}"
-          - "Environment ANSIBLE_CONFIG: {{ ansible_env.ANSIBLE_CONFIG | default('NOT SET') }}"
-          - "Environment ANSIBLE_CALLBACK_PLUGINS: {{ ansible_env.ANSIBLE_CALLBACK_PLUGINS | default('NOT SET') }}"
+          - "Environment ANSIBLE_CONFIG: {{ ansible_facts.env.ANSIBLE_CONFIG | default('NOT SET') }}"
+          - "Environment ANSIBLE_CALLBACK_PLUGINS: {{ ansible_facts.env.ANSIBLE_CALLBACK_PLUGINS | default('NOT SET') }}"
 
   roles:
     - role: common

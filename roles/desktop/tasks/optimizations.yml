@@ -19,4 +19,4 @@
         create: true
         owner: "{{ vps_username }}"
         group: "{{ vps_username }}"
-        mode: '0644'
+        mode: "0644"

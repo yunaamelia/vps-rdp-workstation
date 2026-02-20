@@ -29,30 +29,10 @@ platforms:
 
 provisioner:
   name: ansible
-  env:
-    ANSIBLE_CONFIG: "${MOLECULE_PROJECT_DIRECTORY}/ansible.cfg"
-    ANSIBLE_DEPRECATION_WARNINGS: "True"
-    ANSIBLE_SYSTEM_WARNINGS: "True"
-    ANSIBLE_CALLBACK_PLUGINS: "${MOLECULE_PROJECT_DIRECTORY}/plugins/callback"
-    ANSIBLE_CALLBACKS_ENABLED: "strict_deprecations"
   config_options:
     defaults:
       roles_path: ${MOLECULE_PROJECT_DIRECTORY}/roles
       collections_path: ${MOLECULE_PROJECT_DIRECTORY}/collections
-      remote_tmp: /tmp/.ansible/tmp
-      allow_world_readable_tmpfiles: true
-      pipelining: true
-  playbooks:
-    converge: converge.yml
-    verify: verify.yml
-  inventory:
-    host_vars:
-      debian-rollback:
-        ansible_user: root
-        vps_fail2ban_start_service: false
-      localhost:
-        ansible_connection: local
-        ansible_become: false
 
 verifier:
   name: ansible

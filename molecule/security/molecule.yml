@@ -24,16 +24,10 @@ platforms:
       - security_group
 provisioner:
   name: ansible
-  env:
-    ANSIBLE_COLLECTIONS_PATH: ${MOLECULE_PROJECT_DIRECTORY}/collections
-    ANSIBLE_ROLES_PATH: ${MOLECULE_PROJECT_DIRECTORY}/roles
   config_options:
     defaults:
-      interpreter_python: auto_silent
-      stdout_callback: ansible.builtin.default
-      callback_result_format: yaml
-      callbacks_enabled: profile_tasks, timer
-    ssh_connection:
-      pipelining: false
+      roles_path: ${MOLECULE_PROJECT_DIRECTORY}/roles
+      collections_path: ${MOLECULE_PROJECT_DIRECTORY}/collections
+
 verifier:
   name: ansible

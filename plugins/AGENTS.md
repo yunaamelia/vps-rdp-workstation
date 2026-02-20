@@ -1,24 +1,34 @@
-# COMPONENT: PYTHON CALLBACKS
+# COMPONENT: PYTHON PLUGINS
 
-**Purpose**: Custom Ansible stdout callback plugins for rich execution output.
+**Scope**: Custom Ansible callbacks + vendored Mitogen strategy.
 
 ## KEY FILES
-- `callback/clean_progress.py`: Minimalist text-only icons (✓/✗). Low-dependency fallback.
-- `callback/rich_tui.py`: Full TUI with spinners, tables, colors. Requires `rich` library.
+
+| File                         | Purpose                                              |
+| ---------------------------- | ---------------------------------------------------- |
+| `callback/clean_progress.py` | Minimalist. Unicode ✓/✗ icons. Low-dependency.       |
+| `callback/rich_tui.py`       | Full TUI. Spinners, tables, colors. Requires `rich`. |
+| `mitogen/`                   | Vendored v0.3.21 for 2-7x execution speedup.         |
 
 ## CONVENTIONS
-- **Inheritance**: MUST inherit from `CallbackBase`.
-- **Documentation**: MUST include a `DOCUMENTATION` YAML block (Ansible autodiscovery).
-- **Redaction**: Handle `vps_user_password_hash` to prevent secret leakage in TUI/logs.
-- **Performance**: Keep logic lightweight; callbacks run in main Ansible thread.
-- **Degradation**: Gracefully fallback if external libs (e.g., `rich`) are missing.
+
+- **Inheritance**: MUST inherit from `ansible.plugins.callback.CallbackBase`.
+- **Documentation**: MUST include `DOCUMENTATION` YAML block for autodiscovery.
+- **Redaction**: Handle `vps_user_password_hash` to prevent secret leakage.
+- **Degradation**: Wrap `rich` imports in try/except for fallback.
+- **Threading**: Callbacks run in main Ansible thread; keep lightweight.
 
 ## INTEGRATION
-- **Selection**: `setup.sh` sets `ANSIBLE_STDOUT_CALLBACK` env var based on `--tui`/`--minimal` flags.
-- **Path Resolution**: `ansible.cfg` points `callback_plugins` to `plugins/callback/`.
-- **pipx Gotcha**: When Ansible installed via `pipx`, plugin path may not resolve — `setup.sh` handles injection.
+
+- **Selection**: `setup.sh` sets `ANSIBLE_STDOUT_CALLBACK` via `--tui`/`--minimal` flags.
+- **Path**: `ansible.cfg` points `callback_plugins` to `plugins/callback/`.
+- **pipx Injection**: `setup.sh` injects `rich` into pipx-managed Ansible environments.
 
 ## ANTI-PATTERNS
-- **Blocking**: No network/heavy I/O inside callback methods.
-- **Stdout Noise**: Strictly format or swallow unrestricted stdout.
+
+- **Blocking I/O**: NEVER synchronous network/disk I/O in callback methods.
 - **Direct Import**: Never import `rich` at module level; wrap in try/except.
+- **Stdout Noise**: Strictly format or swallow unrestricted stdout.
+- **Module-Level State**: Avoid shared mutable state between tasks.
+
+[Root Guidelines](../AGENTS.md)

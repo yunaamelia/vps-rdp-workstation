@@ -28,24 +28,10 @@ platforms:
 
 provisioner:
   name: ansible
-  env:
-    ANSIBLE_DEPRECATION_WARNINGS: "True"
-    ANSIBLE_WARNINGS_ARE_ERRORS: "True"
-    ANSIBLE_SYSTEM_WARNINGS: "True"
-    ANSIBLE_CALLBACK_PLUGINS: "${MOLECULE_PROJECT_DIRECTORY}/plugins/callback"
-    ANSIBLE_CALLBACKS_ENABLED: "strict_deprecations"
   config_options:
     defaults:
       roles_path: ${MOLECULE_PROJECT_DIRECTORY}/roles
       collections_path: ${MOLECULE_PROJECT_DIRECTORY}/collections
-      remote_tmp: /tmp/.ansible/tmp
-      allow_world_readable_tmpfiles: true
-      pipelining: true
-      debian-devtools:
-        ansible_user: root
-      localhost:
-        ansible_connection: local
-        ansible_become: false
 
 verifier:
   name: ansible

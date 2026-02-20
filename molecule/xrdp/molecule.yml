@@ -13,8 +13,11 @@ platforms:
     cgroupns_mode: host
     command: /lib/systemd/systemd
 provisioner:
-  env:
-    ANSIBLE_ROLES_PATH: ../../roles
   name: ansible
+  config_options:
+    defaults:
+      roles_path: ${MOLECULE_PROJECT_DIRECTORY}/roles
+      collections_path: ${MOLECULE_PROJECT_DIRECTORY}/collections
+
 verifier:
   name: ansible

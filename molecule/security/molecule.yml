@@ -2,11 +2,16 @@
 dependency:
   name: galaxy
 driver:
-  name: lxd
+  name: docker
 platforms:
-  - name: security-instance
-    image: images:debian/12
-    type: container
+  - name: instance
+    image: docker.io/geerlingguy/docker-debian12-ansible:latest
+    pre_build_image: true
+    privileged: true
+    cgroupns_mode: host
+    command: /lib/systemd/systemd
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
 provisioner:
   name: ansible
   config_options:

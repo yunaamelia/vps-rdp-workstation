@@ -11,6 +11,7 @@
       - ca-certificates
       - curl
       - gnupg
+    update_cache: true
     state: present
   when: vps_development_install_nodejs
   tags: [development, nodejs]

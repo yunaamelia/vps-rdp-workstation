@@ -1,6 +1,13 @@
 # Terminal Role - Zsh and Oh My Zsh
 # Shell configuration for developer productivity
 ---
+- name: Install git (required for Oh My Zsh)
+  ansible.builtin.apt:
+    name: git
+    state: present
+    update_cache: true
+  tags: [terminal, zsh]
+
 - name: Install Zsh
   ansible.builtin.apt:
     name: zsh

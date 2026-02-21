@@ -1,73 +1,78 @@
 # Security Role - Firewall, Fail2ban, SSH Hardening
 # CRITICAL: Must run before any services are exposed
 ---
-# =============================================================================
-#  UFW Firewall Configuration
-# =============================================================================
-
 - name: Execute security role tasks
   block:
-    - name: Install UFW firewall
-      ansible.builtin.apt:
-        name: ufw
-        state: present
-      become: true
-      tags: [security, firewall]
+    # =============================================================================
+    #  UFW Firewall Configuration (skip in containers - requires iptables access)
+    # =============================================================================
+    - name: UFW firewall configuration
+      when: ansible_facts['virtualization_type'] | default('') != 'docker'
+      block:
+        - name: Install UFW firewall
+          ansible.builtin.apt:
+            name: ufw
+            state: present
+          become: true
+          tags: [security, firewall]
 
-    - name: Set UFW default deny incoming
-      community.general.ufw:
-        direction: incoming
-        default: deny
-      become: true
-      tags: [security, firewall]
+        - name: Set UFW default deny incoming
+          community.general.ufw:
+            direction: incoming
+            default: deny
+          become: true
+          tags: [security, firewall]
 
-    - name: Set UFW default allow outgoing
-      community.general.ufw:
-        direction: outgoing
-        default: allow
-      become: true
-      tags: [security, firewall]
+        - name: Set UFW default allow outgoing
+          community.general.ufw:
+            direction: outgoing
+            default: allow
+          become: true
+          tags: [security, firewall]
 
-    - name: Allow SSH with rate limiting
-      community.general.ufw:
-        rule: limit
-        port: "{{ vps_ssh_port }}"
-        proto: tcp
-        comment: "SSH with rate limiting"
-      become: true
-      tags: [security, firewall]
+        - name: Allow SSH with rate limiting
+          community.general.ufw:
+            rule: limit
+            port: "{{ vps_ssh_port }}"
+            proto: tcp
+            comment: "SSH with rate limiting"
+          become: true
+          tags: [security, firewall]
 
-    - name: Allow RDP with rate limiting
-      community.general.ufw:
-        rule: limit
-        port: "{{ vps_xrdp_port }}"
-        proto: tcp
-        comment: "RDP with rate limiting"
-      when: vps_install_xrdp | default(true)
-      become: true
-      tags: [security, firewall]
+        - name: Allow RDP with rate limiting
+          community.general.ufw:
+            rule: limit
+            port: "{{ vps_xrdp_port }}"
+            proto: tcp
+            comment: "RDP with rate limiting"
+          when: vps_install_xrdp | default(true)
+          become: true
+          tags: [security, firewall]
 
-    - name: Configure UFW logging
-      community.general.ufw:
-        logging: "{{ vps_firewall_logging }}"
-      become: true
-      tags: [security, firewall]
+        - name: Configure UFW logging
+          community.general.ufw:
+            logging: "{{ vps_firewall_logging }}"
+          become: true
+          tags: [security, firewall]
 
-    - name: Enable UFW firewall
-      community.general.ufw:
-        state: enabled
-      become: true
-      tags: [security, firewall]
+        - name: Enable UFW firewall
+          community.general.ufw:
+            state: enabled
+          become: true
+          tags: [security, firewall]
 
-    - name: Set up UFW default policies
-      community.general.ufw:
-        state: enabled
-        policy: deny
-        direction: incoming
-      no_log: true
-      become: true
-      tags: [security, firewall]
+        - name: Set up UFW default policies
+          community.general.ufw:
+            state: enabled
+            policy: deny
+            direction: incoming
+          no_log: true
+          become: true
+          tags: [security, firewall]
 
+    # =============================================================================
+    #  SSH Server Configuration
+    # =============================================================================
     - name: Install OpenSSH Server
       ansible.builtin.apt:
         name: openssh-server
@@ -145,6 +150,9 @@
       notify: Restart SSH
       tags: [security, ssh]
 
+    # =============================================================================
+    #  Fail2ban Configuration
+    # =============================================================================
     - name: Ensure log files exist for Fail2ban
       ansible.builtin.file:
         path: "{{ item }}"
@@ -198,7 +206,7 @@
       changed_when: false
       tags: [security, fail2ban]
 
-    - name: Install fail2ban
+    - name: Start and enable fail2ban service
       ansible.builtin.systemd:
         name: fail2ban
         enabled: true
@@ -206,9 +214,13 @@
       when:
         - vps_fail2ban_enabled
         - vps_fail2ban_start_service | default(true)
+        - ansible_facts['virtualization_type'] | default('') != 'docker'
       ignore_errors: "{{ ansible_check_mode }}"
       tags: [security, fail2ban]
 
+    # =============================================================================
+    #  Unattended Upgrades
+    # =============================================================================
     - name: Install unattended-upgrades
       ansible.builtin.apt:
         name:

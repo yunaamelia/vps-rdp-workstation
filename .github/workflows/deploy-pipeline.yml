@@ -30,8 +30,8 @@ jobs:
       - name: Check Secrets
         id: secrets
         env:
-          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
-          HOST: ${{ secrets.STAGING_HOST }}
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}  # pragma: allowlist secret
+          HOST: ${{ secrets.STAGING_HOST }}  # pragma: allowlist secret
         run: |
           if [[ -n "$SSH_KEY" && -n "$HOST" ]]; then
             echo "has_secrets=true" >> $GITHUB_OUTPUT
@@ -107,8 +107,8 @@ jobs:
       - name: Check Secrets
         id: secrets
         env:
-          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}
-          HOST: ${{ secrets.PROD_HOST }}
+          SSH_KEY: ${{ secrets.PROD_SSH_KEY }}  # pragma: allowlist secret
+          HOST: ${{ secrets.PROD_HOST }}  # pragma: allowlist secret
         run: |
           if [[ -n "$SSH_KEY" && -n "$HOST" ]]; then
             echo "has_secrets=true" >> $GITHUB_OUTPUT

@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-VPS_IP="139.59.253.112"
+VPS_IP="165.245.144.253"
 VPS_PASS="gg123123@"
 REPO_URL="https://github.com/yunaamelia/vps-rdp-workstation.git"
 TEST_USER="testdeploy"
@@ -10,14 +10,14 @@ TEST_USER_PASS="SecurePass123!@#"
 echo "=== 1. Checking Connectivity ==="
 sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=10 -o PreferredAuthentications=password -o PubkeyAuthentication=no root@$VPS_IP "echo '✓ Connected to $(hostname)'"
 
-echo "=== 2a. Fixing Locales ==="
-sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no root@$VPS_IP "apt-get install -y locales && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8"
+echo "=== 2a. Fixing Locales & Installing Base Dependencies ==="
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no root@$VPS_IP "apt-get update && apt-get install -y locales git sudo curl wget && sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && locale-gen && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8"
 
 echo "=== 3. Cloning Repository ==="
 sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no root@$VPS_IP "rm -rf vps-rdp-workstation && git clone $REPO_URL"
 
 echo "=== 4. Running Rollback (Cleanup) ==="
-sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no root@$VPS_IP "cd vps-rdp-workstation && chmod +x setup.sh && export CONFIRM_ROLLBACK=true && ./setup.sh --rollback"
+sshpass -p "$VPS_PASS" ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o PreferredAuthentications=password -o PubkeyAuthentication=no root@$VPS_IP "cd vps-rdp-workstation && chmod +x setup.sh && export CONFIRM_ROLLBACK=true && VPS_USERNAME=$TEST_USER VPS_PASSWORD='$VPS_PASS' ./setup.sh --rollback -- -e confirm_rollback=yes || true"
 
 echo "=== 5. Running Setup (CI Mode) ==="
 echo "Create secrets file..."

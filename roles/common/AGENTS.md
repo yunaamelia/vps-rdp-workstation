@@ -10,7 +10,7 @@
 
 ## CONVENTIONS
 *   **Secret Handling**: User creation task MUST use `no_log: true` for password hash.
-*   **Variables**: `vps_username` defined here, used globally across all 25 roles.
+*   **Variables**: `vps_username` defined here, used globally across all 27 roles.
 *   **Apt Cache**: Exclusive `update_cache: yes`. Other roles assume cache is fresh.
 *   **Cannot Skip**: This role establishes the execution user and state directory.
 

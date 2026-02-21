@@ -1,6 +1,6 @@
 # COMPONENT: ANSIBLE ROLES
 
-**Scope**: 25 independent roles for Debian 13 workstation automation.
+**Scope**: 27 independent roles for Debian 13 workstation automation.
 
 ## STRUCTURE
 
@@ -24,7 +24,7 @@ roles/<name>/
 5. **Phase 6-8**: kde-optimization → kde-apps → whitesur-theme
 6. **Phase 9-11**: terminal → shell-styling → zsh-enhancements
 7. **Phase 12-14**: development → docker → editors
-8. **Phase 15-25**: tool roles (tui-tools, network-tools, cloud-native, etc.)
+8. **Phase 15-27: tool roles (tui-tools → monitoring). See root AGENTS.md for full order.
 
 ## CONVENTIONS
 

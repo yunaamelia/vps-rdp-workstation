@@ -1,3 +1,4 @@
+{% raw %}
 groups:
   - name: HostAlerts
     rules:
@@ -27,3 +28,4 @@ groups:
       annotations:
         summary: "Host out of disk space on {{ $labels.instance }}"
         description: "Disk is almost full (< 10% left)."
+{% endraw %}

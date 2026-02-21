@@ -14,7 +14,7 @@ vps-rdp-workstation/
 ├── ansible.cfg           # Pipelining, custom callbacks, fact caching.
 ├── inventory/            # hosts.yml + group_vars/all.yml (config root).
 ├── playbooks/            # main.yml (orchestration), rollback.yml, templates/.
-├── roles/                # 25 flat roles, each with AGENTS.md + uninstall.yml.
+├── roles/                # 27 flat roles, each with AGENTS.md + uninstall.yml.
 ├── plugins/              # callback/ (rich_tui.py, clean_progress.py), mitogen/.
 ├── molecule/             # 31 test scenarios (one per role + default/chaos).
 ├── tests/                # validate.sh (30 criteria), remote_test.sh, smoke-test.sh.
@@ -35,7 +35,7 @@ vps-rdp-workstation/
 | **Progress State**  | `/var/lib/vps-setup/progress.json` | Resume after failure with `--resume`.                               |
 | **ARA Reports**     | `ara playbook list`                | SQLite DB at `/var/log/ara-database.sqlite`.                        |
 
-## EXECUTION ORDER (25 Roles)
+## EXECUTION ORDER (27 Roles)
 
 ```
 Phase 1:  common (foundation, packages, users)
@@ -52,7 +52,18 @@ Phase 11: zsh-enhancements (autosuggestions, fzf-tab, forgit)
 Phase 12: development (Node.js, Python, PHP)
 Phase 13: docker (Engine, Compose V2)
 Phase 14: editors (VS Code, OpenCode AI)
-Phase 15-25: tool roles (tui-tools, network-tools, cloud-native, etc.)
+Phase 15: tui-tools
+Phase 16: network-tools
+Phase 17: system-performance
+Phase 18: text-processing
+Phase 19: file-management
+Phase 20: dev-debugging
+Phase 21: code-quality
+Phase 22: productivity
+Phase 23: log-visualization
+Phase 24: ai-devtools
+Phase 25: cloud-native
+Phase 26-27: monitoring (final phase)
 ```
 
 ## CONVENTIONS
@@ -96,6 +107,16 @@ Phase 15-25: tool roles (tui-tools, network-tools, cloud-native, etc.)
 - **Live Testing**: NEVER run `remote_test.sh` on production systems.
 - **Global Handlers**: Forbidden in roles; use role-local handlers only.
 
+## CI/CD
+
+- **12 GitHub Actions workflows** in `.github/workflows/`.
+- `ci.yml`: Lint + syntax + Molecule on push/PR. `ci-enhanced.yml`, `ci-parallel.yml`: extended variants.
+- `deploy-pipeline.yml`: Staging → production with approval gates. Auto-rollback on failure.
+- `security-scan.yml`: Weekly Trivy scan, SARIF to GitHub Security tab.
+- `validate-playbooks.yml`: Syntax + lint gate. `weekly-integration.yml`: scheduled full integration.
+- `ai-review.yml`: AI-powered PR review. `issue-triage.yml`: automated issue labeling.
+- Discord webhook notifications on deploy. Pre-commit hooks configured.
+
 ## UNIQUE PATTERNS
 
 - **Mitogen Strategy**: Vendored in `plugins/mitogen/`. Injected by `setup.sh` dynamically.
@@ -103,5 +124,5 @@ Phase 15-25: tool roles (tui-tools, network-tools, cloud-native, etc.)
 - **ARA Integration**: Auto-records all runs to SQLite for post-run analysis.
 - **Non-Circular Validation**: `validate.sh` uses native shell commands, not Ansible modules.
 - **Systemd-in-Docker**: Molecule uses `privileged: true` with cgroup mounts for XRDP/UFW testing.
-- **Role AGENTS.md**: Each of 25 roles has its own AGENTS.md for granular context.
+- **Role AGENTS.md**: Each of 27 roles has its own AGENTS.md for granular context.
 - **3-Level Tagging**: `[phase, role, feature]` enables precise execution targeting.
